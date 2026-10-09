@@ -1,8 +1,8 @@
-> **0.5.1:** Explicit Automation tasks now use scoped safer routing, nearby hostile-mob defense, short checked-ground retreat and available food. The task pauses while protection intervenes, then resumes after its recovery checks. See [Survival safety](SAFETY.md), [Automation](AUTOMATION.md) and [ESP readability](ESP-READABILITY.md).
+> **0.5.2:** Automation protection keeps checking after an explosion or unavailable retreat instead of leaving a stale blocked warning. Short escape checks now account for surface water, snow, slabs and one-block terrain changes, and prioritize urgent creepers. The original task stays paused until its recovery checks pass. See [Survival safety](SAFETY.md), [Automation](AUTOMATION.md) and [ESP readability](ESP-READABILITY.md).
 
 # Analyzer
 
-An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.5.1** has **123 registered modules**: world visuals, editable HUD widgets, three native menu layouts, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
+An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.5.2** has **123 registered modules**: world visuals, editable HUD widgets, three native menu layouts, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
 
 ![Analyzer native interface](screenshots/analyzer-ui.png)
 
@@ -10,9 +10,9 @@ An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and 
 
 ## Install and start
 
-**Prism Launcher:** drag `Analyzer-0.5.1-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, the official Baritone API and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; Baritone is a separate mod installed once for Automation.
+**Prism Launcher:** drag `Analyzer-0.5.2-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, the official Baritone API and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; Baritone is a separate mod installed once for Automation.
 
-For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.5.1.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. Add the separate official `baritone-api-fabric-1.13.1.jar` to run Automation. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
+For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.5.2.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. Add the separate official `baritone-api-fabric-1.13.1.jar` to run Automation. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
 
 Click **Analyzer** on the title screen or press **Right Shift** in game. Choose **Profiles → cinematic → Load** for the visual/HUD setup, or **studio** to try selected new cosmetics. **classic** uses draggable category columns and **neon** uses the Compact layout and Neon HUD; these four visual profiles leave gameplay automation off. Loading **hvh** explicitly enables Kill Aura, Crystal Aura, Surround, Auto Weapon, Auto Totem, Auto Armor and Keep Sprint, with combat HUD widgets. Earlier **showcase**, **arctic**, **cinder**, **aurora**, **ember** and **minimal** profiles remain available. Profiles are available from the Workspace layout.
 
@@ -51,9 +51,11 @@ Fresh defaults enable **Sky Aurora, Interface, Particles, Coordinates, HUD Studi
 
 ## Automation protection
 
-Start through **Right Shift → Automation → Review plan → Start reviewed plan**. With fresh settings, the task uses safer Baritone route settings, watches visible hostile mobs within 12 blocks, eats suitable available food below 14 hunger, and prefers retreat when health is low or a nearby creeper threatens it. Ordinary attacks respect reach and cooldowns. Protection pauses the original task and shows **TASK PAUSED FOR SAFETY**; after the three-second quiet delay it checks the configured retreat/minimum-health and minimum-hunger limits before resuming.
+Start through **Right Shift → Automation → Review plan → Start reviewed plan**. With fresh settings, the task uses safer Baritone route settings, watches nearby hostile mobs within 12 blocks, eats suitable available food below 14 hunger, and prefers retreat when health is low or an urgent creeper threatens it. Creepers that are ignited, swelling or close receive priority over ordinary pursuers; nearby creepers can remain threats without a clear line of sight. Ordinary attacks respect reach and cooldowns. Protection pauses the original task and shows **TASK PAUSED FOR SAFETY**; after the three-second quiet delay it checks the configured retreat/minimum-health and minimum-hunger limits before resuming.
 
-The temporary route settings restore on user Pause, Stop, completion, blocking, disconnect/death or manual Baritone takeover. User Pause and Stop release owned movement/use inputs. This protection can still fail: the retreat checks only a short loaded, dry, supported ground corridor, and it does not find long paths to shelter, swim, climb, fly or fight players. Missing food at the recovery limits or an impossible escape produces a visible blocked reason and manual recovery instructions. Read [SAFETY.md](SAFETY.md) for all settings and limits; this is not invincibility or a guaranteed spawn escape.
+An unavailable retreat or recovery enters a live **SAFETY_HOLD**: mining stays paused while protection rechecks threats, terrain and available food. Short escape checks cover up to two loaded blocks, using collision shapes for snow/slabs, one-block steps and drops, and surface water with a clear route to air. Explosion knockback or a changed shoreline can therefore be re-evaluated. A stage already blocked for another requirement returns to that requirement after protection clears; it does not restart automatically.
+
+The temporary route settings restore on user Pause, Stop, completion, ordinary task blocking, disconnect/death or manual Baritone takeover. User Pause and Stop release owned movement/use inputs. Protection remains bounded: it does not plan long routes to cover, navigate deep or enclosed water, climb, fly or fight players. Missing food, trapped terrain and dangerous combat may still require manual recovery. Read [SAFETY.md](SAFETY.md) for the exact controls and limits.
 
 ## Trying gameplay modules
 
@@ -77,6 +79,8 @@ The [roadmap](ROADMAP.md) compares all **163 Temple.nz reference modules**, dist
 
 ## Build from source
 
+Private source and versioned downloads: [XonistReal/Analyzer](https://github.com/XonistReal/Analyzer). See [Moving PCs](MOVING-PCS.md) for cloning, Prism import and reconnecting the local updater.
+
 Select a Java 21 JDK with `JAVA_HOME`, then run:
 
 ```powershell
@@ -87,11 +91,10 @@ Select a Java 21 JDK with `JAVA_HOME`, then run:
 .\gradlew.bat publishLocal   # publish to the Prism local update feed
 ```
 
-On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.5.1.jar`.
+On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.5.2.jar`.
 
 `runSmoke` uses the project-local `run/` directory, creates/updates only `run/saves/Analyzer-Smoke`, captures screenshots, and exits. Installed release builds never activate the development harness. See VALIDATION for assertions and results. Optional pixel checks use `python tools/verify_render.py` and `python tools/verify_visuals.py` with Pillow.
 
 Source packages are `core/` for definitions/configuration, `ui/` for native screens/HUD, `render/` for overlays/event effects, `effects/` for original GLSL/state restoration, `gameplay/` for bounded game actions, `automation/` for the task planner, scoped Baritone bridge, inventory stages and Survival guard, and `mixin/` for narrow 1.21.4 hooks.
 
 Analyzer code is MIT licensed. No client source from GPL projects was copied. Rajdhani fonts use the SIL Open Font License; see [THIRD-PARTY.md](THIRD-PARTY.md), `FONT-LICENSE.txt` and `GRADLE-LICENSE.txt`.
-

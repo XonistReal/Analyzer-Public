@@ -36,6 +36,8 @@ public final class AutomationEngine implements AutomationScreen.Controller {
     private int bestCount=-1,arrivalY=Integer.MIN_VALUE;
     private long lastClicks;
     private boolean dispatched, activeTask;
+    private boolean returnBlocked;
+    private String blockedDetail="";
     private BlockPos shelterOrigin;
     private Path checkpoint;
     private final Map<String,Boolean> suspended=new LinkedHashMap<>();
@@ -50,13 +52,14 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         core.setEnabled("expedition",false);
         ClientTickEvents.END_CLIENT_TICK.register(client->INSTANCE.tick());
         HudRenderCallback.EVENT.register((context,counter)->{
-            if(INSTANCE.activeTask && (INSTANCE.state.equals("PROTECTING") || INSTANCE.state.equals("BLOCKED")))
-                SafetyHud.render(context,core,INSTANCE.detail,INSTANCE.state.equals("BLOCKED"));
+            if(INSTANCE.activeTask && (INSTANCE.protecting() || INSTANCE.state.equals("BLOCKED")))
+                SafetyHud.render(context,core,INSTANCE.detail,INSTANCE.state.equals("BLOCKED") || INSTANCE.state.equals("SAFETY_HOLD"));
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client->{INSTANCE.pause();INSTANCE.stopOwned();INSTANCE.persist();});
     }
     public boolean available(){return bridge.available();}
-    public boolean isRunning(){return activeTask && (state.equals("RUNNING") || state.equals("PROTECTING"));}
+    public boolean isRunning(){return activeTask && (state.equals("RUNNING") || protecting());}
+    private boolean protecting(){return state.equals("PROTECTING") || state.equals("SAFETY_HOLD");}
     public int currentStep(){return current;}
     public String state(){return state;}
     public String detail(){return detail;}
@@ -73,26 +76,32 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         validate(requested);
         if(mc.player==null||mc.world==null)throw new IllegalArgumentException("Join a world before starting a task.");
         if(!available())throw new IllegalArgumentException(bridge.status().message());
+        if(bridge.manualTaskActive())throw new IllegalArgumentException("Finish the manual Baritone task before starting an Analyzer plan.");
         stopOwned();
+        clearIdleInterruption();
         if(!inventory.recovery().isBlank()){state="STOPPED";detail=inventory.recovery();persist();throw new IllegalArgumentException(detail);}
         plan=requested;current=0;stepDetails=new String[plan.steps().size()];Arrays.fill(stepDetails,"");
         world=mc.world;worldKey=worldKey();arrivalY=Integer.MIN_VALUE;shelterOrigin=null;suspendConflicts();
         activeTask=true;state="RUNNING";detail="Starting " + plan.steps().getFirst().label();core.setEnabled("expedition",true);startSafetyProfile();resetProgress();persist();
     }
-    @Override public void pause(){if(isRunning()){guard.cleanup();bridge.endSafetyProfile();bridge.pause();state="PAUSED";detail="Paused. Resume continues the current stage.";persist();}}
+    @Override public void pause(){if(activeTask && !state.equals("PAUSED")){guard.cleanup();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="PAUSED";detail="Paused. Resume continues the current stage.";persist();}}
     @Override public void resume() {
         if(plan==null||current>=plan.steps().size()){detail="Choose and start a new task.";return;}
         if(mc.world==null||mc.player==null){detail="Join the original world before resuming.";return;}
         if(!worldKey.equals(worldKey())){state="BLOCKED";detail="This plan belongs to a different world or dimension. Start a new plan for this location.";return;}
         if(!available()){state="BLOCKED";detail=bridge.status().message();return;}
+        if(bridge.manualTaskActive()){detail="Finish the manual Baritone task before resuming this plan.";persist();return;}
+        clearIdleInterruption();
         world=mc.world;suspendConflicts();core.setEnabled("expedition",true);activeTask=true;state="RUNNING";
         startSafetyProfile();
         if(bridge.status().paused())bridge.resume();
         resetProgress();detail="Resuming " + plan.steps().get(current).label();persist();
     }
     @Override public void stop(){stopOwned();state="STOPPED";detail=inventory.recovery().isBlank()?"Stopped. Owned pathing and inventory actions have been released.":inventory.recovery();if(core!=null)core.setEnabled("expedition",false);persist();}
-    private void stopOwned(){activeTask=false;guard.cleanup();bridge.endSafetyProfile();bridge.cancel();inventory.stop();dispatched=false;restoreConflicts();}
+    private void stopOwned(){activeTask=false;guard.cleanup();bridge.endSafetyProfile();bridge.cancel();inventory.stop();dispatched=false;returnBlocked=false;blockedDetail="";restoreConflicts();}
     private void startSafetyProfile(){if(core.getBoolean("expedition","safe-routing"))bridge.beginSafetyProfile();else bridge.endSafetyProfile();}
+    /** Only an explicit Start/Resume may retry after external control has ended. */
+    private void clearIdleInterruption(){if(bridge.status().state()==BaritoneBridge.State.INTERRUPTED && !bridge.status().owned())bridge.clearStatus();}
     private void suspendConflicts(){
         java.util.Set<String> actions=new java.util.HashSet<>(CONFLICTS);
         for(var module:dev.analyzer.core.GameplayModules.definitions())actions.add(module.id());
@@ -101,7 +110,7 @@ public final class AutomationEngine implements AutomationScreen.Controller {
     }
     private void restoreConflicts(){if(core!=null){for(var entry:suspended.entrySet())if(hasModule(entry.getKey())&&!core.isEnabled(entry.getKey()))core.setEnabled(entry.getKey(),entry.getValue());}suspended.clear();}
 
-    private void block(String reason){guard.cleanup();bridge.endSafetyProfile();bridge.pause();state="BLOCKED";detail=reason;if(current<stepDetails.length)stepDetails[current]=reason;persist();}
+    private void block(String reason){guard.cleanup();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="BLOCKED";detail=reason;if(current<stepDetails.length)stepDetails[current]=reason;persist();}
     private void resetProgress(){lastProgress=ticks;bestCount=-1;bestDistance=Double.MAX_VALUE;lastBridgeProgress=-1;lastClicks=inventory.clicks();dispatched=bridge.status().active();}
     private void progress(){lastProgress=ticks;}
     private void tick() {
@@ -112,24 +121,31 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         if(activeTask && (mc.world==null||mc.player==null||mc.interactionManager==null)){stopOwned();block("Disconnected. Join the original world and explicitly resume.");return;}
         if(activeTask && world!=mc.world){stopOwned();block("The world or dimension changed. Review the plan before resuming.");return;}
         if(activeTask && !mc.player.isAlive()){stopOwned();block("The player died. Review inventory and position before resuming.");return;}
-        if(!isRunning())return;
+        // A live blocked task still watches for danger. User Pause and restored checkpoints do not act.
+        if(!activeTask || state.equals("PAUSED"))return;
         if(mc.player.isSpectator()){block("Automation cannot act in Spectator mode.");return;}
         if(mc.getOverlay()!=null){pause();detail="Paused for a resource reload. Resume after loading finishes.";persist();return;}
         if(core.getBoolean("expedition","pause-on-menu") && mc.currentScreen!=null && !inventory.ownsScreen()){pause();detail="Paused while a menu is open. Press Resume when ready.";persist();return;}
         for(String id:CONFLICTS)if(hasModule(id)&&core.isEnabled(id)){block("Disable " + core.definition(id).name() + " before resuming; it can interfere with this task.");return;}
         if(bridge.status().state()==BaritoneBridge.State.INTERRUPTED){dispatched=false;block(bridge.status().message());return;}
         if(bridge.manualTaskActive()){block("A manual Baritone task is active. Analyzer released safety control; finish it before resuming this plan.");return;}
-        if(core.getBoolean("expedition","safe-routing") != bridge.safetyProfileStatus().enabled())startSafetyProfile();
+        if(!state.equals("BLOCKED") && core.getBoolean("expedition","safe-routing") != bridge.safetyProfileStatus().enabled())startSafetyProfile();
         var protection=guard.tick(core,bridge,inventory);
-        if(protection.fatalBlock()){block(protection.message());return;}
-        if(protection.intervening()){
-            boolean changed=!state.equals("PROTECTING");state="PROTECTING";detail=protection.message();progress();
+        if(protection.intervening() || protection.fatalBlock()){
+            if(!protecting()){returnBlocked=state.equals("BLOCKED");blockedDetail=returnBlocked?detail:"";}
+            String next=protection.fatalBlock()?"SAFETY_HOLD":"PROTECTING";
+            boolean changed=!state.equals(next);state=next;detail=protection.message();progress();
             if(changed){AnalyzerClient.LOGGER.info("Automation protection: {}",detail);persist();}
             return;
         }
         if(protection.resumeReady()){
+            if(returnBlocked){state="BLOCKED";detail=blockedDetail;returnBlocked=false;blockedDetail="";bridge.endSafetyProfile();persist();return;}
             if(bridge.status().paused())bridge.resume();state="RUNNING";resetProgress();detail=protection.message();persist();
+        } else if(protecting()) {
+            // A menu or Creative mode can stop the guard; never leave a stale protection state.
+            pause();detail="Protection paused because it cannot act in the current screen or game mode. Close the screen and press Resume when ready.";persist();return;
         }
+        if(state.equals("BLOCKED"))return;
         if(mc.player.getHealth()<core.getNumber("expedition","min-health")){block("Low health: " + Math.round(mc.player.getHealth()) + " HP. Recover, then resume.");return;}
         if(!mc.player.getAbilities().creativeMode && mc.player.getHungerManager().getFoodLevel()<core.getNumber("expedition","min-hunger")){block("Low hunger. Eat, then resume.");return;}
         if(ticks-lastProgress>core.getNumber("expedition","stuck-timeout")*20){block("No measurable progress for " + (int)core.getNumber("expedition","stuck-timeout") + " seconds. Check the route, tools or workstation, then resume.");return;}

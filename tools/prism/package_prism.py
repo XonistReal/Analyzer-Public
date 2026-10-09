@@ -92,7 +92,7 @@ WrapperCommand=
         '@echo off\r\npowershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass '
         '-File "%~dp0analyzer-updater\\Update-Analyzer.ps1" -InstanceDir "%~dp0."\r\npause\r\n',
         encoding="ascii")
-    for doc in ("README.md", "PRISM.md", "AUTOMATION.md", "SAFETY.md", "UI-OVERHAUL-PLAN.md", "ESP-READABILITY.md", "MODULES.md", "MODULES.json", "ROADMAP.md", "RESEARCH.md", "RESEARCH-VISUALS.md", "RESEARCH-COSMETICS.md", "VALIDATION.md", "VALIDATION.log", "PIXEL-VALIDATION.log", "LICENSE", "FONT-LICENSE.txt", "THIRD-PARTY.md"):
+    for doc in ("README.md", "PRISM.md", "AUTOMATION.md", "SAFETY.md", "UI-OVERHAUL-PLAN.md", "MOVING-PCS.md", "ESP-READABILITY.md", "MODULES.md", "MODULES.json", "ROADMAP.md", "RESEARCH.md", "RESEARCH-VISUALS.md", "RESEARCH-COSMETICS.md", "VALIDATION.md", "VALIDATION.log", "PIXEL-VALIDATION.log", "LICENSE", "FONT-LICENSE.txt", "THIRD-PARTY.md"):
         shutil.copyfile(repo / doc, instance / doc)
     screenshots = instance / "screenshots"
     screenshots.mkdir()

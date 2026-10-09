@@ -1,12 +1,12 @@
 # Analyzer in Prism Launcher
 
-Analyzer **0.5.1** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native Prism ZIP includes Analyzer, Fabric API and official Baritone API, instance definitions, corresponding Baritone sources/notices and a Windows local updater. Minecraft and account credentials are not included.
+Analyzer **0.5.2** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native Prism ZIP includes Analyzer, Fabric API and official Baritone API, instance definitions, corresponding Baritone sources/notices and a Windows local updater. Minecraft and account credentials are not included.
 
 ## Import and launch
 
-Drag `Analyzer-0.5.1-Prism-1.21.4.zip` onto Prism's main window and confirm the new instance. Alternatively use **Add Instance → Import → Browse**, select the ZIP, and press **OK**. The native archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root.
+Drag `Analyzer-0.5.2-Prism-1.21.4.zip` onto Prism's main window and confirm the new instance. Alternatively use **Add Instance → Import → Browse**, select the ZIP, and press **OK**. The native archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root.
 
-For an existing **Fabric 1.21.4** instance without the updater, close Minecraft, open **Edit → Mods**, and replace the old Analyzer JAR with `analyzer-0.5.1.jar`. Install `fabric-api-0.119.4+1.21.4.jar` if needed. Add the separately bundled `baritone-api-fabric-1.13.1.jar` for Automation; it is optional for other Analyzer features. Keep one Analyzer JAR. The ZIP/feed uses `analyzer-0.5.1-<hash>.jar`; this is the same build with a checksum suffix. Other game versions require compatible builds.
+For an existing **Fabric 1.21.4** instance without the updater, close Minecraft, open **Edit → Mods**, and replace the old Analyzer JAR with `analyzer-0.5.2.jar`. Install `fabric-api-0.119.4+1.21.4.jar` if needed. Add the separately bundled `baritone-api-fabric-1.13.1.jar` for Automation; it is optional for other Analyzer features. Keep one Analyzer JAR. The ZIP/feed uses `analyzer-0.5.2-<hash>.jar`; this is the same build with a checksum suffix. Other game versions require compatible builds.
 
 Use Java 21: enable Prism's automatic Java selection/download or select Java 21 under **Settings → Java**. The directly installed instance on this computer uses the verified project Java 21 runtime. The portable ZIP inherits Prism's Java settings and has no fixed Java path.
 
@@ -14,17 +14,19 @@ Press **Right Shift** after launch, choose **Workspace**, then **Profiles → ci
 
 Analyzer now has **123 registered modules**, including actual combat/HvH, movement, inventory and world actions. These use normal game interactions; server movement/reach/cooldown rules still apply. Fresh defaults enable sky/menu/HUD effects and local place/break/hit visuals. All gameplay automation and Entity/Storage ESP are opt-in. [README.md](README.md) explains gear, controls and rendering limits; [MODULES.md](MODULES.md) lists every module; [ROADMAP.md](ROADMAP.md) distinguishes scoped implementations from planned work; [RESEARCH-COSMETICS.md](RESEARCH-COSMETICS.md) compares all 37 published cosmetic setting families with Analyzer's actual controls. Selected runtime checks are in [VALIDATION.md](VALIDATION.md).
 
-## Automation safety in 0.5.1
+## Automation safety in 0.5.2
 
 The existing optional Baritone API JAR is still the dependency for Automation; the safety update adds no AI service or API key. Review and explicitly start an Analyzer task to activate its safer route profile and Survival protection. Loading a profile, reopening a plan or relaunching Minecraft does not start or resume movement. Unfinished checkpoints restore paused.
 
-During a task, nearby hostile mobs, low health or available-food recovery can pause the route while protection acts. A readable top-center banner identifies the paused task and current response. User Pause/Stop release owned inputs, and temporary Baritone settings restore when the task pauses, stops, completes or yields to manual control. See [SAFETY.md](SAFETY.md) for exact defaults, short-ground-retreat limits and blocked/manual-recovery behaviour. Protection does not promise an invincible character or a successful escape from any server spawn.
+During a task, nearby hostile mobs, low health or available-food recovery can pause the route while protection acts. A readable top-center banner identifies the paused task and current response. In **0.5.2**, an unavailable escape becomes a live **SAFETY_HOLD**, so protection keeps checking after knockback, an explosion or changing terrain. Urgent creepers receive priority, and short escape checks include collision-shaped ground, one-block changes and surface water with an open route to air.
+
+User Pause/Stop release owned inputs, and temporary Baritone settings restore when the task pauses, stops, completes, ordinarily blocks or yields to manual control. A safety hold keeps the owned route paused and monitoring active; a separately blocked stage still needs explicit Resume after its requirement is satisfied. See [SAFETY.md](SAFETY.md) for defaults and limits. Equipment, food and escapable terrain still determine whether protection can succeed.
 
 The next full UI pass is [planned](UI-OVERHAUL-PLAN.md) after the user's Minecraft client references arrive. Its final style has not been chosen.
 
 ## Updates while we develop
 
-The updater checks a **local release feed before each launch**. After a 0.5.1 build is published, an existing Analyzer instance connected to this project's feed receives it on its next launch; importing a second instance is optional. Close Minecraft before updating, then restart it to load new code.
+The updater checks a **local release feed before each launch**. After a 0.5.2 build is published, an existing Analyzer instance connected to this project's feed receives it on its next launch; importing a second instance is optional. Close Minecraft before updating, then restart it to load new code.
 
 `analyzer-updater.json` points to this project's sibling `analyzer-updates/release.json`. The updater verifies SHA-256 and embedded mod metadata, backs up JARs whose mod ID is `analyzer` under `.analyzer-updater/backups/`, and installs the verified replacement. It preserves worlds, settings, Analyzer profiles, friends, Fabric API and other mods. Failed updates keep the existing installation and print the reason in Prism's launch console. A pending transaction restores an interrupted install on the next launch, even if the feed is unavailable.
 

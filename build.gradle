@@ -124,6 +124,10 @@ loom {
                 vmArg '-Danalyzer.botOnly=true'
                 vmArg '-Danalyzer.safetyOnly=true'
             }
+            if (project.findProperty('analyzerTerrainOnly') == 'true') {
+                vmArg '-Danalyzer.botOnly=true'
+                vmArg '-Danalyzer.terrainOnly=true'
+            }
             programArg '--username'
             programArg 'AnalyzerDev'
             programArg '--width'

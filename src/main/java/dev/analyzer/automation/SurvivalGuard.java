@@ -84,7 +84,7 @@ public final class SurvivalGuard {
             quietTicks = recoveryTicks = 0;
             LivingEntity target = threats.getFirst();
             double distance = Math.sqrt(target.squaredDistanceTo(mc.player));
-            boolean explosive = threats.stream().anyMatch(e -> e instanceof CreeperEntity && (e.squaredDistanceTo(mc.player) < 36 || ((CreeperEntity) e).getFuseSpeed() > 0));
+            boolean explosive = threats.stream().anyMatch(this::urgentCreeper);
             int weapon = bestWeapon();
             boolean canEngage = !explosive && threats.size() <= 2 && mc.player.getHealth() > retreatHealth && weapon >= 0
                     && weaponScore(mc.player.getInventory().getStack(weapon)) >= 4;
@@ -101,29 +101,31 @@ public final class SurvivalGuard {
                     return new Result(true, false, "Closing normal attack distance to " + target.getName().getString() + "; original task is paused.", false);
                 }
             }
-            Vec3d escape = escapeDirection(threats);
+            EscapeNavigator.Route escape = EscapeNavigator.choose(mc, threats);
             if (escape != null) {
-                aim(mc.player.getEyePos().add(escape.multiply(4)));
-                boolean sprint = hunger > 6 && !consuming;
-                move(route, sprint); retreatTicks++;
+                aim(mc.player.getEyePos().add(escape.direction().multiply(4)));
+                boolean sprint = hunger > 6 && !consuming && !escape.swimming();
+                move(route, sprint, escape.jump()); retreatTicks++;
                 // A ranged opponent or a close pursuer can still be struck at normal reach while retreating.
                 if (!consuming && !explosive && weapon >= 0 && distance <= 3.0 && mc.player.canInteractWithEntity(target, 0)) {
                     select(weapon); attack(target); // Keep the escape yaw, so walking continues away from the attacker.
                 }
                 if (hungry && distance >= 6 && !explosive) food();
-                return new Result(true, false, "Retreating from " + target.getName().getString() + " on checked ground; original task is paused.", false);
+                return new Result(true, false, "Retreating from " + target.getName().getString() + " via " + escape.terrain() + "; original task is paused.", false);
             }
             if (!explosive && weapon >= 0 && mc.player.canInteractWithEntity(target, 0)) {
                 stopFood(); select(weapon); aim(target.getEyePos()); attack(target);
                 return new Result(true, false, "No safe ground retreat found; defending in place. Move to cover if needed.", false);
             }
-            return new Result(true, true, "No safe ground retreat or reachable defense is available. The task is held; move to safety manually.", false);
+            String terrain = mc.player.isTouchingWater() ? "No checked water or shore escape yet"
+                    : !mc.player.isOnGround() ? "Waiting to land after a fall or knockback" : "No checked retreat corridor yet";
+            return new Result(true, true, terrain + "; protection keeps checking. Move manually if needed.", false);
         }
         quietTicks++;
         if (hungry || consuming) {
             if (!food() && !consuming) {
                 boolean critical = hunger < minimumHunger || mc.player.getHealth() < resumeHealth && hunger < 18;
-                if (critical) return new Result(true, true, "No usable food is available. Recover health and hunger before resuming.", false);
+                if (critical) return new Result(true, true, "Recovery held: no usable food. Health " + Math.round(mc.player.getHealth()) + "/" + (int)Math.ceil(resumeHealth) + " HP; protection keeps watching.", false);
             } else {
                 recoveryTicks = 0;
                 return new Result(true, false, "Eating available food while the route is paused.", false);
@@ -131,8 +133,8 @@ public final class SurvivalGuard {
         }
         if (mc.player.getHealth() < resumeHealth || hunger < minimumHunger) {
             if (++recoveryTicks > 400 || hunger < 18 && !foodAvailable)
-                return new Result(true, true, "Health or hunger remains below the task limit. Recover manually before resuming.", false);
-            return new Result(true, false, "Threat cleared; waiting for health and hunger recovery.", false);
+                return new Result(true, true, "Recovery held: health " + Math.round(mc.player.getHealth()) + "/" + (int)Math.ceil(resumeHealth) + " HP, hunger " + hunger + "/" + (int)Math.ceil(minimumHunger) + ". Protection keeps watching.", false);
+            return new Result(true, false, "Threat cleared; recovering health " + Math.round(mc.player.getHealth()) + "/" + (int)Math.ceil(resumeHealth) + " HP and hunger.", false);
         }
         if (quietTicks >= Math.max(10, (int) Math.round(number(core, "resume-delay", 3) * 20))) {
             cleanup();
@@ -147,7 +149,8 @@ public final class SurvivalGuard {
         for (var entity : mc.world.getEntities()) {
             if (++seen > 1024) break;
             if (!(entity instanceof MobEntity mob) || !(mob instanceof Monster) || !mob.isAlive() || mob.isSpectator()
-                    || mc.player.isTeammate(mob) || mob.squaredDistanceTo(mc.player) > range * range || !mc.player.canSee(mob)) continue;
+                    || mc.player.isTeammate(mob) || mob.squaredDistanceTo(mc.player) > range * range
+                    || !mc.player.canSee(mob) && !urgentCreeper(mob)) continue;
             if (mob.isAiDisabled() && !(mob instanceof CreeperEntity c && (c.isIgnited() || c.getFuseSpeed() > 0))) continue;
             boolean attackedUs = mc.player.getAttacker() == mob || mob.isAttacking();
             if (mob instanceof EndermanEntity enderman && !enderman.isAngry() && !attackedUs) continue;
@@ -156,37 +159,14 @@ public final class SurvivalGuard {
             if (mob instanceof SlimeEntity slime && !(mob instanceof MagmaCubeEntity) && slime.getSize() < 2) continue;
             result.add(mob);
         }
-        result.sort(Comparator.comparingDouble(e -> e.squaredDistanceTo(mc.player) - (e instanceof CreeperEntity c && c.getFuseSpeed() > 0 ? 100 : 0)));
+        result.sort(Comparator.<LivingEntity>comparingInt(e -> e instanceof CreeperEntity c && (c.isIgnited() || c.getFuseSpeed()>0) ? 0 : urgentCreeper(e) ? 1 : 2)
+                .thenComparingDouble(e -> e.squaredDistanceTo(mc.player)));
         return result;
     }
+    private boolean urgentCreeper(LivingEntity entity){return entity instanceof CreeperEntity creeper
+            && (creeper.isIgnited() || creeper.getFuseSpeed()>0 || creeper.squaredDistanceTo(mc.player) <= (creeper.isCharged()?144:64));}
 
-    /** Check the complete short walking corridor and its support, not just the destination block. */
-    private Vec3d escapeDirection(List<LivingEntity> threats) {
-        if (!mc.player.isOnGround() || mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.isClimbing() || mc.player.isGliding()) return null;
-        Vec3d sum = Vec3d.ZERO;
-        for (LivingEntity threat : threats) {
-            Vec3d away = mc.player.getPos().subtract(threat.getPos());
-            double length = Math.hypot(away.x, away.z);
-            if (length > .01) sum = sum.add(away.x / (length * length), 0, away.z / (length * length));
-        }
-        double yaw = Math.atan2(sum.z, sum.x), bestScore = -Double.MAX_VALUE;
-        Vec3d best = null;
-        for (int i = 0; i < 12; i++) {
-            double angle = yaw + i * Math.PI / 6;
-            Vec3d direction = new Vec3d(Math.cos(angle), 0, Math.sin(angle));
-            if (!safeWalk(direction)) continue;
-            Vec3d point = mc.player.getPos().add(direction.multiply(1.2));
-            double nearest = Double.MAX_VALUE;
-            for (LivingEntity threat : threats) nearest = Math.min(nearest, point.squaredDistanceTo(threat.getPos()));
-            double alignment = direction.dotProduct(sum.normalize());
-            double score = nearest + alignment * 2;
-            // Never choose a corridor that deliberately moves closer to the nearest threat.
-            double currentNearest = threats.stream().mapToDouble(e -> e.squaredDistanceTo(mc.player)).min().orElse(0);
-            if (nearest <= currentNearest + .2) continue;
-            if (score > bestScore) { bestScore = score; best = direction; }
-        }
-        return best;
-    }
+    /** Melee approach remains conservative; escape uses the height-aware terrain navigator. */
     private boolean safeWalk(Vec3d direction) {
         for (double distance = .2; distance <= 1.61; distance += .2) {
             Vec3d offset = direction.multiply(distance);
@@ -210,7 +190,10 @@ public final class SurvivalGuard {
                 || state.isOf(Blocks.SWEET_BERRY_BUSH) || state.isOf(Blocks.POWDER_SNOW) || state.isOf(Blocks.WITHER_ROSE);
     }
     private void move(BaritoneBridge route, boolean sprint) {
-        if (!route.setSafetyInputs(true, sprint, false)) { force(mc.options.forwardKey); if (sprint) force(mc.options.sprintKey); }
+        move(route,sprint,false);
+    }
+    private void move(BaritoneBridge route, boolean sprint, boolean jump) {
+        if (!route.setSafetyInputs(true, sprint, jump)) { force(mc.options.forwardKey); if (sprint) force(mc.options.sprintKey); if(jump)force(mc.options.jumpKey); }
     }
     private void releaseMovement() {
         if (bridge != null) bridge.clearSafetyInputs();

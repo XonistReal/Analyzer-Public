@@ -14,7 +14,7 @@ Once references arrive, compare two coherent directions using the same module an
 
 ## 2. Define one visual system
 
-Use a small set of shared tokens for surfaces, text roles, semantic states, spacing, borders, corner treatment, and motion. Apply these to menus, profiles, HUD editing and Automation. Accent colour should mark selection and primary actions; status colours should consistently mean running, paused, blocked, failed or complete. Include labels or icons with those states so colour is never the sole signal.
+Use a small set of shared tokens for surfaces, text roles, semantic states, spacing, borders, corner treatment, and motion. Apply these to menus, profiles, HUD editing and Automation. Accent colour should mark selection and primary actions; status colours should consistently mean running, protecting, safety hold, paused, blocked, failed or complete. Include labels or icons with those states so colour is never the sole signal.
 
 Typography should have a clear title/body/caption hierarchy, measured text wrapping, stable number widths where helpful, and full labels in the settings inspector. Compare the current Rajdhani font with reference-led alternatives at real Minecraft framebuffer sizes. Judge legibility in game, including bright skies and dark caves. A larger settings panel or a wrapped label is preferable to shrinking important words to fit.
 
@@ -52,11 +52,14 @@ Represent the actual controller states, rather than inferring success from a swi
 |---|---|---|
 | Draft / reviewed | Task text, route, stages and prerequisites | Review or Start; Start is enabled only with a reviewed plan and usable dependency. |
 | Running | Current stage, verified progress and current detail | Pause and Stop. |
-| Protecting | **Task paused for safety**, the active protection action and the condition for recovery | Keep Stop available; show any manual recovery instruction. The HUD banner must distinguish protection from ordinary task progress. |
+| Protecting | **Task paused for safety**, the active protection action and the condition for recovery | Pause and Stop remain available; distinguish protection from ordinary task progress. |
+| Safety hold | **Task paused for safety**, the current unavailable escape/recovery condition and live rechecking | Keep Pause and Stop available; show manual assistance when needed. A changing terrain/threat condition must update the detail. |
 | Paused | Pause reason and stage that will continue | Resume when applicable; Stop remains available. |
 | Blocked | Exact missing resource, path/workstation issue or interruption | Explain what needs to change; allow a deliberate retry/resume. |
 | Completed | Verified outcome and remaining limitations, if any | Review a new task. |
 | Stopped | Confirmation that owned actions were released; any recovery instruction | Review a new task. |
+
+A safety hold is active monitoring with the original route paused, not a terminal task failure. If protection intervenes while a stage is already blocked for another requirement, return to that blocked reason afterward without automatically dispatching the stage. Distinguish that behaviour from automatically continuing a formerly running stage after threats clear and recovery checks pass. User Pause/Stop must end protection immediately.
 
 Keep dependency availability separate from task status. “Baritone available” must not imply that the route is running or that armor is complete. Preserve explicit resumption after restart/world changes, real inventory/world completion checks, conflict handling, and cursor recovery instructions. Opening a plan, loading a profile or restoring a toggle must not start movement.
 
@@ -83,7 +86,7 @@ Capture the actual native client at **1280 × 800** and **1920 × 1080**, at Min
 
 The release review should show:
 
-- Catalogue/search, a long Entity ESP inspector, profiles, HUD editor, and Automation draft/running/paused/blocked/completed states. Include empty search, missing Baritone, a long requirement and a save-error state.
+- Catalogue/search, a long Entity ESP inspector, profiles, HUD editor, and Automation draft/running/protecting/safety-hold/paused/blocked/completed states. Include empty search, missing Baritone, a long requirement and a save-error state.
 - Legible primary labels and numeric values; no clipped controls, inaccessible last settings, overlapping labels, or text concealed by decorative effects. Full requirement/error text is reachable.
 - Matching rendered and clickable control bounds after resize and scale changes. Mouse, scroll, keyboard focus, numeric entry, keybind capture, Escape/back and layout switching work predictably.
 - Visible keyboard focus, consistent Tab order and accessible control labels. Check Minecraft narration support for the chosen native controls; document any remaining limitation.
