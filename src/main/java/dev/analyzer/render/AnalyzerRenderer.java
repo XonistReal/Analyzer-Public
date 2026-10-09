@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gl.ShaderProgramKeys;
@@ -35,8 +36,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
@@ -49,6 +52,10 @@ import java.util.List;
 public final class AnalyzerRenderer {
     private static final int MAX_ENTITY_TARGETS = 4096;
     private static final int MAX_LABELS = 128;
+    private static final int MAX_SCREEN_LABELS = 40;
+    private static final float SCREEN_LABEL_SCALE = 0.62f;
+    private static final String CLIENT_VERSION = FabricLoader.getInstance().getModContainer("analyzer")
+            .map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("dev");
     private static final int PLAYER_COLOR = 0xFF66DFF7;
     private static final int HOSTILE_COLOR = 0xFFFF7188;
     private static final int PASSIVE_COLOR = 0xFF79F8CC;
@@ -63,15 +70,51 @@ public final class AnalyzerRenderer {
     private final BufferAllocator labelAllocator = new BufferAllocator(64 * 1024);
     private final VertexConsumerProvider.Immediate labelConsumers = VertexConsumerProvider.immediate(labelAllocator);
     private static volatile RenderCounts lastCounts = new RenderCounts(0, 0, 0);
+    private static volatile AnalyzerRenderer activeRenderer;
+    private List<ScreenTarget> screenEntities = List.of(), screenStorage = List.of();
+    private final List<Target> radarTargets = new ArrayList<>();
+    private Vec3d frameCamera = Vec3d.ZERO;
     private boolean registered;
 
     public AnalyzerRenderer(AnalyzerCore core) {
         this.core = core;
+        activeRenderer = this;
     }
 
     /** Last submitted world targets. Read-only diagnostics used by the development smoke run. */
     public static RenderCounts counts() { return lastCounts; }
     public record RenderCounts(int entities, int containers, int tracers) { }
+    /** Screen-mode rectangles surviving near-plane / viewport / optional visibility checks. */
+    public static RenderCounts screenCounts() {
+        AnalyzerRenderer renderer = activeRenderer;
+        return renderer == null ? new RenderCounts(0, 0, 0)
+                : new RenderCounts(renderer.screenEntities.size(), renderer.screenStorage.size(), 0);
+    }
+
+    /** Live, concise inspector feedback. Counts include selected loaded targets in range. */
+    public static String status(String moduleId) {
+        AnalyzerRenderer renderer = activeRenderer;
+        if (renderer == null || renderer.client.world == null) return "Join a world to see live targets";
+        int count = switch (moduleId) {
+            case "entity-esp" -> lastCounts.entities;
+            case "storage-esp" -> lastCounts.containers;
+            case "tracers" -> lastCounts.tracers;
+            default -> -1;
+        };
+        if (moduleId.equals("storage-esp")) {
+            if (!renderer.storage.ready()) return "Scanning loaded chunks";
+            if (count == 0) return "0 containers · " + renderer.storage.loadedChunksScanned() + " loaded chunks scanned";
+            return count + (count == 1 ? " container in range" : " containers in range");
+        }
+        if (count < 0) return "";
+        EntityFilter filter = renderer.filter(moduleId);
+        if (!filter.players && !filter.hostiles && !filter.passives && !filter.items) return "Select a target category";
+        if (count == 0 && filter.players && !filter.hostiles && !filter.passives && !filter.items) {
+            return renderer.client.isInSingleplayer() ? "0 other players · enable mobs for this world" : "0 other players in range";
+        }
+        if (count == 0) return "0 matching entities in range";
+        return count + (count == 1 ? " entity in range" : " entities in range");
+    }
 
     @SuppressWarnings("deprecation")
     public void register() {
@@ -79,7 +122,10 @@ public final class AnalyzerRenderer {
         registered = true;
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             storage.tick(mc, core);
-            if (mc.world == null) lastCounts = new RenderCounts(0, 0, 0);
+            if (mc.world == null) {
+                lastCounts = new RenderCounts(0, 0, 0);
+                screenEntities = List.of(); screenStorage = List.of(); radarTargets.clear();
+            }
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> labelAllocator.close());
         // Fabulous composition clears main depth. Depth-tested overlays must be drawn
@@ -90,7 +136,11 @@ public final class AnalyzerRenderer {
     }
 
     private void renderWorld(WorldRenderContext context, boolean afterWorld) {
-        if (!afterWorld) lastCounts = new RenderCounts(0, 0, 0);
+        if (!afterWorld) {
+            lastCounts = new RenderCounts(0, 0, 0);
+            screenEntities = List.of(); screenStorage = List.of(); radarTargets.clear();
+            storage.ensureReady(client, core);
+        }
         if (client.world == null || client.player == null) return;
         boolean esp = belongsToPass("entity-esp", afterWorld);
         boolean containers = belongsToPass("storage-esp", afterWorld);
@@ -98,6 +148,7 @@ public final class AnalyzerRenderer {
         if (!esp && !containers && !tracers) return;
 
         Vec3d camera = context.camera().getPos();
+        frameCamera = camera;
         float tickDelta = context.tickCounter().getTickDelta(false);
         List<Target> entityTargets = new ArrayList<>();
         List<Target> tracerTargets = new ArrayList<>();
@@ -141,6 +192,11 @@ public final class AnalyzerRenderer {
         tracerTargets.sort(BACK_TO_FRONT);
         lastCounts = new RenderCounts(lastCounts.entities + entityTargets.size(),
                 lastCounts.containers + storageTargets.size(), lastCounts.tracers + tracerTargets.size());
+        radarTargets.addAll(entityTargets);
+        boolean entityScreen = esp && core.getChoice("entity-esp", "style").equals("Screen");
+        boolean storageScreen = containers && core.getChoice("storage-esp", "style").equals("Screen");
+        if (entityScreen) screenEntities = projectTargets("entity-esp", entityTargets, context);
+        if (storageScreen) screenStorage = projectTargets("storage-esp", storageTargets, context);
 
         // LAST retains the camera matrix and world depth. END has rebound main and popped
         // the camera matrix, so reinstall the view only for that later scope.
@@ -155,8 +211,8 @@ public final class AnalyzerRenderer {
             RenderSystem.depthFunc(GL11.GL_LEQUAL);
             RenderSystem.setShaderColor(1, 1, 1, 1);
             RenderSystem.setShaderFog(Fog.DUMMY);
-            if (!entityTargets.isEmpty()) drawEsp("entity-esp", entityTargets);
-            if (!storageTargets.isEmpty()) drawEsp("storage-esp", storageTargets);
+            if (!entityScreen && !entityTargets.isEmpty()) drawEsp("entity-esp", entityTargets);
+            if (!storageScreen && !storageTargets.isEmpty()) drawEsp("storage-esp", storageTargets);
             if (!tracerTargets.isEmpty()) {
                 setDepth(core.getBoolean("tracers", "through-walls"));
                 // A point just beyond the near plane anchors the lines at the center of view.
@@ -165,9 +221,9 @@ public final class AnalyzerRenderer {
                 drawTracers(tracerTargets, start, width + 2, 28);
                 drawTracers(tracerTargets, start, width, 190);
             }
-            if (!entityTargets.isEmpty()) drawLabels("entity-esp", entityTargets, context,
+            if (!entityScreen && !entityTargets.isEmpty()) drawLabels("entity-esp", entityTargets, context,
                     core.getBoolean("entity-esp", "labels"), core.getBoolean("entity-esp", "health"));
-            if (!storageTargets.isEmpty()) drawLabels("storage-esp", storageTargets, context,
+            if (!storageScreen && !storageTargets.isEmpty()) drawLabels("storage-esp", storageTargets, context,
                     core.getBoolean("storage-esp", "labels"), false);
         } finally {
             if (afterWorld) RenderSystem.getModelViewStack().popMatrix();
@@ -353,12 +409,237 @@ public final class AnalyzerRenderer {
     private record Label(String text, int textWidth, float width, float height, int color,
                          float healthFraction, Matrix4f matrix) { }
 
+    private List<ScreenTarget> projectTargets(String module, List<Target> targets, WorldRenderContext context) {
+        Matrix4f clipMatrix = new Matrix4f(context.projectionMatrix()).mul(context.positionMatrix());
+        boolean throughWalls = core.getBoolean(module, "through-walls");
+        boolean labels = core.getBoolean(module, "labels");
+        boolean health = module.equals("entity-esp") && core.getBoolean(module, "health");
+        List<ScreenTarget> projected = new ArrayList<>();
+        // Nearest targets get priority when a dense base contains many loaded entities.
+        for (int i = targets.size() - 1; i >= 0 && projected.size() < MAX_LABELS; i--) {
+            Target target = targets.get(i);
+            if (context.frustum() != null && !context.frustum().isVisible(
+                    target.bounds.offset(context.camera().getPos()).expand(0.25))) continue;
+            ScreenBounds bounds = projectBox(target.bounds, clipMatrix);
+            if (bounds == null || !throughWalls && !hasLineOfSight(target, context.camera().getPos())) continue;
+            String text = labels ? name(target) : "";
+            if (text.length() > 48) text = text.substring(0, 45) + "…";
+            if (labels) text += " · " + Math.round(Math.sqrt(target.distanceSquared)) + "m";
+            float fraction = health && target.entity instanceof LivingEntity living
+                    ? Math.clamp(living.getHealth() / Math.max(1, living.getMaxHealth()), 0, 1) : -1;
+            projected.add(new ScreenTarget(bounds, target.color, text, fraction, target.distanceSquared));
+        }
+        Collections.reverse(projected);
+        return List.copyOf(projected);
+    }
+
+    private boolean hasLineOfSight(Target target, Vec3d camera) {
+        Vec3d end = target.bounds.getCenter().add(camera);
+        var hit = client.world.raycast(new RaycastContext(camera, end,
+                RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, client.player));
+        return hit.getType() == HitResult.Type.MISS || target.bounds.expand(0.08).contains(hit.getPos().subtract(camera));
+    }
+
+    /** Clip 3D edges at the near plane before projecting, so nearby boxes never flip or jump. */
+    private static ScreenBounds projectBox(Box box, Matrix4f matrix) {
+        if (box.contains(Vec3d.ZERO)) return null;
+        Vector4f[] corners = new Vector4f[8];
+        List<Vector4f> visible = new ArrayList<>(20);
+        for (int i = 0; i < 8; i++) {
+            corners[i] = matrix.transform(new Vector4f((float) ((i & 1) == 0 ? box.minX : box.maxX),
+                    (float) ((i & 2) == 0 ? box.minY : box.maxY),
+                    (float) ((i & 4) == 0 ? box.minZ : box.maxZ), 1));
+            if (corners[i].z + corners[i].w >= 0.001f && corners[i].w > 0.001f) visible.add(corners[i]);
+        }
+        for (int edge = 0; edge < BOX_EDGES.length; edge += 2) {
+            Vector4f a = corners[BOX_EDGES[edge]], b = corners[BOX_EDGES[edge + 1]];
+            float da = a.z + a.w - 0.001f, db = b.z + b.w - 0.001f;
+            if ((da < 0) == (db < 0)) continue;
+            Vector4f intersection = new Vector4f(a).lerp(b, da / (da - db));
+            if (intersection.w > 0.001f) visible.add(intersection);
+        }
+        if (visible.isEmpty()) return null;
+        float left = Float.POSITIVE_INFINITY, top = Float.POSITIVE_INFINITY;
+        float right = Float.NEGATIVE_INFINITY, bottom = Float.NEGATIVE_INFINITY;
+        for (Vector4f point : visible) {
+            float x = point.x / point.w, y = point.y / point.w;
+            if (!Float.isFinite(x) || !Float.isFinite(y)) continue;
+            left = Math.min(left, x); right = Math.max(right, x);
+            top = Math.min(top, -y); bottom = Math.max(bottom, -y);
+        }
+        if (right < -1 || left > 1 || bottom < -1 || top > 1 || !Float.isFinite(left)) return null;
+        left = Math.clamp((left + 1) / 2, 0, 1); right = Math.clamp((right + 1) / 2, 0, 1);
+        top = Math.clamp((top + 1) / 2, 0, 1); bottom = Math.clamp((bottom + 1) / 2, 0, 1);
+        return right > left && bottom > top ? new ScreenBounds(left, top, right, bottom) : null;
+    }
+
+    private void drawScreenTargets(DrawContext draw, String module, List<ScreenTarget> targets,
+                                   List<ScreenLabelRequest> labelRequests, List<HudRect> boxes) {
+        if (!core.isEnabled(module) || !core.getChoice(module, "style").equals("Screen")) return;
+        int width = draw.getScaledWindowWidth(), height = draw.getScaledWindowHeight();
+        int thickness = Math.max(1, Math.round((float) core.getNumber(module, "line-width")));
+        for (ScreenTarget target : targets) {
+            int left = Math.round(target.bounds.left * width), top = Math.round(target.bounds.top * height);
+            int right = Math.max(left + 3, Math.round(target.bounds.right * width));
+            int bottom = Math.max(top + 3, Math.round(target.bounds.bottom * height));
+            HudRect box = new HudRect(left, top, right - left, bottom - top);
+            boxes.add(box);
+            draw.fill(left, top, right, bottom, Palette.alpha(target.color, 12));
+            int corner = Math.max(3, Math.min(18, Math.min(right - left, bottom - top) / 4));
+            for (int layer = 3; layer >= 1; layer--) {
+                screenCorners(draw, left - layer, top - layer, right + layer, bottom + layer,
+                        corner + layer, thickness + layer * 2, Palette.alpha(target.color, 7));
+            }
+            screenCorners(draw, left - 1, top - 1, right + 1, bottom + 1, corner + 1, thickness + 2, 0xC4060D13);
+            screenCorners(draw, left, top, right, bottom, corner, thickness, Palette.alpha(target.color, 250));
+            if (target.health >= 0) {
+                draw.fill(left - 5, top - 1, left - 2, bottom + 1, 0xD9060D13);
+                int healthColor = target.health > 0.6f ? PASSIVE_COLOR : target.health > 0.3f ? ITEM_COLOR : HOSTILE_COLOR;
+                draw.fill(left - 4, bottom - Math.round((bottom - top) * target.health), left - 3, bottom, healthColor);
+            }
+            if (!target.text.isEmpty()) {
+                String text = GuiDraw.truncate(client.textRenderer, target.text, Math.min(120, width - 16), SCREEN_LABEL_SCALE);
+                int panelWidth = (int) Math.ceil(GuiDraw.width(client.textRenderer, text, SCREEN_LABEL_SCALE)) + 8;
+                labelRequests.add(new ScreenLabelRequest(box, panelWidth, text, target.color, target.distanceSquared));
+            }
+        }
+    }
+
+    /** Shared layout keeps nearby entity/container tags readable without hiding their boxes. */
+    private void drawScreenLabels(DrawContext draw, List<ScreenLabelRequest> requests, List<HudRect> boxes,
+                                  List<HudRect> reserved) {
+        int width = draw.getScaledWindowWidth(), height = draw.getScaledWindowHeight();
+        requests.sort(Comparator.comparingDouble(ScreenLabelRequest::distanceSquared));
+        List<HudRect> occupied = new ArrayList<>(reserved);
+        occupied.addAll(boxes);
+        int drawn = 0, panelHeight = 10;
+        for (ScreenLabelRequest request : requests) {
+            if (drawn >= MAX_SCREEN_LABELS) break;
+            HudRect panel = findScreenLabelPosition(request, panelHeight, width, height, occupied);
+            if (panel == null) continue;
+            occupied.add(panel);
+            float ax = Math.clamp(panel.x + panel.width / 2f, request.box.x, request.box.right());
+            float ay = Math.clamp(panel.y + panel.height / 2f, request.box.y, request.box.bottom());
+            float bx = Math.clamp(ax, panel.x, panel.right()), by = Math.clamp(ay, panel.y, panel.bottom());
+            if (Math.abs(ax - bx) + Math.abs(ay - by) > 5) {
+                GuiDraw.line(draw, ax, ay, bx, by, Palette.alpha(request.color, 85));
+            }
+            GuiDraw.outlined(draw, panel.x, panel.y, panel.width, panel.height, 2,
+                    Palette.alpha(request.color, 125), 0xE508131A);
+            draw.fill(panel.x + 1, panel.y + 2, panel.x + 2, panel.bottom() - 2, Palette.alpha(request.color, 230));
+            GuiDraw.label(draw, client.textRenderer, request.text, panel.x + 4, panel.y + 2, SCREEN_LABEL_SCALE, Palette.TEXT);
+            drawn++;
+        }
+    }
+
+    private static HudRect findScreenLabelPosition(ScreenLabelRequest request, int panelHeight,
+                                                    int width, int height, List<HudRect> occupied) {
+        int centerX = request.box.x + request.box.width / 2;
+        int preferredX = centerX - request.panelWidth / 2;
+        // A bounded search gives tags nearby staggered rows; dense/offscreen tags may be omitted.
+        for (int row = 0; row < 6; row++) {
+            int above = request.box.y - panelHeight - 3 - row * (panelHeight + 3);
+            int below = request.box.bottom() + 3 + row * (panelHeight + 3);
+            int[] positions = {preferredX, above, preferredX, below,
+                    request.box.right() + 4, request.box.y + row * (panelHeight + 3),
+                    request.box.x - request.panelWidth - 4, request.box.y + row * (panelHeight + 3)};
+            for (int position = 0; position < positions.length; position += 2) {
+                int x = Math.clamp(positions[position], 2, Math.max(2, width - request.panelWidth - 2));
+                int y = positions[position + 1];
+                if (y < 2 || y + panelHeight > height - 2) continue;
+                HudRect candidate = new HudRect(x, y, request.panelWidth, panelHeight);
+                boolean free = true;
+                for (HudRect other : occupied) {
+                    if (candidate.intersects(other, 2)) { free = false; break; }
+                }
+                if (free) return candidate;
+            }
+        }
+        return null;
+    }
+
+    private List<HudRect> reservedHudAreas(DrawContext draw, float scale, List<ModuleDefinition> enabled) {
+        List<HudRect> reserved = new ArrayList<>();
+        if (!client.getDebugHud().shouldShowDebugHud()) {
+            reserved.add(HudRect.scaled(8, 8, 150, 41, scale));
+            int logicalWidth = Math.round(draw.getScaledWindowWidth() / scale);
+            int logicalHeight = Math.round(draw.getScaledWindowHeight() / scale);
+            if (core.isEnabled("entity-esp") && core.getBoolean("entity-esp", "radar") && logicalHeight >= 240) {
+                reserved.add(HudRect.scaled(8, 55, 112, 137, scale));
+            }
+            int y = 12;
+            for (ModuleDefinition module : enabled) {
+                boolean targetModule = isTargetModule(module.id());
+                String detail = targetModule ? GuiDraw.truncate(client.textRenderer, status(module.id()), 175, 0.7f) : "";
+                int rowWidth = Math.round(Math.max(GuiDraw.width(client.textRenderer, module.name(), 1),
+                        GuiDraw.width(client.textRenderer, detail, 0.7f))) + 18;
+                int rowHeight = targetModule ? 29 : 18;
+                reserved.add(HudRect.scaled(logicalWidth - rowWidth - 12, y - 2, rowWidth + 4, rowHeight + 4, scale));
+                y += rowHeight + 2;
+            }
+            if (core.isEnabled("coordinates")) {
+                String coordinates = "X " + client.player.getBlockX() + "   Y " + client.player.getBlockY() + "   Z " + client.player.getBlockZ();
+                boolean dimension = core.getBoolean("coordinates", "show-dimension");
+                int cardHeight = dimension ? 34 : 23;
+                int cardWidth = (int) Math.ceil(Math.max(GuiDraw.width(client.textRenderer, coordinates, 1),
+                        dimension ? GuiDraw.width(client.textRenderer, dimensionName(), 0.8f) : 0)) + 20;
+                reserved.add(HudRect.scaled(8, logicalHeight - cardHeight - 12, cardWidth + 4, cardHeight + 4, scale));
+            }
+        }
+        // Vanilla hotbar and crosshair remain readable too; these already use native GUI coordinates.
+        int width = draw.getScaledWindowWidth(), height = draw.getScaledWindowHeight();
+        reserved.add(new HudRect(Math.max(0, width / 2 - 94), Math.max(0, height - 27), 188, 27));
+        reserved.add(new HudRect(width / 2 - 12, height / 2 - 12, 24, 24));
+        return reserved;
+    }
+
+    private static boolean isTargetModule(String id) {
+        return id.equals("entity-esp") || id.equals("storage-esp") || id.equals("tracers");
+    }
+
+    private static void screenCorners(DrawContext draw, int left, int top, int right, int bottom,
+                                      int length, int thickness, int color) {
+        draw.fill(left, top, left + length, top + thickness, color);
+        draw.fill(left, top, left + thickness, top + length, color);
+        draw.fill(right - length, top, right, top + thickness, color);
+        draw.fill(right - thickness, top, right, top + length, color);
+        draw.fill(left, bottom - thickness, left + length, bottom, color);
+        draw.fill(left, bottom - length, left + thickness, bottom, color);
+        draw.fill(right - length, bottom - thickness, right, bottom, color);
+        draw.fill(right - thickness, bottom - length, right, bottom, color);
+    }
+
+    private record ScreenBounds(float left, float top, float right, float bottom) { }
+    private record ScreenTarget(ScreenBounds bounds, int color, String text, float health, double distanceSquared) { }
+    private record ScreenLabelRequest(HudRect box, int panelWidth, String text, int color, double distanceSquared) { }
+    private record HudRect(int x, int y, int width, int height) {
+        int right() { return x + width; }
+        int bottom() { return y + height; }
+        boolean intersects(HudRect other, int gap) {
+            return x < other.right() + gap && right() + gap > other.x
+                    && y < other.bottom() + gap && bottom() + gap > other.y;
+        }
+        static HudRect scaled(int x, int y, int width, int height, float scale) {
+            int left = (int) Math.floor(x * scale), top = (int) Math.floor(y * scale);
+            return new HudRect(left, top, (int) Math.ceil((x + width) * scale) - left,
+                    (int) Math.ceil((y + height) * scale) - top);
+        }
+    }
+
     private void renderHud(DrawContext draw, RenderTickCounter tickCounter) {
         if (client.world == null || client.player == null || client.options.hudHidden
                 || client.currentScreen != null) return;
         if (core.isEnabled("crosshair") && client.options.getPerspective().isFirstPerson()) drawCrosshair(draw);
-        if (client.getDebugHud().shouldShowDebugHud()) return;
         float hudScale = Math.min(1, draw.getScaledWindowWidth() / 720f);
+        List<ModuleDefinition> enabled = core.modules().stream().filter(module -> core.isEnabled(module.id()))
+                .sorted(Comparator.comparingDouble((ModuleDefinition module) ->
+                        GuiDraw.width(client.textRenderer, module.name(), 1)).reversed()).toList();
+        List<ScreenLabelRequest> labelRequests = new ArrayList<>();
+        List<HudRect> boxes = new ArrayList<>();
+        drawScreenTargets(draw, "entity-esp", screenEntities, labelRequests, boxes);
+        drawScreenTargets(draw, "storage-esp", screenStorage, labelRequests, boxes);
+        drawScreenLabels(draw, labelRequests, boxes, reservedHudAreas(draw, hudScale, enabled));
+        if (client.getDebugHud().shouldShowDebugHud()) return;
         int width = Math.round(draw.getScaledWindowWidth() / hudScale);
         int height = Math.round(draw.getScaledWindowHeight() / hudScale);
         draw.getMatrices().push();
@@ -369,22 +650,26 @@ public final class AnalyzerRenderer {
         GuiDraw.rounded(draw, 18, 18, 20, 21, 5, 0x2279F8CC);
         GuiDraw.logo(draw, 19, 18, 18, Palette.MINT);
         GuiDraw.label(draw, client.textRenderer, "ANALYZER", 45, 17, 1.24f, Palette.TEXT);
-        GuiDraw.label(draw, client.textRenderer, "0.1  /  " + fps + " FPS", 46, 33, 0.8f, Palette.MUTED);
+        GuiDraw.label(draw, client.textRenderer, CLIENT_VERSION + "  /  " + fps + " FPS", 46, 33, 0.8f, Palette.MUTED);
         draw.fill(145, 20, 147, 22, Palette.MINT);
+        if (core.isEnabled("entity-esp") && core.getBoolean("entity-esp", "radar") && height >= 240) drawRadar(draw);
 
-        List<ModuleDefinition> enabled = core.modules().stream().filter(module -> core.isEnabled(module.id()))
-                .sorted(Comparator.comparingDouble((ModuleDefinition module) ->
-                        GuiDraw.width(client.textRenderer, module.name(), 1)).reversed()).toList();
         int y = 12;
         for (int i = 0; i < enabled.size(); i++) {
             ModuleDefinition module = enabled.get(i);
-            int rowWidth = Math.round(GuiDraw.width(client.textRenderer, module.name(), 1)) + 18;
+            boolean targetModule = isTargetModule(module.id());
+            String detail = targetModule ? status(module.id()) : "";
+            detail = GuiDraw.truncate(client.textRenderer, detail, 175, 0.7f);
+            int rowWidth = Math.round(Math.max(GuiDraw.width(client.textRenderer, module.name(), 1),
+                    GuiDraw.width(client.textRenderer, detail, 0.7f))) + 18;
             int x = width - rowWidth - 10;
             int accent = Palette.mix(Palette.MINT, Palette.VIOLET, i / (double) Math.max(1, enabled.size() - 1));
-            GuiDraw.rounded(draw, x, y, rowWidth, 18, 4, 0xBD0B141A);
+            int rowHeight = targetModule ? 29 : 18;
+            GuiDraw.rounded(draw, x, y, rowWidth, rowHeight, 4, 0xBD0B141A);
             draw.fill(width - 12, y + 4, width - 10, y + 14, accent);
             GuiDraw.label(draw, client.textRenderer, module.name(), x + 7, y + 4, 1, accent);
-            y += 20;
+            if (targetModule) GuiDraw.label(draw, client.textRenderer, detail, x + 7, y + 18, 0.7f, Palette.MUTED);
+            y += rowHeight + 2;
         }
 
         if (core.isEnabled("coordinates")) {
@@ -413,6 +698,54 @@ public final class AnalyzerRenderer {
             case "minecraft:the_end" -> "THE END";
             default -> id;
         };
+    }
+
+    private void drawRadar(DrawContext draw) {
+        int cx = 64, cy = 118, radius = 35;
+        GuiDraw.outlined(draw, 10, 57, 108, 133, 7, 0x5A4C7780, 0xD908141D);
+        GuiDraw.label(draw, client.textRenderer, "LOCAL RADAR", 20, 65, 0.8f, Palette.TEXT);
+        GuiDraw.label(draw, client.textRenderer, "N", cx - 2, cy - radius - 9, 0.65f, Palette.MUTED);
+        for (int ring = 1; ring <= 2; ring++) {
+            double r = radius * ring / 2.0;
+            for (int segment = 0; segment < 48; segment++) {
+                double a = segment * Math.PI * 2 / 48, b = (segment + 1) * Math.PI * 2 / 48;
+                GuiDraw.line(draw, cx + Math.cos(a) * r, cy + Math.sin(a) * r,
+                        cx + Math.cos(b) * r, cy + Math.sin(b) * r, 0x424E7784);
+            }
+        }
+        GuiDraw.line(draw, cx - radius, cy, cx + radius, cy, 0x253F6570);
+        GuiDraw.line(draw, cx, cy - radius, cx, cy + radius, 0x253F6570);
+        double sweep = System.nanoTime() / 1_000_000_000.0 * 0.75;
+        GuiDraw.line(draw, cx, cy, cx + Math.cos(sweep) * radius, cy + Math.sin(sweep) * radius, 0x3864EBD0);
+        double scale = radius / Math.max(1, core.getNumber("entity-esp", "range"));
+        Vec3d origin = client.player.getPos();
+        int count = 0;
+        for (int i = radarTargets.size() - 1; i >= 0 && count < MAX_LABELS; i--) {
+            Target target = radarTargets.get(i);
+            Vec3d relative = target.bounds.getCenter().add(frameCamera).subtract(origin);
+            double px = relative.x * scale, py = relative.z * scale;
+            if (px * px + py * py > radius * radius) continue;
+            int x = cx + (int) Math.round(px), y = cy + (int) Math.round(py);
+            draw.fill(x - 2, y - 2, x + 3, y + 3, Palette.alpha(target.color, 45));
+            draw.fill(x - 1, y - 1, x + 2, y + 2, target.color);
+            count++;
+        }
+        double yaw = Math.toRadians(client.player.getYaw());
+        double dx = -Math.sin(yaw), dz = Math.cos(yaw);
+        GuiDraw.line(draw, cx + dx * 5, cy + dz * 5, cx - dx * 3 + dz * 3, cy - dz * 3 - dx * 3, Palette.TEXT);
+        GuiDraw.line(draw, cx + dx * 5, cy + dz * 5, cx - dx * 3 - dz * 3, cy - dz * 3 + dx * 3, Palette.TEXT);
+        draw.fill(cx - 1, cy - 1, cx + 2, cy + 2, Palette.TEXT);
+        int[] colors = {PLAYER_COLOR, HOSTILE_COLOR, PASSIVE_COLOR, ITEM_COLOR};
+        String[] legend = {"P", "H", "M", "I"};
+        for (int i = 0; i < colors.length; i++) {
+            int x = 20 + i * 24;
+            draw.fill(x, 164, x + 3, 167, colors[i]);
+            GuiDraw.label(draw, client.textRenderer, legend[i], x + 6, 162, 0.65f, Palette.MUTED);
+        }
+        String summary = radarTargets.isEmpty() ? "0 selected targets" : radarTargets.size() + " targets · "
+                + Math.round(core.getNumber("entity-esp", "range")) + "m";
+        GuiDraw.label(draw, client.textRenderer, GuiDraw.truncate(client.textRenderer, summary, 92, 0.7f),
+                18, 178, 0.7f, radarTargets.isEmpty() ? Palette.MUTED : Palette.MINT);
     }
 
     private void drawCrosshair(DrawContext draw) {

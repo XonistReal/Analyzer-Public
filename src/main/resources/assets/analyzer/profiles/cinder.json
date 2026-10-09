@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "modules": {
+    "entity-esp": {"enabled": true, "settings": {"style": "Corners", "players": true, "hostiles": true, "passives": true, "items": true}},
+    "storage-esp": {"enabled": true},
+    "menu": {"enabled": true, "settings": {"material": "Glass", "accent": "Gold", "motion": 0.75}},
+    "particles": {"enabled": true, "settings": {"density": 0.9}},
+    "sky": {"enabled": true, "settings": {"preset": "Ember", "intensity": 0.9, "stars": true}},
+    "shader": {"enabled": true, "settings": {"preset": "Ember", "strength": 0.75}}
+  }
+}

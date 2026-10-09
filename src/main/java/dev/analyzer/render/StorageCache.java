@@ -5,6 +5,9 @@ import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BarrelBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.block.entity.DispenserBlockEntity;
+import net.minecraft.block.entity.DropperBlockEntity;
+import net.minecraft.block.entity.BrewingStandBlockEntity;
 import net.minecraft.block.entity.EnderChestBlockEntity;
 import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.block.entity.ShulkerBoxBlockEntity;
@@ -30,8 +33,13 @@ final class StorageCache {
     private int ticks;
     private boolean previouslyEnabled;
     private double previousRange;
+    private ChunkPos previousCenter;
+    private int loadedChunksScanned;
+    private boolean ready;
 
     List<Container> containers() { return containers; }
+    int loadedChunksScanned() { return loadedChunksScanned; }
+    boolean ready() { return ready; }
 
     void tick(MinecraftClient client, AnalyzerCore core) {
         boolean enabled = core.isEnabled("storage-esp");
@@ -40,13 +48,32 @@ final class StorageCache {
             cachedWorld = client.world;
             ticks = REFRESH_TICKS;
             previouslyEnabled = false;
+            previousCenter = null;
+            loadedChunksScanned = 0;
+            ready = false;
         }
         if (!enabled || client.world == null || client.player == null) return;
         double range = core.getNumber("storage-esp", "range");
-        if (!previouslyEnabled || range != previousRange || ++ticks >= REFRESH_TICKS) {
+        if (!previouslyEnabled || range != previousRange || !client.player.getChunkPos().equals(previousCenter)
+                || ++ticks >= REFRESH_TICKS) {
             ticks = 0;
             previouslyEnabled = true;
             previousRange = range;
+            previousCenter = client.player.getChunkPos();
+            refresh(client, range);
+        }
+    }
+
+    /** A menu toggle/profile change gets a fresh cache before its very next world frame. */
+    void ensureReady(MinecraftClient client, AnalyzerCore core) {
+        if (!core.isEnabled("storage-esp") || client.world == null || client.player == null) return;
+        double range = core.getNumber("storage-esp", "range");
+        if (cachedWorld != client.world || !previouslyEnabled || previousRange != range) {
+            cachedWorld = client.world;
+            previouslyEnabled = true;
+            previousRange = range;
+            previousCenter = client.player.getChunkPos();
+            ticks = 0;
             refresh(client, range);
         }
     }
@@ -57,6 +84,7 @@ final class StorageCache {
         ChunkPos center = client.player.getChunkPos();
         int radius = Math.min(9, (int) Math.ceil(range / 16.0) + 1);
         List<Container> found = new ArrayList<>();
+        int scanned = 0;
         // Near chunks are visited first so the bounded cache remains useful in dense bases.
         for (int ring = 0; ring <= radius && found.size() < MAX_CONTAINERS; ring++) {
             for (int dx = -ring; dx <= ring && found.size() < MAX_CONTAINERS; dx++) {
@@ -65,6 +93,7 @@ final class StorageCache {
                     WorldChunk chunk = world.getChunkManager().getChunk(center.x + dx, center.z + dz,
                             ChunkStatus.FULL, false);
                     if (chunk == null) continue;
+                    scanned++;
                     for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
                         int color = color(blockEntity);
                         if (color == 0 || blockEntity.isRemoved()) continue;
@@ -80,6 +109,8 @@ final class StorageCache {
             }
         }
         containers = List.copyOf(found);
+        loadedChunksScanned = scanned;
+        ready = true;
     }
 
     boolean isCurrent(ClientWorld world, Container container) {
@@ -96,6 +127,8 @@ final class StorageCache {
         if (blockEntity instanceof BarrelBlockEntity) return 0xFFEDAE71;
         if (blockEntity instanceof HopperBlockEntity) return 0xFF66DFF7;
         if (blockEntity instanceof AbstractFurnaceBlockEntity) return 0xFFFF8266;
+        if (blockEntity instanceof DispenserBlockEntity) return 0xFFEAA97A;
+        if (blockEntity instanceof BrewingStandBlockEntity) return 0xFF92C8FF;
         return 0;
     }
 
@@ -105,6 +138,9 @@ final class StorageCache {
         if (blockEntity instanceof ChestBlockEntity) return "Chest";
         if (blockEntity instanceof BarrelBlockEntity) return "Barrel";
         if (blockEntity instanceof HopperBlockEntity) return "Hopper";
+        if (blockEntity instanceof DropperBlockEntity) return "Dropper";
+        if (blockEntity instanceof DispenserBlockEntity) return "Dispenser";
+        if (blockEntity instanceof BrewingStandBlockEntity) return "Brewing stand";
         if (blockEntity instanceof AbstractFurnaceBlockEntity) {
             String block = blockEntity.getCachedState().getBlock().getName().getString();
             return block.isEmpty() ? "Furnace" : block;

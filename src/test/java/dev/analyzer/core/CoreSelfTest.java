@@ -12,7 +12,19 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 8, "Complete module registry");
+            check(core.modules().size() == 10, "Complete module registry");
+            check(core.getChoice("menu", "material").equals("Glass"), "Glass interface default");
+            core.setValue("menu", "accent", "Gold");
+            check(core.getChoice("menu", "accent").equals("Gold"), "Interface theme choices");
+            check(core.isEnabled("sky") && core.getChoice("sky", "preset").equals("Aurora"), "Visible sky defaults");
+            core.setValue("sky", "intensity", 8.0);
+            equal(1, core.getNumber("sky", "intensity"), "Sky intensity clamps");
+            core.setValue("sky", "speed", 0.0);
+            equal(0, core.getNumber("sky", "speed"), "Sky animation can be frozen");
+            core.setValue("entity-esp", "style", "Screen");
+            check(core.getChoice("entity-esp", "style").equals("Screen"), "Projected ESP style");
+            core.setValue("shader", "preset", "Bloom");
+            check(core.getChoice("shader", "preset").equals("Bloom"), "Neutral bloom preset");
             check(core.isEnabled("coordinates"), "Coordinate defaults");
             check(core.keybind("entity-esp") == -1, "Unbound key default");
             check(core.getBoolean("entity-esp", "labels") && core.getBoolean("entity-esp", "health")

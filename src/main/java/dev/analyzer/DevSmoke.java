@@ -2,6 +2,7 @@ package dev.analyzer;
 
 import dev.analyzer.ui.AnalyzerScreen;
 import dev.analyzer.render.AnalyzerRenderer;
+import dev.analyzer.effects.GpuEffects;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.OtherClientPlayerEntity;
@@ -25,11 +26,14 @@ import java.util.List;
 final class DevSmoke {
     private static int ticks, worldTicks;
     private static boolean started, worldRequested, arenaReady;
+    private static long skyFramesAtDay;
     private static final List<String> captures = new ArrayList<>();
     static void tick(MinecraftClient client) {
         if (!started && client.isFinishedLoading() && client.getOverlay() == null && client.currentScreen instanceof TitleScreen) {
             started = true; AnalyzerClient.CORE.resetAll();
             client.options.pauseOnLostFocus = false;
+            client.getTutorialManager().setStep(net.minecraft.client.tutorial.TutorialStep.NONE);
+            client.getToastManager().clear();
             GLFW.glfwHideWindow(client.getWindow().getHandle());
             client.setScreen(new AnalyzerScreen(AnalyzerClient.CORE));
         }
@@ -108,9 +112,11 @@ final class DevSmoke {
                     require(counts.containers() >= 6, "Storage ESP rendered targets: " + counts.containers());
                     require(counts.tracers() >= 6, "Tracer rendered targets: " + counts.tracers());
                     require(client.world.getEntityById(991382) instanceof OtherClientPlayerEntity, "Local remote-player fixture present");
+                    require(GpuEffects.skyFrames() > 0, "Real sky pass rendered");
+                    require(GpuEffects.worldFrames() > 0 && GpuEffects.isHealthy(), "World post effects rendered");
                     screenshot(client, "analyzer-world-aurora.png");
                 }
-                case 95 -> { core.setValue("shader", "preset", "Ember"); core.setValue("entity-esp", "style", "Boxes"); }
+                case 95 -> { core.setValue("shader", "preset", "Ember"); core.setValue("sky", "preset", "Ember"); core.setValue("entity-esp", "style", "Boxes"); }
                 case 115 -> screenshot(client, "analyzer-world-ember.png");
                 case 120 -> { core.setValue("shader", "preset", "Frost"); core.setValue("entity-esp", "through-walls", false); core.setValue("storage-esp", "through-walls", false); client.options.getGraphicsMode().setValue(GraphicsMode.FABULOUS); client.worldRenderer.reload(); }
                 case 140 -> screenshot(client, "analyzer-world-frost.png");
@@ -122,12 +128,85 @@ final class DevSmoke {
                 case 240 -> client.setScreen(null);
                 case 245 -> screenshot(client, "analyzer-world-resized.png");
                 case 250 -> {
-                    AnalyzerClient.LOGGER.info("ANALYZER_SMOKE_WORLD_COMPLETE: {} screenshots", captures.size());
+                    loadProfile("showcase");
+                    client.options.getGraphicsMode().setValue(GraphicsMode.FAST); client.worldRenderer.reload();
+                }
+                case 270 -> {
+                    var counts = AnalyzerRenderer.screenCounts();
+                    require(counts.entities() >= 6, "Screen ESP projected entities under Fast: " + counts.entities());
+                    require(counts.containers() >= 6, "Screen ESP projected containers under Fast: " + counts.containers());
+                    screenshot(client, "analyzer-screen-fast.png");
+                }
+                case 275 -> { client.options.getGraphicsMode().setValue(GraphicsMode.FANCY); client.worldRenderer.reload(); }
+                case 295 -> {
+                    require(AnalyzerRenderer.screenCounts().entities() >= 6, "Screen ESP under Fancy");
+                    screenshot(client, "analyzer-screen-fancy.png");
+                }
+                case 300 -> { client.options.getGraphicsMode().setValue(GraphicsMode.FABULOUS); client.worldRenderer.reload(); }
+                case 320 -> {
+                    require(AnalyzerRenderer.screenCounts().entities() >= 6, "Screen ESP under Fabulous");
+                    screenshot(client, "analyzer-screen-fabulous.png");
+                }
+                case 325 -> {
+                    core.setEnabled("entity-esp", false); core.setEnabled("storage-esp", false); core.setEnabled("tracers", true);
+                    core.setValue("tracers", "players", true); core.setValue("tracers", "hostiles", false); core.setValue("tracers", "passives", false); core.setValue("tracers", "items", false);
+                    client.world.removeEntity(991382, net.minecraft.entity.Entity.RemovalReason.DISCARDED);
+                }
+                case 345 -> {
+                    require(AnalyzerRenderer.status("tracers").contains("0 other players"), "Singleplayer players-only filter is explained");
+                    core.setEnabled("tracers", false); core.setEnabled("shader", false); core.setValue("sky", "preset", "Aurora");
+                    command(client, "tp AnalyzerDev 11 161 21 180 -24");
+                }
+                case 370 -> screenshot(client, "analyzer-sky-aurora.png");
+                case 375 -> core.setValue("sky", "preset", "Nebula");
+                case 395 -> screenshot(client, "analyzer-sky-nebula.png");
+                case 400 -> core.setValue("sky", "preset", "Ember");
+                case 420 -> screenshot(client, "analyzer-sky-ember.png");
+                case 425 -> core.setEnabled("sky", false);
+                case 445 -> screenshot(client, "analyzer-sky-off.png");
+                case 450 -> {
+                    core.setEnabled("sky", true); core.setValue("sky", "preset", "Aurora"); core.setValue("sky", "day-night", "Night");
+                    command(client, "time set 6000");
+                }
+                case 470 -> skyFramesAtDay = GpuEffects.skyFrames();
+                case 490 -> {
+                    require(GpuEffects.skyFrames() == skyFramesAtDay, "Night-only sky is inactive at noon");
+                    screenshot(client, "analyzer-sky-night-at-noon.png");
+                    core.setValue("sky", "day-night", "Always");
+                }
+                case 510 -> {
+                    require(GpuEffects.skyFrames() > skyFramesAtDay, "Always sky is visible at noon");
+                    screenshot(client, "analyzer-sky-day.png");
+                    core.setValue("sky", "day-night", "Night"); command(client, "time set 13000");
+                }
+                case 535 -> {
+                    screenshot(client, "analyzer-sky-night.png"); loadProfile("cinder");
+                    core.setValue("menu", "material", "Solid"); core.setEnabled("particles", false);
+                    client.setScreen(new AnalyzerScreen(core));
+                }
+                case 555 -> screenshot(client, "analyzer-menu-gold-solid.png");
+                case 560 -> {
+                    core.setValue("menu", "material", "Glass"); core.setValue("menu", "accent", "Mint"); core.setEnabled("particles", true);
+                }
+                case 585 -> screenshot(client, "analyzer-menu-glass-particles.png");
+                case 590 -> core.setValue("menu", "accent", "Violet");
+                case 615 -> screenshot(client, "analyzer-menu-violet.png");
+                case 620 -> {
+                    require(GpuEffects.isHealthy(), "GPU effects survived presets, resize and resource reload");
+                    AnalyzerClient.LOGGER.info("ANALYZER_SMOKE_WORLD_COMPLETE: {} screenshots; skyFrames={} gradeFrames={}", captures.size(), GpuEffects.skyFrames(), GpuEffects.worldFrames());
                     client.scheduleStop();
                 }
             }
         }
         if (ticks > 4000) throw new IllegalStateException("Smoke test timed out");
+    }
+
+    private static void loadProfile(String name) {
+        try { AnalyzerClient.CORE.loadProfile(name); }
+        catch (Exception ex) { throw new IllegalStateException("Could not load smoke profile " + name, ex); }
+    }
+    private static void command(MinecraftClient client, String command) {
+        client.getServer().execute(() -> client.getServer().getCommandManager().executeWithPrefix(client.getServer().getCommandSource().withSilent(), command));
     }
 
     private static void setupArena(MinecraftClient client) {

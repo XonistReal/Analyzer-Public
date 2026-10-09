@@ -5,9 +5,12 @@ import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.core.ModuleDefinition;
 import dev.analyzer.core.Setting;
 import dev.analyzer.effects.GpuEffects;
+import dev.analyzer.render.AnalyzerRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.block.enums.CameraSubmersionType;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -17,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.SplittableRandom;
 
 /** Original Analyzer click GUI, with a logical canvas that fits every Minecraft GUI scale. */
 public final class AnalyzerScreen extends Screen {
@@ -27,6 +31,12 @@ public final class AnalyzerScreen extends Screen {
     private final AnalyzerCore core;
     private final List<Hit> hits = new ArrayList<>();
     private final Map<String, Double> animation = new HashMap<>();
+    private static final int MAX_PARTICLES = 96;
+    private final AmbientParticle[] particles = new AmbientParticle[MAX_PARTICLES];
+    private int visibleParticles;
+    private double animationTime, motion = 0.8;
+    private int accentColor = Palette.MINT;
+    private boolean glass = true;
     private ModuleDefinition selected;
     private String category = "ALL", query = "", profileName = "";
     private String selectedProfile = "", captureModule = null;
@@ -44,6 +54,11 @@ public final class AnalyzerScreen extends Screen {
         super(Text.literal("Analyzer"));
         this.core = core;
         this.selected = core.modules().isEmpty() ? null : core.modules().getFirst();
+        SplittableRandom random = new SplittableRandom(0xA11A7EFL);
+        for (int i = 0; i < particles.length; i++) {
+            particles[i] = new AmbientParticle(random.nextDouble(-20, CANVAS_W + 20), random.nextDouble(-20, CANVAS_H + 20),
+                    random.nextDouble(6, 20) * (i % 2 == 0 ? 1 : -1), random.nextDouble(-10, 10), random.nextDouble(0, Math.PI * 2));
+        }
         refreshProfiles();
     }
 
@@ -54,6 +69,8 @@ public final class AnalyzerScreen extends Screen {
         long now = System.nanoTime();
         frameSeconds = Math.clamp((now - lastFrame) / 1_000_000_000.0, 0.001, 0.05);
         lastFrame = now;
+        updateMaterial();
+        animationTime += frameSeconds * motion;
         double entrance = 1 - Math.exp(-(now - openedAt) / 160_000_000.0);
         canvasScale = Math.min(1.25f, Math.min((width - 20f) / CANVAS_W, (height - 20f) / CANVAS_H));
         canvasScale = Math.max(0.15f, canvasScale);
@@ -61,16 +78,22 @@ public final class AnalyzerScreen extends Screen {
         canvasY = (height - CANVAS_H * canvasScale) / 2 + (float) ((1 - entrance) * 14 * canvasScale);
         mx = (mouseX - canvasX) / canvasScale;
         my = (mouseY - canvasY) / canvasScale;
+        updateParticles();
         hits.clear();
-        context.fillGradient(0, 0, width, height, 0x99050A10, 0xD9060C10);
         GpuEffects.drawBackdrop(context);
+        if (!GpuEffects.isHealthy()) context.fillGradient(0, 0, width, height, 0xB3050A10, 0xD9060C10);
         context.getMatrices().push();
         context.getMatrices().translate(canvasX, canvasY, 0);
         context.getMatrices().scale(canvasScale, canvasScale, 1);
-        GuiDraw.glow(context, 0, 0, CANVAS_W, CANVAS_H, 18, Palette.MINT);
-        GuiDraw.outlined(context, 0, 0, CANVAS_W, CANVAS_H, 18, Palette.BORDER, Palette.BACKGROUND);
-        GuiDraw.rounded(context, 1, 1, 158, CANVAS_H - 2, 17, Palette.SURFACE);
-        context.fill(144, 1, 159, CANVAS_H - 1, Palette.SURFACE);
+        GuiDraw.glow(context, 0, 0, CANVAS_W, CANVAS_H, 18, accentColor);
+        GuiDraw.glow(context, 189, 10, 390, 120, 22, Palette.VIOLET);
+        GuiDraw.outlined(context, 0, 0, CANVAS_W, CANVAS_H, 18, Palette.BRIGHT_BORDER, glass ? Palette.GLASS : Palette.BACKGROUND);
+        GuiDraw.rounded(context, 1, 1, 158, CANVAS_H - 2, 17, Palette.alpha(Palette.SURFACE, glass ? 226 : 255));
+        context.fill(144, 1, 159, CANVAS_H - 1, Palette.alpha(Palette.SURFACE, glass ? 226 : 255));
+        clip(context, new Rect(3, 3, CANVAS_W - 6, CANVAS_H - 6));
+        drawParticleField(context, new Rect(3, 3, CANVAS_W - 6, CANVAS_H - 6), 1.0);
+        drawComets(context);
+        context.disableScissor();
         context.fill(159, 20, 160, CANVAS_H - 20, Palette.BORDER);
         context.fill(607, 20, 608, 480, Palette.BORDER);
         drawSidebar(context);
@@ -81,10 +104,260 @@ public final class AnalyzerScreen extends Screen {
         context.getMatrices().pop();
     }
 
+    private void updateMaterial() {
+        boolean hasMenu = core.modules().stream().anyMatch(module -> module.id().equals("menu"));
+        int targetAccent = Palette.MINT;
+        glass = true;
+        motion = 0.8;
+        if (hasMenu) {
+            boolean custom = core.isEnabled("menu");
+            glass = custom && core.getChoice("menu", "material").equals("Glass");
+            motion = custom ? core.getNumber("menu", "motion") : 0;
+            if (custom) targetAccent = switch (core.getChoice("menu", "accent")) {
+                case "Violet" -> Palette.VIOLET;
+                case "Gold" -> Palette.GOLD;
+                default -> Palette.MINT;
+            };
+        }
+        accentColor = Palette.mix(accentColor, targetAccent, 1 - Math.exp(-frameSeconds * 12));
+    }
+
+    private void updateParticles() {
+        visibleParticles = core.isEnabled("particles") ? (int) Math.round(core.getNumber("particles", "density") * MAX_PARTICLES) : 0;
+        double dt = frameSeconds * motion;
+        for (int i = 0; i < visibleParticles; i++) {
+            AmbientParticle p = particles[i];
+            double dx = p.x - mx, dy = p.y - my;
+            double distance = Math.hypot(dx, dy);
+            double push = distance > 1 && distance < 120 ? (1 - distance / 120) * 155 : 0;
+            double targetVx = p.baseVx + (distance > 1 ? dx / distance * push : 0);
+            double targetVy = p.baseVy + Math.sin(animationTime * 0.6 + p.phase) * 5 + (distance > 1 ? dy / distance * push : 0);
+            p.vx += (targetVx - p.vx) * (1 - Math.exp(-dt * 3));
+            p.vy += (targetVy - p.vy) * (1 - Math.exp(-dt * 3));
+            p.x += p.vx * dt; p.y += p.vy * dt;
+            if (p.x < -24) p.x = CANVAS_W + 23;
+            else if (p.x > CANVAS_W + 24) p.x = -23;
+            if (p.y < -24) p.y = CANVAS_H + 23;
+            else if (p.y > CANVAS_H + 24) p.y = -23;
+        }
+    }
+
+    private int particleColor(int index) {
+        return index % 7 == 0 ? Palette.CYAN : index % 3 == 0 ? Palette.VIOLET : accentColor;
+    }
+
+    private void drawParticleField(DrawContext c, Rect window, double strength) {
+        if (visibleParticles == 0) return;
+        int cursorLinks = 0;
+        for (int i = 0; i < visibleParticles; i++) {
+            AmbientParticle p = particles[i];
+            if (!window.contains(p.x, p.y)) continue;
+            int color = particleColor(i);
+            int links = 0;
+            for (int j = i + 1; j < visibleParticles && links < 2; j++) {
+                AmbientParticle other = particles[j];
+                if (!window.contains(other.x, other.y)) continue;
+                double distance = Math.hypot(p.x - other.x, p.y - other.y);
+                if (distance < 118 && distance > 8) {
+                    int alpha = (int) (strength * (102 - distance * 0.57));
+                    GuiDraw.stroke(c, p.x, p.y, other.x, other.y, 0.7f, Palette.alpha(color, alpha));
+                    links++;
+                }
+            }
+            double distanceToCursor = Math.hypot(p.x - mx, p.y - my);
+            if (window.contains(mx, my) && distanceToCursor < 142 && cursorLinks < 6) {
+                GuiDraw.stroke(c, p.x, p.y, mx, my, 0.7f,
+                        Palette.alpha(accentColor, (int) (strength * (130 - distanceToCursor * 0.65))));
+                cursorLinks++;
+            }
+            float radius = i % 11 == 0 ? 2.4f : i % 3 == 0 ? 1.65f : 1.1f;
+            int brightness = (int) (strength * (195 + Math.sin(animationTime * 1.3 + p.phase) * 45));
+            GuiDraw.glowDot(c, p.x, p.y, radius, color, brightness);
+            if (i % 11 == 0) {
+                GuiDraw.stroke(c, p.x - 5, p.y, p.x + 6, p.y, 0.7f, Palette.alpha(color, (int) (strength * 85)));
+                GuiDraw.stroke(c, p.x, p.y - 5, p.x, p.y + 6, 0.7f, Palette.alpha(color, (int) (strength * 85)));
+            }
+        }
+    }
+
+    private void drawComets(DrawContext c) {
+        if (visibleParticles == 0 || motion <= 0) return;
+        for (int comet = 0; comet < 2; comet++) {
+            double x = (animationTime * (72 + comet * 21) + comet * 487) % 1150 - 100;
+            double y = comet == 0 ? 77 + Math.sin(animationTime * 0.35) * 12 : 398 + Math.sin(animationTime * 0.4 + 2) * 35;
+            int color = comet == 0 ? accentColor : Palette.VIOLET;
+            for (int segment = 14; segment > 0; segment--) {
+                double sx = x - segment * 6;
+                double sy = y + segment * (comet == 0 ? 0.42 : -0.3);
+                GuiDraw.stroke(c, sx, sy, sx + 7, sy - (comet == 0 ? 0.42 : -0.3), 1.1f,
+                        Palette.alpha(color, 120 - segment * 7));
+            }
+            GuiDraw.glowDot(c, x, y, 2.1f, color, 242);
+        }
+    }
+
+    private String liveStatus(ModuleDefinition module) {
+        String id = module.id();
+        if (!core.isEnabled(id)) return "Disabled · preview shown";
+        if (id.equals("particles")) return visibleParticles == 0 ? "Density is zero · increase it below" : visibleParticles + " luminous particles · " + (motion > 0 ? "cursor reactive" : "static motion");
+        if (id.equals("menu")) return core.getChoice(id, "material") + " material · " + core.getChoice(id, "accent") + " accent";
+        if ((id.equals("shader") || id.equals("sky")) && !GpuEffects.isHealthy()) return "Effect unavailable · " + GpuEffects.status();
+        if (client == null || client.world == null || client.player == null) return "Enabled · enter a world to render";
+        return switch (id) {
+            case "entity-esp", "storage-esp", "tracers" -> AnalyzerRenderer.status(id);
+            case "shader" -> core.getChoice(id, "preset").equals("Off") ? "Preset is Off · choose a look below" : core.getNumber(id, "strength") == 0 ? "Strength is zero · increase it below" : core.getChoice(id, "preset") + " post effect · " + Math.round(core.getNumber(id, "strength") * 100) + "% strength";
+            case "sky" -> {
+                if (client.world.getDimensionEffects().getSkyType() != DimensionEffects.SkyType.NORMAL) yield "Custom sky needs an Overworld sky";
+                if (client.gameRenderer.getCamera().getSubmersionType() != CameraSubmersionType.NONE) yield "Sky hidden while submerged";
+                if (core.getNumber(id, "intensity") == 0) yield "Intensity is zero · increase it below";
+                if (core.getChoice(id, "day-night").equals("Night") && client.world.getStarBrightness(client.getRenderTickCounter().getTickDelta(false)) < 0.001f) yield "Waiting for night · preview shown";
+                yield core.getChoice(id, "preset") + " sky · " + Math.round(core.getNumber(id, "intensity") * 100) + "% intensity";
+            }
+            case "fullbright" -> "Lighting boost · " + number(core.getNumber(id, "gamma")) + "× brightness";
+            case "crosshair" -> "Live HUD · close menu to see crosshair";
+            case "coordinates" -> "Live position · " + client.player.getBlockPos().toShortString();
+            default -> "Enabled · settings applied";
+        };
+    }
+
+    private int statusColor(ModuleDefinition module) {
+        if (!core.isEnabled(module.id())) return Palette.MUTED;
+        if ((module.id().equals("shader") || module.id().equals("sky")) && !GpuEffects.isHealthy()) return Palette.ERROR;
+        if (!module.id().equals("particles") && !module.id().equals("menu") && (client == null || client.world == null)) return Palette.GOLD;
+        return accentColor;
+    }
+
+    private String previewKind(ModuleDefinition module) {
+        return switch (module.id()) {
+            case "sky" -> "CUSTOM SKY / CELESTIAL EFFECT";
+            case "shader" -> "POST EFFECT / SCENE PROCESSING";
+            case "entity-esp", "storage-esp" -> core.getChoice(module.id(), "style").toUpperCase(Locale.ROOT) + " ESP / " + (core.getBoolean(module.id(), "through-walls") ? "THROUGH WALLS" : "VISIBLE TARGETS");
+            case "tracers" -> "WORLD TRACERS / SETTINGS PREVIEW";
+            case "particles" -> "MENU PARTICLES / LIVE FIELD";
+            case "menu" -> "INTERFACE / LIVE MATERIAL";
+            default -> "HUD / SETTINGS PREVIEW";
+        };
+    }
+
+    private void drawPreview(DrawContext c, ModuleDefinition module, Rect area) {
+        String id = module.id();
+        boolean enabled = core.isEnabled(id);
+        int color = enabled ? accentColor : Palette.SUBTLE;
+        GuiDraw.outlined(c, area.x, area.y, area.w, area.h, 8, Palette.alpha(accentColor, 70), 0xBC0B1723);
+        clip(c, new Rect(area.x + 2, area.y + 2, area.w - 4, area.h - 4));
+        for (int x = area.x + 12; x < area.right(); x += 15) GuiDraw.stroke(c, x, area.y + 3, x, area.bottom() - 3, 0.5f, 0x1638AAAE);
+        for (int y = area.y + 12; y < area.bottom(); y += 15) GuiDraw.stroke(c, area.x + 3, y, area.right() - 3, y, 0.5f, 0x1638AAAE);
+        switch (id) {
+            case "entity-esp" -> {
+                int x = area.x + 50, y = area.y + 21;
+                GuiDraw.rounded(c, x + 10, y + 5, 12, 12, 5, 0xFF3A515E);
+                GuiDraw.rounded(c, x + 6, y + 22, 21, 25, 4, 0xFF283F4D);
+                String style = core.getChoice(id, "style");
+                float thickness = (float) core.getNumber(id, "line-width");
+                GuiDraw.wireBox(c, x, y, 32, 53, style.equals("Corners"), thickness, color);
+                if (style.equals("Boxes")) {
+                    GuiDraw.wireBox(c, x + 6, y - 5, 32, 53, false, 0.6f, Palette.alpha(color, 90));
+                    for (int corner = 0; corner < 4; corner++) GuiDraw.stroke(c, x + corner % 2 * 32, y + corner / 2 * 53, x + corner % 2 * 32 + 6, y + corner / 2 * 53 - 5, 0.6f, Palette.alpha(color, 150));
+                }
+                if (hasSetting(module, "health") && core.getBoolean(id, "health")) {
+                    c.fill(x - 5, y, x - 3, y + 53, 0xFF273940);
+                    c.fill(x - 5, y + 11, x - 3, y + 53, color);
+                }
+                if (hasSetting(module, "labels") && core.getBoolean(id, "labels")) label(c, "PLAYER · " + number(Math.min(32, core.getNumber(id, "range") / 2)) + "m", area.x + 30, area.y + 6, 0.56f, color);
+            }
+            case "storage-esp" -> {
+                int x = area.x + 47, y = area.y + 29;
+                GuiDraw.cube(c, x, y, 37, Palette.alpha(color, 180));
+                GuiDraw.wireBox(c, x - 5, y - 7, 48, 48, core.getChoice(id, "style").equals("Corners"), (float) core.getNumber(id, "line-width"), color);
+                if (hasSetting(module, "labels") && core.getBoolean(id, "labels")) label(c, "CHEST · 16m", area.x + 34, area.y + 9, 0.64f, color);
+            }
+            case "tracers" -> {
+                double originX = area.x + area.w / 2.0, originY = area.bottom() - 10;
+                for (int i = 0; i < 3; i++) {
+                    double x = area.x + 25 + i * 42, y = area.y + 22 + Math.sin(animationTime + i * 1.6) * 8;
+                    GuiDraw.stroke(c, originX, originY, x, y, (float) core.getNumber(id, "line-width"), color);
+                    GuiDraw.glowDot(c, x, y, 2, color, 240);
+                }
+                GuiDraw.glowDot(c, originX, originY, 1.8f, Palette.TEXT, 210);
+            }
+            case "crosshair" -> {
+                double x = area.x + area.w / 2.0, y = area.y + area.h / 2.0;
+                double gap = core.getNumber(id, "gap"), arm = core.getNumber(id, "size");
+                float weight = (float) core.getNumber(id, "line-width");
+                GuiDraw.stroke(c, x - gap - arm, y, x - gap, y, weight, color);
+                GuiDraw.stroke(c, x + gap, y, x + gap + arm, y, weight, color);
+                GuiDraw.stroke(c, x, y - gap - arm, x, y - gap, weight, color);
+                GuiDraw.stroke(c, x, y + gap, x, y + gap + arm, weight, color);
+                GuiDraw.glowDot(c, x, y, 1, color, 130);
+            }
+            case "coordinates" -> {
+                for (int axis = 0; axis < 3; axis++) {
+                    String value = client == null || client.player == null ? "—" : Integer.toString(axis == 0 ? client.player.getBlockX() : axis == 1 ? client.player.getBlockY() : client.player.getBlockZ());
+                    label(c, (axis == 0 ? "X " : axis == 1 ? "Y " : "Z ") + value, area.x + 20, area.y + 20 + axis * 18, 0.94f, color);
+                }
+            }
+            case "particles" -> {
+                int count = (int) Math.round(core.getNumber(id, "density") * 18);
+                if (!enabled || count == 0) label(c, "FIELD OFF", area.x + 36, area.y + 37, 0.8f, Palette.SUBTLE);
+                else for (int i = 0; i < count; i++) {
+                    double x = area.x + 12 + Math.floorMod(i * 37, 109) + Math.sin(animationTime + i) * 3;
+                    double y = area.y + 11 + Math.floorMod(i * 23, 64) + Math.cos(animationTime * 0.7 + i) * 5;
+                    GuiDraw.glowDot(c, x, y, i % 3 == 0 ? 2 : 1, particleColor(i), 235);
+                    if (i > 0) GuiDraw.stroke(c, area.x + 12 + Math.floorMod((i - 1) * 37, 109), area.y + 11 + Math.floorMod((i - 1) * 23, 64), x, y, 0.5f, Palette.alpha(color, 60));
+                }
+            }
+            case "sky" -> drawCelestialPreview(c, area, core.getChoice(id, "preset"), core.getNumber(id, "intensity") * (enabled ? 1 : 0.25), core.getBoolean(id, "stars"), true);
+            case "shader" -> drawCelestialPreview(c, area, core.getChoice(id, "preset"), core.getNumber(id, "strength") * (enabled ? 1 : 0.25), false, false);
+            case "fullbright" -> {
+                double brightness = enabled ? core.getNumber(id, "gamma") / 16 : 0.05;
+                for (int row = 0; row < 3; row++) for (int column = 0; column < 5; column++) {
+                    int shade = Palette.mix(0xFF102027, (column + row) % 2 == 0 ? 0xFF89BCA2 : 0xFF94AECA, brightness);
+                    GuiDraw.rounded(c, area.x + 16 + column * 20, area.y + 17 + row * 19, 18, 17, 2, shade);
+                }
+                if (enabled) GuiDraw.glowDot(c, area.x + 110, area.y + 13, 2.2f, Palette.GOLD, 245);
+            }
+            case "menu" -> {
+                GuiDraw.rounded(c, area.x + 18, area.y + 16, 98, 56, 8, Palette.alpha(color, glass ? 42 : 95));
+                GuiDraw.rounded(c, area.x + 24, area.y + 22, 21, 44, 5, glass ? 0xA4111C2A : Palette.SURFACE);
+                for (int row = 0; row < 3; row++) GuiDraw.rounded(c, area.x + 53, area.y + 24 + row * 12, 54, 8, 3, Palette.alpha(color, 130 - row * 22));
+                label(c, glass ? "GLASS" : "SOLID", area.x + 50, area.bottom() - 12, 0.59f, color);
+            }
+            default -> GuiDraw.logo(c, area.x + 49, area.y + 24, 35, color);
+        }
+        c.disableScissor();
+    }
+
+    private void drawCelestialPreview(DrawContext c, Rect area, String preset, double strength, boolean stars, boolean sky) {
+        int tint = preset.equals("Ember") ? Palette.GOLD : preset.equals("Nebula") ? Palette.VIOLET : preset.equals("Frost") ? Palette.CYAN : accentColor;
+        double amount = preset.equals("Off") ? 0 : strength;
+        double time = sky && selected != null && selected.id().equals("sky") ? animationTime * core.getNumber("sky", "speed") : animationTime;
+        if (!sky) {
+            for (int column = 0; column < 8; column++) {
+                int h = 16 + column * 11 % 26;
+                GuiDraw.rounded(c, area.x + 8 + column * 15, area.bottom() - h - 6, 12, h, 2, Palette.mix(0xFF203540, tint, amount * 0.55));
+            }
+        }
+        for (int band = 0; band < (sky ? 3 : 2); band++) {
+            int previousX = area.x, previousY = area.y + 30;
+            for (int x = 0; x <= area.w; x += 3) {
+                int y = area.y + 21 + band * 12 + (int) (Math.sin(x * 0.043 + time * 0.6 + band * 1.3) * 9 + Math.cos(x * 0.019 - time * 0.35) * 7);
+                int color = band == 1 ? Palette.VIOLET : tint;
+                GuiDraw.stroke(c, previousX, previousY + 4, area.x + x, y + 4, sky ? 8 : 5, Palette.alpha(color, (int) (amount * 23)));
+                GuiDraw.stroke(c, previousX, previousY, area.x + x, y, sky ? 2.6f : 1.2f, Palette.alpha(color, (int) (amount * 170)));
+                previousX = area.x + x; previousY = y;
+            }
+        }
+        if (stars) for (int i = 0; i < 15; i++) GuiDraw.glowDot(c, area.x + 7 + i * 43 % 119, area.y + 7 + i * 31 % 53, i % 5 == 0 ? 1.5f : 0.8f, Palette.TEXT, (int) (strength * (170 + Math.sin(time + i) * 60)));
+        if (preset.equals("Bloom")) for (int i = 0; i < 3; i++) GuiDraw.glowDot(c, area.x + 29 + i * 38, area.y + 27 + i * 13, 3, Palette.GOLD, (int) (amount * 245));
+        label(c, (sky ? "SKY / " : "POST FX / ") + preset.toUpperCase(Locale.ROOT), area.x + 10, area.bottom() - 13, 0.58f, Palette.alpha(Palette.TEXT, 210));
+    }
+
+    private boolean hasSetting(ModuleDefinition module, String id) { return module.settings().stream().anyMatch(setting -> setting.id().equals(id)); }
+
     private void drawSidebar(DrawContext c) {
-        GuiDraw.glow(c, 23, 22, 34, 34, 10, Palette.MINT);
-        GuiDraw.rounded(c, 23, 22, 34, 34, 10, 0xFF19342F);
-        GuiDraw.logo(c, 28, 26, 23, Palette.MINT);
+        GuiDraw.glow(c, 23, 22, 34, 34, 10, accentColor);
+        GuiDraw.rounded(c, 23, 22, 34, 34, 10, Palette.mix(Palette.SURFACE, accentColor, 0.18));
+        GuiDraw.logo(c, 28, 26, 23, accentColor);
         heading(c, "ANALYZER", 67, 25, 1.1f, Palette.TEXT);
         label(c, "CLIENT / 1.21.4", 68, 42, 0.68f, Palette.SUBTLE);
         label(c, "WORKSPACE", 23, 95, 0.74f, Palette.SUBTLE);
@@ -96,9 +369,9 @@ public final class AnalyzerScreen extends Screen {
         label(c, "PERSONAL", 23, 328, 0.74f, Palette.SUBTLE);
         sidebar(c, "PROFILES", "Profiles", "05", 350);
         GuiDraw.outlined(c, 18, 425, 123, 53, 10, Palette.BORDER, 0xFF121F25);
-        GuiDraw.rounded(c, 29, 439, 5, 5, 2, Palette.MINT);
-        label(c, "SYSTEM ONLINE", 40, 436, 0.73f, Palette.MINT);
-        label(c, enabledCount() + " modules enabled", 29, 454, 0.75f, Palette.MUTED);
+        GuiDraw.rounded(c, 29, 439, 5, 5, 2, GpuEffects.isHealthy() ? accentColor : Palette.ERROR);
+        label(c, GpuEffects.isHealthy() ? "RENDER ONLINE" : "RENDER LIMITED", 40, 436, 0.73f, GpuEffects.isHealthy() ? accentColor : Palette.ERROR);
+        label(c, enabledCount() + " modules / " + visibleParticles + " particles", 29, 454, 0.67f, Palette.MUTED);
     }
 
     private void sidebar(DrawContext c, String id, String name, String number, int y) {
@@ -106,9 +379,9 @@ public final class AnalyzerScreen extends Screen {
         double hover = ease("nav-" + id, bounds.contains(mx, my) ? 1 : 0);
         boolean active = category.equals(id);
         GuiDraw.rounded(c, 16, y, 128, 35, 8,
-                active ? 0xFF20352F : Palette.mix(Palette.SURFACE, Palette.CARD_HOVER, hover));
-        if (active) GuiDraw.rounded(c, 16, y + 9, 3, 17, 1, Palette.MINT);
-        label(c, number, 27, y + 12, 0.72f, active ? Palette.MINT : Palette.SUBTLE);
+                active ? Palette.mix(Palette.SURFACE, accentColor, 0.14) : Palette.mix(Palette.SURFACE, Palette.CARD_HOVER, hover));
+        if (active) GuiDraw.rounded(c, 16, y + 9, 3, 17, 1, accentColor);
+        label(c, number, 27, y + 12, 0.72f, active ? accentColor : Palette.SUBTLE);
         heading(c, name, 49, y + 10, 0.9f, active ? Palette.TEXT : Palette.MUTED);
         hits.add(new Hit(bounds, () -> {
             category = id; scroll = 0; profileScroll = 0; focus = Focus.NONE;
@@ -127,24 +400,26 @@ public final class AnalyzerScreen extends Screen {
             default -> "A new perspective.";
         };
         heading(c, title, 182, 45, 1.48f, Palette.TEXT);
+        GuiDraw.outlined(c, 481, 22, 106, 23, 6, Palette.alpha(accentColor, 85), 0xAF101E28);
+        GuiDraw.rounded(c, 491, 30, 4, 4, 2, GpuEffects.isHealthy() ? accentColor : Palette.ERROR);
+        label(c, "EFFECT ENGINE", 502, 29, 0.66f, GpuEffects.isHealthy() ? accentColor : Palette.ERROR);
+        label(c, GuiDraw.truncate(textRenderer, GpuEffects.status(), 107, 0.60f), 481, 51, 0.60f, Palette.MUTED);
         button(c, "close", "×", 850, 24, 29, 29, false, this::close);
         label(c, category.equals("PROFILES") ? "PROFILE MANAGER" : "MODULE INSPECTOR", 628, 64, 0.78f, Palette.SUBTLE);
     }
 
     private void drawModules(DrawContext c) {
-        GuiDraw.outlined(c, 181, 91, 408, 108, 12, 0xFF2D4844, 0xFF142521);
-        int particleCount = core.isEnabled("particles") ? (int) (core.getNumber("particles", "density") * 36) : 0;
-        for (int i = 0; i < particleCount; i++) {
-            double time = System.nanoTime() / 1_000_000_000.0;
-            int x = 379 + (i * 37 % 195);
-            int y = 101 + (int) ((i * 23 + time * (4 + i % 3)) % 87);
-            GuiDraw.rounded(c, x, y, 2, 2, 1, Palette.alpha(Palette.MINT, 45 + i % 4 * 12));
+        GuiDraw.outlined(c, 181, 91, 408, 108, 12, Palette.mix(Palette.BORDER, accentColor, 0.34),
+                Palette.alpha(Palette.mix(Palette.SURFACE, accentColor, 0.09), glass ? 213 : 255));
+        drawParticleField(c, new Rect(185, 95, 400, 100), 0.85);
+        label(c, "LIVE SETTINGS PREVIEW", 197, 106, 0.73f, accentColor);
+        if (selected != null) {
+            heading(c, selected.name(), 197, 126, 1.3f, Palette.TEXT);
+            List<String> statusLines = GuiDraw.wrap(textRenderer, liveStatus(selected), 234, 0.79f);
+            for (int i = 0; i < Math.min(2, statusLines.size()); i++) label(c, statusLines.get(i), 197, 152 + i * 13, 0.79f, statusColor(selected));
+            label(c, previewKind(selected), 197, 181, 0.65f, Palette.SUBTLE);
+            drawPreview(c, selected, new Rect(444, 101, 132, 87));
         }
-        label(c, "DESIGNED TO DISCOVER", 197, 106, 0.76f, Palette.MINT);
-        heading(c, "Clarity changes everything.", 197, 126, 1.13f, Palette.TEXT);
-        label(c, "Beautiful visuals. Precise awareness.", 197, 151, 0.84f, Palette.MUTED);
-        label(c, "Built for your world.", 197, 171, 0.84f, Palette.MUTED);
-        radar(c, 527, 144, 39);
         field(c, "Search modules…", query, Focus.SEARCH, new Rect(181, 214, 408, 35));
         label(c, "/", 570, 226, 0.78f, Palette.SUBTLE);
         List<ModuleDefinition> list = visibleModules();
@@ -172,12 +447,13 @@ public final class AnalyzerScreen extends Screen {
         double hover = ease("card-" + module.id(), bounds.contains(mx, my) && MODULE_VIEW.contains(mx, my) ? 1 : 0);
         boolean active = core.isEnabled(module.id()), isSelected = selected != null && selected.id().equals(module.id());
         GuiDraw.outlined(c, x, y, 198, 86, 10,
-                isSelected ? 0xFF4E9C83 : Palette.mix(Palette.BORDER, 0xFF406058, hover),
-                Palette.mix(Palette.CARD, Palette.CARD_HOVER, hover));
-        GuiDraw.rounded(c, x + 12, y + 13, 25, 25, 7, active ? 0xFF234238 : 0xFF223039);
-        icon(c, module.id(), x + 18, y + 19, active ? Palette.MINT : Palette.MUTED);
+                isSelected ? Palette.mix(Palette.BORDER, accentColor, 0.59) : Palette.mix(Palette.BORDER, accentColor, hover * 0.28),
+                Palette.mix(glass ? Palette.CARD_GLASS : Palette.CARD, Palette.alpha(Palette.CARD_HOVER, glass ? 237 : 255), hover));
+        drawParticleField(c, new Rect(x + 8, y + 8, 181, 70), 0.68);
+        GuiDraw.rounded(c, x + 12, y + 13, 25, 25, 7, active ? Palette.mix(Palette.CARD, accentColor, 0.20) : 0xFF223039);
+        icon(c, module.id(), x + 18, y + 19, active ? accentColor : Palette.MUTED);
         heading(c, GuiDraw.truncate(textRenderer, module.name(), 105, 0.97f), x + 46, y + 13, 0.97f, Palette.TEXT);
-        label(c, module.category().toString(), x + 46, y + 29, 0.65f, Palette.SUBTLE);
+        label(c, (active ? "ACTIVE / " : "OFF / ") + module.category(), x + 46, y + 29, 0.61f, active ? accentColor : Palette.SUBTLE);
         List<String> lines = GuiDraw.wrap(textRenderer, module.description(), 172, 0.76f);
         for (int i = 0; i < Math.min(2, lines.size()); i++) label(c, lines.get(i), x + 12, y + 51 + i * 12, 0.76f, Palette.MUTED);
         clippedHit(bounds, MODULE_VIEW, () -> {
@@ -191,13 +467,14 @@ public final class AnalyzerScreen extends Screen {
     private void drawInspector(DrawContext c) {
         if (selected == null) return;
         boolean enabled = core.isEnabled(selected.id());
-        GuiDraw.rounded(c, 629, 94, 39, 39, 10, 0xFF20332F);
-        icon(c, selected.id(), 641, 106, Palette.MINT);
+        GuiDraw.rounded(c, 629, 94, 39, 39, 10, Palette.mix(Palette.CARD, accentColor, 0.15));
+        icon(c, selected.id(), 641, 106, accentColor);
         label(c, selected.category().toString(), 679, 96, 0.72f, Palette.SUBTLE);
         heading(c, selected.name(), 679, 114, 1.3f, Palette.TEXT);
         List<String> description = GuiDraw.wrap(textRenderer, selected.description(), 244, 0.9f);
         for (int i = 0; i < Math.min(2, description.size()); i++) label(c, description.get(i), 629, 145 + i * 14, 0.9f, Palette.MUTED);
-        label(c, enabled ? "MODULE ACTIVE" : "MODULE DISABLED", 629, 185, 0.79f, enabled ? Palette.MINT : Palette.SUBTLE);
+        label(c, enabled ? "MODULE ACTIVE" : "MODULE DISABLED", 629, 181, 0.75f, statusColor(selected));
+        label(c, GuiDraw.truncate(textRenderer, liveStatus(selected), 198, 0.68f), 629, 198, 0.68f, statusColor(selected));
         Rect toggle = new Rect(832, 179, 44, 23);
         drawToggle(c, "inspecttoggle-" + selected.id(), toggle, enabled);
         hits.add(new Hit(toggle, () -> { core.toggle(selected.id()); changed(); }));
@@ -231,7 +508,7 @@ public final class AnalyzerScreen extends Screen {
                 boolean value = core.getBoolean(moduleId, setting.id());
                 Rect bounds = new Rect(841, y - 2, 35, 19);
                 drawToggle(c, "setting-" + moduleId + setting.id(), bounds, value);
-                label(c, value ? "Enabled" : "Disabled", 629, y + 22, 0.78f, value ? Palette.MINT : Palette.SUBTLE);
+                label(c, value ? "Enabled" : "Disabled", 629, y + 22, 0.78f, value ? accentColor : Palette.SUBTLE);
                 clippedHit(new Rect(629, y - 2, 247, 42), SETTINGS_VIEW, () -> {
                     core.setValue(moduleId, setting.id(), !core.getBoolean(moduleId, setting.id())); changed();
                 });
@@ -239,12 +516,12 @@ public final class AnalyzerScreen extends Screen {
             case NUMBER -> {
                 double value = core.getNumber(moduleId, setting.id());
                 String formatted = number(value);
-                label(c, formatted, 875 - GuiDraw.width(textRenderer, formatted, 0.85f), y + 1, 0.85f, Palette.MINT);
+                label(c, formatted, 875 - GuiDraw.width(textRenderer, formatted, 0.85f), y + 1, 0.85f, accentColor);
                 Rect track = new Rect(629, y + 29, 245, 5);
                 GuiDraw.rounded(c, track.x, track.y, track.w, track.h, 2, Palette.BORDER);
                 double amount = setting.max() == setting.min() ? 0 : Math.clamp((value - setting.min()) / (setting.max() - setting.min()), 0.0, 1.0);
                 int px = track.x + (int) (amount * track.w);
-                GuiDraw.rounded(c, track.x, track.y, px - track.x, track.h, 2, Palette.MINT);
+                GuiDraw.rounded(c, track.x, track.y, px - track.x, track.h, 2, accentColor);
                 GuiDraw.rounded(c, px - 4, track.y - 2, 9, 9, 4, Palette.TEXT);
                 clippedHit(new Rect(625, y + 18, 253, 26), SETTINGS_VIEW, () -> {
                     dragging = new SliderDrag(moduleId, setting, track); updateSlider(mx);
@@ -255,7 +532,7 @@ public final class AnalyzerScreen extends Screen {
                 Rect bounds = new Rect(629, y + 18, 247, 26);
                 GuiDraw.outlined(c, bounds.x, bounds.y, bounds.w, bounds.h, 6, Palette.BORDER,
                         bounds.contains(mx, my) ? Palette.CARD_HOVER : Palette.CARD);
-                label(c, value, 639, y + 26, 0.86f, Palette.MINT);
+                label(c, value, 639, y + 26, 0.86f, accentColor);
                 label(c, "›", 860, y + 23, 1.07f, Palette.MUTED);
                 clippedHit(bounds, SETTINGS_VIEW, () -> {
                     List<String> choices = setting.choices();
@@ -320,7 +597,7 @@ public final class AnalyzerScreen extends Screen {
         c.fill(180, 488, 878, 489, Palette.BORDER);
         String message = error ? status : dirty ? "Saving changes…" : status;
         label(c, GuiDraw.truncate(textRenderer, message, 439, 0.77f), 182, 500, 0.77f,
-                error ? Palette.ERROR : dirty ? Palette.MUTED : Palette.MINT);
+                error ? Palette.ERROR : dirty ? Palette.MUTED : accentColor);
         String shortcut = category.equals("PROFILES") ? "TAB NAME · ENTER SAVE" : "/ SEARCH";
         label(c, keyName(AnalyzerClient.getMenuKey()).toUpperCase(Locale.ROOT) + " / ESC CLOSE    ·    " + shortcut, 641, 500, 0.67f, Palette.SUBTLE);
         if (error && new Rect(181, 489, 442, 31).contains(mx, my)) {
@@ -329,25 +606,6 @@ public final class AnalyzerScreen extends Screen {
             GuiDraw.outlined(c, 181, 482 - h, 424, h, 8, 0xFF86505B, 0xFF261D25);
             for (int i = 0; i < lines.size(); i++) label(c, lines.get(i), 193, 494 - h + i * 14, 0.85f, Palette.ERROR);
         }
-    }
-
-    private void radar(DrawContext c, int x, int y, int radius) {
-        double angle = System.nanoTime() / 1_000_000_000.0 * 0.42;
-        for (int ring = 1; ring <= 3; ring++) {
-            int r = ring * radius / 3;
-            for (int i = 0; i < 48; i++) {
-                double a = i * Math.PI / 24;
-                GuiDraw.line(c, x + Math.cos(a) * r, y + Math.sin(a) * r,
-                        x + Math.cos(a + Math.PI / 24) * r, y + Math.sin(a + Math.PI / 24) * r, 0xFF2A493F);
-            }
-        }
-        GuiDraw.line(c, x - radius, y, x + radius, y, 0xFF2A493F);
-        GuiDraw.line(c, x, y - radius, x, y + radius, 0xFF2A493F);
-        GuiDraw.cube(c, x - 12, y - 13, 25, Palette.MINT);
-        GuiDraw.line(c, x, y, x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, Palette.alpha(Palette.MINT, 100));
-        int px = x + (int) (Math.cos(angle) * (radius - 4)), py = y + (int) (Math.sin(angle) * (radius - 4));
-        GuiDraw.glow(c, px - 2, py - 2, 4, 4, 2, Palette.MINT);
-        GuiDraw.rounded(c, px - 2, py - 2, 4, 4, 2, Palette.MINT);
     }
 
     private void icon(DrawContext c, String module, int x, int y, int color) {
@@ -380,6 +638,18 @@ public final class AnalyzerScreen extends Screen {
                 GuiDraw.rounded(c, x, y + 5, 3, 3, 1, color); GuiDraw.rounded(c, x + 7, y, 4, 4, 2, color);
                 GuiDraw.rounded(c, x + 8, y + 10, 3, 3, 1, color);
             }
+            case "sky" -> {
+                GuiDraw.stroke(c, x, y + 10, x + 4, y + 3, 1.5f, color);
+                GuiDraw.stroke(c, x + 4, y + 3, x + 8, y + 9, 1.5f, color);
+                GuiDraw.stroke(c, x + 8, y + 9, x + 13, y + 1, 1.5f, color);
+                GuiDraw.glowDot(c, x + 10, y + 12, 1, color, 190);
+            }
+            case "menu" -> {
+                GuiDraw.wireBox(c, x, y, 14, 13, false, 1, color);
+                GuiDraw.stroke(c, x + 4, y + 1, x + 4, y + 12, 1, color);
+                GuiDraw.stroke(c, x + 7, y + 4, x + 12, y + 4, 1, color);
+                GuiDraw.stroke(c, x + 7, y + 8, x + 12, y + 8, 1, color);
+            }
             default -> {
                 GuiDraw.line(c, x, y + 12, x + 6, y, color); GuiDraw.line(c, x + 6, y, x + 14, y + 12, color);
                 GuiDraw.line(c, x, y + 12, x + 14, y + 12, color); GuiDraw.line(c, x + 6, y, x + 6, y + 12, color);
@@ -390,7 +660,7 @@ public final class AnalyzerScreen extends Screen {
     private void drawToggle(DrawContext c, String id, Rect bounds, boolean value) {
         double amount = ease(id, value ? 1 : 0);
         GuiDraw.rounded(c, bounds.x, bounds.y, bounds.w, bounds.h, bounds.h / 2,
-                Palette.mix(0xFF34424A, 0xFF57C79F, amount));
+                Palette.mix(0xFF34424A, Palette.mix(Palette.SURFACE, accentColor, 0.80), amount));
         int size = bounds.h - 6;
         int x = bounds.x + 3 + (int) ((bounds.w - size - 6) * amount);
         GuiDraw.rounded(c, x, bounds.y + 3, size, size, size / 2,
@@ -400,7 +670,7 @@ public final class AnalyzerScreen extends Screen {
     private void field(DrawContext c, String placeholder, String value, Focus target, Rect bounds) {
         boolean focused = focus == target;
         GuiDraw.outlined(c, bounds.x, bounds.y, bounds.w, bounds.h, 7,
-                focused ? Palette.MINT : Palette.BORDER, Palette.SURFACE);
+                focused ? accentColor : Palette.BORDER, Palette.SURFACE);
         if (target == Focus.SEARCH) {
             GuiDraw.rounded(c, bounds.x + 11, bounds.y + 10, 10, 10, 5, Palette.SUBTLE);
             GuiDraw.rounded(c, bounds.x + 13, bounds.y + 12, 6, 6, 3, Palette.SURFACE);
@@ -416,7 +686,7 @@ public final class AnalyzerScreen extends Screen {
         label(c, shown, x, bounds.y + 11, 0.91f, value.isEmpty() ? Palette.SUBTLE : Palette.TEXT);
         if (focused && (System.currentTimeMillis() / 450) % 2 == 0) {
             int cursorX = x + (value.isEmpty() ? 0 : (int) GuiDraw.width(textRenderer, shown, 0.91f)) + 1;
-            c.fill(cursorX, bounds.y + 9, cursorX + 1, bounds.y + 23, Palette.MINT);
+            c.fill(cursorX, bounds.y + 9, cursorX + 1, bounds.y + 23, accentColor);
         }
         hits.add(new Hit(bounds, () -> { focus = target; selectAll = false; captureModule = null; }));
     }
@@ -429,8 +699,8 @@ public final class AnalyzerScreen extends Screen {
     }
 
     private void staticButton(DrawContext c, String value, int x, int y, int w, int h, boolean primary, boolean hover) {
-        int inside = primary ? hover ? 0xFF91FFDA : Palette.MINT : hover ? Palette.CARD_HOVER : Palette.CARD;
-        GuiDraw.outlined(c, x, y, w, h, 6, primary ? Palette.MINT : Palette.BORDER, inside);
+        int inside = primary ? hover ? Palette.mix(accentColor, Palette.TEXT, 0.25) : accentColor : hover ? Palette.CARD_HOVER : Palette.CARD;
+        GuiDraw.outlined(c, x, y, w, h, 6, primary ? accentColor : Palette.BORDER, inside);
         label(c, value, x + (w - GuiDraw.width(textRenderer, value, 0.85f)) / 2, y + (h - 9) / 2, 0.85f,
                 primary ? 0xFF10271E : Palette.MUTED);
     }
@@ -626,6 +896,14 @@ public final class AnalyzerScreen extends Screen {
     @Override public void removed() { if (dirty) persist(); }
 
     private enum Focus { NONE, SEARCH, PROFILE }
+    private static final class AmbientParticle {
+        double x, y, vx, vy;
+        final double baseVx, baseVy, phase;
+        AmbientParticle(double x, double y, double vx, double vy, double phase) {
+            this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+            this.baseVx = vx; this.baseVy = vy; this.phase = phase;
+        }
+    }
     private record Hit(Rect bounds, Runnable action) {}
     private record SliderDrag(String module, Setting<?> setting, Rect track) {}
     private record Rect(int x, int y, int w, int h) {

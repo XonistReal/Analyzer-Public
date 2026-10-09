@@ -1,20 +1,22 @@
 # Analyzer in Prism Launcher
 
-Analyzer 0.1.1 targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4**, and **Java 21**. The native Prism ZIP includes both mods, the instance definitions, and a Windows updater. Minecraft and account credentials are not included.
+Analyzer **0.2.0** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4**, and **Java 21**. The native Prism ZIP includes both mods, the instance definitions, and a Windows updater. Minecraft and account credentials are not included.
 
 ## Import
 
-Drag `Analyzer-0.1.1-Prism-1.21.4.zip` onto Prism's main window and confirm the new instance. Alternatively, use **Add Instance → Import → Browse**, select the ZIP, and press **OK**. The earlier release ZIP contained loose mods; use the new Prism ZIP to import a complete instance.
+Drag `Analyzer-0.2.0-Prism-1.21.4.zip` onto Prism's main window and confirm the new instance. Alternatively, use **Add Instance → Import → Browse**, select the ZIP, and press **OK**. This is a native instance archive with `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root.
 
-For an existing **Fabric 1.21.4** instance, open **Edit → Mods** and drag both the Analyzer and Fabric API JARs into that panel. Other Minecraft or loader versions require compatible builds.
+For an existing **Fabric 1.21.4** instance without the updater, close Minecraft and open **Edit → Mods**. Replace the old Analyzer JAR with `analyzer-0.2.0.jar`, and install `fabric-api-0.119.4+1.21.4.jar` if needed. Keep one Analyzer JAR. In the Prism ZIP and update feed, the Analyzer filename includes a checksum suffix: `analyzer-0.2.0-<hash>.jar`; the mod is the same build. Other Minecraft or loader versions require compatible builds.
 
 Use Java 21. Enable Prism's automatic Java selection/download, or select Java 21 under the instance's **Settings → Java**. The directly installed instance on this computer uses the verified Java 21 runtime from this project. The portable ZIP inherits Prism's Java settings and contains no fixed Java path.
 
-Launch Analyzer, press **Right Shift**, and try **Profiles → aurora → Load**.
+Launch Analyzer, press **Right Shift**, and use **Profiles → showcase → Load**. This is the recommended starting point after updating an existing instance: Aurora sky, neutral Bloom, Screen ESP/radar, glass panels and cursor-reactive particles. **arctic** and **cinder** add violet/Nebula and gold/Ember looks. Earlier profiles and your saved files are preserved; loading a profile replaces active module settings and keybinds.
+
+Fresh defaults enable the sky and menu effects. Entity ESP and Storage ESP remain opt-in until you enable them or load a profile. The ten modules and rendering limits are described in [README.md](README.md), including Screen ESP's line-of-sight filtering and untested Iris/Sodium compatibility.
 
 ## Updates while we develop
 
-The updater checks a **local release feed before each launch**. Future work can publish a checked build into the same feed; your next launch installs it. Close Minecraft before updating and restart to load new code.
+The updater checks a **local release feed before each launch**. An existing Analyzer instance already connected to this project's feed can receive 0.2.0 on its next launch; importing another instance is optional. Future work can publish a checked build into the same feed. Close Minecraft before updating and restart to load new code.
 
 The instance's `analyzer-updater.json` points to this project's sibling `analyzer-updates/release.json`. The updater verifies SHA-256 and embedded mod metadata, backs up existing JARs whose mod ID is `analyzer` under `.analyzer-updater/backups/`, and installs the verified replacement. It preserves worlds, settings, Analyzer profiles, Fabric API, and other mods. Failed updates keep the existing installation and print the reason in Prism's launch console. A pending transaction record restores an interrupted install on the next launch, even if the feed is unavailable.
 

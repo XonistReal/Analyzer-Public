@@ -9,6 +9,11 @@ public final class Palette {
     public static final int BORDER = 0xFF25343C;
     public static final int MINT = 0xFF79F8CC;
     public static final int VIOLET = 0xFFA993FA;
+    public static final int CYAN = 0xFF6DDEFF;
+    public static final int GOLD = 0xFFFFCF84;
+    public static final int GLASS = 0xAD09101A;
+    public static final int CARD_GLASS = 0xC415222D;
+    public static final int BRIGHT_BORDER = 0xFF3A645C;
     public static final int TEXT = 0xFFF0F7F5;
     public static final int MUTED = 0xFF92A5AF;
     public static final int SUBTLE = 0xFF607782;

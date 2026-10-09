@@ -15,13 +15,13 @@ Research date: October 8, 2026. Sources below are upstream repositories and offi
 | [Wurst 7](https://github.com/Wurst-Imperium/Wurst7) | GPL-3.0. Current [properties](https://raw.githubusercontent.com/Wurst-Imperium/Wurst7/master/gradle.properties) target 26.2, v7.55.1; README requires JDK 25. | Plain configuration and documented compatibility checks with rendering-related mods. |
 | [ThunderHack Recode](https://github.com/Pan4ur/ThunderHack-Recode) | GPL-3.0, Fabric 1.21 / Java 21; archived November 6, 2024. Development is explicitly stopped. | Historical UI/effects reference, including Satin usage. Age and discontinued maintenance increase porting cost. |
 
-**Temple.nz remains unverified.** The domain could not be retrieved, and no primary source established that it identifies this Minecraft project. The [official Temple Development organization](https://github.com/TempleDevelopment) points to `templecheats.xyz` and Temple Client Legacy. Those are the verified references; the domain names are not assumed to represent the same project.
+**Temple.nz is now verified as the user's intended reference.** The exact [showcase page](https://temple.nz/#showcase), official Glass/Simple menu images, public feature catalogue and sampled video frames were inspected for the 0.2.0 upgrade. It is a separate reference from Temple Client Legacy; no relationship between those projects is assumed. See [RESEARCH-VISUALS.md](RESEARCH-VISUALS.md) for observed details, primary links and the distinction between its sky effects and player cosmetics.
 
 ## Analyzer's version choice
 
-Analyzer 0.1.0 deliberately targets one concrete game version: **Minecraft Java Edition 1.21.4**, **Java 21**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4**, **Yarn 1.21.4+build.8**, **Loom 1.9.2** and **Gradle 8.12**. The loader metadata permits Loader 0.16.10 or newer; 0.16.14 is the build pin.
+Analyzer deliberately targets one concrete game version: **Minecraft Java Edition 1.21.4**, **Java 21**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4**, **Yarn 1.21.4+build.8**, **Loom 1.9.2** and **Gradle 8.12**. The loader metadata permits Loader 0.16.10 or newer; 0.16.14 is the build pin.
 
-This is a focused initial target with established mappings, rather than a claim to support every version used by the references. The current Meteor/Wurst branches now target newer game and Java versions, while Temple uses an older Forge stack. Their source cannot be dropped into this build unchanged. Porting Analyzer to 1.21.11 or 26.x requires revisiting rendering APIs, mixins, dependencies and runtime behavior. Protocol translation to other server versions is outside this release.
+This is a focused target with established mappings. The inspected Meteor/Wurst branches and Temple.nz target newer game versions, while Temple Client Legacy uses an older Forge stack. Their source cannot be dropped into this build unchanged. Porting Analyzer to 1.21.11 or 26.x requires revisiting rendering APIs, mixins, dependencies and runtime behavior. Protocol translation to other server versions is outside this release.
 
 ## Original implementation
 
@@ -31,13 +31,13 @@ The core owns typed module definitions, validated values, enabled states and key
 
 ## Implemented scope versus reference features
 
-| Area | Analyzer 0.1.0 implementation | Wider reference features outside this release |
+| Area | Analyzer 0.2.0 implementation | Wider reference features outside this release |
 | --- | --- | --- |
-| Interface | Native module/category/search interface, settings, keyboard binds, local configuration/profiles, Rajdhani UI fonts and animated menu effects. | Embedded browser theme marketplaces and other clients' GUI/HUD systems. |
-| Entity visuals | Entity ESP and tracers with player/hostile/passive/item filters, interpolated positions, range, line width and through-wall control; ESP uses translucent boxes or corner outlines with a soft outer stroke, name/distance labels and health indicators. | Rendered-model silhouette masks, shader/glow ESP, skeletal/wireframe model ESP and friend color systems. |
+| Interface | Native module/category/search interface, settings, keyboard binds, local configuration/profiles, Rajdhani UI fonts, Glass/Solid materials, three accents, motion controls and cursor-reactive particle networks. | Embedded browser theme marketplaces and independent floating category windows. |
+| Entity visuals | Entity ESP and tracers with player/hostile/passive/item filters, interpolated positions, range, line width and through-wall control; 3D Boxes/Corners and projected Screen corners, labels, health bars, radar and target-count status. | Rendered-model silhouette masks, skeletal/wireframe model ESP and friend color systems. |
 | Storage visuals | Nearby loaded-container ESP with range, labels and through-wall control. | Tunnel scanning, stash automation and generalized block search. |
 | HUD/world utilities | Coordinates with optional dimension, custom crosshair and Fullbright. | Combat automation, movement exploits, Baritone pathfinding and packet manipulation. |
-| Built-in shaders | Original Aurora/Ember/Frost screen post-processing: bright-area bloom sampling, color grading and vignette; a procedural aurora menu background. | Shadow maps, global illumination, reflective water, world material replacement and full Iris/OptiFine shader packs. |
+| Built-in shaders | Original world-sky Aurora/Nebula/Ember with procedural stars and day/night controls; independent Aurora/Ember/Frost/Bloom post-processing, scene blur and animated menu backdrop. | Shadow maps, global illumination, reflective water, world material replacement and full Iris/OptiFine shader packs. |
 
 ESP visualizes information already available in the client's loaded world. It does not discover entities or containers withheld by the server or outside loaded chunks. Storage indexing is bounded to the configured range and 4,096 containers, refreshes every 10 client ticks while enabled, and skips unloaded chunks. Entity ESP and tracer lists are each capped at 4,096 targets. These bounds limit work; they are not a measured FPS guarantee. Shader preset names describe Analyzer's own screen effects; they are not third-party world-lighting packs.
 

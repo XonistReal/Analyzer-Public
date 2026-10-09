@@ -1,15 +1,15 @@
 # Analyzer
 
-An original visual utility client for **Minecraft Java Edition 1.21.4**, built on Fabric and Java 21. Mint and violet, a geometric identity, native controls, and GPU effects. Analyzer 0.1.1 adds Prism integration and a local development updater to the playable visual client.
+An original visual utility client for **Minecraft Java Edition 1.21.4**, built on Fabric and Java 21. Analyzer **0.2.0** adds a real animated sky, a richer interface, cursor-reactive menu particles, screen ESP and a nearby-target radar. Prism integration includes a local development updater.
 
 ![Analyzer native interface](screenshots/analyzer-ui.png)
 
 ## Install
 
-**Prism Launcher:** import `Analyzer-0.1.1-Prism-1.21.4.zip`. It includes both mods and the Windows local updater. See [PRISM.md](PRISM.md) for drag and drop, automatic updates and the development workflow.
+**Prism Launcher:** import `Analyzer-0.2.0-Prism-1.21.4.zip`. It includes both mods and the Windows local updater. See [PRISM.md](PRISM.md) for drag and drop, updates and the development workflow.
 
 1. Create a **Minecraft 1.21.4 Fabric** instance using the [official Fabric installer](https://fabricmc.net/use/installer/) or your launcher's Fabric instance option. Use Fabric Loader **0.16.10 or newer**; the verified build uses **0.16.14**.
-2. Copy **both JARs** from a release bundle into that instance's `mods/` folder: the Analyzer JAR and `fabric-api-0.119.4+1.21.4.jar`. The Prism ZIP keeps them under `minecraft/mods/`; the original loose-mod ZIP used `mods/`.
+2. Copy **both JARs** into that instance's `mods/` folder: `analyzer-0.2.0.jar` and `fabric-api-0.119.4+1.21.4.jar`. The Prism ZIP keeps them under `minecraft/mods/` and adds a hash suffix to the Analyzer filename. Keep one Analyzer JAR installed.
 3. Launch that instance. Click **Analyzer** on the title screen, or press **Right Shift** while playing.
 
 Minecraft 1.21.4 uses Java 21. The official Minecraft Launcher supplies its game runtime. For an alternative launcher, select its Java 21 runtime. Analyzer does not replace the Minecraft launcher and does not require an account of its own.
@@ -18,18 +18,20 @@ Minecraft 1.21.4 uses Java 21. The official Minecraft Launcher supplies its game
 
 | Feature | Controls and behavior |
 | --- | --- |
-| Native interface | Search, category navigation, module cards, a scrolling settings inspector, animated toggles, hover states, scalable layout, custom Rajdhani typography and a geometric Analyzer mark. |
-| Entity ESP | Interpolated boxes or corner outlines with translucent fill and a soft outer stroke; separate filters and colors for players, hostile mobs, passive mobs and dropped items. Adjustable range and line width, optional visibility through walls, name/distance labels and actual health indicators. |
-| Storage ESP | Chests, barrels, shulker boxes, ender chests, hoppers and furnaces, with distinct colors and container/distance labels. Uses loaded chunk block entities and a bounded cache. |
+| Interface | Search, categories, module cards, live previews/statuses and a scrolling inspector. **Glass/Solid** panels, **Mint/Violet/Gold** accents and adjustable motion, with Rajdhani typography, animated controls and a scalable layout. |
+| Particles | Visible luminous menu particles, connecting lines and comets. Particles react to the cursor; density can be reduced to zero, and Interface motion can freeze movement. |
+| Sky Aurora | Original **Aurora**, **Nebula** and **Ember** skies drawn in the world sky pass. Animated curtains, procedural twinkling stars, intensity/speed controls, optional night-only visibility and rain attenuation. Terrain stays in front of the sky; speed zero freezes animation. |
+| Atmosphere | GPU highlight bloom, grading and vignette before the HUD. **Bloom** keeps neutral colors; **Aurora**, **Ember** and **Frost** add cinematic color looks. Strength is adjustable; **Off** bypasses the effect. |
+| Entity ESP | **Boxes**, **Corners** and **Screen** styles, category colors/filters, range and line width. Optional through-wall visibility, name/distance labels, actual health bars and a nearby-target radar. Live status explains empty or disabled filters. |
+| Storage ESP | Boxes/Corners/Screen highlighting for chests, barrels, shulkers, ender chests, hoppers, furnaces, dispensers, droppers and brewing stands, with type colors and distance labels. Uses loaded block entities and a bounded cache; live status reports scans and targets. |
 | Tracers | View-centered lines to selected entity categories, with range, line width and visibility controls. |
-| Atmosphere | Three original built-in GLSL presets: **Aurora**, **Ember**, and **Frost**. Adjustable strength. Highlight bloom, color grading and vignette process the game image before the HUD. |
 | Fullbright | Configurable local lightmap brightness. Toggling it off restores ordinary lighting without changing the player's saved gamma option. |
-| HUD | Real FPS, position/dimension, active visual modules, and a configurable crosshair. |
-| Menu effects | An animated GLSL aurora backdrop, moving radar graphic, ambient particles and bounded glow effects. Particle density can be changed or disabled. |
-| Profiles | Save, load and delete local configurations, including keybinds. Curated **aurora**, **ember**, and **minimal** starter profiles are installed once. |
-| Persistence | Validated and clamped typed settings, atomic JSON replacement, malformed/future config recovery backups, and safe profile filenames. |
+| Coordinates | Position and optional dimension in the HUD, alongside the built-in FPS display and active-module list. |
+| Crosshair | Custom arm length, center gap and line width, with an entity-target color change. |
 
-Start with **Profiles → aurora → Load** to try the visual setup. Defaults keep world overlays and grading disabled until you choose them.
+These are **10 implemented modules**. Fresh defaults enable Sky Aurora, Interface, Particles and Coordinates; Entity ESP, Storage ESP, Tracers, Fullbright, Crosshair and Atmosphere are opt-in.
+
+Start with **Profiles → showcase → Load**, especially after updating an existing instance. It enables the sky, neutral bloom, screen ESP, radar and glass menu. **arctic** uses a violet interface/Nebula sky/Frost grading; **cinder** uses gold/Ember. The earlier **aurora**, **ember** and **minimal** profiles remain available. New starter profiles are installed once without overwriting your saved files. Profiles save/load local settings and keybinds; loading one replaces the active configuration.
 
 ## Controls
 
@@ -45,11 +47,11 @@ Settings live in the instance's `config/analyzer/config.json`. Profiles live in 
 
 ## Shader and compatibility scope
 
-The built-in shaders are actual GPU screen effects, including bloom and cinematic grading. They do not add shadow maps, water reflections, volumetric clouds or a replacement world-lighting pipeline. Those are separate world shader-pack features. Iris is not bundled, and compatibility with Iris/Sodium or other rendering mods has not been validated in this release.
+Sky Aurora renders in the actual sky pass before terrain and celestial objects. Atmosphere applies GPU screen effects separately. The interface's Glass option samples and blurs the game scene behind translucent panels, with rim highlights and glow; it does not implement refraction. These effects do not add shadow maps, water reflections, volumetric clouds or a replacement world-lighting pipeline. Iris is not bundled, and compatibility with Iris/Sodium or other rendering mods has not been validated.
 
-Entity/storage overlays operate on entities and containers loaded by the game. They do not discover server-side information that has not been sent to the client. This release contains eight implemented visual/world/HUD modules; combat and movement automation are outside its current scope.
+ESP operates on entities and containers loaded by the game. **Boxes/Corners** use world geometry with depth testing when Through walls is off. **Screen** draws projected HUD rectangles; with Through walls off, it filters targets by a center line-of-sight raycast rather than masking individual pixels against world depth. The radar follows selected loaded targets. Analyzer does not discover information the server has not sent, and contains no combat or movement automation.
 
-The release is pinned to **1.21.4**. Other Minecraft versions require source changes and a new build. Runtime validation details are in [VALIDATION.md](VALIDATION.md). Research and upstream comparisons are in [RESEARCH.md](RESEARCH.md).
+The release is pinned to **1.21.4**. Other versions require source changes and a new build. Runtime checks are recorded in [VALIDATION.md](VALIDATION.md). See [RESEARCH.md](RESEARCH.md) and [RESEARCH-VISUALS.md](RESEARCH-VISUALS.md) for primary-source comparisons and the exact Temple.nz visual reference; these are research references, not claims of feature parity.
 
 ## Build from source
 
@@ -65,7 +67,7 @@ On macOS/Linux:
 ./gradlew build
 ```
 
-The Gradle wrapper downloads Gradle 8.12 and checks its SHA-256. Gradle/Loom fetch the pinned official Minecraft, Yarn, Fabric Loader and Fabric API dependencies. The installable remapped JAR appears in `build/libs/analyzer-0.1.1.jar`.
+The Gradle wrapper downloads Gradle 8.12 and checks its SHA-256. Gradle/Loom fetch the pinned official Minecraft, Yarn, Fabric Loader and Fabric API dependencies. The installable remapped JAR appears in `build/libs/analyzer-0.2.0.jar`.
 
 ```powershell
 .\gradlew.bat coreCheck   # configuration, profile and recovery assertions
@@ -73,9 +75,9 @@ The Gradle wrapper downloads Gradle 8.12 and checks its SHA-256. Gradle/Loom fet
 .\gradlew.bat runSmoke    # automated UI + isolated singleplayer render checks
 ```
 
-`runSmoke` uses a hidden development window and the project-local `run/` directory. It creates/updates only `run/saves/Analyzer-Smoke`, exercises controls and shader presets, captures screenshots, reloads resources, and exits. Installed release builds never activate this development harness.
+`runSmoke` uses a hidden development window and the project-local `run/` directory. It creates/updates only `run/saves/Analyzer-Smoke`, exercises UI/profiles, screen ESP and sky/post effects, captures screenshots, reloads resources, and exits. Installed release builds never activate this development harness.
 
-Optional pixel validation after the smoke run: `python tools/verify_render.py` (Python with Pillow).
+Optional pixel validation after the smoke run: `python tools/verify_render.py` and `python tools/verify_visuals.py` (Python with Pillow).
 
 ## Code layout
 
@@ -83,6 +85,6 @@ Optional pixel validation after the smoke run: `python tools/verify_render.py` (
 - `ui/`: native canvas, drawing primitives, interactive inspector and profiles.
 - `render/`: world overlays, container cache, labels and HUD.
 - `effects/`: original GLSL compiler, framebuffer copy, rendering and state restoration.
-- `mixin/`: narrow, version-specific game hooks for post-processing, fullbright and crosshair replacement.
+- `mixin/`: narrow, version-specific hooks for sky rendering, post-processing, fullbright and crosshair replacement.
 
 Analyzer code is MIT licensed. No client source from GPL projects was copied. Bundled Rajdhani fonts use the SIL Open Font License; see [THIRD-PARTY.md](THIRD-PARTY.md), `FONT-LICENSE.txt`, and `GRADLE-LICENSE.txt`.

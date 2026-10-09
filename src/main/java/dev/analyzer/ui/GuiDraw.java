@@ -4,6 +4,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.RotationAxis;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +55,46 @@ public final class GuiDraw {
             int x = (int) Math.round(x1 + (x2 - x1) * i / steps);
             int y = (int) Math.round(y1 + (y2 - y1) * i / steps);
             context.fill(x, y, x + 1, y + 1, color);
+        }
+    }
+
+    /** One quad per segment rather than one fill per pixel, for animated networks. */
+    public static void stroke(DrawContext context, double x1, double y1, double x2, double y2,
+                              float thickness, int color) {
+        double length = Math.hypot(x2 - x1, y2 - y1);
+        if (length < 0.01) return;
+        context.getMatrices().push();
+        context.getMatrices().translate((float) x1, (float) y1, 0);
+        context.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotation((float) Math.atan2(y2 - y1, x2 - x1)));
+        context.getMatrices().scale((float) length, thickness, 1);
+        context.fill(0, 0, 1, 1, color);
+        context.getMatrices().pop();
+    }
+
+    public static void glowDot(DrawContext context, double x, double y, float size, int color, int brightness) {
+        int cx = (int) Math.round(x), cy = (int) Math.round(y);
+        int r = Math.max(1, Math.round(size));
+        rounded(context, cx - r * 4, cy - r * 4, r * 8, r * 8, r * 4, Palette.alpha(color, brightness / 18));
+        rounded(context, cx - r * 2, cy - r * 2, r * 4, r * 4, r * 2, Palette.alpha(color, brightness / 8));
+        rounded(context, cx - r, cy - r, r * 2, r * 2, r, Palette.alpha(color, brightness));
+        context.fill(cx, cy, cx + 1, cy + 1, Palette.alpha(Palette.TEXT, brightness));
+    }
+
+    public static void wireBox(DrawContext context, int x, int y, int w, int h, boolean corners,
+                               float thickness, int color) {
+        int arm = Math.max(5, Math.min(w, h) / 4);
+        if (!corners) {
+            stroke(context, x, y, x + w, y, thickness, color);
+            stroke(context, x + w, y, x + w, y + h, thickness, color);
+            stroke(context, x + w, y + h, x, y + h, thickness, color);
+            stroke(context, x, y + h, x, y, thickness, color);
+            return;
+        }
+        for (int corner = 0; corner < 4; corner++) {
+            int cx = x + (corner % 2) * w, cy = y + (corner / 2) * h;
+            int dx = corner % 2 == 0 ? arm : -arm, dy = corner / 2 == 0 ? arm : -arm;
+            stroke(context, cx, cy, cx + dx, cy, thickness, color);
+            stroke(context, cx, cy, cx, cy + dy, thickness, color);
         }
     }
 

@@ -1,4 +1,25 @@
-# Analyzer 0.1.0 validation
+# Analyzer validation
+
+## Analyzer 0.2.0 visual upgrade
+
+Verified October 8, 2026 with the same Windows / Java 21 / Fabric 1.21.4 / RTX 4060 environment described below. This is one tested hardware environment, not a performance benchmark.
+
+The original installed 0.1.1 log showed successful shader initialization. Its saved configuration had Entity ESP disabled and players-only tracers enabled in a singleplayer world. Those settings can legitimately produce no targets. The old Aurora shader was screen grading and did not implement a spatial sky aurora. This release adds an actual sky pass, stronger visual effects and live explanations of renderer/filter state.
+
+- `build` and `coreCheck` pass **44 core assertions**, including the new sky/interface defaults, preset choices and setting bounds. The release has ten modules and four mixins.
+- The isolated `runSmoke` world compiles/links all three original GLSL programs on the actual GPU, exercises UI clicks/search/sliders/booleans/keybinds/profile save, and captures **22 framebuffer screenshots**. Installed builds never activate this development harness.
+- The actual sky renders Aurora, Nebula and Ember behind opaque terrain and vanilla clouds. Night-only mode submits no sky frames at noon; Always mode does. The sky/post programs successfully render again after resource reload and a 1600×1000 to 1280×800 resize. All 22 screenshot checkpoints report `glGetError() == 0`.
+- Entity and storage Screen ESP project at least six targets each under **Fast, Fancy and Fabulous**. Fixtures include hostile/passive mobs, a local remote-player object, an item and six container types. The nearby radar uses the same entity filters. Removing the player fixture produces a clear `0 other players` tracer status. New dispenser, dropper and brewing-stand recognition was source-reviewed; those extra types were not separately exercised in the arena.
+- Glass/Mint with visible particles, Solid/Gold with particles disabled, and Glass/Violet were captured and visually reviewed in game. The interface remains readable, and existing controls continue to work. Tutorial notifications are suppressed only in the development harness for clean captures.
+- `tools/verify_visuals.py` checks actual sky-colored pixels, distinct presets and stable opaque-wall pixels. `tools/verify_render.py` retains the earlier 3D outline depth/through-wall and resize check. Run either with an optional screenshot-directory argument; both require Pillow.
+- The final pixel check measured **13,359 aurora-colored sky pixels versus 324 with the sky off**, a mean sky-image change of **34.47** on the 0–255 scale, and only **0.13** change on the fixed opaque-wall region. The 3D chest test measured **62 visible outline pixels versus 0 with Fabulous depth testing**. Exact results are in `PIXEL-VALIDATION.log`; the full runtime log is `VALIDATION.log`.
+- New `showcase`, `arctic` and `cinder` profiles are seeded once under a new marker. Existing configuration and older edited profiles are preserved. Load `showcase` explicitly to select the new Screen ESP and Bloom combination.
+
+Screen ESP with through-walls disabled uses a line-of-sight check to each target center. The 3D Boxes/Corners modes retain GPU depth testing. This release does not implement model-mask silhouette ESP, shadowed world-lighting shader packs, player aura/trail cosmetics or combat automation. Iris/Sodium and multiplayer behavior remain unverified. Research observations and vendor catalogue claims are distinguished in [RESEARCH-VISUALS.md](RESEARCH-VISUALS.md).
+
+The 0.2.0 release was published to the local feed and installed into the existing Prism Analyzer instance through its updater. The installed JAR matches the feed SHA-256, declares version 0.2.0 and includes the new sky mixin. The prior 0.1.1 JAR was backed up; hashes of all **32 configuration, world and other-mod files** were unchanged after installation. Native Prism and source ZIP integrity are checked during packaging. The unchanged updater's 74-check integration suite is documented below.
+
+## Historical 0.1.x checks
 
 ## Analyzer 0.1.1 Prism integration
 

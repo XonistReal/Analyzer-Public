@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "modules": {
+    "entity-esp": {"enabled": true, "settings": {"style": "Screen", "players": true, "hostiles": true, "passives": true, "items": true, "labels": true, "health": true, "radar": true}},
+    "storage-esp": {"enabled": true, "settings": {"style": "Screen", "labels": true}},
+    "tracers": {"enabled": false},
+    "crosshair": {"enabled": true},
+    "menu": {"enabled": true, "settings": {"material": "Glass", "accent": "Mint", "motion": 0.8}},
+    "particles": {"enabled": true, "settings": {"density": 0.85}},
+    "sky": {"enabled": true, "settings": {"preset": "Aurora", "intensity": 0.9, "stars": true, "day-night": "Always"}},
+    "shader": {"enabled": true, "settings": {"preset": "Bloom", "strength": 0.75}}
+  }
+}
