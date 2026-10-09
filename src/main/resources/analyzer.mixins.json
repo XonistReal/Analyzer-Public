@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": ["GameRendererMixin", "SkyRenderingMixin", "LightmapMixin", "InGameHudMixin",
     "InteractionCooldownAccessor", "UtilityInteractionMixin", "FishingBobberAccessor", "SafeWalkMixin",
-    "VisualInteractionMixin", "VisualNetworkMixin"],
+    "VisualInteractionMixin", "VisualNetworkMixin", "ItemPhysicsStateMixin", "ItemPhysicsRendererMixin",
+    "HandTweaksMixin", "CrystalCosmeticsMixin", "PlayerCosmeticsMixin", "PlayerPoseMixin", "AnalyzerFontMixin"],
   "injectors": { "defaultRequire": 1 }
 }

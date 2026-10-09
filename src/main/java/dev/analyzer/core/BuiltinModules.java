@@ -68,6 +68,7 @@ public final class BuiltinModules {
         ));
         modules.addAll(ClientModules.definitions());
         modules.addAll(VisualModules.definitions());
+        modules.addAll(CosmeticModules.definitions());
         modules.addAll(GameplayModules.definitions());
         modules.addAll(UtilityModules.definitions());
         return List.copyOf(modules);

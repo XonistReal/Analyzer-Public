@@ -14,9 +14,9 @@ public final class Palette {
     public static final int GLASS = 0xAD09101A;
     public static final int CARD_GLASS = 0xC415222D;
     public static final int BRIGHT_BORDER = 0xFF3A645C;
-    public static final int TEXT = 0xFFF0F7F5;
-    public static final int MUTED = 0xFF92A5AF;
-    public static final int SUBTLE = 0xFF607782;
+    public static final int TEXT = 0xFFF4FAFF;
+    public static final int MUTED = 0xFFB9CBD4;
+    public static final int SUBTLE = 0xFF91A8B5;
     public static final int ERROR = 0xFFFF9299;
 
     private Palette() {}

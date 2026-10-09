@@ -24,7 +24,7 @@ public final class ClientModules {
         List<ModuleDefinition> result = new ArrayList<>();
         result.add(new ModuleDefinition("hud", "HUD Studio", "Theme, scale and position controls for your entire HUD.", Category.HUD, true, List.of(
                 Setting.choice("theme", "HUD theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
-                Setting.number("scale", "HUD scale", 1, 0.5, 1.75, 0.05),
+                Setting.number("scale", "HUD scale", 0.6, 0.5, 1.75, 0.05),
                 Setting.number("max-modules", "Maximum list rows", 10, 3, 16, 1),
                 Setting.bool("snap", "Editor grid snapping", true),
                 Setting.bool("show-disabled", "Editor show disabled widgets", false),

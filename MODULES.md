@@ -1,6 +1,6 @@
 # Analyzer module catalogue
 
-107 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
+122 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
 
 ## Render
 
@@ -147,6 +147,21 @@
 | Totem Pops | Golden rings, sparks and a floating pop label on real totem-use statuses. | Off |
 | Landing Impact | A floor shockwave when a falling player lands. | Off |
 | Health Pulse | A fading edge vignette when your local health decreases. | Off |
+| Air Effects | A bounded animated particle field around the camera, drawn in world space. | Off |
+| Block Effects | Independent colored fragments or frames from actual placements and breaks. | Off |
+| Damage Effects | Confirmed hurt bursts and an optional persistent low-health warning. | Off |
+| Contrails | Paired fading paths from real player motion, optionally restricted to elytra flight. | Off |
+| Storm Effects | Branching bolts, ground ripples and a flash on actual loaded lightning strikes. | Off |
+| Vitals | A local warning driven by real health, fire and remaining underwater air. | Off |
+| Hit Sounds | Local vanilla sound cues on confirmed hurts of a recently attacked target. | Off |
+| Item Physics | Dropped-item models tumble in the air and rest on the ground; entity physics is unchanged. | Off |
+| Hand Tweaks | Actual first-person hand/item transforms and swing/equip controls; does not alter attacks. | Off |
+| Crystal Chams | Tint the actual crystal model or replace it with an original Gem/Prism mesh. Normal depth remains. | Off |
+| Cape | An original segmented cloth mesh with moving hems and colors, visible in third person. No image/GIF importer. | Off |
+| Pets | Original animated Rune Orb, Ghost or Dragon geometry following your rendered body in third person. | Off |
+| Emotes | Pose your local player model in third person. No camera change or server-side animation. | Off |
+| Walk Style | Alternative local third-person arm, leg and body poses using the existing player model. | Off |
+| Spinbot | Spin only your rendered player model. Camera, entity rotation and server packets are unchanged. | Off |
 
 ## Client
 

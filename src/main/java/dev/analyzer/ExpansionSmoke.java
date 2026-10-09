@@ -153,7 +153,7 @@ final class ExpansionSmoke {
                 editor.mouseClicked(point[0], point[1], 0); editor.mouseDragged(point[0] + 35, point[1] + 25, 0, 35, 25); editor.mouseReleased(point[0] + 35, point[1] + 25, 0);
             }
             case 339 -> { require(core.getNumber("watermark", "x") > watermarkBefore, "HUD drag changes normalized position"); control(mc, "theme", 0); control(mc, "scale-plus", 0); }
-            case 343 -> { require(core.getChoice("hud", "theme").equals("Glass"), "HUD editor theme control"); require(core.getNumber("hud", "scale") > 1, "HUD editor scale control"); }
+            case 343 -> { require(core.getChoice("hud", "theme").equals("Glass"), "HUD editor theme control"); require(core.getNumber("hud", "scale") == 0.65, "HUD editor increases default 60% scale to 65%"); }
             case 345 -> core.setValue("hud", "show-disabled", false);
             case 350 -> screenshot(mc, "analyzer-hud-editor.png");
             case 355 -> {
@@ -171,8 +171,14 @@ final class ExpansionSmoke {
                 core.setValue("crystal-aura", "cooldown", 0.2); core.setValue("crystal-aura", "delay", 2);
                 hvhBefore = GameplayEngine.actions("crystal-aura"); explosionBefore = VisualEffects.emitted("explosion-effects");
             }
-            case 375 -> core.setEnabled("crystal-aura", true);
+            case 368 -> { command(mc, "kill @e[type=minecraft:item]"); command(mc, "kill @e[type=minecraft:experience_orb]"); }
+            case 375 -> {
+                AnalyzerClient.LOGGER.info("Crystal fixture: base={}, target={}, player={}, usingItem={}", mc.world.getBlockState(new BlockPos(12,160,18)), nearestHostile(mc), mc.player.getPos(), mc.player.isUsingItem());
+                require(mc.world.getBlockState(new BlockPos(12,160,18)).isOf(net.minecraft.block.Blocks.OBSIDIAN) && nearestHostile(mc)!=null, "Crystal fixture has loaded obsidian and live reachable target");
+                core.setEnabled("crystal-aura", true);
+            }
             case 410 -> {
+                AnalyzerClient.LOGGER.info("Crystal smoke: actions={}, player={}, health={}, status={}", GameplayEngine.actions("crystal-aura")-hvhBefore, mc.player.getPos(), mc.player.getHealth(), GameplayEngine.status("crystal-aura"));
                 require(GameplayEngine.actions("crystal-aura") > hvhBefore, "Crystal Aura performs real crystal interaction");
                 require(VisualEffects.emitted("explosion-effects") > explosionBefore, "Crystal Aura creates actual explosion packet");
                 screenshot(mc, "analyzer-crystal-aura.png"); core.setEnabled("crystal-aura", false);
@@ -263,9 +269,9 @@ final class ExpansionSmoke {
                 require(mc.player.getInventory().selectedSlot == 0, "Auto Fish restores previous hotbar slot on disable");
                 require(GL11.glGetError() == GL11.GL_NO_ERROR, "Expansion final GL state");
                 AnalyzerClient.LOGGER.info("ANALYZER_EXPANSION_COMPLETE: {} modules, {} new screenshots; gameplay={}; visuals={}", core.modules().size(), screenshots, GameplayEngine.diagnostics(), VisualEffects.diagnostics());
-                mc.scheduleStop();
             }
         }
+        if (t >= 680) CosmeticsSmoke.tick(mc, t - 680);
     }
     private static void place(MinecraftClient mc) {
         mc.player.getInventory().selectedSlot = 0;
@@ -274,7 +280,7 @@ final class ExpansionSmoke {
         mc.player.swingHand(Hand.MAIN_HAND);
     }
     private static LivingEntity nearestHostile(MinecraftClient mc) {
-        LivingEntity best = null; double distance = 16;
+        LivingEntity best = null; double distance = 64;
         for (var e : mc.world.getEntities()) if (e instanceof LivingEntity living && e instanceof Monster && e.isAlive() && mc.player.squaredDistanceTo(e) < distance) { distance = mc.player.squaredDistanceTo(e); best = living; }
         return best;
     }

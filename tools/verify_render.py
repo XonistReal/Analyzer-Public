@@ -11,11 +11,14 @@ assert aurora.size == frost.size == (1600, 1000), 'Expected initial smoke window
 def chest_pixels(image):
     # The isolated test chest is behind an opaque wall. The visible outline
     # must disappear under depth testing even though the target stays loaded.
-    return sum(r > 115 and g > 85 and r > g * 1.08 and b < g * 0.7
+    # Include the gold overlay's fill as well as its bright edge. Animated color
+    # grading shifts its blue/green ratio around .70; .75 retains the gold mask
+    # while the opaque/depth-tested comparison has no matching pixels.
+    return sum(r > 115 and g > 85 and r > g * 1.08 and b < g * 0.75
                for r, g, b in image.crop((315, 387, 408, 447)).getdata())
 
 visible, occluded = chest_pixels(aurora), chest_pixels(frost)
-print(f'Chest outline pixels: through walls={visible}; depth tested Fabulous={occluded}')
+print(f'Chest overlay pixels: through walls={visible}; depth tested Fabulous={occluded}')
 assert visible > 60, 'The visible chest outline was not captured'
 assert occluded < visible * 0.25, 'Fabulous depth testing failed to occlude the chest'
 assert Image.open(root / 'analyzer-world-resized.png').size == (1280, 800), 'Window resize was not captured'

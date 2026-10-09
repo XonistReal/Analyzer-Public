@@ -1,4 +1,4 @@
-"""Regenerate 0.3 starter snapshots from the exported, typed module catalogue."""
+"""Regenerate starter snapshots from the exported, typed module catalogue."""
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -67,14 +67,22 @@ for module_id in ("kill-aura", "crystal-aura", "surround", "auto-totem", "auto-a
     change(hvh, module_id, True)
 change(hvh, "entity-esp", style="Screen")
 
-profiles = {"cinematic": cinematic, "classic": classic, "neon": neon, "hvh": hvh}
+studio = deepcopy(cinematic)
+for module_id in ("air-effects", "block-effects", "damage-effects", "hit-sounds", "vitals",
+                  "item-physics", "hand-tweaks", "crystal-chams", "cape", "pets"):
+    change(studio, module_id, True)
+change(studio, "air-effects", density=36, style="Stardust")
+change(studio, "block-effects", **{"on-place": False})
+change(studio, "cape", style="Gradient", hem="Pointed")
+change(studio, "pets", pet="Rune Orb", position="Shoulder")
+profiles = {"cinematic": cinematic, "classic": classic, "neon": neon, "studio": studio, "hvh": hvh}
 directory = repo / "src/main/resources/assets/analyzer/profiles"
 for name, document in profiles.items():
-    change(document, "hud", **{"show-disabled": False})
-    assert len(document["modules"]) == len(catalogue) == 107
+    change(document, "hud", scale=0.6, **{"show-disabled": False})
+    assert len(document["modules"]) == len(catalogue)
     if name != "hvh":
         assert all(not document["modules"][m["id"]]["enabled"] for m in catalogue
                    if m["category"] in ("Combat", "HVH", "Movement", "Player", "World")
                    and m["id"] != "sky")
     (directory / f"{name}.json").write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
-print("Generated cinematic/classic/neon/hvh snapshots with 107 typed module states each.")
+print(f"Generated five snapshots with {len(catalogue)} typed module states each at 60% HUD scale.")

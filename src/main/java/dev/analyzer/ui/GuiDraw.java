@@ -1,6 +1,7 @@
 package dev.analyzer.ui;
 
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -12,11 +13,17 @@ import java.util.List;
 public final class GuiDraw {
     private static final Identifier FONT = Identifier.of("analyzer", "ui");
     private static final Identifier BOLD_FONT = Identifier.of("analyzer", "ui_bold");
+    private static final float MIN_TEXT_SCALE = 0.8f;
 
     private GuiDraw() {}
 
     public static Text text(String value) {
         return Text.literal(value).styled(style -> style.withFont(FONT));
+    }
+
+    /** Keep rendering and all measuring helpers on the same minimum logical size. */
+    public static float effectiveScale(float scale) {
+        return Float.isFinite(scale) ? Math.max(MIN_TEXT_SCALE, scale) : MIN_TEXT_SCALE;
     }
 
     public static void rounded(DrawContext context, int x, int y, int width, int height, int radius, int color) {
@@ -100,43 +107,90 @@ public final class GuiDraw {
 
     public static void label(DrawContext context, TextRenderer renderer, String value,
                              float x, float y, float scale, int color) {
+        label(context, renderer, value, x, y, scale, color, false);
+    }
+    public static void label(DrawContext context, TextRenderer renderer, String value,
+                             float x, float y, float scale, int color, boolean shadow) {
+        scale = effectiveScale(scale);
         context.getMatrices().push();
-        context.getMatrices().translate(x, y, 0);
+        translateTextOrigin(context, x, y);
         context.getMatrices().scale(scale, scale, 1);
-        context.drawText(renderer, text(value), 0, 0, color, false);
+        context.drawText(renderer, text(value), 0, 0, color, shadow);
+        context.getMatrices().pop();
+    }
+    public static void bitmapLabel(DrawContext context, TextRenderer renderer, String value,
+                                   float x, float y, float scale, int color) {
+        context.getMatrices().push();
+        translateTextOrigin(context, x, y);
+        context.getMatrices().scale(scale, scale, 1);
+        context.drawText(renderer, value, 0, 0, color, true);
         context.getMatrices().pop();
     }
 
     public static void heading(DrawContext context, TextRenderer renderer, String value,
                                float x, float y, float scale, int color) {
+        scale = effectiveScale(scale);
         context.getMatrices().push();
-        context.getMatrices().translate(x, y, 0);
+        translateTextOrigin(context, x, y);
         context.getMatrices().scale(scale, scale, 1);
         context.drawText(renderer, Text.literal(value).styled(style -> style.withFont(BOLD_FONT)), 0, 0, color, false);
         context.getMatrices().pop();
     }
 
     public static float width(TextRenderer renderer, String value, float scale) {
-        return renderer.getWidth(text(value)) * scale;
+        return renderer.getWidth(text(value)) * effectiveScale(scale);
+    }
+
+    /** Snap through the outer canvas/HUD transform rather than rounding local GUI points. */
+    private static void translateTextOrigin(DrawContext context, float x, float y) {
+        var matrix = context.getMatrices().peek().getPositionMatrix();
+        float a = matrix.m00(), b = matrix.m10(), c = matrix.m01(), d = matrix.m11();
+        float determinant = a * d - b * c;
+        double pixelsPerPoint = MinecraftClient.getInstance().getWindow().getScaleFactor();
+        if (Math.abs(determinant) > 0.000001f && pixelsPerPoint > 0) {
+            double screenX = a * x + b * y + matrix.m30();
+            double screenY = c * x + d * y + matrix.m31();
+            double dx = Math.round(screenX * pixelsPerPoint) / pixelsPerPoint - screenX;
+            double dy = Math.round(screenY * pixelsPerPoint) / pixelsPerPoint - screenY;
+            x += (float) ((d * dx - b * dy) / determinant);
+            y += (float) ((a * dy - c * dx) / determinant);
+        }
+        context.getMatrices().translate(x, y, 0);
     }
 
     public static String truncate(TextRenderer renderer, String value, float maxWidth, float scale) {
         if (width(renderer, value, scale) <= maxWidth) return value;
         String ending = "…";
+        if (width(renderer, ending, scale) > maxWidth) return "";
         int end = value.length();
-        while (end > 0 && width(renderer, value.substring(0, end) + ending, scale) > maxWidth) end--;
+        while (end > 0 && width(renderer, value.substring(0, end) + ending, scale) > maxWidth) end = value.offsetByCodePoints(end, -1);
         return value.substring(0, end) + ending;
     }
 
     public static List<String> wrap(TextRenderer renderer, String value, float maxWidth, float scale) {
         List<String> lines = new ArrayList<>();
         String line = "";
-        for (String word : value.split(" ")) {
+        if (maxWidth <= 0) return lines;
+        for (String word : value.split("\\s+")) {
+            if (word.isEmpty()) continue;
             String candidate = line.isEmpty() ? word : line + " " + word;
             if (!line.isEmpty() && width(renderer, candidate, scale) > maxWidth) {
                 lines.add(line);
-                line = word;
-            } else line = candidate;
+                line = "";
+            }
+            // Long paths, player names and translated words must fit the same measured limit.
+            if (width(renderer, word, scale) > maxWidth) {
+                if (!line.isEmpty()) { lines.add(line); line = ""; }
+                String remaining = word;
+                while (width(renderer, remaining, scale) > maxWidth) {
+                    int end = remaining.length();
+                    while (end > 0 && width(renderer, remaining.substring(0, end), scale) > maxWidth) end = remaining.offsetByCodePoints(end, -1);
+                    if (end == 0) return lines;
+                    lines.add(remaining.substring(0, end));
+                    remaining = remaining.substring(end);
+                }
+                line = remaining;
+            } else line = line.isEmpty() ? word : line + " " + word;
         }
         if (!line.isEmpty()) lines.add(line);
         return lines;

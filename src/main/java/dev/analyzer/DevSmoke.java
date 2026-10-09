@@ -215,7 +215,7 @@ final class DevSmoke {
             for (int x = 0; x < 2; x++) for (int z = 0; z < 2; z++) server.getOverworld().getChunk(x, z);
             var source = server.getCommandSource().withSilent();
             String[] commands = {
-                "gamerule doMobSpawning false", "gamerule doDaylightCycle false", "time set 13000", "weather clear",
+                "gamerule doMobSpawning false", "gamerule doMobLoot false", "gamerule doDaylightCycle false", "time set 13000", "weather clear",
                 "kill @e[type=!minecraft:player]", "kill @e[type=minecraft:item]", "fill 0 160 0 24 160 24 minecraft:polished_deepslate",
                 "fill 0 161 0 24 169 24 minecraft:air", "fill 0 160 0 24 160 0 minecraft:sea_lantern", "fill 0 160 24 24 160 24 minecraft:sea_lantern",
                 "fill 0 160 0 0 160 24 minecraft:sea_lantern", "fill 24 160 0 24 160 24 minecraft:sea_lantern",

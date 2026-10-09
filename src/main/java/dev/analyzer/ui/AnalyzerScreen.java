@@ -40,6 +40,7 @@ public final class AnalyzerScreen extends Screen {
     private static final Set<String> GAMEPLAY_IDS = moduleIds(GameplayModules.definitions());
     private static final Set<String> UTILITY_IDS = moduleIds(UtilityModules.definitions());
     private static final Set<String> VISUAL_IDS = moduleIds(VisualModules.definitions());
+    private static final Set<String> COSMETIC_IDS = moduleIds(dev.analyzer.core.CosmeticModules.definitions());
     private final AnalyzerCore core;
     private final List<Hit> hits = new ArrayList<>();
     private final Map<String, Rect> controlBounds = new HashMap<>();
@@ -220,6 +221,8 @@ public final class AnalyzerScreen extends Screen {
         if (client == null || client.world == null || client.player == null) return "Enabled · enter a world to render";
         if (GAMEPLAY_IDS.contains(id)) return GameplayEngine.status(id);
         if (UTILITY_IDS.contains(id)) return UtilityEngine.status(id);
+        if (COSMETIC_IDS.contains(id)) return dev.analyzer.render.CosmeticRenderer.status(id);
+        if (module.category() == Category.COSMETICS) return VisualEffects.status(id);
         if (VISUAL_IDS.contains(id)) return VisualEffects.status(id);
         return switch (id) {
             case "entity-esp", "storage-esp", "tracers" -> AnalyzerRenderer.status(id);

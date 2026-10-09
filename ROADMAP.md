@@ -1,8 +1,8 @@
 # Analyzer roadmap and reference coverage
 
-Reviewed 2026-10-09 for Analyzer 0.3.0, Minecraft Java 1.21.4.
+Reviewed 2026-10-09 for Analyzer 0.4.0, Minecraft Java 1.21.4.
 
-The actual registry has **107 modules**. The [Temple.nz public catalogue](https://temple.nz/assets/data/modules.json?v=be4c7e7b) contains **163 reference modules**. This comparison identifies **89 areas with a functional counterpart or narrower implementation**: **33 scoped counterparts**, **56 partial implementations**, and **74 planned/unimplemented areas**. These figures are separate from feature parity and runtime test coverage.
+The actual registry has **122 modules**. The [Temple.nz public catalogue](https://temple.nz/assets/data/modules.json?v=be4c7e7b) contains **163 reference modules**. This comparison identifies **102 areas with a functional counterpart or narrower implementation**: **33 scoped counterparts**, **69 partial implementations**, and **61 planned/unimplemented areas**. These figures are separate from feature parity and runtime test coverage.
 
 HUD Studio and its widgets count as one Temple HUD area. The same evidence is never expanded into seventeen reference features. A partial row states the missing scope; an implementation sharing a name does not imply the reference's styles, bypasses or server behavior.
 
@@ -36,7 +36,7 @@ Evidence status: the matrix is based on the registered source definitions and co
 | Cosmetics | Realistic Water | — | Planned | Separate water render integration: waves/refraction/reflection/depth/foam; not a grading preset. |
 | Render | Ambience | — | Planned | World fog/cloud/weather controls with restoration and a separate lighting pipeline. |
 | Render | Chams | — | Planned | True entity model-mask rendering and outlines with correct world depth and resource reload. |
-| Cosmetics | Crystal Chams | — | Planned | Crystal model/material integration; keep existing arena automation separate. |
+| Cosmetics | Crystal Chams | `crystal-chams` | Partial | Actual tinted vanilla model or original Gem/Prism meshes, size/spin/bounce/base/rings; no through-wall crystal material. Next: Orb model and refractive materials, with dedicated bloom or silhouette rendering. |
 | Cosmetics | Hand Chams | — | Planned | First-person model/material pass with HUD and world separation. |
 | Cosmetics | Skybox | `sky` | Partial | World-sky Aurora/Nebula/Ember and stars; no imported panoramas or all reference sky styles. |
 | Render | Smooth Hotbar | — | Planned | No direct implementation in this release; design and validation remain. |
@@ -60,44 +60,44 @@ Evidence status: the matrix is based on the registered source definitions and co
 | Render | No Bob | — | Planned | Restore the prior bob setting when disabled; keep hurt-camera effects separate. |
 | Render | Freecam | — | Planned | Independent camera entity/control and reliable body/camera restoration. |
 | Render | Freelook | — | Planned | Camera/body rotation separation for every perspective. |
-| Cosmetics | Hit Particles | `hit-particles` | Partial | Sparks on actual hurt events; no bouncing cube/material system. |
-| Render | Target ESP | `target-esp` | Partial | Orbiting target rings; no full ghost-orb/halo style set. |
-| Cosmetics | Jump Circles | `jump-circles` | Partial | Expanding floor ripples; no crown/dome/block-lift styles. |
-| Cosmetics | Trails | `trails` | Partial | Local movement ribbon; no player afterimages or full elemental styles. |
+| Cosmetics | Hit Particles | `hit-particles` | Partial | Actual hurt Sparks/Shards/Gems/Arc with filters, size/spread/speed/gravity/colors; no bouncing material system. |
+| Render | Target ESP | `target-esp` | Partial | Orbit/Box/Corners with size/linger/depth/colors; no full ghost-orb/halo style set. |
+| Cosmetics | Jump Circles | `jump-circles` | Partial | Local Ripple/Rings/Crown/Tile on Jump/Land/Both; no remote-player selector or block mesh lift. |
+| Cosmetics | Trails | `trails` | Partial | Local Ribbon/Beads/Sparks with height/width/size/colors; no player afterimages or full elemental styles. |
 | Cosmetics | Death Effects | `death-effects` | Partial | Loaded entity death bursts; no coins/souls/ghost models. |
-| Cosmetics | Air Effects | — | Planned | No direct implementation in this release; design and validation remain. |
-| Cosmetics | Block Effects | `place-animation`, `break-animation` | Partial | Local successful place/break hooks and bounded debris; no remote-player event coverage. |
+| Cosmetics | Air Effects | `air-effects` | Partial | Bounded world ambient field with seven shapes, density/radius/wind/network/color controls; no full reference shape catalogue. |
+| Cosmetics | Block Effects | `block-effects` | Partial | Actual local placements/breaks, map colors, crumble/shatter/frame geometry; no remote-player event coverage. |
 | Cosmetics | Place Animation | `place-animation` | Partial | Animated colored ghost overlay; the vanilla block mesh still appears normally. |
 | Cosmetics | Place Preview | `place-preview` | Counterpart | Adjacent/replaceable position preview for a held block. |
-| Cosmetics | Player Aura | `player-aura` | Partial | World-space rotating rings; no wings, ears, horns or wearable mesh collection. Next: Wearable wings/halos/ornament meshes beyond current rotating rings. |
-| Cosmetics | Cape | — | Planned | No direct implementation in this release; design and validation remain. |
-| Cosmetics | Damage Effects | `health-pulse` | Partial | Pulse after actual local health loss; no persistent low-health warning or full world damage styles. |
-| Cosmetics | Footsteps | `footsteps` | Partial | Local grounded floor rings; no print/petal/puddle assets. |
-| Cosmetics | Projectile Trails | `projectile-trails` | Partial | Loaded projectile paths; no full landing-effect style set. |
+| Cosmetics | Player Aura | `player-aura` | Partial | Orbit/Gyroscope/Rune geometry with first-person, radius/speed/colors; no wings, ears, horns or wearable mesh collection. Next: Wearable wings/halos/ornament meshes beyond current rotating rings. |
+| Cosmetics | Cape | `cape` | Partial | Original segmented moving cloth with three styles/three hems, wearer/color/flow controls; no image/GIF importer. |
+| Cosmetics | Damage Effects | `damage-effects`, `health-pulse` | Partial | Confirmed hurt bursts, entity filters and low-health warning; no damage model deformation. |
+| Cosmetics | Footsteps | `footsteps` | Partial | Local Rings/Prints/Petals, spacing/size/max-prints/colors; no remote players or puddle materials. |
+| Cosmetics | Projectile Trails | `projectile-trails` | Partial | Loaded Line/Comet/Spiral paths with projectile-type filters, range/width/colors; no impact burst style set. |
 | Cosmetics | Pickup Streaks | `pickup-streaks` | Partial | Streaks on item pickup packets; no complete experience-orb effect replacement. |
-| Cosmetics | Teleport Effects | `teleport-effects` | Partial | Large local position-change rings; no complete remote-player pearl tracking. |
+| Cosmetics | Teleport Effects | `teleport-effects` | Partial | Large local position-change Rings/Vortex/Portal with linked ends; no complete remote-player pearl tracking. |
 | Render | Damage Numbers | `damage-numbers` | Counterpart | Numbers from actual health decreases of loaded living entities. |
-| Cosmetics | Hit Markers | `hit-markers` | Partial | Recent attacked-target hurt produces a crosshair flash; no world marker/kill style set. |
-| Cosmetics | Hit Sounds | — | Planned | No direct implementation in this release; design and validation remain. |
+| Cosmetics | Hit Markers | `hit-markers` | Partial | Confirmed recent attacked-target hurt produces Cross/Corners/Dots with size/thickness/spin/colors; no world marker/kill style set. |
+| Cosmetics | Hit Sounds | `hit-sounds` | Partial | Seven built-in vanilla sound cues on confirmed attacked-target hurt, pitch/volume/combo/kill controls; no custom file importer. |
 | Render | Music | — | Planned | No direct implementation in this release; design and validation remain. |
-| Cosmetics | Item Physics | — | Planned | No direct implementation in this release; design and validation remain. |
+| Cosmetics | Item Physics | `item-physics` | Partial | Actual dropped-item tumble/ground-rest/water-rock render transforms; no entity physics changes. |
 | Cosmetics | Glint Color | — | Planned | No direct implementation in this release; design and validation remain. |
 | Render | Totem Pops | `totem-pops` | Partial | Real totem-status rings/sparks/label; no persistent per-player pop counts or model replacement. |
-| Cosmetics | Contrails | — | Planned | No direct implementation in this release; design and validation remain. |
+| Cosmetics | Contrails | `contrails` | Partial | Paired fading paths from actual motion, glide restriction and speed filters; no aerodynamic fluid simulation. |
 | Cosmetics | Aurora | — | Planned | Actual local player veil/crown/ribbon curtains; current Sky Aurora only maps to Skybox. |
-| Cosmetics | Pets | — | Planned | No direct implementation in this release; design and validation remain. |
-| Cosmetics | Walk Style | — | Planned | No direct implementation in this release; design and validation remain. |
-| Cosmetics | Emotes | — | Planned | No direct implementation in this release; design and validation remain. |
+| Cosmetics | Pets | `pets` | Partial | Original Rune Orb, Ghost and Dragon meshes in third person; no speech bubbles or Jellyfish. |
+| Cosmetics | Walk Style | `walk-style` | Partial | Five local player-model limb poses and strength/movement controls; no server animation. |
+| Cosmetics | Emotes | `emotes` | Partial | Five local third-person model poses, loop/length/movement/strength controls; no server animation. |
 | Cosmetics | Break Animation | `break-animation` | Partial | Actual mining progress, fading ghost and debris; no replacement block mesh fracture. |
 | Cosmetics | Explosion Effects | `explosion-effects` | Partial | Actual explosion packet shockwaves/sparks, added to vanilla effects. |
 | Player | Inventory Tweaks | — | Planned | No direct implementation in this release; design and validation remain. |
-| Cosmetics | Storm Effects | — | Planned | No direct implementation in this release; design and validation remain. |
-| Cosmetics | Vitals | — | Planned | Persistent low-health threshold warning; current Health Pulse reacts to damage only. |
-| Cosmetics | Hand Tweaks | — | Planned | No direct implementation in this release; design and validation remain. |
+| Cosmetics | Storm Effects | `storm-effects` | Partial | Actual loaded lightning triggers branching bolt/column/spear, sparks/ripple/flash; no weather replacement. |
+| Cosmetics | Vitals | `vitals` | Partial | Real health/fire/underwater-air warning and optional heartbeat; no wearable vitals mesh. |
+| Cosmetics | Hand Tweaks | `hand-tweaks` | Partial | First-person transforms, item stretch/size/rotations, seven swing styles and equip/eat/hide controls; no full reference pose set. |
 | Render | Spawner Notifier | — | Planned | No direct implementation in this release; design and validation remain. |
 | Render | Stash Finder | — | Planned | No direct implementation in this release; design and validation remain. |
 | Render | Trajectories | `trajectories` | Partial | Held bow/trident/snowball/egg/pearl prediction against loaded blocks; no complete other-player future paths. |
-| Cosmetics | Spinbot | — | Planned | No direct implementation in this release; design and validation remain. |
+| Cosmetics | Spinbot | `spinbot` | Partial | Local player render-state yaw/head pitch only; camera/entity/server rotations remain unchanged. |
 | Movement | No Fall | — | Planned | No direct implementation in this release; design and validation remain. |
 | Movement | Fly | `fly` | Counterpart | Client velocity flight with collisions; no server flight grant or bypass. |
 | Movement | Speed | `speed` | Partial | Directional client speed; no anticheat modes or guaranteed Target Strafe integration. |

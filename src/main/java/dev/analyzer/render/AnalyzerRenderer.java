@@ -664,9 +664,12 @@ public final class AnalyzerRenderer {
 
     private void drawRadar(DrawContext draw) {
         int cx = 64, cy = 118, radius = 35;
+        float titleSize = HudWidgets.readableTtfScale(core, draw, 0.8f);
+        float smallSize = HudWidgets.readableTtfScale(core, draw, 0.65f);
+        float summarySize = HudWidgets.readableTtfScale(core, draw, 0.7f);
         GuiDraw.outlined(draw, 10, 57, 108, 133, 7, 0x5A4C7780, 0xD908141D);
-        GuiDraw.label(draw, client.textRenderer, "LOCAL RADAR", 20, 65, 0.8f, Palette.TEXT);
-        GuiDraw.label(draw, client.textRenderer, "N", cx - 2, cy - radius - 9, 0.65f, Palette.MUTED);
+        GuiDraw.label(draw, client.textRenderer, "LOCAL RADAR", 20, 65, titleSize, Palette.TEXT);
+        GuiDraw.label(draw, client.textRenderer, "N", cx - 2, cy - radius - 9, smallSize, Palette.MUTED);
         for (int ring = 1; ring <= 2; ring++) {
             double r = radius * ring / 2.0;
             for (int segment = 0; segment < 48; segment++) {
@@ -702,12 +705,12 @@ public final class AnalyzerRenderer {
         for (int i = 0; i < colors.length; i++) {
             int x = 20 + i * 24;
             draw.fill(x, 164, x + 3, 167, colors[i]);
-            GuiDraw.label(draw, client.textRenderer, legend[i], x + 6, 162, 0.65f, Palette.MUTED);
+            GuiDraw.label(draw, client.textRenderer, legend[i], x + 6, 162, smallSize, Palette.MUTED);
         }
         String summary = radarTargets.isEmpty() ? "0 selected targets" : radarTargets.size() + " targets · "
                 + Math.round(core.getNumber("entity-esp", "range")) + "m";
-        GuiDraw.label(draw, client.textRenderer, GuiDraw.truncate(client.textRenderer, summary, 92, 0.7f),
-                18, 178, 0.7f, radarTargets.isEmpty() ? Palette.MUTED : Palette.MINT);
+        GuiDraw.label(draw, client.textRenderer, GuiDraw.truncate(client.textRenderer, summary, 92, summarySize),
+                18, 178, summarySize, radarTargets.isEmpty() ? Palette.MUTED : Palette.MINT);
     }
 
     private void drawCrosshair(DrawContext draw) {

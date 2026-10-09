@@ -133,7 +133,7 @@
       "keybind": -1,
       "settings": {
         "theme": "Neon",
-        "scale": 1.0,
+        "scale": 0.6,
         "max-modules": 10,
         "snap": true,
         "show-disabled": false,
@@ -301,7 +301,15 @@
       "keybind": -1,
       "settings": {
         "duration": 0.7,
-        "style": "Bloom"
+        "style": "Bloom",
+        "range": 48.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "break-animation": {
@@ -310,7 +318,19 @@
       "settings": {
         "duration": 0.8,
         "debris": 20.0,
-        "progress": true
+        "progress": true,
+        "style": "Dissolve",
+        "range": 48.0,
+        "size": 0.06,
+        "spread": 1.0,
+        "gravity": 2.4,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "place-preview": {
@@ -318,7 +338,18 @@
       "keybind": -1,
       "settings": {
         "through-walls": false,
-        "opacity": 0.35
+        "opacity": 0.35,
+        "edges": true,
+        "fill": true,
+        "show-blocked": true,
+        "glide": true,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "block-highlight": {
@@ -326,7 +357,14 @@
       "keybind": -1,
       "settings": {
         "line-width": 2.0,
-        "pulse": true
+        "pulse": true,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "hit-particles": {
@@ -334,7 +372,21 @@
       "keybind": -1,
       "settings": {
         "duration": 0.7,
-        "count": 18.0
+        "count": 18.0,
+        "style": "Sparks",
+        "size": 0.06,
+        "spread": 1.0,
+        "speed": 1.3,
+        "gravity": 2.4,
+        "who": "Everything",
+        "range": 64.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "jump-circles": {
@@ -342,7 +394,16 @@
       "keybind": -1,
       "settings": {
         "duration": 1.0,
-        "size": 1.3
+        "size": 1.3,
+        "style": "Ripple",
+        "trigger": "Jump",
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "trails": {
@@ -350,7 +411,17 @@
       "keybind": -1,
       "settings": {
         "duration": 1.2,
-        "line-width": 2.0
+        "line-width": 2.0,
+        "style": "Ribbon",
+        "height": 0.15,
+        "size": 0.06,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "damage-numbers": {
@@ -358,7 +429,16 @@
       "keybind": -1,
       "settings": {
         "duration": 1.4,
-        "scale": 1.0
+        "scale": 1.0,
+        "rise": 0.8,
+        "distance": false,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "hit-markers": {
@@ -366,7 +446,17 @@
       "keybind": -1,
       "settings": {
         "duration": 0.4,
-        "size": 7.0
+        "size": 7.0,
+        "style": "Cross",
+        "thickness": 1.0,
+        "spin": 0.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "footsteps": {
@@ -374,7 +464,17 @@
       "keybind": -1,
       "settings": {
         "duration": 1.3,
-        "spacing": 0.7
+        "spacing": 0.7,
+        "style": "Rings",
+        "size": 0.32,
+        "max-prints": 24.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "death-effects": {
@@ -382,7 +482,18 @@
       "keybind": -1,
       "settings": {
         "duration": 1.6,
-        "count": 28.0
+        "count": 28.0,
+        "style": "Soul",
+        "who": "Everything",
+        "self": true,
+        "range": 64.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "projectile-trails": {
@@ -390,7 +501,20 @@
       "keybind": -1,
       "settings": {
         "duration": 1.5,
-        "line-width": 1.5
+        "line-width": 1.5,
+        "style": "Line",
+        "arrows": true,
+        "pearls": true,
+        "thrown": true,
+        "other": true,
+        "range": 64.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "pickup-streaks": {
@@ -398,7 +522,17 @@
       "keybind": -1,
       "settings": {
         "duration": 0.6,
-        "line-width": 2.0
+        "line-width": 2.0,
+        "size": 0.06,
+        "segments": 12.0,
+        "who": "Both",
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "teleport-effects": {
@@ -406,7 +540,17 @@
       "keybind": -1,
       "settings": {
         "duration": 1.2,
-        "threshold": 8.0
+        "threshold": 8.0,
+        "style": "Rings",
+        "size": 1.5,
+        "link": false,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "player-aura": {
@@ -414,7 +558,16 @@
       "keybind": -1,
       "settings": {
         "size": 0.9,
-        "speed": 1.0
+        "speed": 1.0,
+        "style": "Orbit",
+        "first-person": true,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "target-esp": {
@@ -422,7 +575,16 @@
       "keybind": -1,
       "settings": {
         "linger": 2.0,
-        "through-walls": false
+        "through-walls": false,
+        "style": "Orbit",
+        "size": 1.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "hole-esp": {
@@ -430,7 +592,14 @@
       "keybind": -1,
       "settings": {
         "radius": 8.0,
-        "through-walls": true
+        "through-walls": true,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "trajectories": {
@@ -438,7 +607,14 @@
       "keybind": -1,
       "settings": {
         "steps": 80.0,
-        "line-width": 1.5
+        "line-width": 1.5,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "item-esp": {
@@ -447,7 +623,14 @@
       "settings": {
         "range": 64.0,
         "through-walls": true,
-        "labels": true
+        "labels": true,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "nametags": {
@@ -458,7 +641,14 @@
         "players": true,
         "mobs": true,
         "through-walls": true,
-        "scale": 1.0
+        "scale": 1.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "explosion-effects": {
@@ -466,7 +656,18 @@
       "keybind": -1,
       "settings": {
         "duration": 1.2,
-        "size": 4.0
+        "size": 4.0,
+        "style": "Nova",
+        "count": 32.0,
+        "shockwave": true,
+        "range": 96.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "totem-pops": {
@@ -474,7 +675,16 @@
       "keybind": -1,
       "settings": {
         "duration": 1.5,
-        "count": 30.0
+        "count": 30.0,
+        "style": "Rings",
+        "size": 1.8,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "landing-impact": {
@@ -482,7 +692,16 @@
       "keybind": -1,
       "settings": {
         "duration": 0.8,
-        "size": 1.5
+        "size": 1.5,
+        "style": "Ripple",
+        "count": 12.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
       }
     },
     "health-pulse": {
@@ -490,7 +709,286 @@
       "keybind": -1,
       "settings": {
         "duration": 0.7,
-        "intensity": 0.6
+        "intensity": 0.6,
+        "style": "Edges",
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
+      }
+    },
+    "air-effects": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "style": "Fireflies",
+        "density": 48.0,
+        "radius": 12.0,
+        "clear-radius": 1.5,
+        "size": 0.06,
+        "speed": 0.6,
+        "wind": 0.3,
+        "link-range": 3.0,
+        "through-walls": false,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
+      }
+    },
+    "block-effects": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "on-place": true,
+        "on-break": true,
+        "style": "Crumble",
+        "block-colors": true,
+        "count": 24.0,
+        "size": 0.07,
+        "duration": 0.9,
+        "spread": 1.0,
+        "gravity": 2.4,
+        "range": 48.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
+      }
+    },
+    "damage-effects": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "who": "Everything",
+        "style": "Shatter",
+        "count": 20.0,
+        "size": 0.07,
+        "duration": 0.8,
+        "spread": 1.0,
+        "gravity": 2.4,
+        "damage-red": true,
+        "low-health": true,
+        "threshold": 6.0,
+        "range": 64.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
+      }
+    },
+    "contrails": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "style": "Streamers",
+        "who": "Self",
+        "elytra-only": true,
+        "min-speed": 0.25,
+        "duration": 2.0,
+        "line-width": 2.0,
+        "wing-spread": 0.7,
+        "speed-color": true,
+        "first-person": false,
+        "range": 96.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
+      }
+    },
+    "storm-effects": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "style": "Bolt",
+        "size": 32.0,
+        "branches": 4.0,
+        "duration": 0.8,
+        "sparks": true,
+        "scorch": true,
+        "scorch-time": 2.0,
+        "flash": true,
+        "flash-strength": 0.25,
+        "range": 128.0,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
+      }
+    },
+    "vitals": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "threshold": 8.0,
+        "style": "Pulse",
+        "strength": 0.6,
+        "heartbeat": false,
+        "burning": true,
+        "drowning": true,
+        "color-mode": "Natural",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "brightness": 1.0,
+        "color-speed": 1.0,
+        "color-pulse": false
+      }
+    },
+    "hit-sounds": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "sound": "Ding",
+        "volume": 0.65,
+        "pitch": 1.0,
+        "variation": 0.05,
+        "combo": true,
+        "kill-sound": "Lower"
+      }
+    },
+    "item-physics": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "tumble": 1.0,
+        "water-rock": true,
+        "water-strength": 0.2,
+        "ground-lift": 0.035
+      }
+    },
+    "hand-tweaks": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "swing": "Low",
+        "swing-strength": 0.4,
+        "cancel-swing": false,
+        "hold-pose": false,
+        "swing-pose": 0.35,
+        "equip-dip": 1.0,
+        "cancel-eat": false,
+        "hide-hands": false,
+        "hide-offhand": false,
+        "hand-scale": 1.0,
+        "main-x": 0.0,
+        "main-y": 0.0,
+        "main-z": 0.0,
+        "main-size": 1.0,
+        "main-tilt": 0.0,
+        "main-turn": 0.0,
+        "main-roll": 0.0,
+        "off-x": 0.0,
+        "off-y": 0.0,
+        "off-z": 0.0,
+        "off-size": 1.0,
+        "off-tilt": 0.0,
+        "off-turn": 0.0,
+        "off-roll": 0.0,
+        "stretch-x": 1.0,
+        "stretch-y": 1.0,
+        "stretch-z": 1.0
+      }
+    },
+    "crystal-chams": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "color": "Theme",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "model": "Vanilla",
+        "opacity": 0.85,
+        "glow": true,
+        "rings": true,
+        "size": 1.0,
+        "spin": 1.0,
+        "bounce": 1.0,
+        "base": "Default"
+      }
+    },
+    "cape": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "color": "Theme",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "style": "Trimmed",
+        "hem": "Straight",
+        "who": "Self",
+        "hide-elytra": true,
+        "hide-vanilla": true,
+        "length": 1.0,
+        "width": 1.0,
+        "flow": 1.0,
+        "ripple": 0.5,
+        "wind": 0.4,
+        "opacity": 0.9
+      }
+    },
+    "pets": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "color": "Theme",
+        "red": 121.0,
+        "green": 248.0,
+        "blue": 204.0,
+        "pet": "Rune Orb",
+        "position": "Shoulder",
+        "size": 1.0,
+        "speed": 1.0,
+        "opacity": 0.85
+      }
+    },
+    "emotes": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "emote": "Wave",
+        "loop": false,
+        "length": 4.0,
+        "stop-moving": true,
+        "strength": 1.0
+      }
+    },
+    "walk-style": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "style": "Swagger",
+        "strength": 1.0,
+        "only-moving": true
+      }
+    },
+    "spinbot": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "speed": 15.0,
+        "pitch": 0.0
       }
     },
     "kill-aura": {

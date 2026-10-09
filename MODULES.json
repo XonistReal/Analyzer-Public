@@ -653,7 +653,7 @@
         "id": "scale",
         "label": "HUD scale",
         "kind": "NUMBER",
-        "default": 1.0,
+        "default": 0.6,
         "min": 0.5,
         "max": 1.75,
         "step": 0.05
@@ -1386,8 +1386,82 @@
         "choices": [
           "Bloom",
           "Rise",
-          "Pop"
+          "Pop",
+          "Drop",
+          "Spin"
         ]
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 48.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1421,6 +1495,116 @@
         "label": "Mining progress",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "style",
+        "label": "Ghost style",
+        "kind": "CHOICE",
+        "default": "Dissolve",
+        "choices": [
+          "Dissolve",
+          "Chip",
+          "Brackets"
+        ]
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 48.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "size",
+        "label": "Debris size",
+        "kind": "NUMBER",
+        "default": 0.06,
+        "min": 0.02,
+        "max": 0.3,
+        "step": 0.01
+      },
+      {
+        "id": "spread",
+        "label": "Debris spread",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "gravity",
+        "label": "Debris gravity",
+        "kind": "NUMBER",
+        "default": 2.4,
+        "min": 0.0,
+        "max": 6.0,
+        "step": 0.2
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1445,6 +1629,93 @@
         "min": 0.05,
         "max": 0.7,
         "step": 0.05
+      },
+      {
+        "id": "edges",
+        "label": "Draw edges",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "fill",
+        "label": "Draw fill",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "show-blocked",
+        "label": "Show blocked placement",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "glide",
+        "label": "Ease position changes",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1469,6 +1740,69 @@
         "label": "Pulse",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1496,6 +1830,137 @@
         "min": 4.0,
         "max": 48.0,
         "step": 2.0
+      },
+      {
+        "id": "style",
+        "label": "Particle shape",
+        "kind": "CHOICE",
+        "default": "Sparks",
+        "choices": [
+          "Sparks",
+          "Shards",
+          "Gems",
+          "Arc"
+        ]
+      },
+      {
+        "id": "size",
+        "label": "Particle size",
+        "kind": "NUMBER",
+        "default": 0.06,
+        "min": 0.02,
+        "max": 0.3,
+        "step": 0.01
+      },
+      {
+        "id": "spread",
+        "label": "Spread",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "speed",
+        "label": "Particle speed",
+        "kind": "NUMBER",
+        "default": 1.3,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "gravity",
+        "label": "Gravity",
+        "kind": "NUMBER",
+        "default": 2.4,
+        "min": 0.0,
+        "max": 6.0,
+        "step": 0.2
+      },
+      {
+        "id": "who",
+        "label": "Hurt entities",
+        "kind": "CHOICE",
+        "default": "Everything",
+        "choices": [
+          "Everything",
+          "Players",
+          "Self"
+        ]
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1523,6 +1988,92 @@
         "min": 0.4,
         "max": 3.0,
         "step": 0.1
+      },
+      {
+        "id": "style",
+        "label": "Ripple shape",
+        "kind": "CHOICE",
+        "default": "Ripple",
+        "choices": [
+          "Ripple",
+          "Rings",
+          "Crown",
+          "Tile"
+        ]
+      },
+      {
+        "id": "trigger",
+        "label": "Trigger",
+        "kind": "CHOICE",
+        "default": "Jump",
+        "choices": [
+          "Jump",
+          "Land",
+          "Both"
+        ]
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1550,6 +2101,98 @@
         "min": 0.5,
         "max": 5.0,
         "step": 0.5
+      },
+      {
+        "id": "style",
+        "label": "Path shape",
+        "kind": "CHOICE",
+        "default": "Ribbon",
+        "choices": [
+          "Ribbon",
+          "Beads",
+          "Sparks"
+        ]
+      },
+      {
+        "id": "height",
+        "label": "Trail height",
+        "kind": "NUMBER",
+        "default": 0.15,
+        "min": 0.0,
+        "max": 1.8,
+        "step": 0.05
+      },
+      {
+        "id": "size",
+        "label": "Bead size",
+        "kind": "NUMBER",
+        "default": 0.06,
+        "min": 0.02,
+        "max": 0.3,
+        "step": 0.01
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1577,6 +2220,84 @@
         "min": 0.5,
         "max": 2.0,
         "step": 0.1
+      },
+      {
+        "id": "rise",
+        "label": "Rise distance",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 2.5,
+        "step": 0.1
+      },
+      {
+        "id": "distance",
+        "label": "Include distance",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1604,6 +2325,98 @@
         "min": 3.0,
         "max": 16.0,
         "step": 1.0
+      },
+      {
+        "id": "style",
+        "label": "Marker shape",
+        "kind": "CHOICE",
+        "default": "Cross",
+        "choices": [
+          "Cross",
+          "Corners",
+          "Dots"
+        ]
+      },
+      {
+        "id": "thickness",
+        "label": "Thickness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 3.0,
+        "step": 1.0
+      },
+      {
+        "id": "spin",
+        "label": "Rotation speed",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 5.0,
+        "step": 0.25
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1631,6 +2444,98 @@
         "min": 0.3,
         "max": 1.5,
         "step": 0.1
+      },
+      {
+        "id": "style",
+        "label": "Footprint shape",
+        "kind": "CHOICE",
+        "default": "Rings",
+        "choices": [
+          "Rings",
+          "Prints",
+          "Petals"
+        ]
+      },
+      {
+        "id": "size",
+        "label": "Print radius",
+        "kind": "NUMBER",
+        "default": 0.32,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.02
+      },
+      {
+        "id": "max-prints",
+        "label": "Maximum prints",
+        "kind": "NUMBER",
+        "default": 24.0,
+        "min": 4.0,
+        "max": 64.0,
+        "step": 2.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1658,6 +2563,106 @@
         "min": 8.0,
         "max": 48.0,
         "step": 4.0
+      },
+      {
+        "id": "style",
+        "label": "Death burst",
+        "kind": "CHOICE",
+        "default": "Soul",
+        "choices": [
+          "Soul",
+          "Shatter",
+          "Shockwave"
+        ]
+      },
+      {
+        "id": "who",
+        "label": "Entities",
+        "kind": "CHOICE",
+        "default": "Everything",
+        "choices": [
+          "Everything",
+          "Players",
+          "Hostiles"
+        ]
+      },
+      {
+        "id": "self",
+        "label": "Own death",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1685,6 +2690,113 @@
         "min": 0.5,
         "max": 4.0,
         "step": 0.5
+      },
+      {
+        "id": "style",
+        "label": "Trail shape",
+        "kind": "CHOICE",
+        "default": "Line",
+        "choices": [
+          "Line",
+          "Comet",
+          "Spiral"
+        ]
+      },
+      {
+        "id": "arrows",
+        "label": "Arrows and tridents",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pearls",
+        "label": "Ender pearls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "thrown",
+        "label": "Other thrown items",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "other",
+        "label": "Other projectiles",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1712,6 +2824,98 @@
         "min": 0.5,
         "max": 4.0,
         "step": 0.5
+      },
+      {
+        "id": "size",
+        "label": "Pickup bead size",
+        "kind": "NUMBER",
+        "default": 0.06,
+        "min": 0.02,
+        "max": 0.3,
+        "step": 0.01
+      },
+      {
+        "id": "segments",
+        "label": "Streak length",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 4.0,
+        "max": 24.0,
+        "step": 2.0
+      },
+      {
+        "id": "who",
+        "label": "Collectors",
+        "kind": "CHOICE",
+        "default": "Both",
+        "choices": [
+          "Self",
+          "Players",
+          "Both"
+        ]
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1739,6 +2943,95 @@
         "min": 4.0,
         "max": 32.0,
         "step": 1.0
+      },
+      {
+        "id": "style",
+        "label": "Arrival shape",
+        "kind": "CHOICE",
+        "default": "Rings",
+        "choices": [
+          "Rings",
+          "Vortex",
+          "Portal"
+        ]
+      },
+      {
+        "id": "size",
+        "label": "Radius",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "link",
+        "label": "Connect departure and arrival",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1766,6 +3059,86 @@
         "min": 0.2,
         "max": 3.0,
         "step": 0.1
+      },
+      {
+        "id": "style",
+        "label": "Ring arrangement",
+        "kind": "CHOICE",
+        "default": "Orbit",
+        "choices": [
+          "Orbit",
+          "Gyroscope",
+          "Rune"
+        ]
+      },
+      {
+        "id": "first-person",
+        "label": "Show own aura in first person",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1788,6 +3161,89 @@
       {
         "id": "through-walls",
         "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "style",
+        "label": "Target shape",
+        "kind": "CHOICE",
+        "default": "Orbit",
+        "choices": [
+          "Orbit",
+          "Box",
+          "Corners"
+        ]
+      },
+      {
+        "id": "size",
+        "label": "Size multiplier",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 2.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
         "kind": "BOOLEAN",
         "default": false
       }
@@ -1814,6 +3270,69 @@
         "label": "Through walls",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1841,6 +3360,69 @@
         "min": 0.5,
         "max": 4.0,
         "step": 0.5
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1871,6 +3453,69 @@
         "label": "Item labels",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1916,6 +3561,69 @@
         "min": 0.5,
         "max": 1.5,
         "step": 0.1
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1943,6 +3651,104 @@
         "min": 1.0,
         "max": 8.0,
         "step": 0.5
+      },
+      {
+        "id": "style",
+        "label": "Blast shape",
+        "kind": "CHOICE",
+        "default": "Nova",
+        "choices": [
+          "Nova",
+          "Implosion",
+          "Rings"
+        ]
+      },
+      {
+        "id": "count",
+        "label": "Spark count",
+        "kind": "NUMBER",
+        "default": 32.0,
+        "min": 0.0,
+        "max": 64.0,
+        "step": 4.0
+      },
+      {
+        "id": "shockwave",
+        "label": "Shockwave",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1970,6 +3776,89 @@
         "min": 8.0,
         "max": 48.0,
         "step": 2.0
+      },
+      {
+        "id": "style",
+        "label": "Pop shape",
+        "kind": "CHOICE",
+        "default": "Rings",
+        "choices": [
+          "Rings",
+          "Spiral",
+          "Crown"
+        ]
+      },
+      {
+        "id": "size",
+        "label": "Radius",
+        "kind": "NUMBER",
+        "default": 1.8,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -1997,6 +3886,88 @@
         "min": 0.5,
         "max": 3.0,
         "step": 0.1
+      },
+      {
+        "id": "style",
+        "label": "Impact shape",
+        "kind": "CHOICE",
+        "default": "Ripple",
+        "choices": [
+          "Ripple",
+          "Crown"
+        ]
+      },
+      {
+        "id": "count",
+        "label": "Debris count",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 0.0,
+        "max": 40.0,
+        "step": 2.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -2024,6 +3995,1830 @@
         "min": 0.1,
         "max": 1.0,
         "step": 0.1
+      },
+      {
+        "id": "style",
+        "label": "Edge shape",
+        "kind": "CHOICE",
+        "default": "Edges",
+        "choices": [
+          "Edges",
+          "Corners",
+          "Screen"
+        ]
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "air-effects",
+    "name": "Air Effects",
+    "category": "Cosmetics",
+    "description": "A bounded animated particle field around the camera, drawn in world space.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "style",
+        "label": "Ambient shape",
+        "kind": "CHOICE",
+        "default": "Fireflies",
+        "choices": [
+          "Fireflies",
+          "Embers",
+          "Snow",
+          "Stardust",
+          "Cubes",
+          "Network",
+          "Rings"
+        ]
+      },
+      {
+        "id": "density",
+        "label": "Particle count",
+        "kind": "NUMBER",
+        "default": 48.0,
+        "min": 12.0,
+        "max": 160.0,
+        "step": 4.0
+      },
+      {
+        "id": "radius",
+        "label": "Field radius",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 4.0,
+        "max": 24.0,
+        "step": 1.0
+      },
+      {
+        "id": "clear-radius",
+        "label": "Clear camera radius",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.5,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "size",
+        "label": "Particle size",
+        "kind": "NUMBER",
+        "default": 0.06,
+        "min": 0.02,
+        "max": 0.4,
+        "step": 0.01
+      },
+      {
+        "id": "speed",
+        "label": "Drift speed",
+        "kind": "NUMBER",
+        "default": 0.6,
+        "min": 0.1,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "wind",
+        "label": "Horizontal wind",
+        "kind": "NUMBER",
+        "default": 0.3,
+        "min": -2.0,
+        "max": 2.0,
+        "step": 0.1
+      },
+      {
+        "id": "link-range",
+        "label": "Network link distance",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "block-effects",
+    "name": "Block Effects",
+    "category": "Cosmetics",
+    "description": "Independent colored fragments or frames from actual placements and breaks.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "on-place",
+        "label": "On placement",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "on-break",
+        "label": "On break",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "style",
+        "label": "Fragment shape",
+        "kind": "CHOICE",
+        "default": "Crumble",
+        "choices": [
+          "Crumble",
+          "Shatter",
+          "Frame"
+        ]
+      },
+      {
+        "id": "block-colors",
+        "label": "Use block map colors",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "count",
+        "label": "Fragment count",
+        "kind": "NUMBER",
+        "default": 24.0,
+        "min": 4.0,
+        "max": 64.0,
+        "step": 4.0
+      },
+      {
+        "id": "size",
+        "label": "Fragment size",
+        "kind": "NUMBER",
+        "default": 0.07,
+        "min": 0.02,
+        "max": 0.3,
+        "step": 0.01
+      },
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.9,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "spread",
+        "label": "Spread",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "gravity",
+        "label": "Gravity",
+        "kind": "NUMBER",
+        "default": 2.4,
+        "min": 0.0,
+        "max": 6.0,
+        "step": 0.2
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 48.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "damage-effects",
+    "name": "Damage Effects",
+    "category": "Cosmetics",
+    "description": "Confirmed hurt bursts and an optional persistent low-health warning.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "who",
+        "label": "Hurt entities",
+        "kind": "CHOICE",
+        "default": "Everything",
+        "choices": [
+          "Everything",
+          "Players",
+          "Self"
+        ]
+      },
+      {
+        "id": "style",
+        "label": "Hurt burst",
+        "kind": "CHOICE",
+        "default": "Shatter",
+        "choices": [
+          "Bleed",
+          "Shatter",
+          "Shockwave"
+        ]
+      },
+      {
+        "id": "count",
+        "label": "Particle count",
+        "kind": "NUMBER",
+        "default": 20.0,
+        "min": 4.0,
+        "max": 48.0,
+        "step": 2.0
+      },
+      {
+        "id": "size",
+        "label": "Particle size",
+        "kind": "NUMBER",
+        "default": 0.07,
+        "min": 0.02,
+        "max": 0.3,
+        "step": 0.01
+      },
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "spread",
+        "label": "Spread",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "gravity",
+        "label": "Gravity",
+        "kind": "NUMBER",
+        "default": 2.4,
+        "min": 0.0,
+        "max": 6.0,
+        "step": 0.2
+      },
+      {
+        "id": "damage-red",
+        "label": "Natural damage red",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "low-health",
+        "label": "Low health edge pulse",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "threshold",
+        "label": "Low health (HP)",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 2.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "contrails",
+    "name": "Contrails",
+    "category": "Cosmetics",
+    "description": "Paired fading paths from real player motion, optionally restricted to elytra flight.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "style",
+        "label": "Trail shape",
+        "kind": "CHOICE",
+        "default": "Streamers",
+        "choices": [
+          "Vapour",
+          "Streamers",
+          "Embers"
+        ]
+      },
+      {
+        "id": "who",
+        "label": "Players",
+        "kind": "CHOICE",
+        "default": "Self",
+        "choices": [
+          "Self",
+          "Players",
+          "Both"
+        ]
+      },
+      {
+        "id": "elytra-only",
+        "label": "Only while gliding",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "min-speed",
+        "label": "Minimum speed (blocks/tick)",
+        "kind": "NUMBER",
+        "default": 0.25,
+        "min": 0.05,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "line-width",
+        "label": "Trail width",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.5,
+        "max": 5.0,
+        "step": 0.5
+      },
+      {
+        "id": "wing-spread",
+        "label": "Wing offset",
+        "kind": "NUMBER",
+        "default": 0.7,
+        "min": 0.2,
+        "max": 2.0,
+        "step": 0.1
+      },
+      {
+        "id": "speed-color",
+        "label": "Natural speed color",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "first-person",
+        "label": "Show own in first person",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "storm-effects",
+    "name": "Storm Effects",
+    "category": "Cosmetics",
+    "description": "Branching bolts, ground ripples and a flash on actual loaded lightning strikes.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "style",
+        "label": "Strike shape",
+        "kind": "CHOICE",
+        "default": "Bolt",
+        "choices": [
+          "Bolt",
+          "Column",
+          "Spear"
+        ]
+      },
+      {
+        "id": "size",
+        "label": "Strike height",
+        "kind": "NUMBER",
+        "default": 32.0,
+        "min": 8.0,
+        "max": 64.0,
+        "step": 4.0
+      },
+      {
+        "id": "branches",
+        "label": "Branches",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 0.0,
+        "max": 8.0,
+        "step": 1.0
+      },
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "sparks",
+        "label": "Ground sparks",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "scorch",
+        "label": "Ground ripple",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "scorch-time",
+        "label": "Ripple duration",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.5,
+        "max": 5.0,
+        "step": 0.25
+      },
+      {
+        "id": "flash",
+        "label": "Screen flash",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "flash-strength",
+        "label": "Flash strength",
+        "kind": "NUMBER",
+        "default": 0.25,
+        "min": 0.05,
+        "max": 0.6,
+        "step": 0.05
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "vitals",
+    "name": "Vitals",
+    "category": "Cosmetics",
+    "description": "A local warning driven by real health, fire and remaining underwater air.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "threshold",
+        "label": "Low health (HP)",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 2.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "style",
+        "label": "Warning style",
+        "kind": "CHOICE",
+        "default": "Pulse",
+        "choices": [
+          "Pulse",
+          "Steady",
+          "Corners"
+        ]
+      },
+      {
+        "id": "strength",
+        "label": "Edge intensity",
+        "kind": "NUMBER",
+        "default": 0.6,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.1
+      },
+      {
+        "id": "heartbeat",
+        "label": "Heartbeat sound",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "burning",
+        "label": "Warn while burning",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "drowning",
+        "label": "Warn on low underwater air",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "color-mode",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Natural",
+        "choices": [
+          "Natural",
+          "Theme",
+          "Custom",
+          "Rainbow"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brightness",
+        "label": "Color brightness",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "color-speed",
+        "label": "Color cycle speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 4.0,
+        "step": 0.1
+      },
+      {
+        "id": "color-pulse",
+        "label": "Pulse brightness",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "hit-sounds",
+    "name": "Hit Sounds",
+    "category": "Cosmetics",
+    "description": "Local vanilla sound cues on confirmed hurts of a recently attacked target.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "sound",
+        "label": "Hit sound",
+        "kind": "CHOICE",
+        "default": "Ding",
+        "choices": [
+          "Pop",
+          "Punch",
+          "Crit",
+          "Tick",
+          "Ding",
+          "Orb",
+          "Amethyst"
+        ]
+      },
+      {
+        "id": "volume",
+        "label": "Volume",
+        "kind": "NUMBER",
+        "default": 0.65,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "pitch",
+        "label": "Pitch",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.4,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "variation",
+        "label": "Pitch variation",
+        "kind": "NUMBER",
+        "default": 0.05,
+        "min": 0.0,
+        "max": 0.4,
+        "step": 0.01
+      },
+      {
+        "id": "combo",
+        "label": "Raise pitch on a hit combo",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "kill-sound",
+        "label": "Kill cue",
+        "kind": "CHOICE",
+        "default": "Lower",
+        "choices": [
+          "Off",
+          "Same",
+          "Lower",
+          "Ding"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "item-physics",
+    "name": "Item Physics",
+    "category": "Cosmetics",
+    "description": "Dropped-item models tumble in the air and rest on the ground; entity physics is unchanged.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "tumble",
+        "label": "Tumble speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 3.0,
+        "step": 0.05
+      },
+      {
+        "id": "water-rock",
+        "label": "Rock in water",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "water-strength",
+        "label": "Water rocking",
+        "kind": "NUMBER",
+        "default": 0.2,
+        "min": 0.0,
+        "max": 0.6,
+        "step": 0.02
+      },
+      {
+        "id": "ground-lift",
+        "label": "Ground clearance",
+        "kind": "NUMBER",
+        "default": 0.035,
+        "min": 0.01,
+        "max": 0.15,
+        "step": 0.005
+      }
+    ]
+  },
+  {
+    "id": "hand-tweaks",
+    "name": "Hand Tweaks",
+    "category": "Cosmetics",
+    "description": "Actual first-person hand/item transforms and swing/equip controls; does not alter attacks.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "swing",
+        "label": "Swing style",
+        "kind": "CHOICE",
+        "default": "Low",
+        "choices": [
+          "Vanilla",
+          "Low",
+          "Smooth",
+          "Stab",
+          "Slide",
+          "Spin",
+          "Tap"
+        ]
+      },
+      {
+        "id": "swing-strength",
+        "label": "Swing strength",
+        "kind": "NUMBER",
+        "default": 0.4,
+        "min": 0.05,
+        "max": 1.5,
+        "step": 0.05
+      },
+      {
+        "id": "cancel-swing",
+        "label": "Cancel swing",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "hold-pose",
+        "label": "Hold swing pose",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "swing-pose",
+        "label": "Held swing progress",
+        "kind": "NUMBER",
+        "default": 0.35,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "equip-dip",
+        "label": "Equip dip amount",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "cancel-eat",
+        "label": "Cancel eating animation",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "hide-hands",
+        "label": "Hide hands and items",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "hide-offhand",
+        "label": "Hide offhand item",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "hand-scale",
+        "label": "Hands and items scale",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.3,
+        "max": 1.5,
+        "step": 0.05
+      },
+      {
+        "id": "main-x",
+        "label": "Main hand X",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -1.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "main-y",
+        "label": "Main hand Y",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -1.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "main-z",
+        "label": "Main hand Z",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -1.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "main-size",
+        "label": "Main item size",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 2.5,
+        "step": 0.05
+      },
+      {
+        "id": "main-tilt",
+        "label": "Main item tilt",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -180.0,
+        "max": 180.0,
+        "step": 5.0
+      },
+      {
+        "id": "main-turn",
+        "label": "Main item turn",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -180.0,
+        "max": 180.0,
+        "step": 5.0
+      },
+      {
+        "id": "main-roll",
+        "label": "Main item roll",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -180.0,
+        "max": 180.0,
+        "step": 5.0
+      },
+      {
+        "id": "off-x",
+        "label": "Offhand hand X",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -1.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "off-y",
+        "label": "Offhand hand Y",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -1.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "off-z",
+        "label": "Offhand hand Z",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -1.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "off-size",
+        "label": "Offhand item size",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 2.5,
+        "step": 0.05
+      },
+      {
+        "id": "off-tilt",
+        "label": "Offhand item tilt",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -180.0,
+        "max": 180.0,
+        "step": 5.0
+      },
+      {
+        "id": "off-turn",
+        "label": "Offhand item turn",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -180.0,
+        "max": 180.0,
+        "step": 5.0
+      },
+      {
+        "id": "off-roll",
+        "label": "Offhand item roll",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -180.0,
+        "max": 180.0,
+        "step": 5.0
+      },
+      {
+        "id": "stretch-x",
+        "label": "Item width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.05
+      },
+      {
+        "id": "stretch-y",
+        "label": "Item height",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.05
+      },
+      {
+        "id": "stretch-z",
+        "label": "Item depth",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "crystal-chams",
+    "name": "Crystal Chams",
+    "category": "Cosmetics",
+    "description": "Tint the actual crystal model or replace it with an original Gem/Prism mesh. Normal depth remains.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "color",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Theme",
+        "choices": [
+          "Theme",
+          "Mint",
+          "Violet",
+          "Gold",
+          "Rainbow",
+          "Custom",
+          "Original"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "model",
+        "label": "Crystal model",
+        "kind": "CHOICE",
+        "default": "Vanilla",
+        "choices": [
+          "Vanilla",
+          "Gem",
+          "Prism"
+        ]
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity",
+        "kind": "NUMBER",
+        "default": 0.85,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "glow",
+        "label": "Vanilla model fullbright",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "rings",
+        "label": "Orbit bands",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "size",
+        "label": "Model size",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 2.5,
+        "step": 0.05
+      },
+      {
+        "id": "spin",
+        "label": "Spin rate",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": -3.0,
+        "max": 3.0,
+        "step": 0.05
+      },
+      {
+        "id": "bounce",
+        "label": "Bounce height",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "base",
+        "label": "Crystal base",
+        "kind": "CHOICE",
+        "default": "Default",
+        "choices": [
+          "Default",
+          "Always",
+          "Never"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cape",
+    "name": "Cape",
+    "category": "Cosmetics",
+    "description": "An original segmented cloth mesh with moving hems and colors, visible in third person. No image/GIF importer.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "color",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Theme",
+        "choices": [
+          "Theme",
+          "Mint",
+          "Violet",
+          "Gold",
+          "Rainbow",
+          "Custom"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "style",
+        "label": "Cape style",
+        "kind": "CHOICE",
+        "default": "Trimmed",
+        "choices": [
+          "Trimmed",
+          "Stripes",
+          "Gradient"
+        ]
+      },
+      {
+        "id": "hem",
+        "label": "Cape hem",
+        "kind": "CHOICE",
+        "default": "Straight",
+        "choices": [
+          "Straight",
+          "Pointed",
+          "Swallowtail"
+        ]
+      },
+      {
+        "id": "who",
+        "label": "Wearers",
+        "kind": "CHOICE",
+        "default": "Self",
+        "choices": [
+          "Self",
+          "Players",
+          "Both"
+        ]
+      },
+      {
+        "id": "hide-elytra",
+        "label": "Hide with Elytra",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hide-vanilla",
+        "label": "Hide Minecraft cape",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "length",
+        "label": "Cape length",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 1.6,
+        "step": 0.05
+      },
+      {
+        "id": "width",
+        "label": "Cape width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 1.6,
+        "step": 0.05
+      },
+      {
+        "id": "flow",
+        "label": "Flow",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "ripple",
+        "label": "Ripple",
+        "kind": "NUMBER",
+        "default": 0.5,
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "wind",
+        "label": "Wind",
+        "kind": "NUMBER",
+        "default": 0.4,
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity",
+        "kind": "NUMBER",
+        "default": 0.9,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "pets",
+    "name": "Pets",
+    "category": "Cosmetics",
+    "description": "Original animated Rune Orb, Ghost or Dragon geometry following your rendered body in third person.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "color",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Theme",
+        "choices": [
+          "Theme",
+          "Mint",
+          "Violet",
+          "Gold",
+          "Rainbow",
+          "Custom"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "pet",
+        "label": "Companion",
+        "kind": "CHOICE",
+        "default": "Rune Orb",
+        "choices": [
+          "Rune Orb",
+          "Ghost",
+          "Dragon"
+        ]
+      },
+      {
+        "id": "position",
+        "label": "Pet position",
+        "kind": "CHOICE",
+        "default": "Shoulder",
+        "choices": [
+          "Shoulder",
+          "Orbit",
+          "Behind"
+        ]
+      },
+      {
+        "id": "size",
+        "label": "Pet size",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 2.5,
+        "step": 0.05
+      },
+      {
+        "id": "speed",
+        "label": "Pet animation speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "opacity",
+        "label": "Pet opacity",
+        "kind": "NUMBER",
+        "default": 0.85,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "emotes",
+    "name": "Emotes",
+    "category": "Cosmetics",
+    "description": "Pose your local player model in third person. No camera change or server-side animation.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "emote",
+        "label": "Emote",
+        "kind": "CHOICE",
+        "default": "Wave",
+        "choices": [
+          "Wave",
+          "Dance",
+          "Bow",
+          "Sit",
+          "Cheer"
+        ]
+      },
+      {
+        "id": "loop",
+        "label": "Loop",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "length",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 0.5
+      },
+      {
+        "id": "stop-moving",
+        "label": "Stop when moving",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "strength",
+        "label": "Pose strength",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.3,
+        "max": 1.5,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "walk-style",
+    "name": "Walk Style",
+    "category": "Cosmetics",
+    "description": "Alternative local third-person arm, leg and body poses using the existing player model.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "style",
+        "label": "Walking style",
+        "kind": "CHOICE",
+        "default": "Swagger",
+        "choices": [
+          "Swagger",
+          "Robot",
+          "Ninja",
+          "Zombie",
+          "Bouncy"
+        ]
+      },
+      {
+        "id": "strength",
+        "label": "Pose strength",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.3,
+        "max": 1.5,
+        "step": 0.05
+      },
+      {
+        "id": "only-moving",
+        "label": "Only while walking",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "spinbot",
+    "name": "Spinbot",
+    "category": "Cosmetics",
+    "description": "Spin only your rendered player model. Camera, entity rotation and server packets are unchanged.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "speed",
+        "label": "Yaw speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 15.0,
+        "min": -180.0,
+        "max": 180.0,
+        "step": 5.0
+      },
+      {
+        "id": "pitch",
+        "label": "Rendered head pitch",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -90.0,
+        "max": 90.0,
+        "step": 5.0
       }
     ]
   },

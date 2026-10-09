@@ -12,7 +12,7 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 107, "Release catalogue includes 107 registered modules");
+            check(core.modules().size() == 122, "Release catalogue includes 122 registered modules");
             check(core.modules().stream().map(ModuleDefinition::id).distinct().count() == core.modules().size(), "Unique module IDs");
             for (Category category : Category.values())
                 check(core.modules().stream().anyMatch(module -> module.category() == category), "Populated category " + category);
@@ -22,6 +22,7 @@ public final class CoreSelfTest {
                     check(!core.isEnabled(module.id()), "Gameplay opt-in " + module.id());
             }
             check(core.getChoice("menu", "material").equals("Glass"), "Glass interface default");
+            equal(0.6, core.getNumber("hud", "scale"), "HUD defaults to 60 percent");
             core.setValue("menu", "accent", "Gold");
             check(core.getChoice("menu", "accent").equals("Gold"), "Interface theme choices");
             check(core.isEnabled("sky") && core.getChoice("sky", "preset").equals("Aurora"), "Visible sky defaults");
@@ -103,8 +104,8 @@ public final class CoreSelfTest {
             try (var files = Files.list(temporary)) {
                 check(files.noneMatch(path -> path.toString().endsWith(".tmp")), "Atomic write cleans temporary files");
             }
-            String[] names = {"cinematic", "classic", "neon", "hvh"};
-            String[] layouts = {"Workspace", "Classic", "Compact", "Classic"};
+            String[] names = {"cinematic", "classic", "neon", "studio", "hvh"};
+            String[] layouts = {"Workspace", "Classic", "Compact", "Workspace", "Classic"};
             Files.createDirectories(temporary.resolve("profiles"));
             for (int i = 0; i < names.length; i++) {
                 try (var resource = CoreSelfTest.class.getResourceAsStream("/assets/analyzer/profiles/" + names[i] + ".json")) {
@@ -113,6 +114,7 @@ public final class CoreSelfTest {
                 }
                 restored.loadProfile(names[i]);
                 check(restored.loadWarnings().isEmpty(), "Starter profile values load without warnings: " + names[i]);
+                equal(0.6, restored.getNumber("hud", "scale"), "Starter HUD at sixty percent: " + names[i]);
                 check(restored.getChoice("menu", "layout").equals(layouts[i]), "Starter profile layout: " + names[i]);
                 if (!names[i].equals("hvh"))
                     check(restored.modules().stream().filter(module -> module.category() == Category.COMBAT
