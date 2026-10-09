@@ -12,7 +12,15 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 10, "Complete module registry");
+            check(core.modules().size() == 107, "Release catalogue includes 107 registered modules");
+            check(core.modules().stream().map(ModuleDefinition::id).distinct().count() == core.modules().size(), "Unique module IDs");
+            for (Category category : Category.values())
+                check(core.modules().stream().anyMatch(module -> module.category() == category), "Populated category " + category);
+            for (ModuleDefinition module : core.modules()) {
+                check(module.settings().stream().map(Setting::id).distinct().count() == module.settings().size(), "Unique settings " + module.id());
+                if (module.category() == Category.COMBAT || module.category() == Category.MOVEMENT || module.category() == Category.HVH || module.category() == Category.PLAYER)
+                    check(!core.isEnabled(module.id()), "Gameplay opt-in " + module.id());
+            }
             check(core.getChoice("menu", "material").equals("Glass"), "Glass interface default");
             core.setValue("menu", "accent", "Gold");
             check(core.getChoice("menu", "accent").equals("Gold"), "Interface theme choices");
@@ -95,6 +103,25 @@ public final class CoreSelfTest {
             try (var files = Files.list(temporary)) {
                 check(files.noneMatch(path -> path.toString().endsWith(".tmp")), "Atomic write cleans temporary files");
             }
+            String[] names = {"cinematic", "classic", "neon", "hvh"};
+            String[] layouts = {"Workspace", "Classic", "Compact", "Classic"};
+            Files.createDirectories(temporary.resolve("profiles"));
+            for (int i = 0; i < names.length; i++) {
+                try (var resource = CoreSelfTest.class.getResourceAsStream("/assets/analyzer/profiles/" + names[i] + ".json")) {
+                    if (resource == null) throw new AssertionError("Missing starter profile " + names[i]);
+                    Files.copy(resource, temporary.resolve("profiles/" + names[i] + ".json"));
+                }
+                restored.loadProfile(names[i]);
+                check(restored.loadWarnings().isEmpty(), "Starter profile values load without warnings: " + names[i]);
+                check(restored.getChoice("menu", "layout").equals(layouts[i]), "Starter profile layout: " + names[i]);
+                if (!names[i].equals("hvh"))
+                    check(restored.modules().stream().filter(module -> module.category() == Category.COMBAT
+                        || module.category() == Category.HVH || module.category() == Category.MOVEMENT
+                        || module.category() == Category.PLAYER || (module.category() == Category.WORLD && !module.id().equals("sky")))
+                        .noneMatch(module -> restored.isEnabled(module.id())), "Visual starter profile keeps gameplay opt-in: " + names[i]);
+            }
+            check(restored.isEnabled("kill-aura") && restored.isEnabled("crystal-aura") && restored.isEnabled("surround")
+                && restored.isEnabled("auto-totem"), "Explicit HVH profile enables its documented modules");
             System.out.println("Analyzer core: " + assertions + " assertions passed.");
         } finally {
             try (var files = Files.walk(temporary)) {

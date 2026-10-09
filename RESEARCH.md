@@ -1,5 +1,7 @@
 # Analyzer research and implementation scope
 
+The comparison and scope table below record the initial research and **historical 0.2.0** implementation. Analyzer 0.3.0 adds three menus, editable HUD themes, event-driven visuals and opt-in combat/movement/world actions. Its current 107-module catalogue is in [MODULES.md](MODULES.md). The new [ROADMAP.md](ROADMAP.md) compares every one of the 163 entries in Temple.nz's official catalogue, with implemented scopes and missing behavior stated individually. Selected in-game evidence is in [VALIDATION.md](VALIDATION.md).
+
 Research date: October 8, 2026. Sources below are upstream repositories and official client documentation. Version statements describe the inspected branch or dated release, not every release a project has published. Repository activity and published feature lists are useful maintenance signals; they do not constitute a security audit or an independent performance benchmark.
 
 ## Client comparison
@@ -29,7 +31,7 @@ Analyzer's Java code, UI drawing and GLSL effects are original MIT-licensed work
 
 The core owns typed module definitions, validated values, enabled states and keyboard binds. Both the native screen and game adapter consume that same state. JSON configuration includes a schema version, bounded reads, safe profile names and atomic replacement when supported. The game-specific adapter connects Fabric callbacks and a small set of mixins to world/HUD drawing. GPU effects manage their own programs and scene-copy texture, restore OpenGL state, handle resize/reload disposal and disable themselves after a shader failure.
 
-## Implemented scope versus reference features
+## Historical 0.2.0 scope versus reference features
 
 | Area | Analyzer 0.2.0 implementation | Wider reference features outside this release |
 | --- | --- | --- |

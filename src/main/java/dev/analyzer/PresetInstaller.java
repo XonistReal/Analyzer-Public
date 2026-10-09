@@ -9,6 +9,7 @@ final class PresetInstaller {
     static void install(Path directory) throws IOException {
         installOnce(directory, ".presets-v1", new String[]{"aurora", "ember", "minimal"});
         installOnce(directory, ".presets-v2", new String[]{"showcase", "arctic", "cinder"});
+        installOnce(directory, ".presets-v3", new String[]{"cinematic", "classic", "neon", "hvh"});
     }
     private static void installOnce(Path directory, String markerName, String[] names) throws IOException {
         Path marker = directory.resolve(markerName);

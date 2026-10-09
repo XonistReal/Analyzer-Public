@@ -1,0 +1,3438 @@
+[
+  {
+    "id": "entity-esp",
+    "name": "Entity ESP",
+    "category": "Render",
+    "description": "Highlight nearby players, creatures and items.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "items",
+        "label": "Dropped items",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "labels",
+        "label": "Name and distance",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "health",
+        "label": "Health",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "radar",
+        "label": "Nearby target radar",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
+      },
+      {
+        "id": "style",
+        "label": "Box style",
+        "kind": "CHOICE",
+        "default": "Corners",
+        "choices": [
+          "Boxes",
+          "Corners",
+          "Screen"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "storage-esp",
+    "name": "Storage ESP",
+    "category": "World",
+    "description": "Highlight nearby containers.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "labels",
+        "label": "Container labels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": 16.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
+      },
+      {
+        "id": "style",
+        "label": "Box style",
+        "kind": "CHOICE",
+        "default": "Boxes",
+        "choices": [
+          "Boxes",
+          "Corners",
+          "Screen"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tracers",
+    "name": "Tracers",
+    "category": "Render",
+    "description": "Draw lines from your view to nearby entities.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "items",
+        "label": "Dropped items",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
+      }
+    ]
+  },
+  {
+    "id": "fullbright",
+    "name": "Fullbright",
+    "category": "World",
+    "description": "Lift world lighting for clearer exploration.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "gamma",
+        "label": "Brightness",
+        "kind": "NUMBER",
+        "default": 16.0,
+        "min": 1.0,
+        "max": 16.0,
+        "step": 0.5
+      }
+    ]
+  },
+  {
+    "id": "coordinates",
+    "name": "Coordinates",
+    "category": "HUD",
+    "description": "Show position and dimension in your HUD.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "show-dimension",
+        "label": "Show dimension",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "crosshair",
+    "name": "Crosshair",
+    "category": "HUD",
+    "description": "A crisp customizable crosshair.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "size",
+        "label": "Arm length",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 2.0,
+        "max": 20.0,
+        "step": 0.5
+      },
+      {
+        "id": "gap",
+        "label": "Center gap",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 0.0,
+        "max": 12.0,
+        "step": 0.5
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
+      }
+    ]
+  },
+  {
+    "id": "particles",
+    "name": "Particles",
+    "category": "Cosmetics",
+    "description": "Animated ambient particles in the Analyzer menu.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "density",
+        "label": "Density",
+        "kind": "NUMBER",
+        "default": 0.75,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "menu",
+    "name": "Interface",
+    "category": "Client",
+    "description": "Glass or solid panels, accent colors and motion control.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "material",
+        "label": "Panel material",
+        "kind": "CHOICE",
+        "default": "Glass",
+        "choices": [
+          "Glass",
+          "Solid"
+        ]
+      },
+      {
+        "id": "accent",
+        "label": "Accent color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "Mint",
+          "Violet",
+          "Gold"
+        ]
+      },
+      {
+        "id": "motion",
+        "label": "Motion amount",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "layout",
+        "label": "Menu layout",
+        "kind": "CHOICE",
+        "default": "Workspace",
+        "choices": [
+          "Workspace",
+          "Classic",
+          "Compact"
+        ]
+      },
+      {
+        "id": "classic-visual-x",
+        "label": "Render column X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-visual-y",
+        "label": "Render column Y",
+        "kind": "NUMBER",
+        "default": 25.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-visual-collapsed",
+        "label": "Render collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "classic-world-x",
+        "label": "World column X",
+        "kind": "NUMBER",
+        "default": 26.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-world-y",
+        "label": "World column Y",
+        "kind": "NUMBER",
+        "default": 25.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-world-collapsed",
+        "label": "World collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "classic-hud-x",
+        "label": "HUD column X",
+        "kind": "NUMBER",
+        "default": 50.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-hud-y",
+        "label": "HUD column Y",
+        "kind": "NUMBER",
+        "default": 25.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-hud-collapsed",
+        "label": "HUD collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "classic-combat-x",
+        "label": "Combat column X",
+        "kind": "NUMBER",
+        "default": 74.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-combat-y",
+        "label": "Combat column Y",
+        "kind": "NUMBER",
+        "default": 25.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-combat-collapsed",
+        "label": "Combat collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "classic-movement-x",
+        "label": "Movement column X",
+        "kind": "NUMBER",
+        "default": 98.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-movement-y",
+        "label": "Movement column Y",
+        "kind": "NUMBER",
+        "default": 25.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-movement-collapsed",
+        "label": "Movement collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "classic-hvh-x",
+        "label": "HVH column X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-hvh-y",
+        "label": "HVH column Y",
+        "kind": "NUMBER",
+        "default": 95.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-hvh-collapsed",
+        "label": "HVH collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "classic-player-x",
+        "label": "Player column X",
+        "kind": "NUMBER",
+        "default": 26.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-player-y",
+        "label": "Player column Y",
+        "kind": "NUMBER",
+        "default": 95.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-player-collapsed",
+        "label": "Player collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "classic-cosmetics-x",
+        "label": "Cosmetics column X",
+        "kind": "NUMBER",
+        "default": 50.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-cosmetics-y",
+        "label": "Cosmetics column Y",
+        "kind": "NUMBER",
+        "default": 95.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-cosmetics-collapsed",
+        "label": "Cosmetics collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "classic-client-x",
+        "label": "Client column X",
+        "kind": "NUMBER",
+        "default": 74.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-client-y",
+        "label": "Client column Y",
+        "kind": "NUMBER",
+        "default": 95.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "classic-client-collapsed",
+        "label": "Client collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "sky",
+    "name": "Sky Aurora",
+    "category": "World",
+    "description": "Animated sky curtains, stars and cosmic color above your world.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "preset",
+        "label": "Sky preset",
+        "kind": "CHOICE",
+        "default": "Aurora",
+        "choices": [
+          "Aurora",
+          "Nebula",
+          "Ember"
+        ]
+      },
+      {
+        "id": "intensity",
+        "label": "Intensity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "stars",
+        "label": "Twinkling stars",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "speed",
+        "label": "Animation speed",
+        "kind": "NUMBER",
+        "default": 0.6,
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "day-night",
+        "label": "Visible when",
+        "kind": "CHOICE",
+        "default": "Always",
+        "choices": [
+          "Always",
+          "Night"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shader",
+    "name": "Atmosphere",
+    "category": "Render",
+    "description": "Cinematic bloom and color grading. Sky Aurora controls the sky.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "preset",
+        "label": "Preset",
+        "kind": "CHOICE",
+        "default": "Aurora",
+        "choices": [
+          "Off",
+          "Aurora",
+          "Ember",
+          "Frost",
+          "Bloom"
+        ]
+      },
+      {
+        "id": "strength",
+        "label": "Strength",
+        "kind": "NUMBER",
+        "default": 0.75,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "hud",
+    "name": "HUD Studio",
+    "category": "HUD",
+    "description": "Theme, scale and position controls for your entire HUD.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "theme",
+        "label": "HUD theme",
+        "kind": "CHOICE",
+        "default": "Glass",
+        "choices": [
+          "Glass",
+          "Classic",
+          "Minimal",
+          "Neon"
+        ]
+      },
+      {
+        "id": "scale",
+        "label": "HUD scale",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 1.75,
+        "step": 0.05
+      },
+      {
+        "id": "max-modules",
+        "label": "Maximum list rows",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 3.0,
+        "max": 16.0,
+        "step": 1.0
+      },
+      {
+        "id": "snap",
+        "label": "Editor grid snapping",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "show-disabled",
+        "label": "Editor show disabled widgets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "coordinates-x",
+        "label": "Coordinates X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "coordinates-y",
+        "label": "Coordinates Y",
+        "kind": "NUMBER",
+        "default": 94.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "radar-x",
+        "label": "Radar X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "radar-y",
+        "label": "Radar Y",
+        "kind": "NUMBER",
+        "default": 26.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      }
+    ]
+  },
+  {
+    "id": "watermark",
+    "name": "Watermark",
+    "category": "HUD",
+    "description": "Analyzer identity and version badge.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "active-modules",
+    "name": "Active Modules",
+    "category": "HUD",
+    "description": "A bounded list of enabled gameplay modules.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 98.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "details",
+        "label": "ESP target details",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hud-modules",
+        "label": "Include HUD modules",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "fps",
+    "name": "FPS",
+    "category": "HUD",
+    "description": "Current client frames per second.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "ping",
+    "name": "Ping",
+    "category": "HUD",
+    "description": "Actual player latency reported by the server.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 17.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "speed-hud",
+    "name": "Speed HUD",
+    "category": "HUD",
+    "description": "Horizontal movement speed in blocks per second.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 32.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "units",
+        "label": "Speed units",
+        "kind": "CHOICE",
+        "default": "Blocks/s",
+        "choices": [
+          "Blocks/s",
+          "km/h"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "armor",
+    "name": "Armor",
+    "category": "HUD",
+    "description": "Equipped armor icons with remaining durability.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 50.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 86.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "durability",
+        "label": "Durability percentages",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "potions",
+    "name": "Potion Effects",
+    "category": "HUD",
+    "description": "Active effects, levels and remaining durations.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 98.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 55.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "target-hud",
+    "name": "Target HUD",
+    "category": "HUD",
+    "description": "Health and armor of your acquired combat or crosshair target.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 68.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 74.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "keybinds",
+    "name": "Keybinds",
+    "category": "HUD",
+    "description": "Assigned module binds with their enabled state.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 48.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "active-only",
+        "label": "Only active binds",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "inventory",
+    "name": "Inventory Preview",
+    "category": "HUD",
+    "description": "Your actual inventory in a compact three-row panel.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 50.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 68.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "counts",
+        "label": "Stack counts",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "compass",
+    "name": "Compass",
+    "category": "HUD",
+    "description": "Yaw-based cardinal direction and heading.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 50.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "biome",
+    "name": "Biome",
+    "category": "HUD",
+    "description": "Registry name of the biome at your current position.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 84.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "world-clock",
+    "name": "World Clock",
+    "category": "HUD",
+    "description": "World time of day and current day number.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 76.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "format",
+        "label": "Clock format",
+        "kind": "CHOICE",
+        "default": "24 hour",
+        "choices": [
+          "24 hour",
+          "12 hour"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "item-counter",
+    "name": "Item Counter",
+    "category": "HUD",
+    "description": "Count a selected resource in your inventory and offhand.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 81.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 86.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "item",
+        "label": "Count item",
+        "kind": "CHOICE",
+        "default": "Totems",
+        "choices": [
+          "Totems",
+          "Pearls",
+          "Crystals",
+          "Gapples",
+          "Arrows"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "keystrokes",
+    "name": "Keystrokes",
+    "category": "HUD",
+    "description": "Live movement, jump and mouse-button states.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 61.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "mouse",
+        "label": "Show mouse buttons",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "reach-display",
+    "name": "Target Distance",
+    "category": "HUD",
+    "description": "Measured camera distance to the current raycast hit.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "x",
+        "label": "HUD position X",
+        "kind": "NUMBER",
+        "default": 68.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "y",
+        "label": "HUD position Y",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "opacity",
+        "label": "Panel opacity",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "place-animation",
+    "name": "Place Animation",
+    "category": "Cosmetics",
+    "description": "Ease a colored block ghost into each successful placement.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.7,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "style",
+        "label": "Animation",
+        "kind": "CHOICE",
+        "default": "Bloom",
+        "choices": [
+          "Bloom",
+          "Rise",
+          "Pop"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "break-animation",
+    "name": "Break Animation",
+    "category": "Cosmetics",
+    "description": "Mining progress, dissolving block ghosts and debris on successful breaks.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "debris",
+        "label": "Debris count",
+        "kind": "NUMBER",
+        "default": 20.0,
+        "min": 4.0,
+        "max": 48.0,
+        "step": 4.0
+      },
+      {
+        "id": "progress",
+        "label": "Mining progress",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "place-preview",
+    "name": "Place Preview",
+    "category": "Cosmetics",
+    "description": "Show the actual adjacent or replaceable block position for your held block.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity",
+        "kind": "NUMBER",
+        "default": 0.35,
+        "min": 0.05,
+        "max": 0.7,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "block-highlight",
+    "name": "Block Highlight",
+    "category": "Render",
+    "description": "A pulsing outline of the block under your crosshair.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.5
+      },
+      {
+        "id": "pulse",
+        "label": "Pulse",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "hit-particles",
+    "name": "Hit Particles",
+    "category": "Cosmetics",
+    "description": "Colored sparks when loaded living entities are actually hurt.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.7,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "count",
+        "label": "Spark count",
+        "kind": "NUMBER",
+        "default": 18.0,
+        "min": 4.0,
+        "max": 48.0,
+        "step": 2.0
+      }
+    ]
+  },
+  {
+    "id": "jump-circles",
+    "name": "Jump Circles",
+    "category": "Cosmetics",
+    "description": "Expanding floor ripples when you leave the ground with upward velocity.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "size",
+        "label": "Radius",
+        "kind": "NUMBER",
+        "default": 1.3,
+        "min": 0.4,
+        "max": 3.0,
+        "step": 0.1
+      }
+    ]
+  },
+  {
+    "id": "trails",
+    "name": "Trails",
+    "category": "Cosmetics",
+    "description": "A fading ribbon following your actual movement.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.2,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.5,
+        "max": 5.0,
+        "step": 0.5
+      }
+    ]
+  },
+  {
+    "id": "damage-numbers",
+    "name": "Damage Numbers",
+    "category": "Cosmetics",
+    "description": "Floating numbers from actual health decreases of loaded living entities.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.4,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "scale",
+        "label": "Text size",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 2.0,
+        "step": 0.1
+      }
+    ]
+  },
+  {
+    "id": "hit-markers",
+    "name": "Hit Markers",
+    "category": "Cosmetics",
+    "description": "A brief crosshair flash when your recently attacked target is hurt.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.4,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "size",
+        "label": "Marker size",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 3.0,
+        "max": 16.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "footsteps",
+    "name": "Footsteps",
+    "category": "Cosmetics",
+    "description": "Small fading floor rings spaced along grounded movement.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.3,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "spacing",
+        "label": "Step spacing",
+        "kind": "NUMBER",
+        "default": 0.7,
+        "min": 0.3,
+        "max": 1.5,
+        "step": 0.1
+      }
+    ]
+  },
+  {
+    "id": "death-effects",
+    "name": "Death Effects",
+    "category": "Cosmetics",
+    "description": "A rising particle burst when a loaded living entity dies.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.6,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "count",
+        "label": "Particle count",
+        "kind": "NUMBER",
+        "default": 28.0,
+        "min": 8.0,
+        "max": 48.0,
+        "step": 4.0
+      }
+    ]
+  },
+  {
+    "id": "projectile-trails",
+    "name": "Projectile Trails",
+    "category": "Cosmetics",
+    "description": "Fading paths behind actual loaded projectiles.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.5
+      }
+    ]
+  },
+  {
+    "id": "pickup-streaks",
+    "name": "Pickup Streaks",
+    "category": "Cosmetics",
+    "description": "A curved streak from an item to the collector on real pickup packets.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.6,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.5
+      }
+    ]
+  },
+  {
+    "id": "teleport-effects",
+    "name": "Teleport Effects",
+    "category": "Cosmetics",
+    "description": "Paired energy rings on large local position changes.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.2,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "threshold",
+        "label": "Minimum distance",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 4.0,
+        "max": 32.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "player-aura",
+    "name": "Player Aura",
+    "category": "Cosmetics",
+    "description": "Rotating rings around your actual player position.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "size",
+        "label": "Radius",
+        "kind": "NUMBER",
+        "default": 0.9,
+        "min": 0.4,
+        "max": 2.0,
+        "step": 0.1
+      },
+      {
+        "id": "speed",
+        "label": "Orbit speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      }
+    ]
+  },
+  {
+    "id": "target-esp",
+    "name": "Target ESP",
+    "category": "Render",
+    "description": "Orbiting target rings on your crosshair target or recently attacked entity.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "linger",
+        "label": "Attack highlight (seconds)",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 5.0,
+        "step": 0.5
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
+  },
+  {
+    "id": "hole-esp",
+    "name": "Hole ESP",
+    "category": "Render",
+    "description": "Outline loaded single-block holes with resistant floors and walls.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "radius",
+        "label": "Scan radius",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 3.0,
+        "max": 12.0,
+        "step": 1.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "trajectories",
+    "name": "Trajectories",
+    "category": "Render",
+    "description": "Predict a held bow, trident, snowball, egg or pearl path against loaded blocks.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "steps",
+        "label": "Prediction steps",
+        "kind": "NUMBER",
+        "default": 80.0,
+        "min": 20.0,
+        "max": 160.0,
+        "step": 10.0
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.5
+      }
+    ]
+  },
+  {
+    "id": "item-esp",
+    "name": "Item ESP",
+    "category": "Render",
+    "description": "Independent glowing rings and beams on loaded dropped items.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "labels",
+        "label": "Item labels",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "nametags",
+    "name": "Nametags",
+    "category": "Render",
+    "description": "Independent readable names, health and distances for loaded players and mobs.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Range",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 8.0
+      },
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "mobs",
+        "label": "Mobs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "scale",
+        "label": "Text size",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 1.5,
+        "step": 0.1
+      }
+    ]
+  },
+  {
+    "id": "explosion-effects",
+    "name": "Explosion Effects",
+    "category": "Cosmetics",
+    "description": "Shockwave rings and sparks from actual nearby explosion packets.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.2,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "size",
+        "label": "Shockwave radius",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.5
+      }
+    ]
+  },
+  {
+    "id": "totem-pops",
+    "name": "Totem Pops",
+    "category": "Cosmetics",
+    "description": "Golden rings, sparks and a floating pop label on real totem-use statuses.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "count",
+        "label": "Spark count",
+        "kind": "NUMBER",
+        "default": 30.0,
+        "min": 8.0,
+        "max": 48.0,
+        "step": 2.0
+      }
+    ]
+  },
+  {
+    "id": "landing-impact",
+    "name": "Landing Impact",
+    "category": "Cosmetics",
+    "description": "A floor shockwave when a falling player lands.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "size",
+        "label": "Radius",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.1
+      }
+    ]
+  },
+  {
+    "id": "health-pulse",
+    "name": "Health Pulse",
+    "category": "Cosmetics",
+    "description": "A fading edge vignette when your local health decreases.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "duration",
+        "label": "Duration (seconds)",
+        "kind": "NUMBER",
+        "default": 0.7,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "intensity",
+        "label": "Intensity",
+        "kind": "NUMBER",
+        "default": 0.6,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.1
+      }
+    ]
+  },
+  {
+    "id": "kill-aura",
+    "name": "Kill Aura",
+    "category": "Combat",
+    "description": "Attack the nearest selected visible target within vanilla reach and cooldown.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "turn-speed",
+        "label": "Turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "cooldown",
+        "label": "Attack cooldown threshold",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "aim-assist",
+    "name": "Aim Assist",
+    "category": "Combat",
+    "description": "Smoothly turn toward a selected target while holding attack.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "turn-speed",
+        "label": "Turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 90.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "trigger-bot",
+    "name": "Trigger Bot",
+    "category": "Combat",
+    "description": "Attack a selected entity under your crosshair at the configured cooldown.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "turn-speed",
+        "label": "Turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "cooldown",
+        "label": "Attack cooldown threshold",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "auto-clicker",
+    "name": "Auto Clicker",
+    "category": "Combat",
+    "description": "Repeat entity attacks while you hold attack; respects reach and cooldown.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "turn-speed",
+        "label": "Turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "cooldown",
+        "label": "Attack cooldown threshold",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "cps",
+        "label": "Maximum clicks per second",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "auto-weapon",
+    "name": "Auto Weapon",
+    "category": "Combat",
+    "description": "Select a hotbar melee weapon by its material/damage estimate while attacking.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "shield-breaker",
+    "name": "Shield Breaker",
+    "category": "Combat",
+    "description": "Select a hotbar axe and attack a visible blocking target at normal reach.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "bow-aimbot",
+    "name": "Bow Aimbot",
+    "category": "Combat",
+    "description": "Aim a drawn bow at a visible target with velocity lead and gravity compensation.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 48.0,
+        "min": 1.0,
+        "max": 64.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "turn-speed",
+        "label": "Turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 90.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "criticals",
+    "name": "Criticals",
+    "category": "Combat",
+    "description": "Jump before melee attacks, then attack in the ordinary falling phase. Hold attack or enable an aura.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "turn-speed",
+        "label": "Turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "cooldown",
+        "label": "Attack cooldown threshold",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "crystal-aura",
+    "name": "Crystal Aura",
+    "category": "HVH",
+    "description": "Place crystals on real obsidian/bedrock and break reachable enemy-near crystals. No damage prediction.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "delay",
+        "label": "Action interval (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "place",
+        "label": "Place crystals",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "break",
+        "label": "Break crystals",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "cooldown",
+        "label": "Break cooldown threshold",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "self-distance",
+        "label": "Minimum self distance",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 2.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "health",
+        "label": "Minimum health",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "anchor-aura",
+    "name": "Anchor Aura",
+    "category": "HVH",
+    "description": "Place, charge and use anchors only in dimensions where they explode. No damage prediction.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "delay",
+        "label": "Action interval (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "self-distance",
+        "label": "Minimum self distance",
+        "kind": "NUMBER",
+        "default": 3.5,
+        "min": 2.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "health",
+        "label": "Minimum health",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "surround",
+    "name": "Surround",
+    "category": "HVH",
+    "description": "Place hotbar obsidian around your feet, one normal interaction at a time.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "delay",
+        "label": "Placement interval (ticks)",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "support",
+        "label": "Build lower supports",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "auto-trap",
+    "name": "Auto Trap",
+    "category": "HVH",
+    "description": "Place obsidian around a selected target and above its head with ordinary block use.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "delay",
+        "label": "Action interval (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "auto-web",
+    "name": "Auto Web",
+    "category": "HVH",
+    "description": "Place hotbar cobweb at a selected target\u0027s feet when support and reach permit.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "delay",
+        "label": "Action interval (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "hole-filler",
+    "name": "Hole Filler",
+    "category": "HVH",
+    "description": "Fill nearby one-block holes with a solid floor and four solid walls using obsidian.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Search range",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 5.0,
+        "step": 0.5
+      },
+      {
+        "id": "delay",
+        "label": "Placement interval (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "target-strafe",
+    "name": "Target Strafe",
+    "category": "HVH",
+    "description": "Move tangentially around the nearest selected visible target; collision remains active.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Target range",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Field of view",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 20.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "radius",
+        "label": "Orbit radius",
+        "kind": "NUMBER",
+        "default": 2.5,
+        "min": 1.0,
+        "max": 5.0,
+        "step": 0.25
+      },
+      {
+        "id": "speed",
+        "label": "Horizontal speed",
+        "kind": "NUMBER",
+        "default": 0.22,
+        "min": 0.05,
+        "max": 0.6,
+        "step": 0.01
+      },
+      {
+        "id": "clockwise",
+        "label": "Clockwise",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "keep-sprint",
+    "name": "Keep Sprint",
+    "category": "Movement",
+    "description": "Hold the normal sprint input while moving forward and able to sprint.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "auto-walk",
+    "name": "Auto Walk",
+    "category": "Movement",
+    "description": "Hold forward while the world is focused; releases the input when disabled.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "speed",
+    "name": "Speed",
+    "category": "Movement",
+    "description": "Set horizontal client velocity while directional input is held; servers may correct it.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "speed",
+        "label": "Speed (blocks/tick)",
+        "kind": "NUMBER",
+        "default": 0.35,
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "fly",
+    "name": "Fly",
+    "category": "Movement",
+    "description": "Client velocity flight with jump/sneak vertical control; does not grant server flight permission.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "speed",
+        "label": "Flight speed",
+        "kind": "NUMBER",
+        "default": 0.35,
+        "min": 0.05,
+        "max": 1.0,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "step",
+    "name": "Step",
+    "category": "Movement",
+    "description": "Temporarily raise the client step-height attribute; servers may correct movement.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "height",
+        "label": "Step height",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.6,
+        "max": 2.5,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "parkour",
+    "name": "Parkour",
+    "category": "Movement",
+    "description": "Jump when approaching an unsupported edge while moving on the ground.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "safe-walk",
+    "name": "Safe Walk",
+    "category": "Movement",
+    "description": "Use vanilla ledge clipping without requiring the sneak key.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "fast-ladder",
+    "name": "Fast Ladder",
+    "category": "Movement",
+    "description": "Increase upward velocity while climbing with forward or jump input.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "speed",
+        "label": "Climb speed",
+        "kind": "NUMBER",
+        "default": 0.28,
+        "min": 0.1,
+        "max": 0.6,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "reverse-step",
+    "name": "Reverse Step",
+    "category": "Movement",
+    "description": "Accelerate downward when falling toward a nearby floor.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "speed",
+        "label": "Downward speed",
+        "kind": "NUMBER",
+        "default": 0.8,
+        "min": 0.1,
+        "max": 2.0,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "fast-fall",
+    "name": "Fast Fall",
+    "category": "Movement",
+    "description": "Accelerate an existing fall after the configured distance; no fall-damage spoof.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "speed",
+        "label": "Downward speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.2,
+        "max": 3.0,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "glide",
+    "name": "Glide",
+    "category": "Movement",
+    "description": "Limit ordinary falling velocity outside fluids; servers may correct it.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "speed",
+        "label": "Fall speed",
+        "kind": "NUMBER",
+        "default": 0.1,
+        "min": 0.02,
+        "max": 0.5,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "high-jump",
+    "name": "High Jump",
+    "category": "Movement",
+    "description": "Increase upward velocity at the start of a normal jump.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "height",
+        "label": "Upward velocity",
+        "kind": "NUMBER",
+        "default": 0.7,
+        "min": 0.42,
+        "max": 1.5,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "long-jump",
+    "name": "Long Jump",
+    "category": "Movement",
+    "description": "Add horizontal velocity at the start of a normal directional jump.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "speed",
+        "label": "Jump speed",
+        "kind": "NUMBER",
+        "default": 0.65,
+        "min": 0.2,
+        "max": 1.5,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "elytra-boost",
+    "name": "Elytra Boost",
+    "category": "Movement",
+    "description": "Add a bounded impulse in the view direction while already gliding.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "thrust",
+        "label": "Impulse per tick",
+        "kind": "NUMBER",
+        "default": 0.035,
+        "min": 0.005,
+        "max": 0.1,
+        "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "ground-strafe",
+    "name": "Ground Strafe",
+    "category": "Movement",
+    "description": "Align existing horizontal momentum with your ground movement input.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "auto-eat",
+    "name": "Auto Eat",
+    "category": "Player",
+    "description": "Eat hotbar food below a hunger threshold; temporarily owns and restores use input/slot.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "hunger",
+        "label": "Eat below hunger",
+        "kind": "NUMBER",
+        "default": 16.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "auto-gapple",
+    "name": "Auto Gapple",
+    "category": "Player",
+    "description": "Use a hotbar golden apple below a health threshold.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "health",
+        "label": "Eat below health",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "auto-totem",
+    "name": "Auto Totem",
+    "category": "Player",
+    "description": "Swap an inventory totem into the offhand through the normal player inventory handler.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "auto-armor",
+    "name": "Auto Armor",
+    "category": "Player",
+    "description": "Equip stronger material-tier armor through guarded normal inventory quick moves.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "auto-tool",
+    "name": "Auto Tool",
+    "category": "Player",
+    "description": "Choose the fastest hotbar tool for the block you are actively mining.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "refill",
+    "name": "Refill",
+    "category": "Player",
+    "description": "Swap larger matching inventory stacks into low hotbar stacks.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "threshold",
+        "label": "Refill below count",
+        "kind": "NUMBER",
+        "default": 16.0,
+        "min": 1.0,
+        "max": 32.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "anti-afk",
+    "name": "Anti AFK",
+    "category": "Player",
+    "description": "Periodically turn and jump using ordinary input, while no menu is open.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "interval",
+        "label": "Interval (seconds)",
+        "kind": "NUMBER",
+        "default": 30.0,
+        "min": 5.0,
+        "max": 120.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "auto-respawn",
+    "name": "Auto Respawn",
+    "category": "Player",
+    "description": "Request an ordinary respawn after the death screen delay.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "delay",
+        "label": "Delay (ticks)",
+        "kind": "NUMBER",
+        "default": 20.0,
+        "min": 1.0,
+        "max": 100.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "durability-alert",
+    "name": "Durability Alert",
+    "category": "Player",
+    "description": "Show a periodic warning for low-durability equipped items.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "threshold",
+        "label": "Remaining durability (%)",
+        "kind": "NUMBER",
+        "default": 15.0,
+        "min": 1.0,
+        "max": 50.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "auto-fish",
+    "name": "Auto Fish",
+    "category": "Player",
+    "description": "Reel on the server-synchronized caught-fish flag, then optionally cast again.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "cast",
+        "label": "Automatically cast",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "delay",
+        "label": "Cast/reel interval (ticks)",
+        "kind": "NUMBER",
+        "default": 20.0,
+        "min": 5.0,
+        "max": 100.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "scaffold",
+    "name": "Scaffold",
+    "category": "World",
+    "description": "Place hotbar blocks underneath your feet using ordinary block interactions.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "delay",
+        "label": "Placement delay (ticks)",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 2.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "tower",
+    "name": "Tower",
+    "category": "World",
+    "description": "While holding jump, rise onto automatically placed hotbar blocks.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "height",
+        "label": "Jump velocity",
+        "kind": "NUMBER",
+        "default": 0.42,
+        "min": 0.42,
+        "max": 0.7,
+        "step": 0.02
+      }
+    ]
+  },
+  {
+    "id": "air-place",
+    "name": "Air Place",
+    "category": "World",
+    "description": "While holding use, attempt to place a block at your crosshair in empty air.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "distance",
+        "label": "Placement distance",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 4.0,
+        "step": 0.25
+      }
+    ]
+  },
+  {
+    "id": "nuker",
+    "name": "Nuker",
+    "category": "World",
+    "description": "Mine nearby reachable blocks one at a time with normal mining progress.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Interaction range",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 4.5,
+        "step": 0.25
+      }
+    ]
+  },
+  {
+    "id": "auto-farm",
+    "name": "Auto Farm",
+    "category": "World",
+    "description": "Harvest mature crops and replant empty farmland using hotbar seeds.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Interaction range",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 4.5,
+        "step": 0.25
+      }
+    ]
+  },
+  {
+    "id": "auto-tunnel",
+    "name": "Auto Tunnel",
+    "category": "World",
+    "description": "Mine a two-block-tall path in the direction you face.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Interaction range",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 4.5,
+        "step": 0.25
+      }
+    ]
+  },
+  {
+    "id": "bed-breaker",
+    "name": "Bed Breaker",
+    "category": "World",
+    "description": "Find and mine reachable beds using normal mining progress.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Interaction range",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 4.5,
+        "step": 0.25
+      }
+    ]
+  },
+  {
+    "id": "flatten",
+    "name": "Flatten",
+    "category": "World",
+    "description": "Mine reachable blocks above your standing level; preserve the floor.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Interaction range",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 4.5,
+        "step": 0.25
+      }
+    ]
+  },
+  {
+    "id": "speed-mine",
+    "name": "Speed Mine",
+    "category": "World",
+    "description": "Remove the client delay between ordinary block breaks; server mining rules still apply.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "vein-miner",
+    "name": "Vein Miner",
+    "category": "World",
+    "description": "After a manual break, mine connected blocks of the same type within reach.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Interaction range",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 4.5,
+        "step": 0.25
+      },
+      {
+        "id": "limit",
+        "label": "Connected block limit",
+        "kind": "NUMBER",
+        "default": 32.0,
+        "min": 4.0,
+        "max": 64.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "no-block-interact",
+    "name": "No Block Interact",
+    "category": "World",
+    "description": "Use block placement against containers without opening them.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "chest-stealer",
+    "name": "Chest Stealer",
+    "category": "Player",
+    "description": "Quick-move items from an open container at a bounded rate.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "delay",
+        "label": "Transfer delay (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 2.0,
+        "max": 20.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "middle-click-friend",
+    "name": "Middle Click Friend",
+    "category": "Player",
+    "description": "Middle-click a player to add or remove a locally saved friend.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "player-detection",
+    "name": "Player Detection",
+    "category": "Player",
+    "description": "Notify locally when a non-friend enters your selected radius.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Detection range",
+        "kind": "NUMBER",
+        "default": 48.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 4.0
+      }
+    ]
+  },
+  {
+    "id": "notifier",
+    "name": "Notifier",
+    "category": "Player",
+    "description": "Local messages for loaded players arriving or departing.",
+    "defaultEnabled": false,
+    "settings": []
+  },
+  {
+    "id": "coord-snapper",
+    "name": "Coord Snapper",
+    "category": "Player",
+    "description": "Copy your coordinates to the clipboard, then turn off automatically.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "nether",
+        "label": "Include Nether conversion",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  }
+]

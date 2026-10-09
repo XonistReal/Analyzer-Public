@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.core.ModuleDefinition;
 import dev.analyzer.ui.GuiDraw;
+import dev.analyzer.ui.HudWidgets;
 import dev.analyzer.ui.Palette;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -561,32 +562,17 @@ public final class AnalyzerRenderer {
     private List<HudRect> reservedHudAreas(DrawContext draw, float scale, List<ModuleDefinition> enabled) {
         List<HudRect> reserved = new ArrayList<>();
         if (!client.getDebugHud().shouldShowDebugHud()) {
-            reserved.add(HudRect.scaled(8, 8, 150, 41, scale));
-            int logicalWidth = Math.round(draw.getScaledWindowWidth() / scale);
-            int logicalHeight = Math.round(draw.getScaledWindowHeight() / scale);
-            if (core.isEnabled("entity-esp") && core.getBoolean("entity-esp", "radar") && logicalHeight >= 240) {
-                reserved.add(HudRect.scaled(8, 55, 112, 137, scale));
+            for (HudWidgets.WidgetBounds widget : HudWidgets.bounds(core, draw, false)) {
+                reserved.add(new HudRect(widget.x(), widget.y(), widget.width(), widget.height()));
             }
-            int y = 12;
-            for (ModuleDefinition module : enabled) {
-                boolean targetModule = isTargetModule(module.id());
-                String detail = targetModule ? GuiDraw.truncate(client.textRenderer, status(module.id()), 175, 0.7f) : "";
-                int rowWidth = Math.round(Math.max(GuiDraw.width(client.textRenderer, module.name(), 1),
-                        GuiDraw.width(client.textRenderer, detail, 0.7f))) + 18;
-                int rowHeight = targetModule ? 29 : 18;
-                reserved.add(HudRect.scaled(logicalWidth - rowWidth - 12, y - 2, rowWidth + 4, rowHeight + 4, scale));
-                y += rowHeight + 2;
-            }
-            if (core.isEnabled("coordinates")) {
-                String coordinates = "X " + client.player.getBlockX() + "   Y " + client.player.getBlockY() + "   Z " + client.player.getBlockZ();
-                boolean dimension = core.getBoolean("coordinates", "show-dimension");
-                int cardHeight = dimension ? 34 : 23;
-                int cardWidth = (int) Math.ceil(Math.max(GuiDraw.width(client.textRenderer, coordinates, 1),
-                        dimension ? GuiDraw.width(client.textRenderer, dimensionName(), 0.8f) : 0)) + 20;
-                reserved.add(HudRect.scaled(8, logicalHeight - cardHeight - 12, cardWidth + 4, cardHeight + 4, scale));
+            if (core.isEnabled("hud") && core.isEnabled("entity-esp") && core.getBoolean("entity-esp", "radar")) {
+                int logicalWidth = Math.round(draw.getScaledWindowWidth() / scale);
+                int logicalHeight = Math.round(draw.getScaledWindowHeight() / scale);
+                int x = (int) Math.round(HudWidgets.position(core, "radar", true) * Math.max(0, logicalWidth - 108) / 100);
+                int y = (int) Math.round(HudWidgets.position(core, "radar", false) * Math.max(0, logicalHeight - 133) / 100);
+                reserved.add(HudRect.scaled(x, y, 108, 133, scale));
             }
         }
-        // Vanilla hotbar and crosshair remain readable too; these already use native GUI coordinates.
         int width = draw.getScaledWindowWidth(), height = draw.getScaledWindowHeight();
         reserved.add(new HudRect(Math.max(0, width / 2 - 94), Math.max(0, height - 27), 188, 27));
         reserved.add(new HudRect(width / 2 - 12, height / 2 - 12, 24, 24));
@@ -627,67 +613,43 @@ public final class AnalyzerRenderer {
     }
 
     private void renderHud(DrawContext draw, RenderTickCounter tickCounter) {
-        if (client.world == null || client.player == null || client.options.hudHidden
-                || client.currentScreen != null) return;
+        if (client.world == null || client.player == null || client.options.hudHidden || client.currentScreen != null) return;
         if (core.isEnabled("crosshair") && client.options.getPerspective().isFirstPerson()) drawCrosshair(draw);
-        float hudScale = Math.min(1, draw.getScaledWindowWidth() / 720f);
-        List<ModuleDefinition> enabled = core.modules().stream().filter(module -> core.isEnabled(module.id()))
-                .sorted(Comparator.comparingDouble((ModuleDefinition module) ->
-                        GuiDraw.width(client.textRenderer, module.name(), 1)).reversed()).toList();
+        float hudScale = HudWidgets.scale(core, draw);
         List<ScreenLabelRequest> labelRequests = new ArrayList<>();
         List<HudRect> boxes = new ArrayList<>();
         drawScreenTargets(draw, "entity-esp", screenEntities, labelRequests, boxes);
         drawScreenTargets(draw, "storage-esp", screenStorage, labelRequests, boxes);
-        drawScreenLabels(draw, labelRequests, boxes, reservedHudAreas(draw, hudScale, enabled));
+        drawScreenLabels(draw, labelRequests, boxes, reservedHudAreas(draw, hudScale, List.of()));
         if (client.getDebugHud().shouldShowDebugHud()) return;
-        int width = Math.round(draw.getScaledWindowWidth() / hudScale);
-        int height = Math.round(draw.getScaledWindowHeight() / hudScale);
-        draw.getMatrices().push();
-        draw.getMatrices().scale(hudScale, hudScale, 1);
-        try {
-        int fps = client.getCurrentFps();
-        GuiDraw.outlined(draw, 10, 10, 146, 37, 7, 0x483C6668, 0xD20B141A);
-        GuiDraw.rounded(draw, 18, 18, 20, 21, 5, 0x2279F8CC);
-        GuiDraw.logo(draw, 19, 18, 18, Palette.MINT);
-        GuiDraw.label(draw, client.textRenderer, "ANALYZER", 45, 17, 1.24f, Palette.TEXT);
-        GuiDraw.label(draw, client.textRenderer, CLIENT_VERSION + "  /  " + fps + " FPS", 46, 33, 0.8f, Palette.MUTED);
-        draw.fill(145, 20, 147, 22, Palette.MINT);
-        if (core.isEnabled("entity-esp") && core.getBoolean("entity-esp", "radar") && height >= 240) drawRadar(draw);
-
-        int y = 12;
-        for (int i = 0; i < enabled.size(); i++) {
-            ModuleDefinition module = enabled.get(i);
-            boolean targetModule = isTargetModule(module.id());
-            String detail = targetModule ? status(module.id()) : "";
-            detail = GuiDraw.truncate(client.textRenderer, detail, 175, 0.7f);
-            int rowWidth = Math.round(Math.max(GuiDraw.width(client.textRenderer, module.name(), 1),
-                    GuiDraw.width(client.textRenderer, detail, 0.7f))) + 18;
-            int x = width - rowWidth - 10;
-            int accent = Palette.mix(Palette.MINT, Palette.VIOLET, i / (double) Math.max(1, enabled.size() - 1));
-            int rowHeight = targetModule ? 29 : 18;
-            GuiDraw.rounded(draw, x, y, rowWidth, rowHeight, 4, 0xBD0B141A);
-            draw.fill(width - 12, y + 4, width - 10, y + 14, accent);
-            GuiDraw.label(draw, client.textRenderer, module.name(), x + 7, y + 4, 1, accent);
-            if (targetModule) GuiDraw.label(draw, client.textRenderer, detail, x + 7, y + 18, 0.7f, Palette.MUTED);
-            y += rowHeight + 2;
-        }
-
-        if (core.isEnabled("coordinates")) {
-            String coordinates = "X " + client.player.getBlockX() + "   Y " + client.player.getBlockY()
-                    + "   Z " + client.player.getBlockZ();
-            String dimension = dimensionName();
-            boolean showDimension = core.getBoolean("coordinates", "show-dimension");
-            int cardHeight = showDimension ? 34 : 23;
-            int cardWidth = (int) Math.ceil(Math.max(GuiDraw.width(client.textRenderer, coordinates, 1),
-                    showDimension ? GuiDraw.width(client.textRenderer, dimension, 0.8f) : 0)) + 20;
-            int cy = height - cardHeight - 10;
-            GuiDraw.outlined(draw, 10, cy, cardWidth, cardHeight, 6, 0x483C6668, 0xD20B141A);
-            GuiDraw.label(draw, client.textRenderer, coordinates, 20, cy + 7, 1, Palette.TEXT);
-            if (showDimension) GuiDraw.label(draw, client.textRenderer, dimension, 20, cy + 21, 0.8f, Palette.MUTED);
-        }
-        } finally {
+        // HUD Studio draws these exact widgets itself, with its editing guides.
+        if (client.currentScreen instanceof dev.analyzer.ui.HudEditorScreen) return;
+        HudWidgets.render(core, draw, false);
+        if (core.isEnabled("hud") && core.isEnabled("entity-esp") && core.getBoolean("entity-esp", "radar")) {
+            int width = Math.round(draw.getScaledWindowWidth() / hudScale), height = Math.round(draw.getScaledWindowHeight() / hudScale);
+            if (height < 150) return;
+            int x = (int) Math.round(HudWidgets.position(core, "radar", true) * Math.max(0, width - 108) / 100);
+            int y = (int) Math.round(HudWidgets.position(core, "radar", false) * Math.max(0, height - 133) / 100);
+            draw.getMatrices().push();
+            draw.getMatrices().scale(hudScale, hudScale, 1);
+            draw.getMatrices().translate(x - 10, y - 57, 0);
+            drawRadar(draw);
             draw.getMatrices().pop();
         }
+    }
+
+    /** The editor uses the actual selected entity radar, and the same persisted placement as gameplay. */
+    public static HudWidgets.WidgetBounds renderEditorRadar(DrawContext draw) {
+        AnalyzerRenderer renderer = activeRenderer;
+        if (renderer == null || renderer.client.world == null || renderer.client.player == null
+                || !renderer.core.isEnabled("entity-esp") || !renderer.core.getBoolean("entity-esp", "radar")) return null;
+        float scale = HudWidgets.scale(renderer.core, draw);
+        int width = Math.round(draw.getScaledWindowWidth() / scale), height = Math.round(draw.getScaledWindowHeight() / scale);
+        int x = (int) Math.round(HudWidgets.position(renderer.core, "radar", true) * Math.max(0, width - 108) / 100);
+        int y = (int) Math.round(HudWidgets.position(renderer.core, "radar", false) * Math.max(0, height - 133) / 100);
+        draw.getMatrices().push(); draw.getMatrices().scale(scale, scale, 1); draw.getMatrices().translate(x - 10, y - 57, 0);
+        renderer.drawRadar(draw); draw.getMatrices().pop();
+        return new HudWidgets.WidgetBounds("radar", Math.round(x * scale), Math.round(y * scale), Math.round(108 * scale), Math.round(133 * scale));
     }
 
     private String dimensionName() {

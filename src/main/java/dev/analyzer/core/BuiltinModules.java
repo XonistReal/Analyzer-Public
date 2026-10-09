@@ -1,13 +1,14 @@
 package dev.analyzer.core;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /** The complete supported module catalog. No placeholders are presented as features. */
 public final class BuiltinModules {
     private BuiltinModules() { }
 
     public static List<ModuleDefinition> definitions() {
-        return List.of(
+        List<ModuleDefinition> modules = new ArrayList<>(List.of(
                 new ModuleDefinition("entity-esp", "Entity ESP", "Highlight nearby players, creatures and items.",
                         Category.VISUAL, false, List.of(
                         Setting.bool("players", "Players", true),
@@ -49,13 +50,10 @@ public final class BuiltinModules {
                         Setting.number("gap", "Center gap", 3, 0, 12, 0.5),
                         Setting.number("line-width", "Line width", 1.5, 0.5, 4, 0.25))),
                 new ModuleDefinition("particles", "Particles", "Animated ambient particles in the Analyzer menu.",
-                        Category.VISUAL, true, List.of(
+                        Category.COSMETICS, true, List.of(
                         Setting.number("density", "Density", 0.75, 0, 1, 0.05))),
                 new ModuleDefinition("menu", "Interface", "Glass or solid panels, accent colors and motion control.",
-                        Category.VISUAL, true, List.of(
-                        Setting.choice("material", "Panel material", "Glass", "Glass", "Solid"),
-                        Setting.choice("accent", "Accent color", "Mint", "Mint", "Violet", "Gold"),
-                        Setting.number("motion", "Motion amount", 0.8, 0, 1, 0.05))),
+                        Category.CLIENT, true, menuSettings()),
                 new ModuleDefinition("sky", "Sky Aurora", "Animated sky curtains, stars and cosmic color above your world.",
                         Category.WORLD, true, List.of(
                         Setting.choice("preset", "Sky preset", "Aurora", "Aurora", "Nebula", "Ember"),
@@ -67,6 +65,19 @@ public final class BuiltinModules {
                         Category.VISUAL, false, List.of(
                         Setting.choice("preset", "Preset", "Aurora", "Off", "Aurora", "Ember", "Frost", "Bloom"),
                         Setting.number("strength", "Strength", 0.75, 0, 1, 0.01)))
-        );
+        ));
+        modules.addAll(ClientModules.definitions());
+        modules.addAll(VisualModules.definitions());
+        modules.addAll(GameplayModules.definitions());
+        modules.addAll(UtilityModules.definitions());
+        return List.copyOf(modules);
+    }
+    private static List<Setting<?>> menuSettings() {
+        List<Setting<?>> settings = new ArrayList<>(List.of(
+            Setting.choice("material", "Panel material", "Glass", "Glass", "Solid"),
+            Setting.choice("accent", "Accent color", "Mint", "Mint", "Violet", "Gold"),
+            Setting.number("motion", "Motion amount", 0.8, 0, 1, 0.05)));
+        settings.addAll(ClientModules.menuSettings());
+        return List.copyOf(settings);
     }
 }

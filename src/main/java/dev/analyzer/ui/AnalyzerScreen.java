@@ -2,10 +2,17 @@ package dev.analyzer.ui;
 
 import dev.analyzer.AnalyzerClient;
 import dev.analyzer.core.AnalyzerCore;
+import dev.analyzer.core.Category;
+import dev.analyzer.core.GameplayModules;
 import dev.analyzer.core.ModuleDefinition;
 import dev.analyzer.core.Setting;
+import dev.analyzer.core.UtilityModules;
+import dev.analyzer.core.VisualModules;
 import dev.analyzer.effects.GpuEffects;
+import dev.analyzer.gameplay.GameplayEngine;
+import dev.analyzer.gameplay.UtilityEngine;
 import dev.analyzer.render.AnalyzerRenderer;
+import dev.analyzer.render.VisualEffects;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.DimensionEffects;
@@ -21,6 +28,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SplittableRandom;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Original Analyzer click GUI, with a logical canvas that fits every Minecraft GUI scale. */
 public final class AnalyzerScreen extends Screen {
@@ -28,8 +37,14 @@ public final class AnalyzerScreen extends Screen {
     private static final Rect MODULE_VIEW = new Rect(180, 269, 409, 203);
     private static final Rect SETTINGS_VIEW = new Rect(627, 218, 251, 204);
     private static final Rect PROFILE_VIEW = new Rect(181, 241, 408, 231);
+    private static final Set<String> GAMEPLAY_IDS = moduleIds(GameplayModules.definitions());
+    private static final Set<String> UTILITY_IDS = moduleIds(UtilityModules.definitions());
+    private static final Set<String> VISUAL_IDS = moduleIds(VisualModules.definitions());
     private final AnalyzerCore core;
     private final List<Hit> hits = new ArrayList<>();
+    private final Map<String, Rect> controlBounds = new HashMap<>();
+    private double categoryScroll;
+    private static final Rect CATEGORY_VIEW = new Rect(16, 156, 129, 157);
     private final Map<String, Double> animation = new HashMap<>();
     private static final int MAX_PARTICLES = 96;
     private final AmbientParticle[] particles = new AmbientParticle[MAX_PARTICLES];
@@ -79,7 +94,7 @@ public final class AnalyzerScreen extends Screen {
         mx = (mouseX - canvasX) / canvasScale;
         my = (mouseY - canvasY) / canvasScale;
         updateParticles();
-        hits.clear();
+        hits.clear(); controlBounds.clear();
         GpuEffects.drawBackdrop(context);
         if (!GpuEffects.isHealthy()) context.fillGradient(0, 0, width, height, 0xB3050A10, 0xD9060C10);
         context.getMatrices().push();
@@ -203,6 +218,9 @@ public final class AnalyzerScreen extends Screen {
         if (id.equals("menu")) return core.getChoice(id, "material") + " material · " + core.getChoice(id, "accent") + " accent";
         if ((id.equals("shader") || id.equals("sky")) && !GpuEffects.isHealthy()) return "Effect unavailable · " + GpuEffects.status();
         if (client == null || client.world == null || client.player == null) return "Enabled · enter a world to render";
+        if (GAMEPLAY_IDS.contains(id)) return GameplayEngine.status(id);
+        if (UTILITY_IDS.contains(id)) return UtilityEngine.status(id);
+        if (VISUAL_IDS.contains(id)) return VisualEffects.status(id);
         return switch (id) {
             case "entity-esp", "storage-esp", "tracers" -> AnalyzerRenderer.status(id);
             case "shader" -> core.getChoice(id, "preset").equals("Off") ? "Preset is Off · choose a look below" : core.getNumber(id, "strength") == 0 ? "Strength is zero · increase it below" : core.getChoice(id, "preset") + " post effect · " + Math.round(core.getNumber(id, "strength") * 100) + "% strength";
@@ -220,6 +238,10 @@ public final class AnalyzerScreen extends Screen {
         };
     }
 
+    private static Set<String> moduleIds(List<ModuleDefinition> modules) {
+        return modules.stream().map(ModuleDefinition::id).collect(Collectors.toUnmodifiableSet());
+    }
+
     private int statusColor(ModuleDefinition module) {
         if (!core.isEnabled(module.id())) return Palette.MUTED;
         if ((module.id().equals("shader") || module.id().equals("sky")) && !GpuEffects.isHealthy()) return Palette.ERROR;
@@ -235,7 +257,7 @@ public final class AnalyzerScreen extends Screen {
             case "tracers" -> "WORLD TRACERS / SETTINGS PREVIEW";
             case "particles" -> "MENU PARTICLES / LIVE FIELD";
             case "menu" -> "INTERFACE / LIVE MATERIAL";
-            default -> "HUD / SETTINGS PREVIEW";
+            default -> module.category().label().toUpperCase(Locale.ROOT) + " / LIVE CONFIGURATION";
         };
     }
 
@@ -362,10 +384,24 @@ public final class AnalyzerScreen extends Screen {
         label(c, "CLIENT / 1.21.4", 68, 42, 0.68f, Palette.SUBTLE);
         label(c, "WORKSPACE", 23, 95, 0.74f, Palette.SUBTLE);
         sidebar(c, "ALL", "All modules", "01", 116);
-        sidebar(c, "VISUAL", "Visual", "02", 159);
-        sidebar(c, "WORLD", "World", "03", 202);
-        sidebar(c, "HUD", "HUD", "04", 245);
-        c.fill(24, 307, 135, 308, Palette.BORDER);
+        categoryScroll = Math.clamp(categoryScroll, 0, Math.max(0, Category.values().length * 26 - CATEGORY_VIEW.h));
+        clip(c, CATEGORY_VIEW);
+        for (int i = 0; i < Category.values().length; i++) {
+            Category entry = Category.values()[i];
+            int y = 159 + i * 26 - (int) categoryScroll;
+            if (y + 24 < CATEGORY_VIEW.y || y >= CATEGORY_VIEW.bottom()) continue;
+            Rect box = new Rect(16, y, 128, 24);
+            boolean active = category.equals(entry.name());
+            GuiDraw.rounded(c, box.x, box.y, box.w, box.h, 5, active ? Palette.alpha(accentColor, 50) : Palette.alpha(Palette.SURFACE, 220));
+            if (active) c.fill(16, y + 5, 18, y + 20, accentColor);
+            label(c, String.format(Locale.ROOT, "%02d", i + 2), 27, y + 8, 0.64f, active ? accentColor : Palette.SUBTLE);
+            heading(c, entry.label(), 49, y + 7, 0.8f, active ? Palette.TEXT : Palette.MUTED);
+            diagnostic("category:" + entry.name(), box, CATEGORY_VIEW);
+            clippedHit(box, CATEGORY_VIEW, () -> { category = entry.name(); scroll = 0; focus = Focus.NONE; captureModule = null; dragging = null; });
+        }
+        c.disableScissor();
+        if (Category.values().length * 26 > CATEGORY_VIEW.h) scrollBar(c, CATEGORY_VIEW, categoryScroll, Category.values().length * 26 - CATEGORY_VIEW.h);
+        c.fill(24, 317, 135, 318, Palette.BORDER);
         label(c, "PERSONAL", 23, 328, 0.74f, Palette.SUBTLE);
         sidebar(c, "PROFILES", "Profiles", "05", 350);
         GuiDraw.outlined(c, 18, 425, 123, 53, 10, Palette.BORDER, 0xFF121F25);
@@ -376,6 +412,7 @@ public final class AnalyzerScreen extends Screen {
 
     private void sidebar(DrawContext c, String id, String name, String number, int y) {
         Rect bounds = new Rect(16, y, 128, 35);
+        controlBounds.put("category:" + id, bounds);
         double hover = ease("nav-" + id, bounds.contains(mx, my) ? 1 : 0);
         boolean active = category.equals(id);
         GuiDraw.rounded(c, 16, y, 128, 35, 8,
@@ -406,6 +443,10 @@ public final class AnalyzerScreen extends Screen {
         label(c, GuiDraw.truncate(textRenderer, GpuEffects.status(), 107, 0.60f), 481, 51, 0.60f, Palette.MUTED);
         button(c, "close", "×", 850, 24, 29, 29, false, this::close);
         label(c, category.equals("PROFILES") ? "PROFILE MANAGER" : "MODULE INSPECTOR", 628, 64, 0.78f, Palette.SUBTLE);
+        button(c, "layout-workspace", "Workspace", 182, 68, 86, 20, true, () -> switchLayout("Workspace"));
+        button(c, "layout-classic", "Classic", 274, 68, 64, 20, false, () -> switchLayout("Classic"));
+        button(c, "layout-compact", "Compact", 344, 68, 73, 20, false, () -> switchLayout("Compact"));
+        button(c, "hud-editor", "Edit HUD", 423, 68, 76, 20, false, () -> client.setScreen(new HudEditorScreen(core, this)));
     }
 
     private void drawModules(DrawContext c) {
@@ -460,6 +501,8 @@ public final class AnalyzerScreen extends Screen {
             selected = module; settingsScroll = 0; focus = Focus.NONE; captureModule = null;
         });
         Rect toggle = new Rect(x + 155, y + 13, 31, 17);
+        diagnostic("inspect:" + module.id(), bounds, MODULE_VIEW);
+        diagnostic("module:" + module.id(), toggle, MODULE_VIEW);
         drawToggle(c, "cardtoggle-" + module.id(), toggle, active);
         clippedHit(toggle, MODULE_VIEW, () -> { core.toggle(module.id()); changed(); });
     }
@@ -476,6 +519,7 @@ public final class AnalyzerScreen extends Screen {
         label(c, enabled ? "MODULE ACTIVE" : "MODULE DISABLED", 629, 181, 0.75f, statusColor(selected));
         label(c, GuiDraw.truncate(textRenderer, liveStatus(selected), 198, 0.68f), 629, 198, 0.68f, statusColor(selected));
         Rect toggle = new Rect(832, 179, 44, 23);
+        controlBounds.put("selected-toggle", toggle);
         drawToggle(c, "inspecttoggle-" + selected.id(), toggle, enabled);
         hits.add(new Hit(toggle, () -> { core.toggle(selected.id()); changed(); }));
         c.fill(628, 211, 877, 212, Palette.BORDER);
@@ -502,6 +546,7 @@ public final class AnalyzerScreen extends Screen {
 
     private void drawSetting(DrawContext c, Setting<?> setting, int y) {
         String moduleId = selected.id();
+        diagnostic("setting:" + moduleId + ":" + setting.id(), new Rect(629, y + 18, 247, 26), SETTINGS_VIEW);
         label(c, setting.label(), 629, y, 0.94f, Palette.TEXT);
         switch (setting.kind()) {
             case BOOLEAN -> {
@@ -668,6 +713,7 @@ public final class AnalyzerScreen extends Screen {
     }
 
     private void field(DrawContext c, String placeholder, String value, Focus target, Rect bounds) {
+        controlBounds.put(target == Focus.SEARCH ? "search" : "profile-name", bounds);
         boolean focused = focus == target;
         GuiDraw.outlined(c, bounds.x, bounds.y, bounds.w, bounds.h, 7,
                 focused ? accentColor : Palette.BORDER, Palette.SURFACE);
@@ -692,6 +738,7 @@ public final class AnalyzerScreen extends Screen {
     }
 
     private void button(DrawContext c, String id, String label, int x, int y, int w, int h, boolean primary, Runnable action) {
+        controlBounds.put(id, new Rect(x, y, w, h));
         Rect bounds = new Rect(x, y, w, h);
         double hover = ease("button-" + id, bounds.contains(mx, my) ? 1 : 0);
         staticButton(c, label, x, y, w, h, primary, hover > 0.1);
@@ -736,7 +783,7 @@ public final class AnalyzerScreen extends Screen {
     private List<ModuleDefinition> visibleModules() {
         String filter = query.toLowerCase(Locale.ROOT).strip();
         return core.modules().stream().filter(module -> category.equals("ALL") || module.category().toString().equals(category))
-                .filter(module -> (module.name() + " " + module.description()).toLowerCase(Locale.ROOT).contains(filter)).toList();
+                .filter(module -> (module.id() + " " + module.name() + " " + module.description()).toLowerCase(Locale.ROOT).contains(filter)).toList();
     }
 
     private long enabledCount() { return core.modules().stream().filter(module -> core.isEnabled(module.id())).count(); }
@@ -772,7 +819,8 @@ public final class AnalyzerScreen extends Screen {
 
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         double x = (mouseX - canvasX) / canvasScale, y = (mouseY - canvasY) / canvasScale;
-        if (category.equals("PROFILES") && PROFILE_VIEW.contains(x, y)) profileScroll = Math.max(0, profileScroll - verticalAmount * 30);
+        if (CATEGORY_VIEW.contains(x, y)) categoryScroll = Math.max(0, categoryScroll - verticalAmount * 26);
+        else if (category.equals("PROFILES") && PROFILE_VIEW.contains(x, y)) profileScroll = Math.max(0, profileScroll - verticalAmount * 30);
         else if (SETTINGS_VIEW.contains(x, y)) settingsScroll = Math.max(0, settingsScroll - verticalAmount * 28);
         else if (MODULE_VIEW.contains(x, y)) scroll = Math.max(0, scroll - verticalAmount * 30);
         return true;
@@ -895,6 +943,23 @@ public final class AnalyzerScreen extends Screen {
 
     @Override public void removed() { if (dirty) persist(); }
 
+    public AnalyzerScreen showProfiles() { category = "PROFILES"; refreshProfiles(); return this; }
+    public AnalyzerScreen inspect(String id) {
+        core.modules().stream().filter(module -> module.id().equals(id)).findFirst().ifPresent(module -> {
+            selected = module; category = "ALL"; scroll = Math.max(0, core.modules().indexOf(module) / 2 * 98 - 80); settingsScroll = 0;
+        });
+        return this;
+    }
+    private void switchLayout(String layout) { core.setValue("menu", "layout", layout); changed(); persist(); client.setScreen(MenuScreens.create(core)); }
+    private void diagnostic(String id, Rect bounds, Rect clip) {
+        int x = Math.max(bounds.x, clip.x), y = Math.max(bounds.y, clip.y);
+        int right = Math.min(bounds.right(), clip.right()), bottom = Math.min(bounds.bottom(), clip.bottom());
+        if (right > x && bottom > y) controlBounds.put(id, new Rect(x, y, right - x, bottom - y));
+    }
+    public double[] controlPoint(String action) {
+        Rect bounds = controlBounds.get(action);
+        return bounds == null ? null : new double[]{canvasX + (bounds.x + bounds.w / 2.0) * canvasScale, canvasY + (bounds.y + bounds.h / 2.0) * canvasScale};
+    }
     private enum Focus { NONE, SEARCH, PROFILE }
     private static final class AmbientParticle {
         double x, y, vx, vy;

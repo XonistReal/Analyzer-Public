@@ -1,5 +1,26 @@
 # Analyzer validation
 
+## Analyzer 0.3.0 expansion
+
+Verified October 9, 2026 on the same Windows / Java 21 / Minecraft 1.21.4 / Fabric / RTX 4060 environment. The registry contains **107 modules**, including HUD widgets; this is separate from reference coverage and runtime coverage.
+
+- The final `build moduleCatalog runSmoke` succeeds. **218 core assertions** pass: typed settings/configuration recovery plus registry consistency, gameplay opt-in defaults and all four new profile snapshots. `cinematic`, `classic` and `neon` keep gameplay automation off; `hvh` explicitly enables its documented combat/inventory/building setup.
+- The isolated native client passes **139 runtime assertions**, including **54 screenshot/OpenGL checkpoints** (22 retained visual checks plus 32 expansion frames). Every checkpoint reports zero GL errors; a final GL check also passes. The final run has no ERROR log entries. `VALIDATION.log` contains the actual final build/runtime output. Installed builds do not activate this development harness.
+- Actual normal stone placement and breaking change the world and emit bounded ghost/ring/debris geometry. Disabling the respective animation prevents new events. Seventeen successive framebuffer captures are encoded into the release's block-effect GIF; it is a runtime recording. These effects overlay vanilla meshes rather than replacing chunk geometry.
+- Kill Aura submits normal attacks and reduces a nearby test zombie's health; disabling it stops attacks. Crystal Aura performs real interaction and receives an actual explosion packet. Anchor Aura places, charges and detonates an anchor in the Overworld, with a real explosion packet. Surround builds all four actual obsidian sides around the player. These are selected local scenarios, not multiplayer combat benchmarks.
+- Auto Totem performs a real offhand inventory swap. Step changes then restores the original step attribute. Auto Walk presses then releases its owned forward input. Coord Snapper copies coordinates once and turns off; the harness restores the previous clipboard contents without logging them.
+- Nuker breaks actual blocks in Creative and completes ordinary **Survival mining without held attack**. Long obsidian mining retains progress; disabling the module and opening a menu cancel it. This caught and fixed vanilla idle-input cancellation resetting utility mining every tick. Item `canMine()` is checked; a creative sword is correctly excluded.
+- Auto Fish performs a real rod cast, retains the rod and server bobber across subsequent waiting ticks, then restores the original hotbar slot on disable. This caught and fixed premature rod release. A naturally occurring fish bite/reel cycle was not exercised.
+- Workspace, Classic and Compact menus open through real controls. Classic toggles and inline typed settings work; Compact search/toggle works. All four HUD themes render actual game data. The editor's actual widget bounds drive a drag, persisted normalized position, theme change and scale change. The editor owns its widget pass to avoid drawing widgets twice; fresh editor defaults show active widgets.
+- The retained sky/shader/ESP checks still pass across Fast/Fancy/Fabulous, reload and resize. Pixel verification measures **13,728 aurora-colored sky pixels versus 324 with sky off**, mean sky change **34.14**, opaque-wall change **0.24**, and **62 through-wall chest outline pixels versus 0 with Fabulous depth testing**. Exact results are in `PIXEL-VALIDATION.log`.
+- Source review checks bounded visual buffers, loaded-world scans, normal reach/cooldown/action budgets, target filters/friends, guarded inventory transactions and cleanup of temporary owned input/slots/attributes. Not all 107 modules, visual styles, item combinations or simultaneous-module combinations were tested in game.
+
+Remaining scope: Crystal/Anchor use distance/health guards without explosion exposure/damage prediction. Movement may be corrected by servers. Full model-mask Chams, reflective water/foliage shader integration and the remaining reference features are planned in [ROADMAP.md](ROADMAP.md). Iris/Sodium, other GPUs and public-server behavior remain unverified. No public server was contacted for these checks. The 89 scoped/partial reference areas in the roadmap describe source-reviewed implementation coverage, not feature parity.
+
+`publishLocal` rebuilt/checked the release and atomically published the local feed. The existing Prism **Analyzer** instance was upgraded through its updater with Minecraft closed; 0.2.0 was backed up. The installed 0.3.0 JAR matches SHA-256 `90485cb5c37c197d068bba69983f14e9d14be795bf0ab4d29fdc3a59ab0d9a5b`. Hashes of all **32 configuration, world and other-mod files** were unchanged after installation. The updater itself is unchanged from its historical 74-check integration suite. The native Prism ZIP and clean source ZIP are checked for CRC/metadata/catalogue integrity during packaging.
+
+## Historical release validation
+
 ## Analyzer 0.2.0 visual upgrade
 
 Verified October 8, 2026 with the same Windows / Java 21 / Fabric 1.21.4 / RTX 4060 environment described below. This is one tested hardware environment, not a performance benchmark.

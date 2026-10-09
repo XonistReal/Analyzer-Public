@@ -1,90 +1,84 @@
 # Analyzer
 
-An original visual utility client for **Minecraft Java Edition 1.21.4**, built on Fabric and Java 21. Analyzer **0.2.0** adds a real animated sky, a richer interface, cursor-reactive menu particles, screen ESP and a nearby-target radar. Prism integration includes a local development updater.
+An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.3.0** has **107 registered modules**: world visuals, editable HUD widgets, three native menu layouts, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
 
 ![Analyzer native interface](screenshots/analyzer-ui.png)
 
-## Install
+![Analyzer Classic category columns](screenshots/analyzer-gui-classic.png)
 
-**Prism Launcher:** import `Analyzer-0.2.0-Prism-1.21.4.zip`. It includes both mods and the Windows local updater. See [PRISM.md](PRISM.md) for drag and drop, updates and the development workflow.
+## Install and start
 
-1. Create a **Minecraft 1.21.4 Fabric** instance using the [official Fabric installer](https://fabricmc.net/use/installer/) or your launcher's Fabric instance option. Use Fabric Loader **0.16.10 or newer**; the verified build uses **0.16.14**.
-2. Copy **both JARs** into that instance's `mods/` folder: `analyzer-0.2.0.jar` and `fabric-api-0.119.4+1.21.4.jar`. The Prism ZIP keeps them under `minecraft/mods/` and adds a hash suffix to the Analyzer filename. Keep one Analyzer JAR installed.
-3. Launch that instance. Click **Analyzer** on the title screen, or press **Right Shift** while playing.
+**Prism Launcher:** drag `Analyzer-0.3.0-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed.
 
-Minecraft 1.21.4 uses Java 21. The official Minecraft Launcher supplies its game runtime. For an alternative launcher, select its Java 21 runtime. Analyzer does not replace the Minecraft launcher and does not require an account of its own.
+For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.3.0.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
 
-## What's implemented
+Click **Analyzer** on the title screen or press **Right Shift** in game. Choose **Profiles → cinematic → Load** for the new visual/HUD setup. **classic** uses draggable category columns and **neon** uses the Compact layout and Neon HUD; these three visual profiles leave gameplay automation off. Loading **hvh** explicitly enables Kill Aura, Crystal Aura, Surround, Auto Weapon, Auto Totem, Auto Armor and Keep Sprint, with combat HUD widgets. Earlier **showcase**, **arctic**, **cinder**, **aurora**, **ember** and **minimal** profiles remain available. Profiles are available from the Workspace layout.
 
-| Feature | Controls and behavior |
-| --- | --- |
-| Interface | Search, categories, module cards, live previews/statuses and a scrolling inspector. **Glass/Solid** panels, **Mint/Violet/Gold** accents and adjustable motion, with Rajdhani typography, animated controls and a scalable layout. |
-| Particles | Visible luminous menu particles, connecting lines and comets. Particles react to the cursor; density can be reduced to zero, and Interface motion can freeze movement. |
-| Sky Aurora | Original **Aurora**, **Nebula** and **Ember** skies drawn in the world sky pass. Animated curtains, procedural twinkling stars, intensity/speed controls, optional night-only visibility and rain attenuation. Terrain stays in front of the sky; speed zero freezes animation. |
-| Atmosphere | GPU highlight bloom, grading and vignette before the HUD. **Bloom** keeps neutral colors; **Aurora**, **Ember** and **Frost** add cinematic color looks. Strength is adjustable; **Off** bypasses the effect. |
-| Entity ESP | **Boxes**, **Corners** and **Screen** styles, category colors/filters, range and line width. Optional through-wall visibility, name/distance labels, actual health bars and a nearby-target radar. Live status explains empty or disabled filters. |
-| Storage ESP | Boxes/Corners/Screen highlighting for chests, barrels, shulkers, ender chests, hoppers, furnaces, dispensers, droppers and brewing stands, with type colors and distance labels. Uses loaded block entities and a bounded cache; live status reports scans and targets. |
-| Tracers | View-centered lines to selected entity categories, with range, line width and visibility controls. |
-| Fullbright | Configurable local lightmap brightness. Toggling it off restores ordinary lighting without changing the player's saved gamma option. |
-| Coordinates | Position and optional dimension in the HUD, alongside the built-in FPS display and active-module list. |
-| Crosshair | Custom arm length, center gap and line width, with an entity-target color change. |
+Profiles are seeded once without overwriting existing files. Loading a profile replaces active settings and module keybinds. Settings live in `config/analyzer/config.json`; profiles in `config/analyzer/profiles/`, friends in `config/analyzer/friends.txt`. The updater preserves these and your worlds.
 
-These are **10 implemented modules**. Fresh defaults enable Sky Aurora, Interface, Particles and Coordinates; Entity ESP, Storage ESP, Tracers, Fullbright, Crosshair and Atmosphere are opt-in.
+## Menus and HUD
 
-Start with **Profiles → showcase → Load**, especially after updating an existing instance. It enables the sky, neutral bloom, screen ESP, radar and glass menu. **arctic** uses a violet interface/Nebula sky/Frost grading; **cinder** uses gold/Ember. The earlier **aurora**, **ember** and **minimal** profiles remain available. New starter profiles are installed once without overwriting your saved files. Profiles save/load local settings and keybinds; loading one replaces the active configuration.
+- **Workspace:** categories, search, module cards and a scrolling settings inspector. Select a card to inspect it; use its switch or **Space** to toggle it. **/** focuses search.
+- **Classic:** independent draggable category columns with collapse and scroll. Left-click a module to toggle it; right-click to open its settings.
+- **Compact:** searchable category/card view with a settings inspector. Left-click to select/toggle; right-click to inspect.
+- Use the header's **Workspace / Classic / Compact / Edit HUD** buttons to change layout or edit the HUD. Layout selection persists.
+- **Edit HUD:** drag widgets, right-click to toggle them, use arrows to move a selection, and choose grid snapping, scale and **Glass / Classic / Minimal / Neon** themes. Settings and reset controls are available in the editor.
+- Under **Interface**, choose **Glass / Solid**, **Mint / Violet / Gold**, and motion speed. Menu particles react to the cursor; density zero hides them and motion zero freezes movement.
+- Assign a module **Keybind** in its inspector. **Backspace/Delete** clears it; **Escape** cancels. Changes save automatically.
 
-## Controls
+## Implemented features
 
-- **Right Shift** opens/closes the menu; the menu key can be changed in Minecraft's Controls settings.
-- **/** focuses module search. **Escape** leaves text entry, then closes the menu.
-- Click a card to inspect it; click its switch or press **Space** to toggle it.
-- Scroll over cards or the inspector to see additional modules/settings. Arrow keys select cards.
-- Click **Keybind**, then press a key. **Backspace/Delete** clears it; **Escape** cancels.
-- **Tab** focuses search or profile naming. **Ctrl+A**, **Ctrl+V**, and **Backspace** work in text fields.
-- Drag sliders and click preset selectors. Changes save automatically and when the screen closes.
+The complete IDs, settings and defaults are exported in [MODULES.md](MODULES.md) and [MODULES.json](MODULES.json).
 
-Settings live in the instance's `config/analyzer/config.json`. Profiles live in `config/analyzer/profiles/`. Recovery files use `config-recovery-*.json`. Remove or edit profiles through the menu; first-launch starter profiles are not recreated after deletion.
+| Group | Count | Implemented scope |
+| --- | ---: | --- |
+| Original visual/interface modules | 10 | Entity/Storage ESP, Tracers, Fullbright, Coordinates, Crosshair, menu particles, Interface, Atmosphere and Sky Aurora. ESP includes Boxes/Corners/Screen styles, filters, labels, health, radar and live target/scan statuses. |
+| HUD and client controls | 17 | HUD Studio plus watermark, active modules, FPS, ping, speed, armor, potion effects, Target HUD, keybinds, inventory, compass, biome, world clock, item counter, keystrokes and target distance. Widgets use actual game data and saved positions. |
+| World effects | 24 | Place/Break Animation, Place Preview, Block Highlight, Hit Particles, Jump Circles, Trails, Damage Numbers, Hit Markers, Footsteps, Death Effects, Projectile Trails, Pickup Streaks, Teleport Effects, Player Aura, Target/Hole/Item ESP, Trajectories, Nametags, Explosion Effects, Totem Pops, Landing Impact and Health Pulse. |
+| Combat and HvH | 15 | Kill Aura, Aim Assist, Trigger Bot, Auto Clicker, Auto Weapon, Shield Breaker, Bow Aimbot, Criticals; Crystal/Anchor Aura, Surround, Auto Trap, Auto Web, Hole Filler and Target Strafe. These perform ordinary attacks, item/block interactions or client movement. |
+| Movement | 15 | Keep Sprint, Auto Walk, Speed, Fly, Step, Parkour, Safe Walk, Fast Ladder, Reverse Step, Fast Fall, Glide, High Jump, Long Jump, Elytra Boost and Ground Strafe. Owned input and temporary step changes are restored on disable/pause. |
+| Player automation | 10 | Auto Eat/Gapple/Totem/Armor/Tool, Refill, Anti AFK, Auto Respawn, Durability Alert and Auto Fish. Normal inventory actions are guarded; Auto Armor preserves an equipped Elytra. |
+| World utilities | 16 | Scaffold, Tower, Air Place, Nuker, Auto Farm, Auto Tunnel, Bed Breaker, Flatten, Speed Mine, Vein Miner, No Block Interact, Chest Stealer, Middle Click Friend, Player Detection, Notifier and Coord Snapper. Work is bounded to loaded, reachable game data. |
 
-## Shader and compatibility scope
+Fresh defaults enable **Sky Aurora, Interface, Particles, Coordinates, HUD Studio, Watermark, Active Modules, FPS, Place Animation, Break Animation and Hit Particles**. All combat, HvH, movement, player automation and world utilities are disabled by default. Entity/Storage ESP are opt-in, or can be enabled through a visual profile.
 
-Sky Aurora renders in the actual sky pass before terrain and celestial objects. Atmosphere applies GPU screen effects separately. The interface's Glass option samples and blurs the game scene behind translucent panels, with rim highlights and glow; it does not implement refraction. These effects do not add shadow maps, water reflections, volumetric clouds or a replacement world-lighting pipeline. Iris is not bundled, and compatibility with Iris/Sodium or other rendering mods has not been validated.
+## Trying gameplay modules
 
-ESP operates on entities and containers loaded by the game. **Boxes/Corners** use world geometry with depth testing when Through walls is off. **Screen** draws projected HUD rectangles; with Through walls off, it filters targets by a center line-of-sight raycast rather than masking individual pixels against world depth. The radar follows selected loaded targets. Analyzer does not discover information the server has not sent, and contains no combat or movement automation.
+Enable one module at a time and inspect its settings/status. Target filters default to **Players** for combat; enable **Hostile mobs** and disable Players to try a singleplayer mob arena. Persisted friends are excluded from combat targeting. Most gameplay automation pauses while a menu is open.
 
-The release is pinned to **1.21.4**. Other versions require source changes and a new build. Runtime checks are recorded in [VALIDATION.md](VALIDATION.md). See [RESEARCH.md](RESEARCH.md) and [RESEARCH-VISUALS.md](RESEARCH-VISUALS.md) for primary-source comparisons and the exact Temple.nz visual reference; these are research references, not claims of feature parity.
+Melee modules need a suitable hotbar weapon and normal reach/cooldown. Shield Breaker needs an axe; Bow Aimbot needs a drawn bow. Criticals uses a real jump and falling-phase attack. Surround/Trap/Hole Filler need hotbar obsidian, Auto Web needs cobwebs, and ordinary placement needs valid support/reach. Crystal Aura needs crystals plus reachable obsidian/bedrock; Anchor Aura needs anchors, glowstone and a non-glowstone hand for detonation in a dimension where anchors explode. The Nether is excluded from detonation.
+
+Crystal/Anchor Aura have health/distance guards but **no explosion damage prediction**. Fly/Speed and other velocity modules alter client movement; a server can correct or reject it. Air Place attempts a normal interaction and depends on server acceptance. There are no promised anticheat bypasses, silent rotations or packet criticals. Refill currently restocks low **nonempty** hotbar stacks; weapon/armor scoring uses material estimates rather than full enchantment simulation.
+
+## Rendering scope
+
+**Sky Aurora** draws original **Aurora / Nebula / Ember** skies and stars in the actual world sky pass before terrain/celestial objects, with intensity, speed, night-only visibility and rain attenuation. **Atmosphere** separately applies GPU bloom, grading and vignette before the HUD; **Bloom** keeps neutral colors and Aurora/Ember/Frost add color looks. Glass samples a blurred game backdrop behind translucent panels, rims and glow; it does not implement refraction.
+
+Place/Break Animation adds animated ghost overlays and bounded debris to real local actions; the vanilla block mesh remains. Explosion and totem effects add visuals to actual game events. Player Aura draws rotating rings. These are scoped effects without Temple's complete style collection or replacement model/material pipeline.
+
+ESP uses entities and containers loaded by the game. **Boxes/Corners** use depth-tested world geometry when Through walls is off. **Screen** draws projected HUD rectangles; disabling Through walls filters by a center line-of-sight raycast, rather than masking individual HUD pixels against world depth. The radar uses selected loaded targets.
+
+Iris is not bundled; Iris/Sodium and other renderer compatibility has not been validated. Analyzer does not add shadow maps, water reflections, volumetric clouds or a replacement world-lighting pipeline. The release is pinned to **1.21.4**; other versions need source changes and a new build.
+
+The [roadmap](ROADMAP.md) compares all **163 Temple.nz reference modules**: **89 areas** have a scoped counterpart or partial implementation, with **74 remaining**. HUD widgets count as one reference area. This is not a feature-parity claim. Selected runtime checks are recorded in [VALIDATION.md](VALIDATION.md); not all 107 modules or their modes have been tested in game. See [RESEARCH.md](RESEARCH.md) and [RESEARCH-VISUALS.md](RESEARCH-VISUALS.md) for primary sources and sampled visual observations.
 
 ## Build from source
 
-Install a Java 21 JDK, set `JAVA_HOME` to it, and run:
+Select a Java 21 JDK with `JAVA_HOME`, then run:
 
 ```powershell
-.\gradlew.bat build
+.\gradlew.bat build          # remapped build + core checks
+.\gradlew.bat moduleCatalog  # export the actual registry
+.\gradlew.bat runClient      # interactive development instance
+.\gradlew.bat runSmoke       # isolated UI/world/gameplay checks
+.\gradlew.bat publishLocal   # publish to the Prism local update feed
 ```
 
-On macOS/Linux:
+On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.3.0.jar`.
 
-```sh
-./gradlew build
-```
+`runSmoke` uses the project-local `run/` directory, creates/updates only `run/saves/Analyzer-Smoke`, captures screenshots, and exits. Installed release builds never activate the development harness. See VALIDATION for assertions and results. Optional pixel checks use `python tools/verify_render.py` and `python tools/verify_visuals.py` with Pillow.
 
-The Gradle wrapper downloads Gradle 8.12 and checks its SHA-256. Gradle/Loom fetch the pinned official Minecraft, Yarn, Fabric Loader and Fabric API dependencies. The installable remapped JAR appears in `build/libs/analyzer-0.2.0.jar`.
+Source packages are `core/` for definitions/configuration, `ui/` for native screens/HUD, `render/` for overlays/event effects, `effects/` for original GLSL/state restoration, `gameplay/` for bounded game actions, and `mixin/` for narrow 1.21.4 hooks.
 
-```powershell
-.\gradlew.bat coreCheck   # configuration, profile and recovery assertions
-.\gradlew.bat runClient   # interactive development instance
-.\gradlew.bat runSmoke    # automated UI + isolated singleplayer render checks
-```
+Analyzer code is MIT licensed. No client source from GPL projects was copied. Rajdhani fonts use the SIL Open Font License; see [THIRD-PARTY.md](THIRD-PARTY.md), `FONT-LICENSE.txt` and `GRADLE-LICENSE.txt`.
 
-`runSmoke` uses a hidden development window and the project-local `run/` directory. It creates/updates only `run/saves/Analyzer-Smoke`, exercises UI/profiles, screen ESP and sky/post effects, captures screenshots, reloads resources, and exits. Installed release builds never activate this development harness.
-
-Optional pixel validation after the smoke run: `python tools/verify_render.py` and `python tools/verify_visuals.py` (Python with Pillow).
-
-## Code layout
-
-- `core/`: version-independent module definitions, typed settings and config storage.
-- `ui/`: native canvas, drawing primitives, interactive inspector and profiles.
-- `render/`: world overlays, container cache, labels and HUD.
-- `effects/`: original GLSL compiler, framebuffer copy, rendering and state restoration.
-- `mixin/`: narrow, version-specific hooks for sky rendering, post-processing, fullbright and crosshair replacement.
-
-Analyzer code is MIT licensed. No client source from GPL projects was copied. Bundled Rajdhani fonts use the SIL Open Font License; see [THIRD-PARTY.md](THIRD-PARTY.md), `FONT-LICENSE.txt`, and `GRADLE-LICENSE.txt`.

@@ -38,6 +38,12 @@ tasks.register('coreCheck', JavaExec) {
     mainClass = 'dev.analyzer.core.CoreSelfTest'
 }
 tasks.named('check') { dependsOn tasks.named('coreCheck') }
+tasks.register('moduleCatalog', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.core.ModuleCatalog'
+    args file('MODULES.json').absolutePath, file('MODULES.md').absolutePath
+}
 
 // Publish a checked build for the Prism instance's local pre-launch updater.
 // Artifacts are immutable; replacing release.json is the final commit step.

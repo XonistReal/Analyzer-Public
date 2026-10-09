@@ -194,9 +194,9 @@ final class DevSmoke {
                 case 620 -> {
                     require(GpuEffects.isHealthy(), "GPU effects survived presets, resize and resource reload");
                     AnalyzerClient.LOGGER.info("ANALYZER_SMOKE_WORLD_COMPLETE: {} screenshots; skyFrames={} gradeFrames={}", captures.size(), GpuEffects.skyFrames(), GpuEffects.worldFrames());
-                    client.scheduleStop();
                 }
             }
+            if (worldTicks >= 625) ExpansionSmoke.tick(client, worldTicks - 625);
         }
         if (ticks > 4000) throw new IllegalStateException("Smoke test timed out");
     }

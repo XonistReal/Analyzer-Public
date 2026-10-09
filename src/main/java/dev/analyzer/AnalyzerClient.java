@@ -4,6 +4,10 @@ import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.effects.GpuEffects;
 import dev.analyzer.render.AnalyzerRenderer;
 import dev.analyzer.ui.AnalyzerScreen;
+import dev.analyzer.ui.MenuScreens;
+import dev.analyzer.render.VisualEffects;
+import dev.analyzer.gameplay.GameplayEngine;
+import dev.analyzer.gameplay.UtilityEngine;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -44,9 +48,12 @@ public final class AnalyzerClient implements ClientModInitializer {
         catch (IOException ex) { LOGGER.warn("Could not install Analyzer starter profiles", ex); }
         open = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.analyzer.open", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "key.categories.analyzer"));
         new AnalyzerRenderer(CORE).register();
+        GameplayEngine.register(CORE);
+        UtilityEngine.register(CORE);
+        VisualEffects.register(CORE);
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
-            if (screen instanceof TitleScreen) Screens.getButtons(screen).add(ButtonWidget.builder(Text.literal("Analyzer"), b -> client.setScreen(new AnalyzerScreen(CORE))).dimensions(w - 108, 10, 98, 20).build());
+            if (screen instanceof TitleScreen) Screens.getButtons(screen).add(ButtonWidget.builder(Text.literal("Analyzer"), b -> client.setScreen(MenuScreens.create(CORE))).dimensions(w - 108, 10, 98, 20).build());
         });
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             public Identifier getFabricId() { return Identifier.of("analyzer", "effects"); }
@@ -58,8 +65,8 @@ public final class AnalyzerClient implements ClientModInitializer {
 
     private void tick(MinecraftClient client) {
         while (open.wasPressed()) {
-            if (client.currentScreen == null) client.setScreen(new AnalyzerScreen(CORE));
-            else if (client.currentScreen instanceof AnalyzerScreen) client.setScreen(null);
+            if (client.currentScreen == null) client.setScreen(MenuScreens.create(CORE));
+            else if (MenuScreens.isAnalyzerScreen(client.currentScreen)) client.setScreen(null);
         }
         long window = client.getWindow().getHandle();
         for (var module : CORE.modules()) {
