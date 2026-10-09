@@ -12,7 +12,7 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 122, "Release catalogue includes 122 registered modules");
+            check(core.modules().size() == 123, "Release catalogue includes 123 registered modules");
             check(core.modules().stream().map(ModuleDefinition::id).distinct().count() == core.modules().size(), "Unique module IDs");
             for (Category category : Category.values())
                 check(core.modules().stream().anyMatch(module -> module.category() == category), "Populated category " + category);
@@ -21,6 +21,8 @@ public final class CoreSelfTest {
                 if (module.category() == Category.COMBAT || module.category() == Category.MOVEMENT || module.category() == Category.HVH || module.category() == Category.PLAYER)
                     check(!core.isEnabled(module.id()), "Gameplay opt-in " + module.id());
             }
+            check(!core.isEnabled("expedition"), "Automation never starts by default");
+            check(core.getNumber("entity-esp", "label-range") < core.getNumber("entity-esp", "range"), "ESP labels have an independent nearer range");
             check(core.getChoice("menu", "material").equals("Glass"), "Glass interface default");
             equal(0.6, core.getNumber("hud", "scale"), "HUD defaults to 60 percent");
             core.setValue("menu", "accent", "Gold");

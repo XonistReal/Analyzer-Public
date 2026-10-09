@@ -183,7 +183,7 @@ def main() -> None:
     parser.add_argument("--catalog", type=Path, default=repo / "MODULES.json")
     parser.add_argument("--output", type=Path, default=repo / "ROADMAP.md")
     parser.add_argument("--date", default="2026-10-09")
-    parser.add_argument("--version", default="0.4.0")
+    parser.add_argument("--version", default="0.5.0")
     args = parser.parse_args()
     text = generate(json.loads(args.reference.read_text(encoding="utf-8-sig")),
                     json.loads(args.catalog.read_text(encoding="utf-8-sig")), args.version, args.date)

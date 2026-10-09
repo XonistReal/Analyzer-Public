@@ -31,3 +31,7 @@ The ready-to-install ZIP includes Fabric API as a separate, unmodified mod JAR i
 Future, RusherHack, Temple Client Legacy, Meteor, LiquidBounce, Lambda, Wurst and ThunderHack were consulted through their public documentation/source to compare feature scope and architecture. **No code or assets from these clients were copied into Analyzer.** Their licenses remain with their respective projects; the GPL clients are not relicensed under Analyzer's MIT license. See `RESEARCH.md` for the primary links and version observations.
 
 Iris, Sodium, Satin and third-party world shader packs are not included. Iris may be installed independently to provide world shader packs, but that combination and its version compatibility require separate testing. Analyzer's bundled effects are its own screen post-processing shaders and procedural menu backdrop.
+
+## Baritone optional runtime
+
+Official Fabric API 1.13.1 for Minecraft 1.21.4 is shipped as a separate, replaceable mod under LGPL-3.0-or-later. Original Analyzer integration uses the public API. The verified artifact, upstream corresponding sources, license/notices and provenance are retained in [third-party/baritone](third-party/baritone/README.md); Prism imports include those notices and sources. No Baritone source is copied into Analyzer.

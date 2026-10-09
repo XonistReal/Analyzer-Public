@@ -37,6 +37,7 @@ final class CosmeticsSmoke {
     @SuppressWarnings("deprecation")
     static void tick(MinecraftClient mc, int t) {
         var core = AnalyzerClient.CORE; phase = t;
+        if(t>430 && Boolean.getBoolean("analyzer.automationSmoke")) {AutomationReleaseSmoke.tick(mc,t-431);return;}
         switch (t) {
             case 0 -> {
                 require(dev.analyzer.ui.SmoothFontAtlas.healthy(),"Analyzer font atlases retain actual linear GPU sampling after resource reload");
@@ -128,7 +129,7 @@ final class CosmeticsSmoke {
             case 400 -> { require(CosmeticRenderer.frames("spinbot")>0,"Player render state receives cosmetic spin"); require(mc.player.getYaw()==yawBefore && mc.player.getPitch()==pitchBefore,"Cosmetic spin preserves camera/entity rotations"); var serverPlayer=mc.getServer().getPlayerManager().getPlayer(mc.player.getUuid()); require(serverPlayer!=null && Math.abs(serverPlayer.getYaw()-yawBefore)<0.01,"Cosmetic spin preserves server rotation"); core.setEnabled("spinbot",false); core.setEnabled("cape",false); core.setEnabled("pets",false); before=CosmeticRenderer.frames("cape"); mc.options.setPerspective(Perspective.FIRST_PERSON); core.setEnabled("contrails",true); core.setValue("contrails","elytra-only",false); core.setValue("contrails","min-speed",0.05); core.setValue("contrails","first-person",true); core.setEnabled("auto-walk",true); }
             case 415 -> { require(VisualEffects.cosmeticDiagnostics().contrailPlayers()>0,"Paired contrails follow actual ordinary walking when glide restriction is off"); capture(mc,"analyzer-contrails-walking.png",false); require(CosmeticRenderer.frames("cape")==before,"Disabled cape stops mesh submission"); core.setEnabled("auto-walk",false); core.setEnabled("contrails",false); }
             case 425 -> { require(VisualEffects.cosmeticDiagnostics().contrailPlayers()==0,"Disabled contrails release tracked paths"); core.resetAll(); }
-            case 430 -> { require(GL11.glGetError()==GL11.GL_NO_ERROR,"Cosmetics final GL state"); AnalyzerClient.LOGGER.info("ANALYZER_COSMETICS_COMPLETE: {} assertions, {} screenshots; cosmetics={}",assertions,captures,VisualEffects.cosmeticDiagnostics()); mc.scheduleStop(); }
+            case 430 -> { require(GL11.glGetError()==GL11.GL_NO_ERROR,"Cosmetics final GL state"); AnalyzerClient.LOGGER.info("ANALYZER_COSMETICS_COMPLETE: {} assertions, {} screenshots; cosmetics={}",assertions,captures,VisualEffects.cosmeticDiagnostics()); if(!Boolean.getBoolean("analyzer.automationSmoke")) mc.scheduleStop(); }
         }
     }
     private static void theme(String name) { AnalyzerClient.CORE.setValue("hud","theme",name); audit=true; auditComplete=false; }

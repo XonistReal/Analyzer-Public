@@ -1,6 +1,6 @@
 # Analyzer module catalogue
 
-122 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
+123 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
 
 ## Render
 
@@ -168,4 +168,5 @@
 | Module | Behavior | Default |
 | --- | --- | --- |
 | Interface | Glass or solid panels, accent colors and motion control. | On |
+| Automation | Review a local task plan, then let Baritone and normal inventory actions carry it out. | Off |
 

@@ -1,0 +1,22 @@
+{
+  "project": "Baritone",
+  "upstream": "https://github.com/cabaletta/baritone",
+  "release": "https://github.com/cabaletta/baritone/releases/tag/v1.13.1",
+  "version": "1.13.1",
+  "minecraftVersion": "1.21.4",
+  "loader": "Fabric",
+  "variant": "API",
+  "artifact": "baritone-api-fabric-1.13.1.jar",
+  "download": "https://github.com/cabaletta/baritone/releases/download/v1.13.1/baritone-api-fabric-1.13.1.jar",
+  "sha256": "bfb79c3cdb8fe1f7697999b1f9c7f08ea29775f3b69d48ad90c387690ee67b05",
+  "publishedSha256Source": "https://api.github.com/repos/cabaletta/baritone/releases/tags/v1.13.1",
+  "sha1": "7e2283bb1a1e9cff00ec0278a82568dc33ada382",
+  "publishedSha1Source": "https://github.com/cabaletta/baritone/releases/download/v1.13.1/checksums.txt",
+  "license": "LGPL-3.0-or-later; upstream license files retained",
+  "sourceArchive": "baritone-v1.13.1-source.zip",
+  "sourceDownload": "https://github.com/cabaletta/baritone/archive/refs/tags/v1.13.1.zip",
+  "sourceCommit": "a99e25eb8dc2f5b18229c74ba77ae9e5b682dbb3",
+  "sourceArchiveLocalSha256": "d8893e816beff07c156625b6feb2a2d2354dff54a1e6ba8533489518f8a02850",
+  "modifications": "None; upstream binary and source archive are unchanged",
+  "verifiedOn": "2026-10-09"
+}

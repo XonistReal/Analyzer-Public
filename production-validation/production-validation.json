@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "version": "0.5.0",
+  "analyzerSha256": "a2b3187680df6a9edd16d857ebbdd6a769819316433b188eb5682cb8b7a3d316",
+  "minecraftVersion": "1.21.4",
+  "fabricLoaderVersion": "0.16.14",
+  "fabricApiVersion": "0.119.4+1.21.4",
+  "baritoneVersion": "1.13.1",
+  "baritoneSha256": "bfb79c3cdb8fe1f7697999b1f9c7f08ea29775f3b69d48ad90c387690ee67b05",
+  "moduleCount": 123,
+  "environment": "Production Fabric; official Minecraft client and intermediary mappings",
+  "worldsJoined": 0,
+  "publicGameServersContacted": 0,
+  "checks": [
+    {
+      "mode": "with-baritone",
+      "passed": true,
+      "developmentEnvironment": false,
+      "baritoneAvailable": true,
+      "nestedHelperLoaded": true,
+      "actualTitleScreen": true,
+      "actualAutomationScreen": true,
+      "glError": 0,
+      "framebufferWidth": 1280,
+      "framebufferHeight": 800,
+      "screenshot": "analyzer-production-baritone.png",
+      "screenshotSha256": "ef7a4cbc401eded9ae9504e0d472912258705d02b98a63fcc3687c94645398c7",
+      "log": "with-baritone.log",
+      "logSha256": "a97e4dab92aa73a026dea5862ef82b85d0b31cfa30503cf25d0082b9e8daee2e"
+    },
+    {
+      "mode": "without-baritone",
+      "passed": true,
+      "developmentEnvironment": false,
+      "baritoneAvailable": false,
+      "nestedHelperLoaded": false,
+      "actualTitleScreen": true,
+      "actualAutomationScreen": true,
+      "glError": 0,
+      "framebufferWidth": 1280,
+      "framebufferHeight": 800,
+      "screenshot": "analyzer-production-without-baritone.png",
+      "screenshotSha256": "d888410482d0505050c9bffee32321d2f452a0e1f0b14d0fa8fc7b69428b2fae",
+      "log": "without-baritone.log",
+      "logSha256": "80d0011bec52c2575eb75f1c68b30907d0e082197dcaf53238115334565ec8df"
+    }
+  ]
+}

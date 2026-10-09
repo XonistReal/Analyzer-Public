@@ -1,8 +1,8 @@
 # Analyzer roadmap and reference coverage
 
-Reviewed 2026-10-09 for Analyzer 0.4.0, Minecraft Java 1.21.4.
+Reviewed 2026-10-09 for Analyzer 0.5.0, Minecraft Java 1.21.4.
 
-The actual registry has **122 modules**. The [Temple.nz public catalogue](https://temple.nz/assets/data/modules.json?v=be4c7e7b) contains **163 reference modules**. This comparison identifies **102 areas with a functional counterpart or narrower implementation**: **33 scoped counterparts**, **69 partial implementations**, and **61 planned/unimplemented areas**. These figures are separate from feature parity and runtime test coverage.
+The actual registry has **123 modules**. The [Temple.nz public catalogue](https://temple.nz/assets/data/modules.json?v=be4c7e7b) contains **163 reference modules**. This comparison identifies **102 areas with a functional counterpart or narrower implementation**: **33 scoped counterparts**, **69 partial implementations**, and **61 planned/unimplemented areas**. These figures are separate from feature parity and runtime test coverage.
 
 HUD Studio and its widgets count as one Temple HUD area. The same evidence is never expanded into seventeen reference features. A partial row states the missing scope; an implementation sharing a name does not imply the reference's styles, bypasses or server behavior.
 

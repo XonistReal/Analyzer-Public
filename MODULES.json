@@ -50,12 +50,84 @@
       },
       {
         "id": "range",
-        "label": "Range",
+        "label": "Range (blocks)",
         "kind": "NUMBER",
         "default": 128.0,
         "min": 16.0,
         "max": 256.0,
         "step": 8.0
+      },
+      {
+        "id": "label-range",
+        "label": "Label range (blocks)",
+        "kind": "NUMBER",
+        "default": 48.0,
+        "min": 8.0,
+        "max": 256.0,
+        "step": 4.0
+      },
+      {
+        "id": "label-scale",
+        "label": "Label scale",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "distance-scale",
+        "label": "Shrink distant labels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "label-near",
+        "label": "Full-size distance (blocks)",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 2.0,
+        "max": 64.0,
+        "step": 2.0
+      },
+      {
+        "id": "label-far-scale",
+        "label": "Distant label size",
+        "kind": "NUMBER",
+        "default": 0.45,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "fade-labels",
+        "label": "Fade distant labels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "max-labels",
+        "label": "Maximum labels",
+        "kind": "NUMBER",
+        "default": 16.0,
+        "min": 0.0,
+        "max": 128.0,
+        "step": 1.0
+      },
+      {
+        "id": "declutter",
+        "label": "Hide overlapping labels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "min-marker-pixels",
+        "label": "Minimum marker size (pixels)",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 0.0,
+        "max": 12.0,
+        "step": 1.0
       },
       {
         "id": "through-walls",
@@ -100,12 +172,84 @@
       },
       {
         "id": "range",
-        "label": "Range",
+        "label": "Range (blocks)",
         "kind": "NUMBER",
         "default": 64.0,
         "min": 16.0,
         "max": 128.0,
         "step": 8.0
+      },
+      {
+        "id": "label-range",
+        "label": "Label range (blocks)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 8.0,
+        "max": 128.0,
+        "step": 4.0
+      },
+      {
+        "id": "label-scale",
+        "label": "Label scale",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "distance-scale",
+        "label": "Shrink distant labels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "label-near",
+        "label": "Full-size distance (blocks)",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 2.0,
+        "max": 64.0,
+        "step": 2.0
+      },
+      {
+        "id": "label-far-scale",
+        "label": "Distant label size",
+        "kind": "NUMBER",
+        "default": 0.45,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "fade-labels",
+        "label": "Fade distant labels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "max-labels",
+        "label": "Maximum labels",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 0.0,
+        "max": 128.0,
+        "step": 1.0
+      },
+      {
+        "id": "declutter",
+        "label": "Hide overlapping labels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "min-marker-pixels",
+        "label": "Minimum marker size (pixels)",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 0.0,
+        "max": 12.0,
+        "step": 1.0
       },
       {
         "id": "through-walls",
@@ -168,7 +312,7 @@
       },
       {
         "id": "range",
-        "label": "Range",
+        "label": "Range (blocks)",
         "kind": "NUMBER",
         "default": 128.0,
         "min": 16.0,
@@ -7225,6 +7369,48 @@
       {
         "id": "nether",
         "label": "Include Nether conversion",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "expedition",
+    "name": "Automation",
+    "category": "Client",
+    "description": "Review a local task plan, then let Baritone and normal inventory actions carry it out.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "min-health",
+        "label": "Pause below health",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "min-hunger",
+        "label": "Pause below hunger",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "stuck-timeout",
+        "label": "No-progress timeout (seconds)",
+        "kind": "NUMBER",
+        "default": 90.0,
+        "min": 15.0,
+        "max": 600.0,
+        "step": 5.0
+      },
+      {
+        "id": "pause-on-menu",
+        "label": "Pause while other menus are open",
         "kind": "BOOLEAN",
         "default": true
       }

@@ -4,11 +4,27 @@
   "version": "${version}",
   "name": "Analyzer",
   "description": "A visual Minecraft utility client with a native interface, ESP, profiles and original shader presets.",
-  "authors": ["Analyzer contributors"],
+  "authors": [
+    "Analyzer contributors"
+  ],
   "license": "MIT",
   "icon": "assets/analyzer/icon.png",
   "environment": "client",
-  "entrypoints": { "client": ["dev.analyzer.AnalyzerClient"] },
-  "mixins": ["analyzer.mixins.json"],
-  "depends": { "fabricloader": ">=0.16.10", "minecraft": "1.21.4", "java": ">=21", "fabric-api": "*" }
+  "entrypoints": {
+    "client": [
+      "dev.analyzer.AnalyzerClient"
+    ]
+  },
+  "mixins": [
+    "analyzer.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "1.21.4",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "baritone": "1.13.1"
+  }
 }

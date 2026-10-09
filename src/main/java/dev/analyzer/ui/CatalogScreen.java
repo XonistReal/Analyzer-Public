@@ -74,6 +74,7 @@ abstract class CatalogScreen extends Screen {
         label(draw, query.isEmpty() ? "Search all modules…  /" : GuiDraw.truncate(textRenderer, query, 217, 0.86f), 721, 28, 0.86f, query.isEmpty() ? Palette.MUTED : Palette.TEXT);
         control("search", new Area(709, 20, 240, 25), 0, () -> { searchFocused = true; selectAll = false; capture = null; });
         button(draw, "close", "×", 957, 20, 23, 25, false, this::close);
+        button(draw, "automation", "Automation", 826, 49, 123, 20, false, () -> client.setScreen(MenuScreens.automation(core, this)));
         label(draw, "Drag category headers / every control is saved locally", 248, 53, 0.7f, Palette.SUBTLE);
     }
     protected List<ModuleDefinition> matching() {

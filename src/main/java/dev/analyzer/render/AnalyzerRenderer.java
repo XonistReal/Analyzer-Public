@@ -53,8 +53,8 @@ import java.util.List;
 public final class AnalyzerRenderer {
     private static final int MAX_ENTITY_TARGETS = 4096;
     private static final int MAX_LABELS = 128;
-    private static final int MAX_SCREEN_LABELS = 40;
-    private static final float SCREEN_LABEL_SCALE = 0.62f;
+    private static final float LABEL_TEXT_PIXELS = 14;
+    private static final float MIN_LABEL_TEXT_PIXELS = 6;
     private static final String CLIENT_VERSION = FabricLoader.getInstance().getModContainer("analyzer")
             .map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("dev");
     private static final int PLAYER_COLOR = 0xFF66DFF7;
@@ -75,6 +75,9 @@ public final class AnalyzerRenderer {
     private List<ScreenTarget> screenEntities = List.of(), screenStorage = List.of();
     private final List<Target> radarTargets = new ArrayList<>();
     private Vec3d frameCamera = Vec3d.ZERO;
+    private final List<EspLayout.Rect> frameLabelBounds = new ArrayList<>();
+    private int entityLabels, storageLabels, tinyMarkers;
+    private float largestLabelPixels, smallestLabelPixels;
     private boolean registered;
 
     public AnalyzerRenderer(AnalyzerCore core) {
@@ -91,6 +94,16 @@ public final class AnalyzerRenderer {
         return renderer == null ? new RenderCounts(0, 0, 0)
                 : new RenderCounts(renderer.screenEntities.size(), renderer.screenStorage.size(), 0);
     }
+
+    /** Actual submitted label panels and nominal physical glyph sizes, independent of the HUD/GUI scale. */
+    public static LabelCounts labelCounts() {
+        AnalyzerRenderer renderer = activeRenderer;
+        return renderer == null ? new LabelCounts(0, 0, 0, 0, 0)
+                : new LabelCounts(renderer.entityLabels, renderer.storageLabels, renderer.tinyMarkers,
+                renderer.largestLabelPixels, renderer.smallestLabelPixels);
+    }
+    public record LabelCounts(int entities, int containers, int tinyMarkersSkipped,
+                              float largestTextPixels, float smallestTextPixels) { }
 
     /** Live, concise inspector feedback. Counts include selected loaded targets in range. */
     public static String status(String moduleId) {
@@ -126,6 +139,8 @@ public final class AnalyzerRenderer {
             if (mc.world == null) {
                 lastCounts = new RenderCounts(0, 0, 0);
                 screenEntities = List.of(); screenStorage = List.of(); radarTargets.clear();
+                frameLabelBounds.clear(); entityLabels = 0; storageLabels = 0; tinyMarkers = 0;
+                largestLabelPixels = 0; smallestLabelPixels = 0;
             }
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> labelAllocator.close());
@@ -141,6 +156,8 @@ public final class AnalyzerRenderer {
             lastCounts = new RenderCounts(0, 0, 0);
             screenEntities = List.of(); screenStorage = List.of(); radarTargets.clear();
             storage.ensureReady(client, core);
+            frameLabelBounds.clear(); entityLabels = 0; storageLabels = 0; tinyMarkers = 0;
+            largestLabelPixels = 0; smallestLabelPixels = 0;
         }
         if (client.world == null || client.player == null) return;
         boolean esp = belongsToPass("entity-esp", afterWorld);
@@ -212,8 +229,8 @@ public final class AnalyzerRenderer {
             RenderSystem.depthFunc(GL11.GL_LEQUAL);
             RenderSystem.setShaderColor(1, 1, 1, 1);
             RenderSystem.setShaderFog(Fog.DUMMY);
-            if (!entityScreen && !entityTargets.isEmpty()) drawEsp("entity-esp", entityTargets);
-            if (!storageScreen && !storageTargets.isEmpty()) drawEsp("storage-esp", storageTargets);
+            if (!entityScreen && !entityTargets.isEmpty()) drawEsp("entity-esp", entityTargets, context);
+            if (!storageScreen && !storageTargets.isEmpty()) drawEsp("storage-esp", storageTargets, context);
             if (!tracerTargets.isEmpty()) {
                 setDepth(core.getBoolean("tracers", "through-walls"));
                 // A point just beyond the near plane anchors the lines at the center of view.
@@ -250,17 +267,30 @@ public final class AnalyzerRenderer {
         return null;
     }
 
-    private void drawEsp(String module, List<Target> targets) {
+    private void drawEsp(String module, List<Target> targets, WorldRenderContext context) {
+        Matrix4f clipMatrix = new Matrix4f(context.projectionMatrix()).mul(context.positionMatrix());
+        List<Target> visible = new ArrayList<>(), glow = new ArrayList<>();
+        for (Target target : targets) {
+            ScreenBounds projected = projectBox(target.bounds, clipMatrix);
+            if (projected == null) continue;
+            float pixelsWide = (projected.right - projected.left) * client.getWindow().getFramebufferWidth();
+            float pixelsHigh = (projected.bottom - projected.top) * client.getWindow().getFramebufferHeight();
+            if (!EspLayout.markerVisible(pixelsWide, pixelsHigh, core.getNumber(module, "min-marker-pixels"))) {
+                tinyMarkers++; continue;
+            }
+            visible.add(target);
+            if (Math.min(pixelsWide, pixelsHigh) >= 12) glow.add(target);
+        }
+        if (visible.isEmpty()) return;
         setDepth(core.getBoolean(module, "through-walls"));
         RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
         BufferBuilder fill = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        for (Target target : targets) fillBox(fill, target.bounds, Palette.alpha(target.color, 22));
+        for (Target target : visible) fillBox(fill, target.bounds, Palette.alpha(target.color, 22));
         BufferRenderer.drawWithGlobalProgram(fill.end());
-
         float width = (float) core.getNumber(module, "line-width");
         boolean corners = core.getChoice(module, "style").equals("Corners");
-        drawOutlines(targets, corners, width + 3, 34);
-        drawOutlines(targets, corners, width, 235);
+        if (!glow.isEmpty()) drawOutlines(glow, corners, width + 3, 34);
+        drawOutlines(visible, corners, width, 235);
     }
 
     private static void setDepth(boolean throughWalls) {
@@ -324,34 +354,48 @@ public final class AnalyzerRenderer {
 
     private void drawLabels(String module, List<Target> targets, WorldRenderContext context,
                             boolean names, boolean health) {
-        if (!names && !health) return;
+        if ((!names && !health) || client.options.hudHidden || client.currentScreen != null) return;
         List<Label> labels = new ArrayList<>();
-        // Bound text work to the nearest visible targets. Geometry still covers the full configured range.
-        for (int i = targets.size() - 1; i >= 0 && labels.size() < MAX_LABELS; i--) {
+        Matrix4f clipMatrix = new Matrix4f(context.projectionMatrix()).mul(context.positionMatrix());
+        int maximum = Math.min(MAX_LABELS, (int) core.getNumber(module, "max-labels"));
+        boolean declutter = core.getBoolean(module, "declutter");
+        // Nearer tags claim space first. Far geometry keeps the full separately configured block range.
+        for (int i = targets.size() - 1; i >= 0 && labels.size() < maximum; i--) {
             Target target = targets.get(i);
+            double distance = Math.sqrt(target.distanceSquared);
+            EspLayout.Appearance appearance = labelAppearance(module, distance);
+            float textPixels = labelPixels(module, appearance);
+            if (!appearance.visible() || names && textPixels < MIN_LABEL_TEXT_PIXELS) continue;
             boolean healthBar = health && target.entity instanceof LivingEntity;
             if (!names && !healthBar) continue;
             if (context.frustum() != null && !context.frustum().isVisible(
                     target.bounds.offset(context.camera().getPos()).expand(0.7))) continue;
-            // Bound remote names for readable tags while preserving their distance suffix.
-            String name = names ? name(target) : "";
-            if (name.length() > 48) name = name.substring(0, 45) + "…";
-            name = GuiDraw.truncate(client.textRenderer, name, 110, 1);
-            String label = names ? name + "  ·  " + Math.round(Math.sqrt(target.distanceSquared)) + "m" : "";
-            int textWidth = names ? client.textRenderer.getWidth(GuiDraw.text(label)) : 0;
-            float width = Math.max(40, textWidth + 12), height = names ? (healthBar ? 23 : 17) : 9;
+            String name = names ? truncateEsp(name(target), 110, 1) : "";
+            String text = names ? name + " · " + Math.round(distance) + "b" : "";
+            int textWidth = names ? client.textRenderer.getWidth(GuiDraw.text(text)) : 0;
+            float width = Math.max(32, textWidth + 10), height = names ? (healthBar ? 23 : 17) : 9;
+            float centerX = (float) ((target.bounds.minX + target.bounds.maxX) / 2);
+            float centerY = (float) (target.bounds.maxY + 0.18);
+            float centerZ = (float) ((target.bounds.minZ + target.bounds.maxZ) / 2);
+            Vector4f view = context.positionMatrix().transform(new Vector4f(centerX, centerY, centerZ, 1));
+            if (view.z >= -0.01f) continue;
             MatrixStack matrices = new MatrixStack();
-            matrices.translate((target.bounds.minX + target.bounds.maxX) / 2,
-                    target.bounds.maxY + 0.18, (target.bounds.minZ + target.bounds.maxZ) / 2);
-            // Model-view already holds the world camera matrix in either pass. Vanilla label rotation cancels
-            // its orientation; copying context.positionMatrix here would apply that camera twice.
+            matrices.translate(centerX, centerY, centerZ);
             matrices.multiply(context.camera().getRotation());
-            float scale = 0.025f * (float) Math.clamp(Math.sqrt(target.distanceSquared) / 20, 1, 8);
+            // Convert a selected physical glyph size into world units at this depth. Size then decreases
+            // explicitly with distance; it never inherits the HUD's readable-text floor or GUI scale.
+            float scale = textPixels / 12f * 2f * -view.z
+                    / Math.max(1, client.getWindow().getFramebufferHeight() * context.projectionMatrix().m11());
             matrices.scale(scale, -scale, scale);
+            Matrix4f matrix = new Matrix4f(matrices.peek().getPositionMatrix());
+            EspLayout.Rect bounds = projectLabelPanel(new Matrix4f(clipMatrix).mul(matrix), width, height);
+            if (bounds == null || declutter && !EspLayout.free(bounds, frameLabelBounds, 3)) continue;
+            frameLabelBounds.add(bounds);
             float healthFraction = healthBar ? Math.clamp(((LivingEntity) target.entity).getHealth()
                     / Math.max(1, ((LivingEntity) target.entity).getMaxHealth()), 0, 1) : -1;
-            labels.add(new Label(label, textWidth, width, height, target.color, healthFraction,
-                    new Matrix4f(matrices.peek().getPositionMatrix())));
+            labels.add(new Label(text, textWidth, width, height, target.color, healthFraction,
+                    (float) appearance.opacity(), matrix));
+            recordLabel(module, names ? textPixels : 0);
         }
         if (labels.isEmpty()) return;
         Collections.reverse(labels);
@@ -365,15 +409,15 @@ public final class AnalyzerRenderer {
         BufferBuilder panels = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         for (Label label : labels) {
             float left = -label.width / 2, right = label.width / 2;
-            panel(panels, label.matrix, left, -label.height, right, 0, 0xC20A141B);
+            panel(panels, label.matrix, left, -label.height, right, 0, faded(0xC20A141B, label.opacity));
             panel(panels, label.matrix, left, -label.height, left + 1.3f, 0,
-                    Palette.alpha(label.color, 235));
+                    faded(Palette.alpha(label.color, 235), label.opacity));
             if (label.healthFraction >= 0) {
-                panel(panels, label.matrix, left + 5, -6, right - 5, -3, 0xFF243A42);
+                panel(panels, label.matrix, left + 5, -6, right - 5, -3, faded(0xFF243A42, label.opacity));
                 int healthColor = label.healthFraction > 0.6f ? Palette.MINT
                         : label.healthFraction > 0.3f ? ITEM_COLOR : HOSTILE_COLOR;
                 panel(panels, label.matrix, left + 5, -6,
-                        left + 5 + (label.width - 10) * label.healthFraction, -3, healthColor);
+                        left + 5 + (label.width - 10) * label.healthFraction, -3, faded(healthColor, label.opacity));
             }
         }
         BufferRenderer.drawWithGlobalProgram(panels.end());
@@ -382,11 +426,63 @@ public final class AnalyzerRenderer {
                     : TextRenderer.TextLayerType.NORMAL;
             for (Label label : labels) {
                 client.textRenderer.draw(GuiDraw.text(label.text), -label.textWidth / 2f,
-                        -label.height + 4, Palette.TEXT, false, label.matrix, labelConsumers,
+                        -label.height + 4, faded(Palette.TEXT, label.opacity), false, label.matrix, labelConsumers,
                         layer, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
             }
             labelConsumers.draw();
         }
+    }
+
+    private EspLayout.Appearance labelAppearance(String module, double distance) {
+        return EspLayout.appearance(distance, core.getNumber(module, "label-near"),
+                Math.min(core.getNumber(module, "range"), core.getNumber(module, "label-range")),
+                core.getNumber(module, "label-far-scale"), core.getBoolean(module, "distance-scale"),
+                core.getBoolean(module, "fade-labels"));
+    }
+
+    private float labelPixels(String module, EspLayout.Appearance appearance) {
+        return (float) (LABEL_TEXT_PIXELS * core.getNumber(module, "label-scale") * appearance.size());
+    }
+
+    private void recordLabel(String module, float textPixels) {
+        if (module.equals("entity-esp")) entityLabels++; else storageLabels++;
+        if (textPixels > 0) {
+            largestLabelPixels = Math.max(largestLabelPixels, textPixels);
+            smallestLabelPixels = smallestLabelPixels == 0 ? textPixels : Math.min(smallestLabelPixels, textPixels);
+        }
+    }
+
+    private EspLayout.Rect projectLabelPanel(Matrix4f matrix, float width, float height) {
+        double left = Double.POSITIVE_INFINITY, top = Double.POSITIVE_INFINITY;
+        double right = Double.NEGATIVE_INFINITY, bottom = Double.NEGATIVE_INFINITY;
+        int pixelsWide = client.getWindow().getFramebufferWidth(), pixelsHigh = client.getWindow().getFramebufferHeight();
+        for (int i = 0; i < 4; i++) {
+            Vector4f point = matrix.transform(new Vector4f((i & 1) == 0 ? -width / 2 : width / 2,
+                    (i & 2) == 0 ? -height : 0, 0, 1));
+            if (point.w <= .001f || point.z + point.w < .001f) return null;
+            double x = (point.x / point.w + 1) / 2 * pixelsWide;
+            double y = (1 - point.y / point.w) / 2 * pixelsHigh;
+            left = Math.min(left, x); top = Math.min(top, y);
+            right = Math.max(right, x); bottom = Math.max(bottom, y);
+        }
+        var result = new EspLayout.Rect(left, top, right - left, bottom - top);
+        return result.inside(pixelsWide, pixelsHigh) ? result : null;
+    }
+
+    private String truncateEsp(String value, float maximum, float scale) {
+        if (value.codePointCount(0, value.length()) > 64)
+            value = value.substring(0, value.offsetByCodePoints(0, 61)) + "…";
+        if (client.textRenderer.getWidth(GuiDraw.text(value)) * scale <= maximum) return value;
+        String ending = "…";
+        if (client.textRenderer.getWidth(GuiDraw.text(ending)) * scale > maximum) return "";
+        int end = value.length();
+        while (end > 0 && client.textRenderer.getWidth(GuiDraw.text(value.substring(0, end) + ending)) * scale > maximum)
+            end = value.offsetByCodePoints(end, -1);
+        return value.substring(0, end) + ending;
+    }
+
+    private static int faded(int color, float opacity) {
+        return Palette.alpha(color, Math.round((color >>> 24) * opacity));
     }
 
     private static String name(Target target) {
@@ -408,7 +504,7 @@ public final class AnalyzerRenderer {
     }
 
     private record Label(String text, int textWidth, float width, float height, int color,
-                         float healthFraction, Matrix4f matrix) { }
+                         float healthFraction, float opacity, Matrix4f matrix) { }
 
     private List<ScreenTarget> projectTargets(String module, List<Target> targets, WorldRenderContext context) {
         Matrix4f clipMatrix = new Matrix4f(context.projectionMatrix()).mul(context.positionMatrix());
@@ -417,15 +513,18 @@ public final class AnalyzerRenderer {
         boolean health = module.equals("entity-esp") && core.getBoolean(module, "health");
         List<ScreenTarget> projected = new ArrayList<>();
         // Nearest targets get priority when a dense base contains many loaded entities.
-        for (int i = targets.size() - 1; i >= 0 && projected.size() < MAX_LABELS; i--) {
+        for (int i = targets.size() - 1; i >= 0 && projected.size() < MAX_ENTITY_TARGETS; i--) {
             Target target = targets.get(i);
             if (context.frustum() != null && !context.frustum().isVisible(
                     target.bounds.offset(context.camera().getPos()).expand(0.25))) continue;
             ScreenBounds bounds = projectBox(target.bounds, clipMatrix);
             if (bounds == null || !throughWalls && !hasLineOfSight(target, context.camera().getPos())) continue;
+            if (!EspLayout.markerVisible((bounds.right - bounds.left) * client.getWindow().getFramebufferWidth(),
+                    (bounds.bottom - bounds.top) * client.getWindow().getFramebufferHeight(),
+                    core.getNumber(module, "min-marker-pixels"))) { tinyMarkers++; continue; }
             String text = labels ? name(target) : "";
             if (text.length() > 48) text = text.substring(0, 45) + "…";
-            if (labels) text += " · " + Math.round(Math.sqrt(target.distanceSquared)) + "m";
+            if (labels) text += " · " + Math.round(Math.sqrt(target.distanceSquared)) + "b";
             float fraction = health && target.entity instanceof LivingEntity living
                     ? Math.clamp(living.getHealth() / Math.max(1, living.getMaxHealth()), 0, 1) : -1;
             projected.add(new ScreenTarget(bounds, target.color, text, fraction, target.distanceSquared));
@@ -478,83 +577,109 @@ public final class AnalyzerRenderer {
                                    List<ScreenLabelRequest> labelRequests, List<HudRect> boxes) {
         if (!core.isEnabled(module) || !core.getChoice(module, "style").equals("Screen")) return;
         int width = draw.getScaledWindowWidth(), height = draw.getScaledWindowHeight();
-        int thickness = Math.max(1, Math.round((float) core.getNumber(module, "line-width")));
+        int pixelsWide = client.getWindow().getFramebufferWidth(), pixelsHigh = client.getWindow().getFramebufferHeight();
+        float pixelsPerPoint = (float) client.getWindow().getScaleFactor();
+        int configuredThickness = Math.max(1, Math.round((float) core.getNumber(module, "line-width")));
         for (ScreenTarget target : targets) {
-            int left = Math.round(target.bounds.left * width), top = Math.round(target.bounds.top * height);
-            int right = Math.max(left + 3, Math.round(target.bounds.right * width));
-            int bottom = Math.max(top + 3, Math.round(target.bounds.bottom * height));
-            HudRect box = new HudRect(left, top, right - left, bottom - top);
+            int left = Math.round(target.bounds.left * pixelsWide), top = Math.round(target.bounds.top * pixelsHigh);
+            int right = Math.round(target.bounds.right * pixelsWide), bottom = Math.round(target.bounds.bottom * pixelsHigh);
+            if (right <= left || bottom <= top) continue;
+            // Preserve projected dimensions. Draw lines in physical pixels so a one-pixel distant entity
+            // cannot turn into a thick three-GUI-pixel marker when Minecraft's GUI scale changes.
+            int boxWidth = right - left, boxHeight = bottom - top;
+            int thickness = Math.max(1, Math.min(configuredThickness, Math.min(boxWidth, boxHeight) / 4));
+            int corner = Math.max(1, Math.min(18, Math.min(boxWidth, boxHeight) / 4));
+            HudRect box = new HudRect((int) Math.floor(left / pixelsPerPoint), (int) Math.floor(top / pixelsPerPoint),
+                    Math.max(1, (int) Math.ceil(boxWidth / pixelsPerPoint)), Math.max(1, (int) Math.ceil(boxHeight / pixelsPerPoint)));
             boxes.add(box);
+            draw.getMatrices().push();
+            draw.getMatrices().scale(1 / pixelsPerPoint, 1 / pixelsPerPoint, 1);
             draw.fill(left, top, right, bottom, Palette.alpha(target.color, 12));
-            int corner = Math.max(3, Math.min(18, Math.min(right - left, bottom - top) / 4));
-            for (int layer = 3; layer >= 1; layer--) {
-                screenCorners(draw, left - layer, top - layer, right + layer, bottom + layer,
-                        corner + layer, thickness + layer * 2, Palette.alpha(target.color, 7));
+            // Tiny markers have their real dimensions and no oversized surrounding glow.
+            if (Math.min(boxWidth, boxHeight) >= 12) {
+                screenCorners(draw, left - 1, top - 1, right + 1, bottom + 1,
+                        corner + 1, thickness + 2, 0xAA060D13);
             }
-            screenCorners(draw, left - 1, top - 1, right + 1, bottom + 1, corner + 1, thickness + 2, 0xC4060D13);
-            screenCorners(draw, left, top, right, bottom, corner, thickness, Palette.alpha(target.color, 250));
-            if (target.health >= 0) {
-                draw.fill(left - 5, top - 1, left - 2, bottom + 1, 0xD9060D13);
+            screenCorners(draw, left, top, right, bottom, corner, thickness, Palette.alpha(target.color, 230));
+            EspLayout.Appearance appearance = labelAppearance(module, Math.sqrt(target.distanceSquared));
+            if (target.health >= 0 && boxHeight >= 12 && appearance.visible()) {
+                draw.fill(left - 4, top, left - 1, bottom, faded(0xD9060D13, (float) appearance.opacity()));
                 int healthColor = target.health > 0.6f ? PASSIVE_COLOR : target.health > 0.3f ? ITEM_COLOR : HOSTILE_COLOR;
-                draw.fill(left - 4, bottom - Math.round((bottom - top) * target.health), left - 3, bottom, healthColor);
+                draw.fill(left - 3, bottom - Math.round(boxHeight * target.health), left - 2, bottom,
+                        faded(healthColor, (float) appearance.opacity()));
             }
-            if (!target.text.isEmpty()) {
-                String text = GuiDraw.truncate(client.textRenderer, target.text, Math.min(120, width - 16), SCREEN_LABEL_SCALE);
-                int panelWidth = (int) Math.ceil(GuiDraw.width(client.textRenderer, text, SCREEN_LABEL_SCALE)) + 8;
-                labelRequests.add(new ScreenLabelRequest(box, panelWidth, text, target.color, target.distanceSquared));
+            draw.getMatrices().pop();
+            float textPixels = labelPixels(module, appearance);
+            if (!target.text.isEmpty() && core.getNumber(module, "max-labels") > 0 && appearance.visible() && textPixels >= MIN_LABEL_TEXT_PIXELS) {
+                float labelScale = textPixels / (12 * pixelsPerPoint);
+                String text = truncateEsp(target.text, Math.min(160 / pixelsPerPoint, width - 16), labelScale);
+                int panelWidth = (int) Math.ceil(client.textRenderer.getWidth(GuiDraw.text(text)) * labelScale + 8 / pixelsPerPoint);
+                int panelHeight = Math.max(1, (int) Math.ceil((textPixels + 6) / pixelsPerPoint));
+                labelRequests.add(new ScreenLabelRequest(module, box, panelWidth, panelHeight, text, labelScale,
+                        textPixels, (float) appearance.opacity(), target.color, target.distanceSquared));
             }
         }
     }
 
-    /** Shared layout keeps nearby entity/container tags readable without hiding their boxes. */
+    /** Shared nearest-first placement respects HUD, other ESP labels and per-module budgets. */
     private void drawScreenLabels(DrawContext draw, List<ScreenLabelRequest> requests, List<HudRect> boxes,
                                   List<HudRect> reserved) {
         int width = draw.getScaledWindowWidth(), height = draw.getScaledWindowHeight();
+        float pixelsPerPoint = (float) client.getWindow().getScaleFactor();
         requests.sort(Comparator.comparingDouble(ScreenLabelRequest::distanceSquared));
         List<HudRect> occupied = new ArrayList<>(reserved);
         occupied.addAll(boxes);
-        int drawn = 0, panelHeight = 10;
+        for (EspLayout.Rect worldLabel : frameLabelBounds) {
+            occupied.add(new HudRect((int) Math.floor(worldLabel.x() / pixelsPerPoint),
+                    (int) Math.floor(worldLabel.y() / pixelsPerPoint),
+                    (int) Math.ceil(worldLabel.width() / pixelsPerPoint),
+                    (int) Math.ceil(worldLabel.height() / pixelsPerPoint)));
+        }
         for (ScreenLabelRequest request : requests) {
-            if (drawn >= MAX_SCREEN_LABELS) break;
-            HudRect panel = findScreenLabelPosition(request, panelHeight, width, height, occupied);
+            int count = request.module.equals("entity-esp") ? entityLabels : storageLabels;
+            if (count >= core.getNumber(request.module, "max-labels")) continue;
+            boolean declutter = core.getBoolean(request.module, "declutter");
+            HudRect panel = findScreenLabelPosition(request, width, height, occupied, declutter);
             if (panel == null) continue;
             occupied.add(panel);
-            float ax = Math.clamp(panel.x + panel.width / 2f, request.box.x, request.box.right());
-            float ay = Math.clamp(panel.y + panel.height / 2f, request.box.y, request.box.bottom());
-            float bx = Math.clamp(ax, panel.x, panel.right()), by = Math.clamp(ay, panel.y, panel.bottom());
-            if (Math.abs(ax - bx) + Math.abs(ay - by) > 5) {
-                GuiDraw.line(draw, ax, ay, bx, by, Palette.alpha(request.color, 85));
-            }
-            GuiDraw.outlined(draw, panel.x, panel.y, panel.width, panel.height, 2,
-                    Palette.alpha(request.color, 125), 0xE508131A);
-            draw.fill(panel.x + 1, panel.y + 2, panel.x + 2, panel.bottom() - 2, Palette.alpha(request.color, 230));
-            GuiDraw.label(draw, client.textRenderer, request.text, panel.x + 4, panel.y + 2, SCREEN_LABEL_SCALE, Palette.TEXT);
-            drawn++;
+            frameLabelBounds.add(new EspLayout.Rect(panel.x * pixelsPerPoint, panel.y * pixelsPerPoint,
+                    panel.width * pixelsPerPoint, panel.height * pixelsPerPoint));
+            // Tags remain near their actual projected targets. Dense targets are omitted instead of
+            // shifting tags through six large rows across the sky.
+            draw.fill(panel.x, panel.y, panel.right(), panel.bottom(), faded(0xD408131A, request.opacity));
+            int lineWidth = Math.max(1, Math.round(1 / pixelsPerPoint));
+            draw.fill(panel.x, panel.y, panel.x + lineWidth, panel.bottom(),
+                    faded(Palette.alpha(request.color, 220), request.opacity));
+            float x = panel.x + 4 / pixelsPerPoint, y = panel.y + 2 / pixelsPerPoint;
+            // Direct draw deliberately bypasses GuiDraw's HUD/menu font floor.
+            draw.getMatrices().push();
+            draw.getMatrices().translate(Math.round(x * pixelsPerPoint) / pixelsPerPoint,
+                    Math.round(y * pixelsPerPoint) / pixelsPerPoint, 0);
+            draw.getMatrices().scale(request.scale, request.scale, 1);
+            draw.drawText(client.textRenderer, GuiDraw.text(request.text), 0, 0,
+                    faded(Palette.TEXT, request.opacity), false);
+            draw.getMatrices().pop();
+            recordLabel(request.module, request.textPixels);
         }
     }
 
-    private static HudRect findScreenLabelPosition(ScreenLabelRequest request, int panelHeight,
-                                                    int width, int height, List<HudRect> occupied) {
-        int centerX = request.box.x + request.box.width / 2;
-        int preferredX = centerX - request.panelWidth / 2;
-        // A bounded search gives tags nearby staggered rows; dense/offscreen tags may be omitted.
-        for (int row = 0; row < 6; row++) {
-            int above = request.box.y - panelHeight - 3 - row * (panelHeight + 3);
-            int below = request.box.bottom() + 3 + row * (panelHeight + 3);
-            int[] positions = {preferredX, above, preferredX, below,
-                    request.box.right() + 4, request.box.y + row * (panelHeight + 3),
-                    request.box.x - request.panelWidth - 4, request.box.y + row * (panelHeight + 3)};
-            for (int position = 0; position < positions.length; position += 2) {
-                int x = Math.clamp(positions[position], 2, Math.max(2, width - request.panelWidth - 2));
-                int y = positions[position + 1];
-                if (y < 2 || y + panelHeight > height - 2) continue;
-                HudRect candidate = new HudRect(x, y, request.panelWidth, panelHeight);
-                boolean free = true;
-                for (HudRect other : occupied) {
-                    if (candidate.intersects(other, 2)) { free = false; break; }
-                }
-                if (free) return candidate;
+    private static HudRect findScreenLabelPosition(ScreenLabelRequest request, int width, int height,
+                                                    List<HudRect> occupied, boolean declutter) {
+        int preferredX = request.box.x + request.box.width / 2 - request.panelWidth / 2;
+        int[] positions = {preferredX, request.box.y - request.panelHeight - 2,
+                preferredX, request.box.bottom() + 2,
+                request.box.right() + 2, request.box.y,
+                request.box.x - request.panelWidth - 2, request.box.y};
+        for (int position = 0; position < positions.length; position += 2) {
+            int x = Math.clamp(positions[position], 2, Math.max(2, width - request.panelWidth - 2));
+            int y = positions[position + 1];
+            if (y < 2 || y + request.panelHeight > height - 2) continue;
+            HudRect candidate = new HudRect(x, y, request.panelWidth, request.panelHeight);
+            boolean free = true;
+            if (declutter) for (HudRect other : occupied) {
+                if (candidate.intersects(other, 1)) { free = false; break; }
             }
+            if (free) return candidate;
         }
         return null;
     }
@@ -597,7 +722,8 @@ public final class AnalyzerRenderer {
 
     private record ScreenBounds(float left, float top, float right, float bottom) { }
     private record ScreenTarget(ScreenBounds bounds, int color, String text, float health, double distanceSquared) { }
-    private record ScreenLabelRequest(HudRect box, int panelWidth, String text, int color, double distanceSquared) { }
+    private record ScreenLabelRequest(String module, HudRect box, int panelWidth, int panelHeight, String text,
+                                      float scale, float textPixels, float opacity, int color, double distanceSquared) { }
     private record HudRect(int x, int y, int width, int height) {
         int right() { return x + width; }
         int bottom() { return y + height; }

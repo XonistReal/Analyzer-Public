@@ -18,14 +18,32 @@ public final class BuiltinModules {
                         Setting.bool("labels", "Name and distance", true),
                         Setting.bool("health", "Health", true),
                         Setting.bool("radar", "Nearby target radar", true),
-                        Setting.number("range", "Range", 128, 16, 256, 8),
+                        Setting.number("range", "Range (blocks)", 128, 16, 256, 8),
+                        Setting.number("label-range", "Label range (blocks)", 48, 8, 256, 4),
+                        Setting.number("label-scale", "Label scale", 1, 0.5, 2, 0.05),
+                        Setting.bool("distance-scale", "Shrink distant labels", true),
+                        Setting.number("label-near", "Full-size distance (blocks)", 8, 2, 64, 2),
+                        Setting.number("label-far-scale", "Distant label size", 0.45, 0.2, 1, 0.05),
+                        Setting.bool("fade-labels", "Fade distant labels", true),
+                        Setting.number("max-labels", "Maximum labels", 16, 0, 128, 1),
+                        Setting.bool("declutter", "Hide overlapping labels", true),
+                        Setting.number("min-marker-pixels", "Minimum marker size (pixels)", 3, 0, 12, 1),
                         Setting.bool("through-walls", "Through walls", true),
                         Setting.number("line-width", "Line width", 1.5, 0.5, 4, 0.25),
                         Setting.choice("style", "Box style", "Corners", "Boxes", "Corners", "Screen"))),
                 new ModuleDefinition("storage-esp", "Storage ESP", "Highlight nearby containers.",
                         Category.WORLD, false, List.of(
                         Setting.bool("labels", "Container labels", true),
-                        Setting.number("range", "Range", 64, 16, 128, 8),
+                        Setting.number("range", "Range (blocks)", 64, 16, 128, 8),
+                        Setting.number("label-range", "Label range (blocks)", 40, 8, 128, 4),
+                        Setting.number("label-scale", "Label scale", 1, 0.5, 2, 0.05),
+                        Setting.bool("distance-scale", "Shrink distant labels", true),
+                        Setting.number("label-near", "Full-size distance (blocks)", 8, 2, 64, 2),
+                        Setting.number("label-far-scale", "Distant label size", 0.45, 0.2, 1, 0.05),
+                        Setting.bool("fade-labels", "Fade distant labels", true),
+                        Setting.number("max-labels", "Maximum labels", 12, 0, 128, 1),
+                        Setting.bool("declutter", "Hide overlapping labels", true),
+                        Setting.number("min-marker-pixels", "Minimum marker size (pixels)", 3, 0, 12, 1),
                         Setting.bool("through-walls", "Through walls", true),
                         Setting.number("line-width", "Line width", 1.5, 0.5, 4, 0.25),
                         Setting.choice("style", "Box style", "Boxes", "Boxes", "Corners", "Screen"))),
@@ -35,7 +53,7 @@ public final class BuiltinModules {
                         Setting.bool("hostiles", "Hostile mobs", false),
                         Setting.bool("passives", "Passive mobs", false),
                         Setting.bool("items", "Dropped items", false),
-                        Setting.number("range", "Range", 128, 16, 256, 8),
+                        Setting.number("range", "Range (blocks)", 128, 16, 256, 8),
                         Setting.bool("through-walls", "Through walls", true),
                         Setting.number("line-width", "Line width", 1, 0.5, 4, 0.25))),
                 new ModuleDefinition("fullbright", "Fullbright", "Lift world lighting for clearer exploration.",
@@ -71,6 +89,7 @@ public final class BuiltinModules {
         modules.addAll(CosmeticModules.definitions());
         modules.addAll(GameplayModules.definitions());
         modules.addAll(UtilityModules.definitions());
+        modules.addAll(AutomationModules.definitions());
         return List.copyOf(modules);
     }
     private static List<Setting<?>> menuSettings() {

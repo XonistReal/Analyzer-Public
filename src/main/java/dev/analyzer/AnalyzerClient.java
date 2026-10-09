@@ -50,6 +50,7 @@ public final class AnalyzerClient implements ClientModInitializer {
         new AnalyzerRenderer(CORE).register();
         GameplayEngine.register(CORE);
         UtilityEngine.register(CORE);
+        dev.analyzer.automation.AutomationEngine.register(CORE);
         VisualEffects.register(CORE);
         dev.analyzer.render.CosmeticRenderer.register(CORE);
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);

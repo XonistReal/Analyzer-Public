@@ -40,6 +40,12 @@ def main() -> None:
     api = jar_metadata(fabric)
     if api["id"] != "fabric-api" or api["version"] != "0.119.4+1.21.4":
         raise ValueError("Fabric API must be the verified 0.119.4+1.21.4 build")
+    baritone = repo / "third-party/baritone/baritone-api-fabric-1.13.1.jar"
+    if hashlib.sha256(baritone.read_bytes()).hexdigest() != "bfb79c3cdb8fe1f7697999b1f9c7f08ea29775f3b69d48ad90c387690ee67b05":
+        raise ValueError("Official Baritone API checksum mismatch")
+    bot = jar_metadata(baritone)
+    if bot["id"] != "baritone" or bot["version"] != "1.13.1":
+        raise ValueError("Expected official Baritone API 1.13.1")
     instance = args.instance_folder.resolve()
     if instance.exists() and any(instance.iterdir()):
         raise ValueError("Refusing to overwrite a staging instance")
@@ -48,6 +54,7 @@ def main() -> None:
     mods.mkdir(parents=True)
     shutil.copyfile(analyzer, mods / artifact)
     shutil.copyfile(fabric, mods / fabric.name)
+    shutil.copyfile(baritone, mods / baritone.name)
     scripts = instance / "analyzer-updater"
     scripts.mkdir()
     shutil.copyfile(repo / "tools/prism/Update-Analyzer.ps1", scripts / "Update-Analyzer.ps1")
@@ -85,12 +92,20 @@ WrapperCommand=
         '@echo off\r\npowershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass '
         '-File "%~dp0analyzer-updater\\Update-Analyzer.ps1" -InstanceDir "%~dp0."\r\npause\r\n',
         encoding="ascii")
-    for doc in ("PRISM.md", "LICENSE", "FONT-LICENSE.txt", "THIRD-PARTY.md"):
+    for doc in ("README.md", "PRISM.md", "AUTOMATION.md", "ESP-READABILITY.md", "MODULES.md", "MODULES.json", "ROADMAP.md", "RESEARCH.md", "RESEARCH-VISUALS.md", "RESEARCH-COSMETICS.md", "VALIDATION.md", "VALIDATION.log", "PIXEL-VALIDATION.log", "LICENSE", "FONT-LICENSE.txt", "THIRD-PARTY.md"):
         shutil.copyfile(repo / doc, instance / doc)
+    screenshots = instance / "screenshots"
+    screenshots.mkdir()
+    for capture in sorted((repo / "screenshots").glob("*.png")):
+        if capture.name in {"analyzer-ui.png", "analyzer-gui-classic.png"} or capture.name.startswith(("analyzer-esp-", "analyzer-bot-", "analyzer-automation-")):
+            shutil.copyfile(capture, screenshots / capture.name)
     licenses = instance / "licenses"
     licenses.mkdir()
     with zipfile.ZipFile(fabric) as archive:
         (licenses / "FABRIC-API-LICENSE.txt").write_bytes(archive.read("LICENSE-fabric-api"))
+    # Separate, replaceable LGPL release, corresponding source and upstream notices.
+    shutil.copytree(repo / "third-party/baritone", instance / "baritone-source-and-notices",
+                    ignore=shutil.ignore_patterns("*.jar"))
     output = (args.output or repo.parent / f"Analyzer-{manifest['version']}-Prism-1.21.4.zip").resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     pending = output.with_suffix(".zip.pending")

@@ -17,6 +17,13 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // Optional at runtime; distributed as a separately replaceable LGPL dependency.
+    modCompileOnly files("third-party/baritone/baritone-api-fabric-1.13.1.jar")
+    modRuntimeOnly files("third-party/baritone/baritone-api-fabric-1.13.1.jar")
+    // Loom removes nested-mod declarations in dev remaps; keep the exact upstream helper discoverable.
+    modRuntimeOnly files(zipTree(file("third-party/baritone/baritone-api-fabric-1.13.1.jar")).matching {
+        include "META-INF/jars/nether-pathfinder-1.4.1.jar"
+    })
 }
 
 processResources {
@@ -37,7 +44,17 @@ tasks.register('coreCheck', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.analyzer.core.CoreSelfTest'
 }
-tasks.named('check') { dependsOn tasks.named('coreCheck') }
+tasks.register('espCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.render.EspLayoutSelfTest'
+}
+tasks.register('plannerCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.automation.TaskPlannerSelfTest'
+}
+tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck') }
 tasks.register('moduleCatalog', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -96,6 +113,8 @@ loom {
             name 'Analyzer UI smoke test'
             vmArg '-Danalyzer.smoke=true'
             vmArg '-Danalyzer.worldsmoke=true'
+            vmArg '-Danalyzer.automationSmoke=true'
+            if (project.findProperty('analyzerBotOnly') == 'true') vmArg '-Danalyzer.botOnly=true'
             programArg '--username'
             programArg 'AnalyzerDev'
             programArg '--width'

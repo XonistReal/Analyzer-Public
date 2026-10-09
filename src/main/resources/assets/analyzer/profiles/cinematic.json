@@ -13,6 +13,15 @@
         "health": true,
         "radar": true,
         "range": 128.0,
+        "label-range": 48.0,
+        "label-scale": 1.0,
+        "distance-scale": true,
+        "label-near": 8.0,
+        "label-far-scale": 0.45,
+        "fade-labels": true,
+        "max-labels": 16.0,
+        "declutter": true,
+        "min-marker-pixels": 3.0,
         "through-walls": true,
         "line-width": 1.5,
         "style": "Screen"
@@ -24,6 +33,15 @@
       "settings": {
         "labels": true,
         "range": 64.0,
+        "label-range": 40.0,
+        "label-scale": 1.0,
+        "distance-scale": true,
+        "label-near": 8.0,
+        "label-far-scale": 0.45,
+        "fade-labels": true,
+        "max-labels": 12.0,
+        "declutter": true,
+        "min-marker-pixels": 3.0,
         "through-walls": true,
         "line-width": 1.5,
         "style": "Boxes"
@@ -1426,6 +1444,16 @@
       "keybind": -1,
       "settings": {
         "nether": true
+      }
+    },
+    "expedition": {
+      "enabled": false,
+      "keybind": -1,
+      "settings": {
+        "min-health": 6.0,
+        "min-hunger": 6.0,
+        "stuck-timeout": 90.0,
+        "pause-on-menu": true
       }
     }
   }

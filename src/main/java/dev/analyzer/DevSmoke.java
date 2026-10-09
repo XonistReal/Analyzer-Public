@@ -40,6 +40,11 @@ final class DevSmoke {
         if (!started) return;
         ticks++;
         var core = AnalyzerClient.CORE;
+        if (Boolean.getBoolean("analyzer.botOnly") && !worldRequested) {
+            worldRequested=true;
+            client.options.getViewDistance().setValue(8); client.options.getSimulationDistance().setValue(8);
+            client.createIntegratedServerLoader().start("Analyzer-Smoke", () -> client.scheduleStop());
+        }
         if (!worldRequested) {
             switch (ticks) {
                 case 36 -> click(client, 80, 134);
@@ -88,6 +93,10 @@ final class DevSmoke {
         } else if (client.world != null && client.player != null && client.getServer() != null && client.getOverlay() == null) {
             if (!arenaReady) { arenaReady = true; setupArena(client); }
             worldTicks++;
+            if (Boolean.getBoolean("analyzer.botOnly")) {
+                if(worldTicks>=20) AutomationReleaseSmoke.tick(client,worldTicks-20);
+                return;
+            }
             switch (worldTicks) {
                 case 40 -> {
                     client.setScreen(null);
@@ -198,7 +207,7 @@ final class DevSmoke {
             }
             if (worldTicks >= 625) ExpansionSmoke.tick(client, worldTicks - 625);
         }
-        if (ticks > 4000) throw new IllegalStateException("Smoke test timed out");
+        if (ticks > (Boolean.getBoolean("analyzer.automationSmoke") ? 10000 : 4000)) throw new IllegalStateException("Smoke test timed out");
     }
 
     private static void loadProfile(String name) {
@@ -215,7 +224,9 @@ final class DevSmoke {
             for (int x = 0; x < 2; x++) for (int z = 0; z < 2; z++) server.getOverworld().getChunk(x, z);
             var source = server.getCommandSource().withSilent();
             String[] commands = {
-                "gamerule doMobSpawning false", "gamerule doMobLoot false", "gamerule doDaylightCycle false", "time set 13000", "weather clear",
+                "difficulty normal", "gamemode creative AnalyzerDev", "clear AnalyzerDev", "effect clear AnalyzerDev",
+                "gamerule naturalRegeneration true",
+                "gamerule doMobSpawning false", "gamerule doMobLoot false", "gamerule doDaylightCycle false", "gamerule maxEntityCramming 24", "time set 13000", "weather clear",
                 "kill @e[type=!minecraft:player]", "kill @e[type=minecraft:item]", "fill 0 160 0 24 160 24 minecraft:polished_deepslate",
                 "fill 0 161 0 24 169 24 minecraft:air", "fill 0 160 0 24 160 0 minecraft:sea_lantern", "fill 0 160 24 24 160 24 minecraft:sea_lantern",
                 "fill 0 160 0 0 160 24 minecraft:sea_lantern", "fill 24 160 0 24 160 24 minecraft:sea_lantern",

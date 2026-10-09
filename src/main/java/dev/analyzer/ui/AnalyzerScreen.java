@@ -450,6 +450,7 @@ public final class AnalyzerScreen extends Screen {
         button(c, "layout-classic", "Classic", 274, 68, 64, 20, false, () -> switchLayout("Classic"));
         button(c, "layout-compact", "Compact", 344, 68, 73, 20, false, () -> switchLayout("Compact"));
         button(c, "hud-editor", "Edit HUD", 423, 68, 76, 20, false, () -> client.setScreen(new HudEditorScreen(core, this)));
+        button(c, "automation", "Automation", 505, 68, 89, 20, false, () -> client.setScreen(MenuScreens.automation(core, this)));
     }
 
     private void drawModules(DrawContext c) {
