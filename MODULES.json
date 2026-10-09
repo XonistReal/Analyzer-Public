@@ -7378,9 +7378,63 @@
     "id": "expedition",
     "name": "Automation",
     "category": "Client",
-    "description": "Review a local task plan, then let Baritone and normal inventory actions carry it out.",
+    "description": "Review a local task plan. Safer routing and active Survival protection guard its normal actions.",
     "defaultEnabled": false,
     "settings": [
+      {
+        "id": "safe-routing",
+        "label": "Use safer Baritone routes",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "defense",
+        "label": "Protect against nearby hostile mobs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "threat-range",
+        "label": "Threat detection range (blocks)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 4.0,
+        "max": 24.0,
+        "step": 1.0
+      },
+      {
+        "id": "retreat-health",
+        "label": "Retreat below health",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 6.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "resume-delay",
+        "label": "Safe delay before resuming (seconds)",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 0.5,
+        "max": 10.0,
+        "step": 0.5
+      },
+      {
+        "id": "auto-food",
+        "label": "Eat available food during tasks",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "eat-below",
+        "label": "Eat below hunger",
+        "kind": "NUMBER",
+        "default": 14.0,
+        "min": 6.0,
+        "max": 20.0,
+        "step": 1.0
+      },
       {
         "id": "min-health",
         "label": "Pause below health",

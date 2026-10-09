@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "version": "0.5.0",
-  "analyzerSha256": "a2b3187680df6a9edd16d857ebbdd6a769819316433b188eb5682cb8b7a3d316",
+  "version": "0.5.1",
+  "analyzerSha256": "2e38af26b191e8572993b30ed1de5c4d3e316b6fa4d7761370f0feb80529c2c3",
   "minecraftVersion": "1.21.4",
   "fabricLoaderVersion": "0.16.14",
   "fabricApiVersion": "0.119.4+1.21.4",
@@ -24,9 +24,9 @@
       "framebufferWidth": 1280,
       "framebufferHeight": 800,
       "screenshot": "analyzer-production-baritone.png",
-      "screenshotSha256": "ef7a4cbc401eded9ae9504e0d472912258705d02b98a63fcc3687c94645398c7",
+      "screenshotSha256": "7b0155c3d60e7f977e54fc2ab19b038dfbc86cb94d88a34d5ffc5df9b1485ea0",
       "log": "with-baritone.log",
-      "logSha256": "a97e4dab92aa73a026dea5862ef82b85d0b31cfa30503cf25d0082b9e8daee2e"
+      "logSha256": "f262fa0ed2cb6c66c2398e4ed4ddfa089e58038b8957de08121aba37eba42274"
     },
     {
       "mode": "without-baritone",
@@ -40,9 +40,9 @@
       "framebufferWidth": 1280,
       "framebufferHeight": 800,
       "screenshot": "analyzer-production-without-baritone.png",
-      "screenshotSha256": "d888410482d0505050c9bffee32321d2f452a0e1f0b14d0fa8fc7b69428b2fae",
+      "screenshotSha256": "0b028a5061d4d977898096559187724d8353d8778f386b420860aa54b3950bad",
       "log": "without-baritone.log",
-      "logSha256": "80d0011bec52c2575eb75f1c68b30907d0e082197dcaf53238115334565ec8df"
+      "logSha256": "125360c0713886972ed23d2cedabd280362c40c2ac9507ffd1f1b2bbbe80f3a8"
     }
   ]
 }

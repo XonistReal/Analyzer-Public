@@ -184,9 +184,9 @@ def prepare(with_bot, analyzer):
     # A new isolated folder would otherwise stop at Minecraft's first-launch accessibility dialog.
     (game / "options.txt").write_text("onboardAccessibility:false\nfullscreen:false\nguiScale:3\ntelemetryOptInExtra:false\n", encoding="utf-8")
     with zipfile.ZipFile(analyzer) as jar:
-        assert jar.testzip() is None and json.loads(jar.read("fabric.mod.json"))["version"] == "0.5.0"
+        assert jar.testzip() is None and json.loads(jar.read("fabric.mod.json"))["version"] == "0.5.1"
         assert b"net/minecraft/class_310" in jar.read("dev/analyzer/AnalyzerClient.class"), "Probe needs the production remapped Analyzer JAR"
-    shutil.copyfile(analyzer, mods / "analyzer-0.5.0.jar")
+    shutil.copyfile(analyzer, mods / "analyzer-0.5.1.jar")
     shutil.copyfile(WORK / "release-deps/fabric-api-0.119.4+1.21.4.jar", mods / "fabric-api-0.119.4+1.21.4.jar")
     if with_bot:
         bot = ROOT / "outputs/analyzer/third-party/baritone/baritone-api-fabric-1.13.1.jar"
@@ -201,7 +201,7 @@ def prepare(with_bot, analyzer):
     with zipfile.ZipFile(mods / "analyzer-production-probe.jar", "w", zipfile.ZIP_DEFLATED) as jar:
         for file in classes.rglob("*.class"):
             jar.write(file, file.relative_to(classes).as_posix())
-        jar.writestr("fabric.mod.json", json.dumps({"schemaVersion": 1, "id": "analyzer-production-probe", "version": "1.0.0", "environment": "client", "entrypoints": {"client": ["dev.analyzer.probe.ProductionProbe"]}, "depends": {"fabricloader": ">=0.16.14", "analyzer": "0.5.0"}}))
+        jar.writestr("fabric.mod.json", json.dumps({"schemaVersion": 1, "id": "analyzer-production-probe", "version": "1.0.0", "environment": "client", "entrypoints": {"client": ["dev.analyzer.probe.ProductionProbe"]}, "depends": {"fabricloader": ">=0.16.14", "analyzer": "0.5.1"}}))
     classpath = os.pathsep.join(str(p.resolve()) for p in [client, *libraries])
     args = ["-Xmx2G", "-Dfabric.development=false", "-Dfabric.gameVersion=1.21.4", f"-Danalyzer.probeBaritone={str(with_bot).lower()}",
             "-cp", classpath, "net.fabricmc.loader.impl.launch.knot.KnotClient",
@@ -255,7 +255,7 @@ if __name__ == "__main__":
     CACHE = WORK / "gradle-cache/caches"
     LIBRARY_CACHE = CACHE / "modules-2/files-2.1"
     LOOM = CACHE / "fabric-loom"
-    analyzer = (options.analyzer or WORK / "analyzer-build/libs/analyzer-0.5.0.jar").resolve()
+    analyzer = (options.analyzer or WORK / "analyzer-build/libs/analyzer-0.5.1.jar").resolve()
     results = []
     for with_bot in ([True, False] if options.mode == "both" else [options.mode == "with"]):
         details = prepare(with_bot, analyzer)

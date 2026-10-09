@@ -1,6 +1,6 @@
 # Analyzer Automation
 
-Analyzer 0.5.0 adds a local task planner and the official [Baritone Fabric API 1.13.1](https://github.com/cabaletta/baritone/releases/tag/v1.13.1), for Minecraft 1.21.4. No AI service, API key or cloud prompt is used. The planner recognizes supported intentions and turns them into explicit stages; it is not an arbitrary-language Minecraft AI.
+Analyzer 0.5.1 includes the local task planner introduced in 0.5.0, scoped safer routing and active Survival protection, using the official [Baritone Fabric API 1.13.1](https://github.com/cabaletta/baritone/releases/tag/v1.13.1), for Minecraft 1.21.4. No AI service, API key or cloud prompt is used. The planner recognizes supported intentions and turns them into explicit stages; it is not an arbitrary-language Minecraft AI.
 
 ## Open and start
 
@@ -29,9 +29,15 @@ Table enchanting needs a table, 15 correctly placed/unobstructed bookshelves, la
 
 Only a reviewed task explicitly started by you runs. Loading a saved module toggle never starts movement. A task checkpoint is saved locally under `config/analyzer/automation-task.json`; unfinished tasks are restored **paused** after restart, and completed tasks retain their completed state. Resume requires the original world and dimension. Disconnect, death and dimension changes stop owned actions and require review. The plan does not reconnect, join public servers or navigate portals automatically.
 
-The Automation module exposes minimum health (6 HP), minimum hunger (6), no-progress timeout (90 seconds) and pause-on-menu settings. Low health/hunger, a failed route, missing materials and stalled progress produce visible reasons. Resource-loading overlays always pause execution. Menu pausing is enabled by default and configurable; Analyzer-owned workstation windows are permitted. Stop preserves task-owned cursor items and avoids moving a cursor item that belongs to a manual interaction. An unavailable return slot is reported for manual recovery.
+The Automation module includes safer routing, hostile-mob protection, threat range, retreat health, recovery delay and food controls, alongside minimum health (6 HP), minimum hunger (6), no-progress timeout (90 seconds) and menu pausing. Exact defaults and limits are in [SAFETY.md](SAFETY.md). Protection uses a **PROTECTING** state while the original stage is held; the HUD says **TASK PAUSED FOR SAFETY**. It defends at normal reach/cooldown, retreats along a short checked-ground corridor when appropriate and consumes suitable food through normal inventory/item actions. After the configured quiet delay, health and hunger checks gate automatic resumption. An unrecoverable situation becomes **BLOCKED** with a concrete reason.
 
-Manual Baritone movement/mining/build commands take control from the task. Analyzer does not cancel a separate manual task or replace it while busy. Harmless query commands retain ownership. No global Baritone settings are changed. Surface escape is ordinary pathfinding toward a coordinate offset, not a guarantee of safety or acceptance on 2b2t, 0b0t or any other server.
+Resource-loading overlays always pause execution. Menu pausing is enabled by default and configurable; Analyzer-owned workstation windows are permitted. User Pause and Stop end protection and release its owned forward/sprint/use inputs. Stop preserves task-owned cursor items and avoids moving a cursor item that belongs to a manual interaction. An unavailable return slot is reported for manual recovery.
+
+Manual Baritone movement/mining/build commands take control from the task. Analyzer yields its owned protection/route actions rather than cancelling that separate manual task. Harmless query commands retain ownership. With safer routing enabled, Analyzer temporarily adjusts shared Baritone settings in memory only for its owned task; it restores them on user Pause, Stop, completion, blocking, world/death shutdown or manual takeover. Later user setting edits are preserved, and settings commands are handled without saving the temporary profile to Baritone's settings file.
+
+Protection watches hostile mobs, not players. Its short ground retreat does not find long detours or cover, swim, climb or fly. Missing suitable food while below the configured recovery limits, an unavailable attack/escape or another unmet requirement leaves a visible blocked task for manual recovery. Surface escape remains ordinary pathfinding toward a coordinate offset; neither route preferences nor defense guarantee safety or acceptance on 2b2t, 0b0t or another server.
+
+The [UI overhaul plan](UI-OVERHAUL-PLAN.md) covers a later reference-led menu/task-console redesign. This release keeps the existing menu layouts and adds live protection feedback.
 
 ## Dependency and development
 

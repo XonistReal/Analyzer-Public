@@ -1,3 +1,5 @@
+> Analyzer 0.5.1 adds scoped safer routes and active PvE Survival protection for reviewed Automation tasks. The full UI redesign follows [UI-OVERHAUL-PLAN.md](UI-OVERHAUL-PLAN.md) after user references arrive.
+
 # Analyzer roadmap and reference coverage
 
 Reviewed 2026-10-09 for Analyzer 0.5.0, Minecraft Java 1.21.4.

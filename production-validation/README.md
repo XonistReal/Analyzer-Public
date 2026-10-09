@@ -1,4 +1,4 @@
-# Production startup validation — Analyzer 0.5.0
+# Production startup validation — Analyzer 0.5.1
 
 Both isolated startup probes passed against the exact remapped Analyzer SHA-256 recorded in `production-validation.json`. These launches used the official Minecraft 1.21.4 client, Fabric Loader 0.16.14, Fabric API 0.119.4+1.21.4 and production intermediary mappings. Fabric's development flag was false. The launcher used a local test name and a dummy access token; no account credentials, user Prism instance, saved world or public game server were used.
 

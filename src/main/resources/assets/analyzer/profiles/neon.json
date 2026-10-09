@@ -1450,6 +1450,13 @@
       "enabled": false,
       "keybind": -1,
       "settings": {
+        "safe-routing": true,
+        "defense": true,
+        "threat-range": 12.0,
+        "retreat-health": 10.0,
+        "resume-delay": 3.0,
+        "auto-food": true,
+        "eat-below": 14.0,
         "min-health": 6.0,
         "min-hunger": 6.0,
         "stuck-timeout": 90.0,

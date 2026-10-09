@@ -17,6 +17,8 @@ public final class BaritoneBridge {
         public boolean paused() { return state == State.PAUSED; }
     }
     public static final int SHELTER_MATERIAL_COUNT = 168;
+    /** The mission requests a profile; it is applied only while a Baritone process is owned. */
+    public record SafetyProfileStatus(boolean enabled, boolean applied, int changedSettings) { }
     private Adapter adapter;
     private boolean initializationFailed;
     private Status status = new Status(State.UNAVAILABLE, "", "Install the official Baritone Fabric API 1.13.1 mod", 0, false);
@@ -44,12 +46,27 @@ public final class BaritoneBridge {
     public boolean pause() { return available() && adapter.pause(); }
     public boolean resume() { return available() && adapter.resume(); }
     public boolean cancel() { return available() && adapter.cancel("Analyzer task canceled"); }
+    /** True for active work outside this bridge's lease, including a route paused by a manual command. */
+    public boolean manualTaskActive() { return available() && adapter.manualTaskActive(); }
+    public boolean beginSafetyProfile() { return available() && adapter.beginSafetyProfile(); }
+    public void endSafetyProfile() { if (adapter != null) adapter.endSafetyProfile(); }
+    public SafetyProfileStatus safetyProfileStatus() {
+        return adapter == null ? new SafetyProfileStatus(false, false, 0) : adapter.safetyProfileStatus();
+    }
+    /** Escape movement belongs to a valid paused Analyzer process; manual Baritone tasks are excluded. */
+    public boolean setSafetyInputs(boolean forward, boolean sprint, boolean jump) {
+        return available() && adapter.setSafetyInputs(forward, sprint, jump);
+    }
+    public void clearSafetyInputs() { if (adapter != null) adapter.clearSafetyInputs(); }
     public void clearStatus() {
         if (available() && !adapter.owned()) status = new Status(State.IDLE, "", "Baritone ready", 0, false);
     }
 
     private static final class Adapter {
         private enum Kind { TRAVEL, MINE, BUILD }
+        private static final java.util.Set<String> OBSERVATIONS = java.util.Set.of("help", "?", "version", "eta", "proc", "paused", "find", "render",
+                "gc", "saveall", "repack", "rescan", "modified", "mod", "baritone", "modifiedsettings", "sethome");
+        private static final java.util.Set<String> SETTINGS_COMMANDS = java.util.Set.of("set", "setting", "settings", "reset");
         private final BaritoneBridge bridge;
         private final MinecraftClient mc = MinecraftClient.getInstance();
         private final baritone.api.IBaritone engine;
@@ -65,6 +82,9 @@ public final class BaritoneBridge {
         private double initialDistance;
         private String signature = "", title = "", pathEvent = "";
         private boolean paused;
+        private boolean safetyProfileEnabled, safetyInputs, safetyForward, safetySprint, safetyJump;
+        private ScopedSettingLease safetyLease;
+        private final java.util.List<CommandGuard> commandGuards = new java.util.ArrayList<>();
 
         Adapter(BaritoneBridge bridge) {
             this.bridge = bridge;
@@ -73,6 +93,16 @@ public final class BaritoneBridge {
             pauser = new PauseProcess();
             engine.getPathingControlManager().registerProcess(pauser);
             engine.getGameEventHandler().registerEventListener(new baritone.api.event.listener.AbstractGameEventListener() {
+                @Override public void onTick(baritone.api.event.events.TickEvent event) {
+                    if (event.getType() == baritone.api.event.events.TickEvent.Type.IN
+                            && event.getState() == baritone.api.event.events.type.EventState.PRE
+                            && safetyInputs && paused && mc.world == world && mc.player != null
+                            && mc.player.isAlive() && leaseValid()) applySafetyInputs();
+                }
+                @Override public void onPlayerSprintState(baritone.api.event.events.SprintStateEvent event) {
+                    if (safetyInputs && paused && owner != null && mc.world == world && mc.player != null
+                            && mc.player.isAlive()) event.setState(safetySprint && safetyForward);
+                }
                 @Override public void onPathEvent(baritone.api.event.events.PathEvent event) {
                     if (owner == null) return;
                     pathEvent = event.name();
@@ -83,21 +113,27 @@ public final class BaritoneBridge {
                     String message = event.getMessage().strip();
                     var settings = baritone.api.BaritoneAPI.getSettings();
                     String prefix = settings.prefix.value;
+                    String forcePrefix = baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
+                    boolean forced = message.startsWith(forcePrefix);
                     boolean prefixed = settings.prefixControl.value && !prefix.isEmpty() && message.startsWith(prefix);
-                    String commandText = prefixed ? message.substring(prefix.length()).strip() : message;
+                    String commandText = forced ? message.substring(forcePrefix.length()).strip()
+                            : prefixed ? message.substring(prefix.length()).strip() : message;
                     String head = commandText.split("\\s+", 2)[0].toLowerCase(Locale.ROOT);
                     boolean direct = (settings.chatControl.value || settings.chatControlAnyway.value)
                             && engine.getCommandManager().getCommand(head) != null;
                     // Looking up help or an ETA does not turn an owned moving task into an orphan.
-                    boolean observation = java.util.Set.of("help", "?", "version", "eta", "proc", "paused", "find", "render",
-                            "gc", "saveall", "repack", "rescan", "modified", "mod", "baritone", "modifiedsettings",
-                            "set", "setting", "settings", "reset", "sethome").contains(head);
-                    if ((prefixed || direct) && !observation) yieldToManual("Manual Baritone command took control");
+                    boolean observation = OBSERVATIONS.contains(head) || SETTINGS_COMMANDS.contains(head) || settings.byLowerName.containsKey(head);
+                    if ((forced || prefixed || direct) && !observation) yieldToManual("Manual Baritone command took control");
                 }
             });
         }
 
         private boolean owned() { return owner != null; }
+        private boolean manualTaskActive() {
+            if (owner != null && leaseValid()) return false;
+            return anotherProcessActive() || engine.getPathingBehavior().isPathing()
+                    || engine.getPathingBehavior().getInProgress().isPresent() || secondaryBaritoneActive();
+        }
         private java.util.List<baritone.api.process.IBaritoneProcess> processes() {
             return java.util.List.of(engine.getCustomGoalProcess(), engine.getMineProcess(), engine.getBuilderProcess(),
                     engine.getFollowProcess(), engine.getExploreProcess(), engine.getFarmProcess(),
@@ -113,6 +149,7 @@ public final class BaritoneBridge {
             if (owner != null) return fail("Pause or cancel the current Analyzer task before starting another");
             if (anotherProcessActive() || engine.getPathingBehavior().isPathing() || engine.getPathingBehavior().getInProgress().isPresent())
                 return fail("Baritone is already running a manual task; Analyzer did not replace it");
+            if (safetyProfileEnabled && secondaryBaritoneActive()) return fail("Another Baritone instance is active; shared routing settings were not changed");
             return true;
         }
         private boolean fail(String message) {
@@ -124,6 +161,7 @@ public final class BaritoneBridge {
             this.kind = kind; owner = process; this.title = title; world = mc.world;
             signature = process.isActive() ? process.displayName() : "";
             ticks = failures = 0; paused = false; pathEvent = "";
+            applySafetyProfile();
             bridge.status = new Status(State.RUNNING, title, "Baritone is calculating a path", 0, true);
         }
         private boolean travel(int x, Integer y, int z) {
@@ -209,12 +247,15 @@ public final class BaritoneBridge {
 
         private boolean leaseValid() {
             if (owner == null) return false;
+            if (safetyLease != null && secondaryBaritoneActive()) { yieldToManual("Another Baritone instance took control of shared routing settings"); return false; }
             if (anotherProcessActive()) { yieldToManual("Another Baritone process took control"); return false; }
             if (kind == Kind.TRAVEL && engine.getCustomGoalProcess().mostRecentGoal() != goal) { yieldToManual("Baritone travel goal changed outside Analyzer"); return false; }
             if (owner.isActive() && !signature.isEmpty() && !owner.displayName().equals(signature) && !(kind == Kind.BUILD && engine.getBuilderProcess().isPaused())) { yieldToManual("Baritone process changed outside Analyzer"); return false; }
             return true;
         }
         private void yieldToManual(String message) {
+            clearSafetyInputs();
+            endSafetyProfile();
             paused = false; owner = null;
             bridge.status = new Status(State.INTERRUPTED, title, message, bridge.status.progress(), false);
         }
@@ -226,6 +267,7 @@ public final class BaritoneBridge {
         }
         private boolean resume() {
             if (!leaseValid()) return false;
+            clearSafetyInputs();
             paused = false;
             bridge.status = new Status(State.RUNNING, title, "Resuming the current Baritone process", bridge.status.progress(), true);
             return true;
@@ -237,6 +279,8 @@ public final class BaritoneBridge {
             return true;
         }
         private void stopOwned() {
+            clearSafetyInputs();
+            restoreSafetyProfile();
             paused = false;
             if (owner != null) {
                 // The lease and competing processes are checked before this method. Never forceCancel.
@@ -254,7 +298,8 @@ public final class BaritoneBridge {
             if (mc.world != world || mc.player == null || mc.player.isDead()) {
                 // World/death shutdown owns the old process; leave any replacement world's process alone.
                 if (mc.world == world && !anotherProcessActive()) stopOwned();
-                else { paused = false; owner = null; }
+                else { clearSafetyInputs(); restoreSafetyProfile(); paused = false; owner = null; }
+                endSafetyProfile();
                 bridge.status = new Status(State.INTERRUPTED, title, "World changed or player died; start the mission again explicitly", bridge.status.progress(), false);
                 return;
             }
@@ -283,6 +328,132 @@ public final class BaritoneBridge {
             // Give newly requested processes time to become active; inactive alone never proves success.
             if (ticks > 2 && !owner.isActive()) { finish(State.FAILED, message + "; target not completed" + (failures > 0 ? " after path calculation failed" : ""), progress); return; }
             bridge.status = new Status(paused ? State.PAUSED : State.RUNNING, title, paused ? "Paused / " + message : message, progress, true);
+        }
+
+        private boolean beginSafetyProfile() {
+            if (owner == null && (anotherProcessActive() || engine.getPathingBehavior().isPathing()
+                    || engine.getPathingBehavior().getInProgress().isPresent()))
+                return fail("Finish the manual Baritone task before enabling Analyzer routing");
+            if (secondaryBaritoneActive()) return fail("Another Baritone instance is active; shared routing settings were not changed");
+            if (owner != null && !leaseValid()) return false;
+            safetyProfileEnabled = true;
+            if (owner != null) applySafetyProfile();
+            return true;
+        }
+        private void endSafetyProfile() {
+            safetyProfileEnabled = false;
+            restoreSafetyProfile();
+        }
+        private SafetyProfileStatus safetyProfileStatus() {
+            return new SafetyProfileStatus(safetyProfileEnabled, safetyLease != null && safetyLease.active(),
+                    safetyLease == null ? 0 : safetyLease.changedSettings());
+        }
+        private boolean secondaryBaritoneActive() {
+            for (var other : baritone.api.BaritoneAPI.getProvider().getAllBaritones()) {
+                if (other == engine) continue;
+                if (other.getPathingBehavior().isPathing() || other.getPathingBehavior().getInProgress().isPresent()
+                        || other.getPathingControlManager().mostRecentInControl().filter(baritone.api.process.IBaritoneProcess::isActive).isPresent()
+                        || other.getCustomGoalProcess().isActive() || other.getMineProcess().isActive() || other.getBuilderProcess().isActive()
+                        || other.getFollowProcess().isActive() || other.getExploreProcess().isActive() || other.getFarmProcess().isActive()
+                        || other.getGetToBlockProcess().isActive() || other.getElytraProcess().isActive()) return true;
+            }
+            return false;
+        }
+        private <T> void safer(ScopedSettingLease lease, baritone.api.Settings.Setting<T> setting, java.util.function.UnaryOperator<T> value) {
+            lease.bind(() -> setting.value, next -> setting.value = next, value);
+        }
+        private void applySafetyProfile() {
+            if (!safetyProfileEnabled || owner == null || safetyLease != null) return;
+            var settings = baritone.api.BaritoneAPI.getSettings();
+            var lease = new ScopedSettingLease();
+            safer(lease, settings.avoidance, value -> true);
+            safer(lease, settings.mobAvoidanceCoefficient, value -> Double.isFinite(value) ? Math.max(4D, value) : 4D);
+            // Avoidance builds a sphere with cubic work per loaded Mob, including passive mobs. Bound the temporary radius.
+            safer(lease, settings.mobAvoidanceRadius, value -> Math.max(10, Math.min(12, value)));
+            safer(lease, settings.mobSpawnerAvoidanceCoefficient, value -> Double.isFinite(value) ? Math.max(4D, value) : 4D);
+            safer(lease, settings.mobSpawnerAvoidanceRadius, value -> Math.max(16, Math.min(24, value)));
+            safer(lease, settings.allowParkour, value -> false);
+            safer(lease, settings.allowParkourPlace, value -> false);
+            safer(lease, settings.allowParkourAscend, value -> false);
+            safer(lease, settings.allowDiagonalDescend, value -> false);
+            safer(lease, settings.allowOvershootDiagonalDescend, value -> false);
+            safer(lease, settings.allowWaterBucketFall, value -> false);
+            safer(lease, settings.maxFallHeightNoWater, value -> Math.max(0, Math.min(3, value)));
+            safer(lease, settings.assumeWalkOnWater, value -> false);
+            safer(lease, settings.assumeWalkOnLava, value -> false);
+            safer(lease, settings.strictLiquidCheck, value -> true);
+            safer(lease, settings.avoidUpdatingFallingBlocks, value -> true);
+            safer(lease, settings.pauseMiningForFallingBlocks, value -> true);
+            safer(lease, settings.walkWhileBreaking, value -> false);
+            safer(lease, settings.sprintAscends, value -> false);
+            safer(lease, settings.allowJumpAtBuildLimit, value -> false);
+            safer(lease, settings.costVerificationLookahead, value -> Math.max(5, value));
+            safetyLease = lease;
+            lease.apply();
+            // The public registry explicitly supports overriding commands with newly prepended delegates.
+            // SetCommand saves all settings even for a single-setting read. Restore before it can save temporary values.
+            var registry = engine.getCommandManager().getRegistry();
+            for (var command : java.util.List.copyOf(registry.entries)) {
+                var guard = new CommandGuard(command);
+                commandGuards.add(guard);
+                registry.register(guard);
+            }
+        }
+        private void restoreSafetyProfile() {
+            var registry = engine.getCommandManager().getRegistry();
+            for (var guard : commandGuards) registry.unregister(guard);
+            commandGuards.clear();
+            if (safetyLease != null) { safetyLease.close(); safetyLease = null; }
+        }
+        private final class CommandGuard implements baritone.api.command.ICommand {
+            private final baritone.api.command.ICommand delegate;
+            private CommandGuard(baritone.api.command.ICommand delegate) { this.delegate = delegate; }
+            @Override public void execute(String label, baritone.api.command.argument.IArgConsumer args) {
+                String name = label.toLowerCase(Locale.ROOT);
+                if (SETTINGS_COMMANDS.contains(name)) {
+                    var previousOwner = owner;
+                    restoreSafetyProfile();
+                    try { delegate.execute(label, args); }
+                    finally { if (owner == previousOwner && owner != null && safetyProfileEnabled && leaseValid()) applySafetyProfile(); }
+                } else {
+                    if (owner != null && !OBSERVATIONS.contains(name)) yieldToManual("Manual Baritone command took control");
+                    delegate.execute(label, args);
+                }
+            }
+            @Override public java.util.stream.Stream<String> tabComplete(String label, baritone.api.command.argument.IArgConsumer args) { return delegate.tabComplete(label, args); }
+            @Override public String getShortDesc() { return delegate.getShortDesc(); }
+            @Override public java.util.List<String> getLongDesc() { return delegate.getLongDesc(); }
+            @Override public java.util.List<String> getNames() { return delegate.getNames(); }
+            // The original stays registered and supplies the help listing; the delegate adds no duplicate entry.
+            @Override public boolean hiddenFromHelp() { return true; }
+        }
+
+        private boolean setSafetyInputs(boolean forward, boolean sprint, boolean jump) {
+            if (!paused || !leaseValid() || mc.player == null || mc.world != world || !mc.player.isAlive()) return false;
+            safetyInputs = true; safetyForward = forward; safetySprint = sprint; safetyJump = jump;
+            applySafetyInputs();
+            return true;
+        }
+        private void applySafetyInputs() {
+            var inputs = engine.getInputOverrideHandler();
+            inputs.setInputForceState(baritone.api.utils.input.Input.MOVE_FORWARD, safetyForward);
+            inputs.setInputForceState(baritone.api.utils.input.Input.MOVE_BACK, false);
+            inputs.setInputForceState(baritone.api.utils.input.Input.MOVE_LEFT, false);
+            inputs.setInputForceState(baritone.api.utils.input.Input.MOVE_RIGHT, false);
+            inputs.setInputForceState(baritone.api.utils.input.Input.SPRINT, safetySprint && safetyForward);
+            inputs.setInputForceState(baritone.api.utils.input.Input.JUMP, safetyJump);
+            inputs.setInputForceState(baritone.api.utils.input.Input.CLICK_LEFT, false);
+            inputs.setInputForceState(baritone.api.utils.input.Input.CLICK_RIGHT, false);
+        }
+        private void clearSafetyInputs() {
+            if (safetyInputs && owner != null && paused && !anotherProcessActive()) {
+                for (var input : java.util.List.of(baritone.api.utils.input.Input.MOVE_FORWARD, baritone.api.utils.input.Input.MOVE_BACK,
+                        baritone.api.utils.input.Input.MOVE_LEFT, baritone.api.utils.input.Input.MOVE_RIGHT,
+                        baritone.api.utils.input.Input.SPRINT, baritone.api.utils.input.Input.JUMP,
+                        baritone.api.utils.input.Input.CLICK_LEFT, baritone.api.utils.input.Input.CLICK_RIGHT))
+                    engine.getInputOverrideHandler().setInputForceState(input, false);
+            }
+            safetyInputs = safetyForward = safetySprint = safetyJump = false;
         }
 
         private final class PauseProcess implements baritone.api.process.IBaritoneProcess {

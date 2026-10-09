@@ -1,8 +1,8 @@
-> **0.5.0:** Distance-aware, independently scaled and decluttered ESP; a local Automation task console with optional official Baritone. See [ESP readability](ESP-READABILITY.md) and [Automation](AUTOMATION.md) for settings, examples and actual scope.
+> **0.5.1:** Explicit Automation tasks now use scoped safer routing, nearby hostile-mob defense, short checked-ground retreat and available food. The task pauses while protection intervenes, then resumes after its recovery checks. See [Survival safety](SAFETY.md), [Automation](AUTOMATION.md) and [ESP readability](ESP-READABILITY.md).
 
 # Analyzer
 
-An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.5.0** has **123 registered modules**: world visuals, editable HUD widgets, three native menu layouts, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
+An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.5.1** has **123 registered modules**: world visuals, editable HUD widgets, three native menu layouts, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
 
 ![Analyzer native interface](screenshots/analyzer-ui.png)
 
@@ -10,9 +10,9 @@ An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and 
 
 ## Install and start
 
-**Prism Launcher:** drag `Analyzer-0.5.0-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, the official Baritone API and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; Baritone is a separate mod installed once for Automation.
+**Prism Launcher:** drag `Analyzer-0.5.1-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, the official Baritone API and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; Baritone is a separate mod installed once for Automation.
 
-For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.5.0.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. Add the separate official `baritone-api-fabric-1.13.1.jar` to run Automation. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
+For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.5.1.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. Add the separate official `baritone-api-fabric-1.13.1.jar` to run Automation. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
 
 Click **Analyzer** on the title screen or press **Right Shift** in game. Choose **Profiles → cinematic → Load** for the visual/HUD setup, or **studio** to try selected new cosmetics. **classic** uses draggable category columns and **neon** uses the Compact layout and Neon HUD; these four visual profiles leave gameplay automation off. Loading **hvh** explicitly enables Kill Aura, Crystal Aura, Surround, Auto Weapon, Auto Totem, Auto Armor and Keep Sprint, with combat HUD widgets. Earlier **showcase**, **arctic**, **cinder**, **aurora**, **ember** and **minimal** profiles remain available. Profiles are available from the Workspace layout.
 
@@ -29,6 +29,8 @@ Profiles are seeded once without overwriting existing files. Loading a profile r
 - Under **Interface**, choose **Glass / Solid**, **Mint / Violet / Gold**, and motion speed. Menu particles react to the cursor; density zero hides them and motion zero freezes movement.
 - Assign a module **Keybind** in its inspector. **Backspace/Delete** clears it; **Escape** cancels. Changes save automatically.
 
+A fuller UI overhaul follows the [UI design plan](UI-OVERHAUL-PLAN.md) after the user supplies Minecraft client references. The plan leaves the final visual style and navigation open; this release adds the task safety banner, not a redesigned menu system.
+
 ## Implemented features
 
 The complete IDs, settings and defaults are exported in [MODULES.md](MODULES.md) and [MODULES.json](MODULES.json).
@@ -43,9 +45,15 @@ The complete IDs, settings and defaults are exported in [MODULES.md](MODULES.md)
 | Movement | 15 | Keep Sprint, Auto Walk, Speed, Fly, Step, Parkour, Safe Walk, Fast Ladder, Reverse Step, Fast Fall, Glide, High Jump, Long Jump, Elytra Boost and Ground Strafe. Owned input and temporary step changes are restored on disable/pause. |
 | Player automation | 10 | Auto Eat/Gapple/Totem/Armor/Tool, Refill, Anti AFK, Auto Respawn, Durability Alert and Auto Fish. Normal inventory actions are guarded; Auto Armor preserves an equipped Elytra. |
 | World utilities | 16 | Scaffold, Tower, Air Place, Nuker, Auto Farm, Auto Tunnel, Bed Breaker, Flatten, Speed Mine, Vein Miner, No Block Interact, Chest Stealer, Middle Click Friend, Player Detection, Notifier and Coord Snapper. Work is bounded to loaded, reachable game data. |
-| Task automation | 1 | Automation reviews supported local travel, mining, crafting, starter-shelter and diamond-kit plans. Baritone performs pathfinding; ordinary inventory transactions and actual item/world checks drive stages. See [AUTOMATION.md](AUTOMATION.md) for prerequisites and limits. |
+| Task automation | 1 | Automation reviews supported local travel, mining, crafting, starter-shelter and diamond-kit plans. Baritone performs pathfinding; normal inventory actions and actual game-state checks drive stages. Scoped safer routes, PvE protection, short retreat and available-food consumption apply only to explicitly started Analyzer tasks. See [AUTOMATION.md](AUTOMATION.md) and [SAFETY.md](SAFETY.md). |
 
 Fresh defaults enable **Sky Aurora, Interface, Particles, Coordinates, HUD Studio, Watermark, Active Modules, FPS, Place Animation, Break Animation and Hit Particles**. All combat, HvH, movement, player automation and world utilities are disabled by default. Entity/Storage ESP are opt-in, or can be enabled through a visual profile.
+
+## Automation protection
+
+Start through **Right Shift → Automation → Review plan → Start reviewed plan**. With fresh settings, the task uses safer Baritone route settings, watches visible hostile mobs within 12 blocks, eats suitable available food below 14 hunger, and prefers retreat when health is low or a nearby creeper threatens it. Ordinary attacks respect reach and cooldowns. Protection pauses the original task and shows **TASK PAUSED FOR SAFETY**; after the three-second quiet delay it checks the configured retreat/minimum-health and minimum-hunger limits before resuming.
+
+The temporary route settings restore on user Pause, Stop, completion, blocking, disconnect/death or manual Baritone takeover. User Pause and Stop release owned movement/use inputs. This protection can still fail: the retreat checks only a short loaded, dry, supported ground corridor, and it does not find long paths to shelter, swim, climb, fly or fight players. Missing food at the recovery limits or an impossible escape produces a visible blocked reason and manual recovery instructions. Read [SAFETY.md](SAFETY.md) for all settings and limits; this is not invincibility or a guaranteed spawn escape.
 
 ## Trying gameplay modules
 
@@ -79,11 +87,11 @@ Select a Java 21 JDK with `JAVA_HOME`, then run:
 .\gradlew.bat publishLocal   # publish to the Prism local update feed
 ```
 
-On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.5.0.jar`.
+On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.5.1.jar`.
 
 `runSmoke` uses the project-local `run/` directory, creates/updates only `run/saves/Analyzer-Smoke`, captures screenshots, and exits. Installed release builds never activate the development harness. See VALIDATION for assertions and results. Optional pixel checks use `python tools/verify_render.py` and `python tools/verify_visuals.py` with Pillow.
 
-Source packages are `core/` for definitions/configuration, `ui/` for native screens/HUD, `render/` for overlays/event effects, `effects/` for original GLSL/state restoration, `gameplay/` for bounded game actions, and `mixin/` for narrow 1.21.4 hooks.
+Source packages are `core/` for definitions/configuration, `ui/` for native screens/HUD, `render/` for overlays/event effects, `effects/` for original GLSL/state restoration, `gameplay/` for bounded game actions, `automation/` for the task planner, scoped Baritone bridge, inventory stages and Survival guard, and `mixin/` for narrow 1.21.4 hooks.
 
 Analyzer code is MIT licensed. No client source from GPL projects was copied. Rajdhani fonts use the SIL Open Font License; see [THIRD-PARTY.md](THIRD-PARTY.md), `FONT-LICENSE.txt` and `GRADLE-LICENSE.txt`.
 

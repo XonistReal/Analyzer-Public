@@ -54,7 +54,12 @@ tasks.register('plannerCheck', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.analyzer.automation.TaskPlannerSelfTest'
 }
-tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck') }
+tasks.register('safetyCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.automation.ScopedSettingLeaseSelfTest'
+}
+tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck'), tasks.named('safetyCheck') }
 tasks.register('moduleCatalog', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -115,6 +120,10 @@ loom {
             vmArg '-Danalyzer.worldsmoke=true'
             vmArg '-Danalyzer.automationSmoke=true'
             if (project.findProperty('analyzerBotOnly') == 'true') vmArg '-Danalyzer.botOnly=true'
+            if (project.findProperty('analyzerSafetyOnly') == 'true') {
+                vmArg '-Danalyzer.botOnly=true'
+                vmArg '-Danalyzer.safetyOnly=true'
+            }
             programArg '--username'
             programArg 'AnalyzerDev'
             programArg '--width'

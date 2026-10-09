@@ -168,5 +168,5 @@
 | Module | Behavior | Default |
 | --- | --- | --- |
 | Interface | Glass or solid panels, accent colors and motion control. | On |
-| Automation | Review a local task plan, then let Baritone and normal inventory actions carry it out. | Off |
+| Automation | Review a local task plan. Safer routing and active Survival protection guard its normal actions. | Off |
 
