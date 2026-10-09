@@ -1,5 +1,16 @@
 # Analyzer 0.1.0 validation
 
+## Analyzer 0.1.1 Prism integration
+
+Added October 8, 2026. The game code and graphics are unchanged from the runtime checks below; this release updates the mod version, distribution tooling, and notices.
+
+- `publishLocal` rebuilt the remapped 0.1.1 JAR, passed all **37 core assertions**, published an immutable hash-named artifact, and atomically replaced the local feed manifest.
+- The updater's Windows PowerShell 5.1 integration suite passed **74 checks** in isolated temporary fixtures. It covers initial install, version replacement, same-version rebuilds, duplicate Analyzer JARs, backups, world/config/other-mod preservation, checksums, metadata types and compatibility, unsafe paths and junctions, filename conflicts, disabled updates, locks, caught-exception rollback, and interrupted transaction recovery even without a feed. Renamed JARs with spaces/Unicode are supported. Busy transactions and unsafe recovery stop launch; ordinary feed errors preserve the installed mod and allow launch.
+- Native instance ZIP layout, custom-command preservation, quoted instance variable expansion, and Java selection behavior were checked against the installed **Prism Launcher 11.1.1** source. The pack includes Minecraft/Fabric component metadata and both required mods, without game binaries or accounts.
+- The directly installed development instance uses the project's verified Java 21 runtime; the portable ZIP inherits the recipient's Prism Java settings. Updates apply before the next launch, not to an already running game.
+
+The updater currently reads a local development feed. An internet release service is not configured. See [PRISM.md](PRISM.md) for setup and publishing.
+
 Verified October 8, 2026 on Windows, Java 21, Minecraft 1.21.4, Fabric Loader 0.16.14, Fabric API 0.119.4+1.21.4 and an NVIDIA GeForce RTX 4060. This records one local hardware/driver environment, not a compatibility or performance benchmark.
 
 ## Build and configuration

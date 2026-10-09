@@ -4,6 +4,9 @@ plugins {
 }
 
 version = project.mod_version
+if (version.toString().length() > 80 || !(version.toString() ==~ /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9._-]+)?$/)) {
+    throw new GradleException('mod_version must be a release version such as 0.1.1 or 0.2.0-beta.1')
+}
 group = project.maven_group
 base { archivesName = project.archives_base_name }
 
@@ -35,6 +38,45 @@ tasks.register('coreCheck', JavaExec) {
     mainClass = 'dev.analyzer.core.CoreSelfTest'
 }
 tasks.named('check') { dependsOn tasks.named('coreCheck') }
+
+// Publish a checked build for the Prism instance's local pre-launch updater.
+// Artifacts are immutable; replacing release.json is the final commit step.
+tasks.register('publishLocal') {
+    dependsOn tasks.named('build')
+    group = 'distribution'
+    description = 'Build, verify and publish Analyzer to the local Prism update feed.'
+    doLast {
+        if (project.minecraft_version.toString() != '1.21.4') {
+            throw new GradleException('The current Prism updater supports Minecraft 1.21.4; update it before publishing another game version.')
+        }
+        def source = tasks.named('remapJar').get().archiveFile.get().asFile.toPath()
+        def feed = file(findProperty('analyzerUpdateDir') ?: '../analyzer-updates').toPath()
+        java.nio.file.Files.createDirectories(feed)
+        def bytes = java.nio.file.Files.readAllBytes(source)
+        def digest = java.security.MessageDigest.getInstance('SHA-256').digest(bytes).encodeHex().toString()
+        def artifact = "analyzer-${project.version}-${digest.take(12)}.jar"
+        def target = feed.resolve(artifact)
+        def staging = feed.resolve(".${artifact}-${UUID.randomUUID()}.tmp")
+        java.nio.file.Files.write(staging, bytes)
+        java.nio.file.Files.move(staging, target,
+            java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        def manifest = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
+            schemaVersion: 1,
+            modId: 'analyzer',
+            minecraftVersion: project.minecraft_version.toString(),
+            version: project.version.toString(),
+            artifact: artifact,
+            sha256: digest
+        ])) + '\n'
+        def pending = feed.resolve(".release-${UUID.randomUUID()}.json.tmp")
+        java.nio.file.Files.writeString(pending, manifest, java.nio.charset.StandardCharsets.UTF_8)
+        java.nio.file.Files.move(pending, feed.resolve('release.json'),
+            java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        logger.lifecycle("Published Analyzer ${project.version}: ${feed.resolve('release.json').toAbsolutePath()}")
+    }
+}
 
 loom {
     runs {

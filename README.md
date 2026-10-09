@@ -1,13 +1,15 @@
 # Analyzer
 
-An original visual utility client for **Minecraft Java Edition 1.21.4**, built on Fabric and Java 21. Mint and violet, a geometric identity, native controls, and GPU effects. Analyzer 0.1.0 is a playable first release focused on visual awareness and customization.
+An original visual utility client for **Minecraft Java Edition 1.21.4**, built on Fabric and Java 21. Mint and violet, a geometric identity, native controls, and GPU effects. Analyzer 0.1.1 adds Prism integration and a local development updater to the playable visual client.
 
 ![Analyzer native interface](screenshots/analyzer-ui.png)
 
 ## Install
 
+**Prism Launcher:** import `Analyzer-0.1.1-Prism-1.21.4.zip`. It includes both mods and the Windows local updater. See [PRISM.md](PRISM.md) for drag and drop, automatic updates and the development workflow.
+
 1. Create a **Minecraft 1.21.4 Fabric** instance using the [official Fabric installer](https://fabricmc.net/use/installer/) or your launcher's Fabric instance option. Use Fabric Loader **0.16.10 or newer**; the verified build uses **0.16.14**.
-2. Copy **both JARs** from the release ZIP's `mods/` folder into that instance's `mods/` folder: `analyzer-0.1.0.jar` and `fabric-api-0.119.4+1.21.4.jar`.
+2. Copy **both JARs** from a release bundle into that instance's `mods/` folder: the Analyzer JAR and `fabric-api-0.119.4+1.21.4.jar`. The Prism ZIP keeps them under `minecraft/mods/`; the original loose-mod ZIP used `mods/`.
 3. Launch that instance. Click **Analyzer** on the title screen, or press **Right Shift** while playing.
 
 Minecraft 1.21.4 uses Java 21. The official Minecraft Launcher supplies its game runtime. For an alternative launcher, select its Java 21 runtime. Analyzer does not replace the Minecraft launcher and does not require an account of its own.
@@ -63,7 +65,7 @@ On macOS/Linux:
 ./gradlew build
 ```
 
-The Gradle wrapper downloads Gradle 8.12 and checks its SHA-256. Gradle/Loom fetch the pinned official Minecraft, Yarn, Fabric Loader and Fabric API dependencies. The installable remapped JAR appears in `build/libs/analyzer-0.1.0.jar`.
+The Gradle wrapper downloads Gradle 8.12 and checks its SHA-256. Gradle/Loom fetch the pinned official Minecraft, Yarn, Fabric Loader and Fabric API dependencies. The installable remapped JAR appears in `build/libs/analyzer-0.1.1.jar`.
 
 ```powershell
 .\gradlew.bat coreCheck   # configuration, profile and recovery assertions
