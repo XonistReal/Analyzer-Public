@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "modules": {
+    "entity-esp": {"enabled": true, "settings": {"style": "Boxes", "players": true, "hostiles": true, "passives": false, "labels": true, "health": true}},
+    "storage-esp": {"enabled": true, "settings": {"labels": true}},
+    "tracers": {"enabled": true, "settings": {"hostiles": true}},
+    "fullbright": {"enabled": true, "settings": {"gamma": 10}},
+    "crosshair": {"enabled": true},
+    "shader": {"enabled": true, "settings": {"preset": "Ember", "strength": 0.55}}
+  }
+}

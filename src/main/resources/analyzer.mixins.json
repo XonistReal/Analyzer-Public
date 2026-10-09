@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "dev.analyzer.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["GameRendererMixin", "LightmapMixin", "InGameHudMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

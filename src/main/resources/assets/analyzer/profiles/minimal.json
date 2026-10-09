@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "modules": {
+    "entity-esp": {"enabled": false},
+    "storage-esp": {"enabled": false},
+    "tracers": {"enabled": false},
+    "fullbright": {"enabled": false},
+    "coordinates": {"enabled": true},
+    "crosshair": {"enabled": true, "settings": {"size": 4, "gap": 2, "line-width": 1}},
+    "particles": {"enabled": false},
+    "shader": {"enabled": false}
+  }
+}

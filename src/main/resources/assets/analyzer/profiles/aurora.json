@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "modules": {
+    "entity-esp": {"enabled": true, "settings": {"style": "Corners", "players": true, "hostiles": true, "passives": true, "labels": true, "health": true}},
+    "storage-esp": {"enabled": true, "settings": {"labels": true}},
+    "crosshair": {"enabled": true},
+    "shader": {"enabled": true, "settings": {"preset": "Aurora", "strength": 0.65}}
+  }
+}

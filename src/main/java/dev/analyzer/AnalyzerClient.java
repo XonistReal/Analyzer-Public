@@ -1,0 +1,85 @@
+package dev.analyzer;
+
+import dev.analyzer.core.AnalyzerCore;
+import dev.analyzer.effects.GpuEffects;
+import dev.analyzer.render.AnalyzerRenderer;
+import dev.analyzer.ui.AnalyzerScreen;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public final class AnalyzerClient implements ClientModInitializer {
+    public static final Logger LOGGER = LoggerFactory.getLogger("Analyzer");
+    public static AnalyzerCore CORE;
+    private final Map<String, Boolean> held = new HashMap<>();
+    private static KeyBinding open;
+    private int saveCountdown;
+
+    @Override public void onInitializeClient() {
+        CORE = new AnalyzerCore(FabricLoader.getInstance().getConfigDir().resolve("analyzer"));
+        try { CORE.load(); for (String warning : CORE.loadWarnings()) LOGGER.warn(warning); }
+        catch (IOException ex) { LOGGER.error("Could not load Analyzer configuration; using defaults", ex); }
+        try { PresetInstaller.install(FabricLoader.getInstance().getConfigDir().resolve("analyzer")); }
+        catch (IOException ex) { LOGGER.warn("Could not install Analyzer starter profiles", ex); }
+        open = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.analyzer.open", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "key.categories.analyzer"));
+        new AnalyzerRenderer(CORE).register();
+        ClientTickEvents.END_CLIENT_TICK.register(this::tick);
+        ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
+            if (screen instanceof TitleScreen) Screens.getButtons(screen).add(ButtonWidget.builder(Text.literal("Analyzer"), b -> client.setScreen(new AnalyzerScreen(CORE))).dimensions(w - 108, 10, 98, 20).build());
+        });
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+            public Identifier getFabricId() { return Identifier.of("analyzer", "effects"); }
+            public void reload(ResourceManager manager) { MinecraftClient.getInstance().execute(GpuEffects::close); }
+        });
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { saveConfig(); GpuEffects.close(); });
+        LOGGER.info("Analyzer initialized: {} modules, Minecraft 1.21.4", CORE.modules().size());
+    }
+
+    private void tick(MinecraftClient client) {
+        while (open.wasPressed()) {
+            if (client.currentScreen == null) client.setScreen(new AnalyzerScreen(CORE));
+            else if (client.currentScreen instanceof AnalyzerScreen) client.setScreen(null);
+        }
+        long window = client.getWindow().getHandle();
+        for (var module : CORE.modules()) {
+            int key = CORE.keybind(module.id());
+            boolean down = key >= GLFW.GLFW_KEY_SPACE && InputUtil.isKeyPressed(window, key);
+            boolean previous = held.getOrDefault(module.id(), false);
+            held.put(module.id(), down);
+            if (client.currentScreen == null && client.player != null && client.getOverlay() == null && down && !previous && key != KeyBindingHelper.getBoundKeyOf(open).getCode()) {
+                CORE.toggle(module.id()); saveCountdown = 20;
+                client.inGameHud.setOverlayMessage(Text.literal(module.name() + (CORE.isEnabled(module.id()) ? " enabled" : " disabled")), false);
+            }
+        }
+        if (saveCountdown > 0 && --saveCountdown == 0) saveConfig();
+        if (FabricLoader.getInstance().isDevelopmentEnvironment() && Boolean.getBoolean("analyzer.smoke")) DevSmoke.tick(client);
+    }
+
+    public static void saveConfig() {
+        if (CORE == null) return;
+        try { CORE.save(); } catch (IOException ex) { LOGGER.error("Could not save Analyzer configuration", ex); }
+    }
+
+    public static int getMenuKey() { return open == null ? GLFW.GLFW_KEY_RIGHT_SHIFT : KeyBindingHelper.getBoundKeyOf(open).getCode(); }
+}
