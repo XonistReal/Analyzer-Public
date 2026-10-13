@@ -10,6 +10,8 @@ The private repository is [XonistReal/Analyzer](https://github.com/XonistReal/An
 
 The bundled updater reads a local development feed. Its original machine's `manifestPath` will not exist on the new PC. The client can still launch; set `"enabled": false` in the imported instance's `analyzer-updater.json` until you reconnect a local feed below. GitHub releases do not require a token stored in Minecraft, and the updater does not automatically download private GitHub assets.
 
+On macOS/Linux, also open the imported instance's **Edit → Settings → Custom commands** and clear its Windows PowerShell **Pre-launch command** before launching. The bundled Windows updater is optional; clearing that command does not remove Analyzer or affect Minecraft account setup.
+
 ## Continue development
 
 Clone using GitHub Desktop, or use GitHub CLI after signing in:

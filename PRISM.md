@@ -6,7 +6,7 @@ Analyzer **0.9.0** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fa
 
 Drag `Analyzer-0.9.0-Prism-1.21.4.zip` onto Prism's main window and confirm the new instance. Alternatively use **Add Instance → Import → Browse**, select the ZIP, and press **OK**. The native archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root.
 
-This computer's existing instance is in `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.7.2-Prism-1.21.4`. The user imported the 0.7.2 package and removed the prior 0.7.0 folder; this folder name records that import and does not identify the currently installed mod version. Reuse this instance; importing another ZIP creates an additional instance. The previously recorded `instances\Analyzer` directory is absent. See [VALIDATION.md](VALIDATION.md) for the installed version and hash.
+This computer's existing instance is in `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.9.0-Prism-1.21.4`. The user removed the older instance in preparation for this fresh 0.9.0 delivery. Reuse this instance for future updates; importing another ZIP creates an additional instance. Verify the installed mod version and hash rather than inferring them from the folder name. See [VALIDATION.md](VALIDATION.md) for the recorded delivery.
 
 For an existing **Fabric 1.21.4** instance without the updater, close Minecraft, open **Edit → Mods**, and replace the old Analyzer JAR with `analyzer-0.9.0.jar`. Install `fabric-api-0.119.4+1.21.4.jar` if needed. Add the separately bundled `baritone-api-fabric-1.13.1.jar` for Automation; it is optional for other Analyzer features. Keep one Analyzer JAR. The ZIP/feed uses `analyzer-0.9.0-<hash>.jar`; this is the same build with a checksum suffix. Other game versions require compatible builds.
 
@@ -75,7 +75,7 @@ The packager includes the complete Studio/HUD guide, supplied transparent logo r
 After publishing, update the closed instance and verify it against the manifest:
 
 ```powershell
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir 'C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.7.2-Prism-1.21.4' -Strict
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir 'C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.9.0-Prism-1.21.4' -Strict
 ```
 
 Run updater checks without touching a real Prism instance:
