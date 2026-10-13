@@ -1,10 +1,10 @@
 # Analyzer on another PC
 
-The private repository is [XonistReal/Analyzer](https://github.com/XonistReal/Analyzer). Sign in to that GitHub account to access the source and release downloads. Version tags preserve the archived releases; the history was reconstructed from saved source exports rather than an earlier Git repository.
+The private repository is [XonistReal/Analyzer](https://github.com/XonistReal/Analyzer). Sign in to that GitHub account to access the source and release downloads. **Main contains the complete current 0.9.0 project**, including tests, shaders, supplied branding, tools and documentation. [Version history](VERSION-HISTORY.md) distinguishes preserved original snapshots, recovered runtime-source snapshots and binaries whose exact sources were not saved.
 
 ## Play through Prism
 
-1. Open [the 0.5.2 release](https://github.com/XonistReal/Analyzer/releases/tag/v0.5.2) and download `Analyzer-0.5.2-Prism-1.21.4.zip`.
+1. Open [the 0.9.0 release](https://github.com/XonistReal/Analyzer/releases/tag/v0.9.0) and download `Analyzer-0.9.0-Prism-1.21.4.zip`.
 2. Drag it onto Prism, or use **Add Instance → Import**. Configure your Minecraft account in Prism and use Java 21.
 3. This is a clean client instance. Transfer your existing saves and personal configurations separately if you want them; they are not in the repository or release.
 
@@ -26,11 +26,13 @@ To inspect an earlier saved version:
 
 ```powershell
 git tag --list
-git switch --detach v0.5.1
+git switch --detach v0.8.0
 git switch main
 ```
 
-Create a branch before editing an older version. Native screenshots and validation summaries describe the scenarios tested in each release; archived source ZIPs on the releases preserve the original exports.
+Create a branch before editing an older version. Native screenshots and validation summaries describe the scenarios tested in each release. Versions through the original v0.5.2 retain their original source/build/test snapshots. Later historical tags through v0.8.0 recover the exact saved main Java/resources with a documented build scaffold; their original tests/build scripts were not saved. The later same-version 0.5.2 UI update is **v0.5.2-ui**, leaving the original v0.5.2 untouched. Main/v0.9.0 retain the complete current source and tests.
+
+Each release includes a Git source ZIP and `SHA256SUMS.txt`. Where available, the original named source JAR, runtime JAR and Prism ZIP are separate assets; same-version alternate binaries are explicitly labeled. The source ZIP is a new export of its Git tag, not a claim that a missing original source export was recovered.
 
 ## Reconnect the Windows local updater
 

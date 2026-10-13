@@ -45,7 +45,10 @@ public final class StudioScreen extends CatalogScreen {
         return (float) Math.max(.12, physical / gui);
     }
     @Override protected void backdrop(DrawContext draw) {
-        if (core.getChoice("menu", "material").equals("Glass")) GpuEffects.drawBackdrop(draw);
+        if (client.world == null) {
+            GpuEffects.drawBackdrop(draw);
+            if (!core.getChoice("menu", "material").equals("Glass")) draw.fill(0, 0, width, height, 0x18000000);
+        } else if (core.getChoice("menu", "material").equals("Glass")) GpuEffects.drawBackdrop(draw);
         else draw.fill(0, 0, width, height, 0x18000000);
     }
     @Override public String selectedModuleId() { return selected == null ? null : selected.id(); }

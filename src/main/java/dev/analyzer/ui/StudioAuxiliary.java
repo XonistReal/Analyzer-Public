@@ -29,8 +29,39 @@ public final class StudioAuxiliary {
         return core != null && core.isEnabled("menu") && core.getChoice("menu", "material").equals("Glass") && GpuEffects.isHealthy();
     }
     public static void backdrop(DrawContext draw, AnalyzerCore core, int width, int height) {
-        if (glass(core)) GpuEffects.drawBackdrop(draw);
+        if (MinecraftClient.getInstance().world == null) {
+            // There is no newly rendered world in the incoming target. Replace all pixels
+            // before optical capture, including when Solid only adds a translucent veil.
+            GpuEffects.drawBackdrop(draw);
+            if (!glass(core)) draw.fill(0, 0, width, height, 0x30000000);
+        } else if (glass(core)) GpuEffects.drawBackdrop(draw);
         else draw.fill(0, 0, width, height, 0x30000000);
+    }
+
+    /**
+     * Title targets can still contain the previous UI, so their fresh backdrop must be
+     * painted first. World glass keeps sampling the undimmed world before its material veil.
+     * The supplied backdrop runs exactly once and before any surface, text or widget.
+     */
+    public static GuiDraw.GlassScope backdropScope(DrawContext draw, String theme, Runnable backdrop) {
+        if (MinecraftClient.getInstance().world == null) {
+            backdrop.run();
+            return GuiDraw.glassScope(draw, theme);
+        }
+        GuiDraw.GlassScope optical = GuiDraw.glassScope(draw, theme);
+        try {
+            backdrop.run();
+            return optical;
+        } catch (RuntimeException | Error failure) {
+            optical.close();
+            throw failure;
+        }
+    }
+
+    /** The HUD editor keeps its original world veil; a title preview first needs an opaque scene. */
+    public static void editorBackdrop(DrawContext draw, int width, int height) {
+        if (MinecraftClient.getInstance().world == null) GpuEffects.drawBackdrop(draw);
+        draw.fill(0, 0, width, height, 0x24000000);
     }
 
     /** Stable physical size across native GUI scales, while fitting a small game window. */

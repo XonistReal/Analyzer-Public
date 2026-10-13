@@ -42,9 +42,9 @@ public final class NumericSettingScreen extends Screen {
         catch (IOException ex) { error = "Could not save: " + ex.getMessage(); }
     }
     @Override public void render(DrawContext draw, int mouseX, int mouseY, float delta) {
-        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(draw, StudioAuxiliary.theme(core))) {
+        try (GuiDraw.GlassScope optical = StudioAuxiliary.backdropScope(draw, StudioAuxiliary.theme(core),
+                () -> StudioAuxiliary.backdrop(draw, core, width, height))) {
         geometry();
-        StudioAuxiliary.backdrop(draw, core, width, height);
         draw.getMatrices().push(); draw.getMatrices().translate(originX, originY, 0); draw.getMatrices().scale(scale, scale, 1);
         try (var font = GuiDraw.sansFont()) {
             GuiDraw.shaderPanel(draw, 0, 0, W, H, 22, StudioAuxiliary.accent(core), StudioAuxiliary.glass(core), StudioAuxiliary.theme(core));

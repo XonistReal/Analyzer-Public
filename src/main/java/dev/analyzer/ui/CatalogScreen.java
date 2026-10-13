@@ -61,8 +61,7 @@ public abstract class CatalogScreen extends Screen {
         mx=(mouseX-ox)/scale;my=(mouseY-oy)/scale;
         accent=core.isEnabled("menu")?HudWidgets.accent(core):Palette.MINT;
         controls.clear();diagnostics.clear();hoveredSetting=null;
-        try(GuiDraw.GlassScope optical=GuiDraw.glassScope(draw,theme())){
-        backdrop(draw);
+        try(GuiDraw.GlassScope optical=StudioAuxiliary.backdropScope(draw,theme(),()->backdrop(draw))){
         try(GuiDraw.FontScope font=shaderStyle()?GuiDraw.sansFont():null){
         draw.getMatrices().push();draw.getMatrices().translate(ox,oy,0);draw.getMatrices().scale(scale,scale,1);
         GuiDraw.shaderPanel(draw,10,9,W-20,H-22,24,accent,glass(),theme());

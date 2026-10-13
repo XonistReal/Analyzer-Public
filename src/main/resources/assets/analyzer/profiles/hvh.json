@@ -151,6 +151,20 @@
         "strength": 0.75
       }
     },
+    "server-privacy": {
+      "enabled": true,
+      "keybind": -1,
+      "settings": {
+        "vanilla-brand": true,
+        "block-mod-channels": true,
+        "vanilla-only": true,
+        "hide-known-packs": true,
+        "block-login-queries": true,
+        "block-key-probes": true,
+        "block-local-pack-urls": true,
+        "scrub-pack-headers": true
+      }
+    },
     "hud": {
       "enabled": true,
       "keybind": -1,

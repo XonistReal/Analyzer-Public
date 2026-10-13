@@ -12,7 +12,7 @@ The user explicitly requested on October 11, 2026 that every Analyzer update als
 
 Current computer paths:
 
-- Prism instance: `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.7.2-Prism-1.21.4`
+- Prism instance: `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.9.0-Prism-1.21.4`
 - Local manifest: `C:\Users\sould\Desktop\analyzer-updates\release.json`
 - Import ZIP: `C:\Users\sould\Desktop\Analyzer-<version>-Prism-1.21.4.zip`
 - Java 21 JDK: `C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot`
@@ -23,7 +23,7 @@ The portable ZIP inherits Prism's Java settings. The current imported instance r
 
 **Studio** follows reference 3: a centered black/gray menu, top category tabs, three columns of rounded cards, inline expanded settings, pink **Rose** controls and a wider bold sans serif font. Use original native GLSL for surfaces, shadows and glow, with Minecraft screens handling text and input; do not introduce ImGui. The latest request removes **Workspace / Classic / Compact** completely. Keep only **Studio / Click GUI** in **HUD Studio → Menu layout**; Click GUI is the new shader category-column layout. Old layout names in saved canonical or HUD-alias fields migrate to Studio on load, while explicit live edits validate only the two current choices. Preserve every other setting and do not rewrite the user's profile files during migration. Keep independent HUD/menu **Glass / Classic / Minimal / Neon** themes and **Rose / Mint / Violet / Gold** accents. Fresh defaults select **Studio / Rose**. The reference board is `UI-REFERENCES.md`; the acceptance plan is `UI-OVERHAUL-PLAN.md`.
 
-The active instance was located in the imported folder above; `instances\Analyzer` is no longer present. The user imported the 0.7.2 ZIP and removed the previous 0.7.0 folder. This current folder name records that import, rather than the installed mod version. Verify the current mod JAR and embedded version instead of inferring the installed version from that folder name. Historically, the 0.6.0 delivery selected **Studio / Rose / Glass theme / Solid material** in the active configuration, preserving all other fields, saved profiles, worlds and unrelated mods. Future updates preserve deliberate user appearance changes unless the user asks to change them; retired layout names use the migration above.
+The user deliberately removed the previous Analyzer instance in preparation for a new one during the 0.9.0 privacy update. The fresh native instance uses the folder above and inherits Prism's Java selection; no other instance is changed. Future updates reuse it. Verify the current mod JAR and embedded version instead of inferring the installed version from the folder name. Historically, the 0.6.0 delivery selected **Studio / Rose / Glass theme / Solid material** in its then-active configuration. Future updates preserve deliberate user appearance changes, saved profiles, worlds and unrelated mods unless the user asks to change them; retired layout names use the migration above.
 
 ## Home screen direction
 
@@ -40,3 +40,7 @@ The user explicitly requires the watermark to show exactly one supplied logo. Ke
 ## Liquid glass theme in 0.8.0
 
 The user requested actual liquid glass for **Glass theme**. Keep its original GLSL scene refraction, curved edge displacement, subtle color dispersion, frost and directional highlights on menu cards/controls, Home panels and HUD panels. Capture one immutable scene before each owning surface pass; preserve transforms, clipping, GL state, resource reload and a readable shader failure fallback. **Menu material → Glass / Solid** separately controls background softness and the outer shell; Solid material must still allow optical Glass-theme cards and controls. Keep HUD/menu themes independent and preserve the supplied logo pixels and exclusive watermark choice. The renderer and native acceptance evidence are documented in `LIQUID-GLASS.md` and `VALIDATION.md`.
+
+## Server privacy in 0.9.0
+
+The user requested built-in OpSec-style mod privacy. Keep **Client → Server Privacy** enabled with its eight default protections for missing older fields: vanilla wire brand, channel announcements, strict exact stock custom-channel filtering, actual vanilla known-pack tuple, vanilla unsupported login-query replies, remote translation/keybind/sign probes, scoped resource-pack URL/redirect/DNS checks and identifying HTTP headers. Preserve explicit saved opt-outs; do not rewrite user files during delivery. Integrated-server transport, ordinary vanilla packets, locally created text and accepted server-pack language values remain usable. Strict networking may require compatibility opt-outs for server-connected mods. Do not claim undetectability: normal behavior/account/IP remain observable, and the resource URL guard has a documented DNS lookup/connect race. Use original code; OpSec's GPL code is not bundled and the Discord-only Autism Defender source is unverified. Current scope is in `SERVER-PRIVACY.md`.

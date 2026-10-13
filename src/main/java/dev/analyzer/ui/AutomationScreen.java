@@ -70,14 +70,14 @@ public final class AutomationScreen extends Screen {
     @Override public void close() { if (client != null) client.setScreen(parent); }
 
     @Override public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(context, theme())) {
+        try (GuiDraw.GlassScope optical = StudioAuxiliary.backdropScope(context, theme(),
+                () -> StudioAuxiliary.backdrop(context, core, width, height))) {
         canvasScale = StudioAuxiliary.canvasScale(client, W, H, .84, .88);
         canvasX = (width - W * canvasScale) / 2; canvasY = (height - H * canvasScale) / 2;
         mx = (mouseX - canvasX) / canvasScale; my = (mouseY - canvasY) / canvasScale;
         hits.clear(); diagnostics.clear();
         View view = controller.snapshot();
         int accent = accent();
-        StudioAuxiliary.backdrop(context, core, width, height);
         context.getMatrices().push(); context.getMatrices().translate(canvasX, canvasY, 0); context.getMatrices().scale(canvasScale, canvasScale, 1);
         try (var font = GuiDraw.sansFont()) {
         GuiDraw.shaderPanel(context, 0, 0, W, H, 24, accent, glass(), theme());

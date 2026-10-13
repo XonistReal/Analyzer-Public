@@ -2,7 +2,7 @@
 
 Reviewed 2026-10-11 for Analyzer 0.5.2, Minecraft Java 1.21.4.
 
-The actual registry has **123 modules**. The [Temple.nz public catalogue](https://temple.nz/assets/data/modules.json?v=be4c7e7b) contains **163 reference modules**. This comparison identifies **102 areas with a functional counterpart or narrower implementation**: **33 scoped counterparts**, **69 partial implementations**, and **61 planned/unimplemented areas**. These figures are separate from feature parity and runtime test coverage.
+The current 0.9.0 registry has **124 modules**, including original [Server Privacy](SERVER-PRIVACY.md). The historical 0.5.2 comparison below used 123 modules. The [Temple.nz public catalogue](https://temple.nz/assets/data/modules.json?v=be4c7e7b) contains **163 reference modules**. That comparison identifies **102 areas with a functional counterpart or narrower implementation**: **33 scoped counterparts**, **69 partial implementations**, and **61 planned/unimplemented areas**. These figures are separate from feature parity and runtime test coverage; the privacy update does not recalculate the comparison matrix.
 
 HUD Studio and its widgets count as one Temple HUD area. The same evidence is never expanded into seventeen reference features. A partial row states the missing scope; an implementation sharing a name does not imply the reference's styles, bypasses or server behavior.
 

@@ -46,7 +46,7 @@ The October 11 interactive comparison presented these directions with shared con
 | Main cost | Another category requires a navigation action. | Less space per category; horizontal scrolling or fewer visible columns is necessary at smaller sizes. |
 | Shared test content | All 123 modules; Entity ESP's 20 controls and Kill Aura's 33 controls. | Exactly the same catalogue, values and inspector content. |
 
-Both compositions used a **123-module, 1,086-setting** snapshot. They compared layout rather than adding reference-only modules; preview edits remained inside the comparison. The current [module catalogue](MODULES.json) exposes **1,100 settings**, including eight HUD Studio aliases for canonical Interface preferences. The snapshot count above describes the historical comparison.
+Both compositions used a **123-module, 1,086-setting** snapshot. They compared layout rather than adding reference-only modules; preview edits remained inside the comparison. The current [module catalogue](MODULES.json) exposes **1,108 settings**, including eight HUD Studio aliases for canonical Interface preferences. The snapshot count above describes the historical comparison.
 
 Behavior retained across current Studio and Click GUI:
 

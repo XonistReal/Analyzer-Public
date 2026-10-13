@@ -43,6 +43,8 @@ public final class AnalyzerClient implements ClientModInitializer {
         CORE = new AnalyzerCore(FabricLoader.getInstance().getConfigDir().resolve("analyzer"));
         try { CORE.load(); for (String warning : CORE.loadWarnings()) LOGGER.warn(warning); }
         catch (IOException ex) { LOGGER.error("Could not load Analyzer configuration; using defaults", ex); }
+        dev.analyzer.privacy.ServerPrivacy.initialize(CORE);
+        ClientLifecycleEvents.CLIENT_STARTED.register(dev.analyzer.privacy.PrivacyTextProtection::initialize);
         try { PresetInstaller.install(FabricLoader.getInstance().getConfigDir().resolve("analyzer")); }
         catch (IOException ex) { LOGGER.warn("Could not install Analyzer starter profiles", ex); }
         open = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.analyzer.open", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "key.categories.analyzer"));
@@ -88,7 +90,8 @@ public final class AnalyzerClient implements ClientModInitializer {
         }
         if (saveCountdown > 0 && --saveCountdown == 0) saveConfig();
         if (FabricLoader.getInstance().isDevelopmentEnvironment() && Boolean.getBoolean("analyzer.smoke")) {
-            if (Boolean.getBoolean("analyzer.homeSmoke")) HomeSmoke.tick(client);
+            if (Boolean.getBoolean("analyzer.privacySmoke")) PrivacySmoke.tick(client);
+            else if (Boolean.getBoolean("analyzer.homeSmoke")) HomeSmoke.tick(client);
             else DevSmoke.tick(client);
         }
     }

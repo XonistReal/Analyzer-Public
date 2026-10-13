@@ -1,14 +1,14 @@
 # Analyzer in Prism Launcher
 
-Analyzer **0.8.0** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native Prism ZIP includes Analyzer, Fabric API and official Baritone API, instance definitions, corresponding Baritone sources/notices and a Windows local updater. Minecraft and account credentials are not included.
+Analyzer **0.9.0** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native Prism ZIP includes Analyzer, Fabric API and official Baritone API, instance definitions, corresponding Baritone sources/notices and a Windows local updater. Minecraft and account credentials are not included.
 
 ## Import and launch
 
-Drag `Analyzer-0.8.0-Prism-1.21.4.zip` onto Prism's main window and confirm the new instance. Alternatively use **Add Instance → Import → Browse**, select the ZIP, and press **OK**. The native archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root.
+Drag `Analyzer-0.9.0-Prism-1.21.4.zip` onto Prism's main window and confirm the new instance. Alternatively use **Add Instance → Import → Browse**, select the ZIP, and press **OK**. The native archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root.
 
 This computer's existing instance is in `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.7.2-Prism-1.21.4`. The user imported the 0.7.2 package and removed the prior 0.7.0 folder; this folder name records that import and does not identify the currently installed mod version. Reuse this instance; importing another ZIP creates an additional instance. The previously recorded `instances\Analyzer` directory is absent. See [VALIDATION.md](VALIDATION.md) for the installed version and hash.
 
-For an existing **Fabric 1.21.4** instance without the updater, close Minecraft, open **Edit → Mods**, and replace the old Analyzer JAR with `analyzer-0.8.0.jar`. Install `fabric-api-0.119.4+1.21.4.jar` if needed. Add the separately bundled `baritone-api-fabric-1.13.1.jar` for Automation; it is optional for other Analyzer features. Keep one Analyzer JAR. The ZIP/feed uses `analyzer-0.8.0-<hash>.jar`; this is the same build with a checksum suffix. Other game versions require compatible builds.
+For an existing **Fabric 1.21.4** instance without the updater, close Minecraft, open **Edit → Mods**, and replace the old Analyzer JAR with `analyzer-0.9.0.jar`. Install `fabric-api-0.119.4+1.21.4.jar` if needed. Add the separately bundled `baritone-api-fabric-1.13.1.jar` for Automation; it is optional for other Analyzer features. Keep one Analyzer JAR. The ZIP/feed uses `analyzer-0.9.0-<hash>.jar`; this is the same build with a checksum suffix. Other game versions require compatible builds.
 
 Use Java 21: enable Prism's automatic Java selection/download or select Java 21 under **Settings → Java**. The existing imported instance on this computer retains Prism's managed Java selection; project builds use the verified Java 21 JDK. The portable ZIP inherits Prism's Java settings and has no fixed Java path.
 
@@ -20,7 +20,9 @@ Open **HUD Studio** using Studio's **Appearance** action or Click GUI's **Style*
 
 Review and start tasks through **Automation**; [AUTOMATION.md](AUTOMATION.md) explains supported phrases and material/XP requirements. Fresh settings use a **60% HUD scale**. Updating preserves an existing saved scale, widget positions and profile files; use **HUD Studio → HUD scale** or the editor controls to change your current setup. Studio, Click GUI, the auxiliary screens and the HUD use bundled Lato Regular/Bold fonts. HUD size remains independent of menu size. Click GUI provides draggable/collapsible category columns, per-column scrolling and a horizontal rail; all current module-menu surfaces use native shaders.
 
-Analyzer now has **123 registered modules**, including actual combat/HvH, movement, inventory and world actions. These use normal game interactions; server movement/reach/cooldown rules still apply. Fresh defaults enable sky/menu/HUD effects and local place/break/hit visuals. All gameplay automation and Entity/Storage ESP are opt-in. [README.md](README.md) explains gear, controls and rendering limits; [MODULES.md](MODULES.md) lists every module; [ROADMAP.md](ROADMAP.md) distinguishes scoped implementations from planned work; [RESEARCH-COSMETICS.md](RESEARCH-COSMETICS.md) compares all 37 published cosmetic setting families with Analyzer's actual controls. Selected runtime checks are in [VALIDATION.md](VALIDATION.md).
+Analyzer now has **124 registered modules**, including server privacy, combat/HvH, movement, inventory and world actions. These use normal game interactions; server movement/reach/cooldown rules still apply. Fresh defaults enable sky/menu/HUD effects, privacy protections and local place/break/hit visuals. All gameplay automation and Entity/Storage ESP are opt-in. [README.md](README.md) explains gear, controls and rendering limits; [MODULES.md](MODULES.md) lists every module; [ROADMAP.md](ROADMAP.md) distinguishes scoped implementations from planned work; [RESEARCH-COSMETICS.md](RESEARCH-COSMETICS.md) compares all 37 published cosmetic setting families with Analyzer's actual controls. Selected runtime checks are in [VALIDATION.md](VALIDATION.md).
+
+**Client → Server Privacy** has eight default protections for wire metadata, remote translation/keybind/sign probes and resource-pack requests. Strict custom-channel protection can interfere with mods that require server communication. Select compatibility settings before connecting; this limits specific leaks and cannot guarantee undetectability. [SERVER-PRIVACY.md](SERVER-PRIVACY.md) records controls, preserved vanilla behavior and remaining limits.
 
 ## Automation safety in 0.5.2
 
@@ -34,7 +36,7 @@ The current 0.8.0 request removes Workspace, Classic and Compact module layouts.
 
 ## Updates while we develop
 
-Project updates include rebuilding the import ZIP, publishing the local feed and updating the user's closed Analyzer instance. This standing request is recorded in [AGENTS.md](AGENTS.md). On this computer the instance is `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.7.2-Prism-1.21.4` and the import ZIP is saved on the Desktop. Future work reuses this instance and preserves its worlds and preferences.
+Project updates include rebuilding the import ZIP, publishing the local feed and updating the user's closed Analyzer instance. This standing request is recorded in [AGENTS.md](AGENTS.md). The user removed the older instance in preparation for this fresh 0.9.0 delivery. On this computer the new instance is `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.9.0-Prism-1.21.4` and the import ZIP is saved on the Desktop. Future work reuses this instance and preserves its worlds and preferences.
 
 The updater checks a **local release feed before each launch**. After a build is published, an existing Analyzer instance connected to this project's feed receives it on its next launch; importing a second instance is optional. Close Minecraft before updating, then restart it to load new code.
 

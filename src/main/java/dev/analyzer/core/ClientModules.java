@@ -22,6 +22,17 @@ public final class ClientModules {
 
     public static List<ModuleDefinition> definitions() {
         List<ModuleDefinition> result = new ArrayList<>();
+        result.add(new ModuleDefinition("server-privacy", "Server Privacy",
+                "Reduce mod-identifying metadata and text probes. Vanilla-only channels can disable server-connected mods; gameplay remains observable.",
+                Category.CLIENT, true, List.of(
+                Setting.bool("vanilla-brand", "Report vanilla client brand", true),
+                Setting.bool("block-mod-channels", "Block mod channel announcements", true),
+                Setting.bool("vanilla-only", "Vanilla-only channels (strict)", true),
+                Setting.bool("hide-known-packs", "Hide non-vanilla known packs", true),
+                Setting.bool("block-login-queries", "Decline mod login queries", true),
+                Setting.bool("block-key-probes", "Protect remote translation/key probes", true),
+                Setting.bool("block-local-pack-urls", "Block local/private pack URLs", true),
+                Setting.bool("scrub-pack-headers", "Hide identifying pack download headers", true))));
         result.add(new ModuleDefinition("hud", "HUD Studio", "Choose your menu, appearance and HUD widget layout.", Category.HUD, true, List.of(
                 Setting.choice("menu-layout", "Menu layout", "Studio", "Studio", "Click GUI"),
                 Setting.choice("menu-material", "Menu material", "Glass", "Glass", "Solid"),

@@ -93,7 +93,7 @@ final class AllModulesSmoke {
                 next();
             }
             case 1 -> { if (age >= 6 && mc.player.isOnGround() && mc.player.getAbilities().creativeMode) {
-                require(core.modules().size() == 123, "All 123 supported modules are present");
+                require(core.modules().size() == 124, "All 124 supported modules are present");
                 next();
             }}
             case 2 -> sweep(mc, age);
@@ -208,7 +208,7 @@ final class AllModulesSmoke {
             if (++variant == 3) { variant = 0; moduleIndex++; }
             entered = tick;
             if (moduleIndex == core.modules().size()) {
-                require(modules.size() == 123 && modules.stream().allMatch(row -> ((List<?>) row.get("variants")).size() == 3), "All 369 live module variants completed");
+                require(modules.size() == core.modules().size() && modules.stream().allMatch(row -> ((List<?>) row.get("variants")).size() == 3), "All registered modules complete three live settings variants");
                 next();
             }
         }

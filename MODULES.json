@@ -818,6 +818,63 @@
     ]
   },
   {
+    "id": "server-privacy",
+    "name": "Server Privacy",
+    "category": "Client",
+    "description": "Reduce mod-identifying metadata and text probes. Vanilla-only channels can disable server-connected mods; gameplay remains observable.",
+    "defaultEnabled": true,
+    "settings": [
+      {
+        "id": "vanilla-brand",
+        "label": "Report vanilla client brand",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "block-mod-channels",
+        "label": "Block mod channel announcements",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "vanilla-only",
+        "label": "Vanilla-only channels (strict)",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hide-known-packs",
+        "label": "Hide non-vanilla known packs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "block-login-queries",
+        "label": "Decline mod login queries",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "block-key-probes",
+        "label": "Protect remote translation/key probes",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "block-local-pack-urls",
+        "label": "Block local/private pack URLs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "scrub-pack-headers",
+        "label": "Hide identifying pack download headers",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
     "id": "hud",
     "name": "HUD Studio",
     "category": "HUD",

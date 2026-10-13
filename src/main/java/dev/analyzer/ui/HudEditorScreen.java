@@ -31,9 +31,9 @@ public final class HudEditorScreen extends Screen {
     public HudEditorScreen(AnalyzerCore core, Screen back) { super(Text.literal("Analyzer / HUD Studio")); this.core = core; this.back = back; }
     @Override public boolean shouldPause() { return false; }
     @Override public void render(DrawContext draw, int mouseX, int mouseY, float delta) {
-        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(draw,
-                core.getChoice("hud", "theme").equals("Glass") ? "Glass" : StudioAuxiliary.theme(core))) {
-        draw.fill(0, 0, width, height, 0x24000000);
+        try (GuiDraw.GlassScope optical = StudioAuxiliary.backdropScope(draw,
+                core.getChoice("hud", "theme").equals("Glass") ? "Glass" : StudioAuxiliary.theme(core),
+                () -> StudioAuxiliary.editorBackdrop(draw, width, height))) {
         int accent = StudioAuxiliary.accent(core);
         List<HudWidgets.WidgetBounds> layout = new ArrayList<>(HudWidgets.render(core, draw, true));
         HudWidgets.WidgetBounds radar = AnalyzerRenderer.renderEditorRadar(draw);

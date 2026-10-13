@@ -1,5 +1,17 @@
 # Native captures
 
+Analyzer **0.9.0** adds Server Privacy. Its final native acceptance has **250 checks and four title-menu captures**; a fresh-frame poison test verifies zero differences after preceding framebuffer content is erased. Separate current runs pass **919 layout/optics checks with 11 captures** and **491 Home checks with 31 captures**. All **46 new images** use `analyzer-privacy-`; the first 0.9.0 QA captures are replaced by the final corrected title render.
+
+- [Privacy in Studio](analyzer-privacy-studio.png), [Solid material](analyzer-privacy-studio-solid.png)
+- [Privacy in Click GUI](analyzer-privacy-click-gui.png), [Solid material](analyzer-privacy-click-gui-solid.png)
+- [Current in-world Studio glass](analyzer-privacy-liquid-studio-glass.png)
+- [Current old-HVH Back return](analyzer-privacy-liquid-legacy-hvh-return.png)
+- [Current Panorama Home](analyzer-privacy-home-panorama.png), [Options](analyzer-privacy-home-options.png)
+
+[Server Privacy](../SERVER-PRIVACY.md) describes tested protections and limits. [Validation](../VALIDATION.md) records the 0.9.0 build and fresh Prism delivery. Older prefixes below retain their original historical PNGs and counts.
+
+## 0.8.0 liquid-glass captures
+
 Analyzer **0.8.0** uses `analyzer-liquid-` for the two current shader layouts and optical Glass theme. The current layout/optics run has **11 captures and 959 assertions**; the title-only Home regression has **31 captures and 491 assertions**. These are actual Minecraft framebuffer captures from the verified build, which passes **2,364 assertions**. Release packaging/install hashes are recorded separately in [Validation](../VALIDATION.md).
 
 - [Studio Glass](analyzer-liquid-studio-glass.png)
