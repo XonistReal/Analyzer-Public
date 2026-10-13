@@ -15,6 +15,7 @@ public final class ClassicScreen extends CatalogScreen {
     private static final int AVAILABLE_Y = H - COLUMN_H - 36;
     private final List<Window> windows = new ArrayList<>();
     private Window dragged;
+    private String lastInspected;
     private double grabX, grabY;
 
     public ClassicScreen(AnalyzerCore core) {
@@ -22,6 +23,16 @@ public final class ClassicScreen extends CatalogScreen {
         for (Category category : Category.values()) windows.add(new Window(category));
     }
     @Override protected String layout() { return "Classic"; }
+    @Override public ClassicScreen inspect(String id) {
+        core.modules().stream().filter(module -> module.id().equals(id)).findFirst().ifPresent(module -> {
+            lastInspected = id;
+            query = "";
+            core.setValue("menu", prefix(module.category()) + "-collapsed", false);
+            for (Window window : windows) if (window.category == module.category()) { window.expanded = id; window.scroll = Math.max(0, core.modules().stream().filter(m -> m.category() == module.category()).toList().indexOf(module) * 28); }
+        });
+        return this;
+    }
+    @Override public String selectedModuleId() { return lastInspected; }
     @Override protected void body(DrawContext draw) {
         for (Window window : windows) drawWindow(draw, window);
     }
@@ -51,9 +62,10 @@ public final class ClassicScreen extends CatalogScreen {
         });
         if (collapsed) return;
         Area viewport = new Area(x + 4, y + 36, COLUMN_W - 8, COLUMN_H - 42);
+        if (lastInspected != null && lastInspected.equals(window.expanded)) diagnostics.put("settings-scroll", new Point(viewport.x() + viewport.w() / 2.0, viewport.y() + viewport.h() / 2.0));
         int content = modules.size() * 28;
         ModuleDefinition expanded = modules.stream().filter(module -> module.id().equals(window.expanded)).findFirst().orElse(null);
-        if (expanded != null) content += settingsHeight(expanded);
+        if (expanded != null) content += settingsHeight(expanded, COLUMN_W - 12);
         window.maxScroll = Math.max(0, content - viewport.h());
         window.scroll = Math.clamp(window.scroll, 0, window.maxScroll);
         draw.enableScissor(viewport.x(), viewport.y(), viewport.right(), viewport.bottom());
@@ -63,18 +75,18 @@ public final class ClassicScreen extends CatalogScreen {
             boolean enabled = core.isEnabled(module.id()), selected = module.id().equals(window.expanded);
             Area row = new Area(x + 6, rowY, COLUMN_W - 12, 26);
             if (row.bottom() >= viewport.y() && row.y() < viewport.bottom()) {
-                GuiDraw.rounded(draw, row.x(), row.y(), row.w(), row.h(), 4,
-                        Palette.alpha(enabled ? accent : selected ? Palette.CARD_HOVER : Palette.CARD, enabled ? 60 : 200));
+                GuiDraw.card(draw, row.x(), row.y(), row.w(), row.h(), 7, accent, glass(), theme(), row.contains(mx, my) ? 1 : 0, selected);
                 if (enabled) draw.fill(row.x(), row.y() + 5, row.x() + 2, row.bottom() - 5, accent);
                 label(draw, GuiDraw.truncate(textRenderer, module.name(), 121, 0.87f), row.x() + 8, row.y() + 9, 0.87f, enabled ? Palette.TEXT : Palette.MUTED);
                 toggle(draw, row.right() - 32, row.y() + 7, enabled);
-                clippedControl("module:" + module.id(), row, viewport, 0, () -> { core.toggle(module.id()); changed(); });
-                clippedControl("inspect:" + module.id(), row, viewport, 1, () -> { window.expanded = selected ? "" : module.id(); capture = null; searchFocused = false; });
+                clippedControl("inspect-left:" + module.id(), row, viewport, 0, () -> { window.expanded = selected ? "" : module.id(); lastInspected = module.id(); capture = null; searchFocused = false; });
+                clippedControl("inspect:" + module.id(), row, viewport, 1, () -> { window.expanded = selected ? "" : module.id(); lastInspected = module.id(); capture = null; searchFocused = false; });
+                clippedControl("module:" + module.id(), new Area(row.right() - 35, row.y() + 2, 35, 24), viewport, 0, () -> { core.toggle(module.id()); changed(); });
             }
             rowY += 28;
             if (selected) {
                 settings(draw, module, x + 6, rowY + 3, COLUMN_W - 12, viewport);
-                rowY += settingsHeight(module);
+                rowY += settingsHeight(module, COLUMN_W - 12);
             }
         }
         draw.disableScissor();

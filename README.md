@@ -1,35 +1,39 @@
-> **0.5.2:** Automation protection keeps checking after an explosion or unavailable retreat instead of leaving a stale blocked warning. Short escape checks now account for surface water, snow, slabs and one-block terrain changes, and prioritize urgent creepers. The original task stays paused until its recovery checks pass. See [Survival safety](SAFETY.md), [Automation](AUTOMATION.md) and [ESP readability](ESP-READABILITY.md).
+> **0.5.2 UI update:** The user-selected Focused workspace is now native: sidebar browsing, rounded module cards/switches, real glass frost and a substantial settings inspector. Choose layouts and independent menu appearance in **HUD Studio**. See [UI controls and native captures](UI-OVERHAUL.md). Automation retains the existing Survival protection described in [SAFETY.md](SAFETY.md).
 
 # Analyzer
 
 An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.5.2** has **123 registered modules**: world visuals, editable HUD widgets, three native menu layouts, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
 
-![Analyzer native interface](screenshots/analyzer-ui.png)
+![Analyzer native Focused workspace with glass](screenshots/analyzer-ui-overhaul-workspace-glass.png)
 
-![Analyzer Classic category columns](screenshots/analyzer-gui-classic.png)
+![Analyzer retained Classic category columns with shared glass appearance](screenshots/analyzer-ui-overhaul-classic-glass.png)
 
 ## Install and start
 
 **Prism Launcher:** drag `Analyzer-0.5.2-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, the official Baritone API and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; Baritone is a separate mod installed once for Automation.
 
+Project updates also rebuild the Prism ZIP and update the user's local Analyzer instance. The standing delivery workflow is recorded in [AGENTS.md](AGENTS.md).
+
 For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.5.2.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. Add the separate official `baritone-api-fabric-1.13.1.jar` to run Automation. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
 
-Click **Analyzer** on the title screen or press **Right Shift** in game. Choose **Profiles → cinematic → Load** for the visual/HUD setup, or **studio** to try selected new cosmetics. **classic** uses draggable category columns and **neon** uses the Compact layout and Neon HUD; these four visual profiles leave gameplay automation off. Loading **hvh** explicitly enables Kill Aura, Crystal Aura, Surround, Auto Weapon, Auto Totem, Auto Armor and Keep Sprint, with combat HUD widgets. Earlier **showcase**, **arctic**, **cinder**, **aurora**, **ember** and **minimal** profiles remain available. Profiles are available from the Workspace layout.
+Click **Analyzer** on the title screen or press **Right Shift** in game. Choose **Profiles → cinematic → Load** for the visual/HUD setup, or **studio** to try selected new cosmetics. **classic** uses draggable category columns and **neon** uses the Compact layout and Neon HUD; these four visual profiles leave gameplay automation off. Loading **hvh** explicitly enables Kill Aura, Crystal Aura, Surround, Auto Weapon, Auto Totem, Auto Armor and Keep Sprint, with combat HUD widgets. Earlier **showcase**, **arctic**, **cinder**, **aurora**, **ember** and **minimal** profiles remain available. The shared header opens Profiles from every menu layout; Back restores the parent catalogue context.
 
 Profiles are seeded once without overwriting existing files. Loading a profile replaces active settings and module keybinds. Settings live in `config/analyzer/config.json`; profiles in `config/analyzer/profiles/`, friends in `config/analyzer/friends.txt`. The updater preserves these and your worlds.
 
 ## Menus and HUD
 
-- **Workspace:** categories, search, module cards and a scrolling settings inspector. Select a card to inspect it; use its switch or **Space** to toggle it. **/** focuses search.
-- **Classic:** independent draggable category columns with collapse and scroll. Left-click a module to toggle it; right-click to open its settings.
-- **Compact:** searchable category/card view with a settings inspector. Left-click to select/toggle; right-click to inspect.
-- Use the header's **Workspace / Classic / Compact / Edit HUD** buttons to change layout or edit the HUD. Layout selection persists.
+- **Workspace:** a persistent category sidebar, search, two-column rounded module cards and a substantial scrolling inspector. Click a card to inspect; its separate switch enables/disables it. **/** focuses search.
+- **Classic:** independent draggable category columns with collapse and scroll. Click a module row to inspect its inline settings; use its separate switch to toggle it. Right-click also opens/closes inspection.
+- **Compact:** a denser searchable category/card view and separate inspector. Click a card to inspect it; use its separate switch to toggle it.
+- **HUD Studio** exposes **Menu layout → Workspace / Classic / Compact**, **Panel material → Glass / Solid**, **Menu theme → Glass / Classic / Minimal / Neon**, and **Accent colour → Mint / Violet / Gold**. These share Interface's saved preferences; they are not conflicting copies. Appearance shortcuts in the header, Workspace sidebar and HUD editor open these controls. Layout selection persists.
 - **Edit HUD:** drag widgets, right-click to toggle them, use arrows to move a selection, and choose grid snapping, scale and **Glass / Classic / Minimal / Neon** themes. Settings and reset controls are available in the editor. **Show active** starts with enabled widgets; **Show all** exposes disabled ones for positioning.
 - Fresh HUD settings use **60% scale**. Updating preserves a saved scale and existing widget positions. To change an older setup, open **HUD Studio → HUD scale** or use the editor scale controls. New text uses the bundled Rajdhani SemiBold font, smooth sampling of its own font atlases, brighter secondary labels and alignment to physical pixels; small HUD text keeps a minimum readable size as panels shrink.
-- Under **Interface**, choose **Glass / Solid**, **Mint / Violet / Gold**, and motion speed. Menu particles react to the cursor; density zero hides them and motion zero freezes movement.
+- Menu theme and HUD theme are independent. Glass uses actual scene frost behind translucent panels; Solid provides an opaque fallback. Under **Interface**, motion zero freezes menu movement; **Particles → Density 0** hides menu particles.
 - Assign a module **Keybind** in its inspector. **Backspace/Delete** clears it; **Escape** cancels. Changes save automatically.
+- Inspectors group related settings and wrap full labels; fields for inactive modes keep their saved values. Click a numeric value or **right-click its slider row** to type a precise value, then press Enter or Apply. **Tab / Shift+Tab** moves visible focus, **Enter / Space** activates the focused control, arrow keys adjust supported values, and **Page Up / Down** scrolls settings. Shared catalogue controls provide labels through Minecraft's native narration hook. See [Gameplay settings](GAMEPLAY-SETTINGS.md) for behavior and reference gaps.
+- Returning from **Profiles**, **Edit HUD** or **Automation** restores the parent screen's search/category/selection context. Loading a profile remains an explicit replacement of module settings and keybinds.
 
-A fuller UI overhaul follows the [UI design plan](UI-OVERHAUL-PLAN.md) after the user supplies Minecraft client references. The plan leaves the final visual style and navigation open; this release adds the task safety banner, not a redesigned menu system.
+The [reference board](UI-REFERENCES.md) records the selected Focused workspace with reference 3's rounded controls and reference 2's glass appearance. The earlier browser comparison remains a historical 1,086-setting snapshot. The native catalogue exposes **1,091 controls: 1,087 canonical settings plus four HUD Studio menu aliases**. [UI-OVERHAUL.md](UI-OVERHAUL.md) records implemented controls and native screenshots; [UI-OVERHAUL-PLAN.md](UI-OVERHAUL-PLAN.md) retains the acceptance requirements and remaining checks.
 
 ## Implemented features
 
@@ -59,11 +63,11 @@ The temporary route settings restore on user Pause, Stop, completion, ordinary t
 
 ## Trying gameplay modules
 
-Enable one module at a time and inspect its settings/status. Target filters default to **Players** for combat; enable **Hostile mobs** and disable Players to try a singleplayer mob arena. Persisted friends are excluded from combat targeting. Most gameplay automation pauses while a menu is open.
+Enable one module at a time and inspect its settings/status. Target filters default to **Players** for combat; enable **Hostile mobs** and disable Players to try a singleplayer mob arena. Persisted friends are excluded by the default Ignore friends setting. Most gameplay automation pauses while a menu is open.
 
-Melee modules need a suitable hotbar weapon and normal reach/cooldown. Shield Breaker needs an axe; Bow Aimbot needs a drawn bow. Criticals uses a real jump and falling-phase attack. Surround/Trap/Hole Filler need hotbar obsidian, Auto Web needs cobwebs, and ordinary placement needs valid support/reach. Crystal Aura needs crystals plus reachable obsidian/bedrock; Anchor Aura needs anchors, glowstone and a non-glowstone hand for detonation in a dimension where anchors explode. The Nether is excluded from detonation.
+Melee modules need a suitable hotbar weapon and normal reach/cooldown. Shield Breaker needs an axe; Bow Aimbot supports selected bow/crossbow/trident inputs. Criticals uses real jumping/falling attacks. Surround/Trap/Hole Filler need the selected hotbar building material, Auto Web needs cobwebs, and ordinary placement needs valid support/reach. Crystal Aura needs crystals plus reachable obsidian/bedrock; Anchor Aura needs anchors, glowstone and a non-glowstone hand for detonation in a dimension where anchors explode. The Nether is excluded from detonation.
 
-Crystal/Anchor Aura have health/distance guards but **no explosion damage prediction**. Fly/Speed and other velocity modules alter client movement; a server can correct or reject it. Air Place attempts a normal interaction and depends on server acceptance. There are no promised anticheat bypasses, silent rotations or packet criticals. Refill currently restocks low **nonempty** hotbar stacks; weapon/armor scoring uses material estimates rather than full enchantment simulation.
+Crystal/Anchor Aura now combine health/distance guards with loaded-terrain explosion estimates, enemy/self damage limits and friend protection. Self estimates omit protective enchantment/effect reductions; estimates can differ from server outcomes. Fly/Speed offer direct motion and applicable normal-input modes; a server can correct or reject direct motion. Air Place attempts a normal interaction and depends on server acceptance. There are no promised anticheat bypasses, silent rotations or packet criticals. Refill currently restocks low **nonempty** hotbar stacks; weapon/armor scoring uses material estimates rather than full enchantment simulation. The [gameplay settings overhaul](GAMEPLAY-SETTINGS.md) records all implemented behavior and limits.
 
 ## Rendering scope
 
@@ -88,6 +92,7 @@ Select a Java 21 JDK with `JAVA_HOME`, then run:
 .\gradlew.bat moduleCatalog  # export the actual registry
 .\gradlew.bat runClient      # interactive development instance
 .\gradlew.bat runSmoke       # isolated UI/world/gameplay checks
+.\gradlew.bat runGameplaySmoke # focused gameplay settings and numeric-entry checks
 .\gradlew.bat publishLocal   # publish to the Prism local update feed
 ```
 

@@ -76,12 +76,9 @@ public final class AutomationScreen extends Screen {
         View view = controller.snapshot();
         int accent = accent();
         GpuEffects.drawBackdrop(context);
-        context.fillGradient(0, 0, width, height, 0x8A060C13, 0xD5091018);
         context.getMatrices().push(); context.getMatrices().translate(canvasX, canvasY, 0); context.getMatrices().scale(canvasScale, canvasScale, 1);
-        GuiDraw.glow(context, 0, 0, W, H, 18, accent);
-        GuiDraw.outlined(context, 0, 0, W, H, 18, Palette.BRIGHT_BORDER, 0xEF0B141D);
-        GuiDraw.rounded(context, 1, 1, W - 2, 65, 17, 0xFF121F2B);
-        context.fill(1, 46, W - 1, 65, 0xFF121F2B);
+        GuiDraw.panel(context, 0, 0, W, H, 16, accent, glass(), theme());
+        GuiDraw.card(context, 1, 1, W - 2, 65, 15, accent, glass(), theme(), 0, false);
         GuiDraw.logo(context, 18, 17, 30, accent);
         GuiDraw.heading(context, textRenderer, "AUTOMATION", 61, 17, 1.5f, Palette.TEXT);
         GuiDraw.label(context, textRenderer, "A task you can inspect. Progress you can verify.", 62, 43, .88f, Palette.MUTED);
@@ -134,6 +131,7 @@ public final class AutomationScreen extends Screen {
         if (steps.isEmpty()) {
             double time = (System.nanoTime() - openedAt) / 1_000_000_000.0;
             for (int i = 0; i < 4; i++) {
+                if (core != null && core.getNumber("menu", "motion") == 0) time = 0;
                 int x = 491 + i * 105, y = 236 + (int) (Math.sin(time * .7 + i) * 10);
                 GuiDraw.glowDot(context, x, y, 3, accent, 110);
                 if (i < 3) GuiDraw.stroke(context, x + 9, y, x + 96, 236 + Math.sin(time * .7 + i + 1) * 10, 1, Palette.alpha(accent, 70));
@@ -147,7 +145,7 @@ public final class AutomationScreen extends Screen {
             boolean active = live && index == view.currentStep;
             boolean done = step.status.toLowerCase(Locale.ROOT).contains("done") || step.status.toLowerCase(Locale.ROOT).contains("complete");
             int color = done ? accent : active ? Palette.GOLD : Palette.SUBTLE;
-            GuiDraw.rounded(context, 449, y, 483, 35, 7, active ? 0xFF243442 : Palette.CARD);
+            GuiDraw.card(context, 449, y, 483, 35, 9, accent, glass(), theme(), 0, active);
             GuiDraw.rounded(context, 459, y + 8, 20, 20, 10, Palette.alpha(color, 35));
             GuiDraw.label(context, textRenderer, Integer.toString(index + 1), 465, y + 13, .84f, color);
             GuiDraw.label(context, textRenderer, GuiDraw.truncate(textRenderer, step.label, 348, .94f), 489, y + 6, .94f, Palette.TEXT);
@@ -234,6 +232,8 @@ public final class AutomationScreen extends Screen {
         if (core == null) return Palette.MINT;
         return switch (core.getChoice("menu", "accent")) { case "Violet" -> Palette.VIOLET; case "Gold" -> Palette.GOLD; default -> Palette.MINT; };
     }
+    private boolean glass() { return core != null && core.isEnabled("menu") && core.getChoice("menu", "material").equals("Glass") && GpuEffects.isHealthy(); }
+    private String theme() { return core == null ? "Glass" : core.getChoice("menu", "theme"); }
     @Override public boolean mouseClicked(double x, double y, int button) {
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
         double px = (x - canvasX) / canvasScale, py = (y - canvasY) / canvasScale;

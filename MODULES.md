@@ -41,7 +41,7 @@
 | --- | --- | --- |
 | Coordinates | Show position and dimension in your HUD. | On |
 | Crosshair | A crisp customizable crosshair. | Off |
-| HUD Studio | Theme, scale and position controls for your entire HUD. | On |
+| HUD Studio | Choose your menu, appearance and HUD widget layout. | On |
 | Watermark | Analyzer identity and version badge. | On |
 | Active Modules | A bounded list of enabled gameplay modules. | On |
 | FPS | Current client frames per second. | On |
@@ -63,46 +63,46 @@
 
 | Module | Behavior | Default |
 | --- | --- | --- |
-| Kill Aura | Attack the nearest selected visible target within vanilla reach and cooldown. | Off |
-| Aim Assist | Smoothly turn toward a selected target while holding attack. | Off |
-| Trigger Bot | Attack a selected entity under your crosshair at the configured cooldown. | Off |
-| Auto Clicker | Repeat entity attacks while you hold attack; respects reach and cooldown. | Off |
-| Auto Weapon | Select a hotbar melee weapon by its material/damage estimate while attacking. | Off |
-| Shield Breaker | Select a hotbar axe and attack a visible blocking target at normal reach. | Off |
-| Bow Aimbot | Aim a drawn bow at a visible target with velocity lead and gravity compensation. | Off |
-| Criticals | Jump before melee attacks, then attack in the ordinary falling phase. Hold attack or enable an aura. | Off |
+| Kill Aura | Choose, rotate toward and attack filtered targets with normal reach and bounded charged actions. | Off |
+| Aim Assist | Pull your actual camera toward a filtered target with configurable aim point, strength and smoothing. | Off |
+| Trigger Bot | Attack a filtered crosshair target after its reaction delay, normal reach and selected charge timing. | Off |
+| Auto Clicker | Repeat held entity attacks or ordinary item/block use with bounded steady, random or paired timing. | Off |
+| Auto Weapon | Temporarily choose allowed hotbar melee weapons by material estimate or durability after a reaction delay. | Off |
+| Shield Breaker | Hold a usable hotbar axe for a blocking crosshair target, with reaction and release delays. | Off |
+| Bow Aimbot | Aim the actual camera for selected drawn bows, charged crossbows or tridents using bounded lead/drop estimates. | Off |
+| Criticals | Use real jumps or your own falling motion to time ordinary charged attacks; no packet critical spoofing. | Off |
 
 ## Movement
 
 | Module | Behavior | Default |
 | --- | --- | --- |
-| Keep Sprint | Hold the normal sprint input while moving forward and able to sprint. | Off |
-| Auto Walk | Hold forward while the world is focused; releases the input when disabled. | Off |
-| Speed | Set horizontal client velocity while directional input is held; servers may correct it. | Off |
-| Fly | Client velocity flight with jump/sneak vertical control; does not grant server flight permission. | Off |
-| Step | Temporarily raise the client step-height attribute; servers may correct movement. | Off |
-| Parkour | Jump when approaching an unsupported edge while moving on the ground. | Off |
-| Safe Walk | Use vanilla ledge clipping without requiring the sneak key. | Off |
-| Fast Ladder | Increase upward velocity while climbing with forward or jump input. | Off |
-| Reverse Step | Accelerate downward when falling toward a nearby floor. | Off |
-| Fast Fall | Accelerate an existing fall after the configured distance; no fall-damage spoof. | Off |
-| Glide | Limit ordinary falling velocity outside fluids; servers may correct it. | Off |
-| High Jump | Increase upward velocity at the start of a normal jump. | Off |
-| Long Jump | Add horizontal velocity at the start of a normal directional jump. | Off |
-| Elytra Boost | Add a bounded impulse in the view direction while already gliding. | Off |
-| Ground Strafe | Align existing horizontal momentum with your ground movement input. | Off |
+| Keep Sprint | Keep sprinting while vanilla movement and hunger conditions permit. | Off |
+| Auto Walk | Hold a chosen movement key while the world is focused; input is released on pause or disable. | Off |
+| Speed | Choose direct motion, a grounded conservative profile, or normal sprint jumps. | Off |
+| Fly | Client flight or descending glide; Legit uses an equipped elytra and hotbar rockets. Servers may correct direct motion. | Off |
+| Step | Raise the client step height, or use a normal jump at a checked one-block ledge. | Off |
+| Parkour | Jump near a loaded unsupported edge while moving on the ground. | Off |
+| Safe Walk | Clip movement at ledges, or hold normal sneak near an edge. | Off |
+| Fast Ladder | Increase climbing velocity; Legit holds normal forward and jump on climbable blocks. | Off |
+| Reverse Step | Accelerate an existing descent only toward a loaded floor within the chosen drop. Legit sneaks through scaffolding. | Off |
+| Fast Fall | Accelerate an existing fall after a distance threshold. Legit only drops through scaffolding. | Off |
+| Glide | Limit falling velocity outside fluids; Legit opens an equipped usable elytra. | Off |
+| High Jump | Increase an ordinary jump's upward velocity; Legit pillars with normal hotbar block use while jump is held. | Off |
+| Long Jump | Boost the start of a directional jump; Legit sprint-jumps near an edge without modifying velocity. | Off |
+| Elytra Boost | Add a bounded gliding impulse and optional climb, or use real hotbar rockets when flight slows. | Off |
+| Ground Strafe | Align existing ground momentum, set a steady ground speed, or use ordinary sprint hops. | Off |
 
 ## HVH
 
 | Module | Behavior | Default |
 | --- | --- | --- |
-| Crystal Aura | Place crystals on real obsidian/bedrock and break reachable enemy-near crystals. No damage prediction. | Off |
-| Anchor Aura | Place, charge and use anchors only in dimensions where they explode. No damage prediction. | Off |
-| Surround | Place hotbar obsidian around your feet, one normal interaction at a time. | Off |
-| Auto Trap | Place obsidian around a selected target and above its head with ordinary block use. | Off |
-| Auto Web | Place hotbar cobweb at a selected target's feet when support and reach permit. | Off |
-| Hole Filler | Fill nearby one-block holes with a solid floor and four solid walls using obsidian. | Off |
-| Target Strafe | Move tangentially around the nearest selected visible target; collision remains active. | Off |
+| Crystal Aura | Score reachable crystals with loaded-world explosion exposure and conservative self/friend damage guards. | Off |
+| Anchor Aura | Place, charge and detonate reachable anchors outside anchor-safe dimensions, with exposure damage guards. | Off |
+| Surround | Build a supported configurable shell around your occupied blocks using normal placement. | Off |
+| Auto Trap | Build a supported roof, head shell or full cage around a selected target. | Off |
+| Auto Web | Place supported feet/head webs on selected enemies within reach and a per-tick budget. | Off |
+| Hole Filler | Scan loaded nearby supported single/double holes and fill relevant unoccupied holes. | Off |
+| Target Strafe | Orbit a selected target with checked support, collision, ordinary hops and optional camera/input steering. | Off |
 
 ## Player
 

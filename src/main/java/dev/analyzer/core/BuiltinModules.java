@@ -95,6 +95,7 @@ public final class BuiltinModules {
     private static List<Setting<?>> menuSettings() {
         List<Setting<?>> settings = new ArrayList<>(List.of(
             Setting.choice("material", "Panel material", "Glass", "Glass", "Solid"),
+            Setting.choice("theme", "Menu theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
             Setting.choice("accent", "Accent color", "Mint", "Mint", "Violet", "Gold"),
             Setting.number("motion", "Motion amount", 0.8, 0, 1, 0.05)));
         settings.addAll(ClientModules.menuSettings());

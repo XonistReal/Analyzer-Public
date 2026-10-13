@@ -1,16 +1,16 @@
 # Analyzer UI overhaul plan
 
-**Status: design plan only.** Finish and verify the current Baritone fixes first. The user will supply Minecraft client UI references afterward; those references will determine the visual direction. This plan does not select a final theme, replace the existing menus, or introduce a new mockup.
+**Status: user-selected Focused workspace implemented, verified and delivered to Prism; broader acceptance checks remain scoped below.** On October 11, 2026 the user chose **Focused workspace**, with the third reference's rounded cards/switches and the second reference's glass appearance. [UI-REFERENCES.md](UI-REFERENCES.md) records that decision and preserves the earlier comparison. [UI-OVERHAUL.md](UI-OVERHAUL.md) describes the implemented controls and native captures. Existing Classic/Compact alternatives, independent HUD/menu themes and Mint/Violet/Gold accents remain available. Final focused native checks pass; this does not complete every item in the full acceptance matrix below.
 
 The goal is a polished interface that makes a large module catalogue easy to browse, settings easy to understand, and automation progress easy to control. Preserve the visual effects that give Analyzer its identity while making text and actions more prominent than decoration.
 
 ## 1. Start with the user's references
 
-For each supplied screenshot, clip or client page, record what the user likes: layout, density, typography, spacing, selected states, settings controls, transitions, and HUD treatment. Record dislikes separately. Look at the same kinds of screens across references—module catalogue, a long settings panel, HUD editor, and any task/status view—rather than choosing a style from a logo or title screen alone.
+For each supplied screenshot, clip or client page, record useful details and tradeoffs in layout, density, typography, spacing, selected states, settings controls, transitions, and HUD treatment. Record the user's likes and dislikes when stated; supplying an image does not establish agreement with every detail in it. Look at the same kinds of screens across references—module catalogue, a long settings panel, HUD editor, and any task/status view—rather than choosing a style from a logo or title screen alone.
 
 Produce a short reference board with annotations and a decision sheet. Separate appearance from behaviour: a preferred colour treatment need not require that client's navigation. Create original Analyzer components; use reference assets only for comparison.
 
-Once references arrive, compare two coherent directions using the same module and settings content. Show the relevant tradeoffs together so the user can choose in one review. Leave colour palette, font selection, panel material, and the number of supported layouts open until then.
+The earlier comparison used the same **123-module, 1,086-setting** snapshot in both directions. The user selected Focused workspace's sidebar, two-column catalogue and substantial inspector, combined with rounded controls and glass. The native catalogue now exposes **1,091 controls: 1,087 canonical settings plus four HUD Studio aliases** for existing Interface preferences. Entity ESP retains 20 settings and Kill Aura 33. Mint/Violet/Gold accents and Glass/Classic/Minimal/Neon menu themes are selectable independently of the HUD theme. Keep the selected direction; do not ask the user to choose it again.
 
 ## 2. Define one visual system
 
@@ -30,9 +30,9 @@ Set explicit project contrast targets during the token pass: at least 4.5:1 for 
 
 ## 3. Make navigation and settings predictable
 
-The current layouts serve different workflows: **Workspace** has categories, module cards and an inspector; **Classic** has draggable category columns with inline settings; **Compact** has a denser catalogue and inspector. Reconsider their roles against the references. Options include a unified shell with density choices, a main workspace plus an optional Classic view, or improved versions of all three. Select one approach after comparison; keep the existing layouts available during development.
+The selected **Workspace** now has a category sidebar, two-column rounded module cards and a substantial grouped inspector. **Classic** retains draggable category columns with inline settings; **Compact** retains a denser catalogue and inspector. All use shared catalogue controls and menu appearance. **HUD Studio** exposes persisted Menu layout, Panel material, Menu theme and Accent colour controls that alias the canonical Interface settings. Header, sidebar and HUD editor shortcuts make these preferences reachable without searching for Interface.
 
-Whichever approach wins, keep the following flows consistent:
+Keep the following flows consistent across the retained layouts:
 
 - Find a module by search or category, select it, inspect its settings, then deliberately change its enabled state. Inspection and toggling should have distinct visible controls.
 - Organise long settings into understandable groups, such as Targets, Range, Appearance and Behaviour. Show units beside values, distinguish defaults from current values, and support precise numeric editing alongside sliders.
@@ -40,7 +40,9 @@ Whichever approach wins, keep the following flows consistent:
 - Reach Profiles, Edit HUD and Automation from each supported layout. Preserve search/category context when returning from another screen.
 - Explain profile loading before the action: it replaces module settings and keybinds. Provide a visible success or save-failure message without relying on a brief footer flash.
 
-Add presentation metadata only where it improves grouping, units or help text. Module IDs, setting IDs, validation bounds, profiles and saved values remain the source of behaviour; the redesign should not silently rename or reset them.
+The shared inspector wraps full labels, separates inspection from the module switch, and supports numeric-value clicks or a right-click on the slider row for exact entry. Tab/Shift+Tab moves visible focus, Enter/Space activates a focused control, arrow keys adjust supported values, and Page Up/Down scrolls settings. The catalogue supplies labels through Minecraft's native narration hook. Returning from Profiles, HUD or Automation restores the parent screen's browsing context.
+
+Add presentation metadata only where it improves grouping, units or help text. Module IDs, setting IDs, validation bounds, profiles and saved values remain the source of behaviour; the redesign should not silently rename or reset them. HUD Studio's four menu aliases serialize through their canonical Interface fields, avoiding conflicting copies. The five current bundled profiles have been regenerated using canonical values; saved user profiles are not overwritten.
 
 ## 4. Treat Automation as a task console
 
@@ -67,16 +69,16 @@ Do not add generic approval dialogs to routine configuration. Put concrete requi
 
 ## 5. Prototype and implement in phases
 
-| Phase | Deliverable | Gate |
-|---|---|---|
-| A. Stabilise current work | Verify Baritone fixes and record the current UI baseline. | Runtime behaviour is sound before UI work starts. |
-| B. Reference intake | Annotated reference board, preferred behaviours and open decisions. | User references have arrived; no premature style commitment. |
-| C. Compare directions | Two low-cost compositions with identical content: catalogue, long ESP settings, HUD editing and a blocked/running task. | Choose a direction from one consolidated comparison. |
-| D. Native vertical slice | Implement the chosen shell, search, one module inspector and Automation status/control using actual data. | Readability, input and live-state checks pass at the target sizes. |
-| E. Expand and migrate | Apply shared components to remaining layouts/screens; migrate only required presentation preferences. | Existing configurations and profiles load without losing values. |
-| F. Verify and package | Real in-game captures, interaction checks, migration evidence and release notes. | Acceptance criteria below pass. |
+| Phase | Status | Deliverable | Gate |
+|---|---|---|---|
+| A. Stabilise current work | Existing native baseline recorded in [VALIDATION.md](VALIDATION.md). | Verify Baritone fixes and record the current UI baseline. | Runtime behaviour is sound before native UI work starts. |
+| B. Reference intake | Five references received; [reference board](UI-REFERENCES.md) prepared. | Annotated reference board, useful behaviours and open decisions. | User references have arrived; no premature style commitment. |
+| C. Compare directions | Complete: user selected Focused workspace plus rounded controls and glass. | Two compositions with identical catalogue/settings content; historical comparison preserved in [UI-REFERENCES.md](UI-REFERENCES.md). | Selected direction is recorded in [AGENTS.md](AGENTS.md). |
+| D. Native vertical slice | Implemented: sidebar, cards, shared inspector, appearance controls and parent-screen return. Final focused native checks pass. | Implement the chosen shell, search, inspector and state/control presentation using actual data. | Continue broader contrast, performance and live-state acceptance checks. |
+| E. Expand and migrate | Shared controls/appearance applied to retained layouts; canonical aliases and bundled profiles updated. | Preserve existing configurations, profiles and independent HUD/menu preferences. | Final migration and preservation evidence accompanies delivery. |
+| F. Verify and package | 280 native assertions, 19 reviewed captures and 1,017 build assertions pass; Prism and the import ZIP are updated. | Real in-game captures, interaction checks, migration evidence and release notes. | Full acceptance matrix is not yet declared complete; see limits in [UI-OVERHAUL.md](UI-OVERHAUL.md). |
 
-Prefer a shared native component layer for text, controls, layout, scrolling, focus, hit regions and animation. The existing `GuiDraw`, `Palette`, `CatalogScreen`, `MenuScreens` and HUD measurement helpers provide starting points; the standalone Workspace and Automation screens currently duplicate some composition logic. Unify presentation gradually without changing gameplay or task-controller semantics as a side effect.
+Use the shared native component layer for text, controls, layout, scrolling, focus, hit regions and animation. Workspace now extends `CatalogScreen`; `GuiDraw`, `Palette` and `MenuScreens` supply shared appearance and navigation. Continue extending shared presentation without changing gameplay or task-controller semantics as a side effect. Actual game-scene frost supplies the glass backdrop; Solid remains the opaque fallback.
 
 Motion should clarify feedback: short selection/toggle transitions, predictable panel entrances and gentle progress changes. Support reduced motion and a true zero-motion mode across all redesigned screens. Keep particles and glow behind content, bound their cost, and verify that moving elements never shift a click target away from the visible control. Use elapsed time rather than frame-dependent animation speed.
 

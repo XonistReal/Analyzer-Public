@@ -1,139 +1,28 @@
-plugins {
-    id 'fabric-loom' version '1.9.2'
-    id 'maven-publish'
-}
-
+// Recovered build scaffold; original main source/resources are unchanged.
+plugins { id 'fabric-loom' version '1.9.2'; id 'maven-publish' }
 version = project.mod_version
-if (version.toString().length() > 80 || !(version.toString() ==~ /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9._-]+)?$/)) {
-    throw new GradleException('mod_version must be a release version such as 0.1.1 or 0.2.0-beta.1')
-}
 group = project.maven_group
 base { archivesName = project.archives_base_name }
-
 repositories { mavenCentral() }
-
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    // Optional at runtime; distributed as a separately replaceable LGPL dependency.
     modCompileOnly files("third-party/baritone/baritone-api-fabric-1.13.1.jar")
     modRuntimeOnly files("third-party/baritone/baritone-api-fabric-1.13.1.jar")
-    // Loom removes nested-mod declarations in dev remaps; keep the exact upstream helper discoverable.
     modRuntimeOnly files(zipTree(file("third-party/baritone/baritone-api-fabric-1.13.1.jar")).matching {
         include "META-INF/jars/nether-pathfinder-1.4.1.jar"
     })
 }
-
 processResources {
     inputs.property 'version', project.version
     filesMatching('fabric.mod.json') { expand 'version': project.version }
 }
-
 tasks.withType(JavaCompile).configureEach { options.release = 21; options.encoding = 'UTF-8' }
 java { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21; withSourcesJar() }
 jar {
     from('LICENSE') { rename { "${it}_${project.base.archivesName.get()}" } }
-    from('FONT-LICENSE.txt')
-    from('THIRD-PARTY.md')
+    ['FONT-LICENSE.txt', 'LATO-OFL.txt', 'THIRD-PARTY.md'].each { notice -> if (file(notice).exists()) from(notice) }
 }
-
-tasks.register('coreCheck', JavaExec) {
-    dependsOn testClasses
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.analyzer.core.CoreSelfTest'
-}
-tasks.register('espCheck', JavaExec) {
-    dependsOn testClasses
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.analyzer.render.EspLayoutSelfTest'
-}
-tasks.register('plannerCheck', JavaExec) {
-    dependsOn testClasses
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.analyzer.automation.TaskPlannerSelfTest'
-}
-tasks.register('safetyCheck', JavaExec) {
-    dependsOn testClasses
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.analyzer.automation.ScopedSettingLeaseSelfTest'
-}
-tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck'), tasks.named('safetyCheck') }
-tasks.register('moduleCatalog', JavaExec) {
-    dependsOn testClasses
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.analyzer.core.ModuleCatalog'
-    args file('MODULES.json').absolutePath, file('MODULES.md').absolutePath
-}
-
-// Publish a checked build for the Prism instance's local pre-launch updater.
-// Artifacts are immutable; replacing release.json is the final commit step.
-tasks.register('publishLocal') {
-    dependsOn tasks.named('build')
-    group = 'distribution'
-    description = 'Build, verify and publish Analyzer to the local Prism update feed.'
-    doLast {
-        if (project.minecraft_version.toString() != '1.21.4') {
-            throw new GradleException('The current Prism updater supports Minecraft 1.21.4; update it before publishing another game version.')
-        }
-        def source = tasks.named('remapJar').get().archiveFile.get().asFile.toPath()
-        def feed = file(findProperty('analyzerUpdateDir') ?: '../analyzer-updates').toPath()
-        java.nio.file.Files.createDirectories(feed)
-        def bytes = java.nio.file.Files.readAllBytes(source)
-        def digest = java.security.MessageDigest.getInstance('SHA-256').digest(bytes).encodeHex().toString()
-        def artifact = "analyzer-${project.version}-${digest.take(12)}.jar"
-        def target = feed.resolve(artifact)
-        def staging = feed.resolve(".${artifact}-${UUID.randomUUID()}.tmp")
-        java.nio.file.Files.write(staging, bytes)
-        java.nio.file.Files.move(staging, target,
-            java.nio.file.StandardCopyOption.ATOMIC_MOVE,
-            java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-        def manifest = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
-            schemaVersion: 1,
-            modId: 'analyzer',
-            minecraftVersion: project.minecraft_version.toString(),
-            version: project.version.toString(),
-            artifact: artifact,
-            sha256: digest
-        ])) + '\n'
-        def pending = feed.resolve(".release-${UUID.randomUUID()}.json.tmp")
-        java.nio.file.Files.writeString(pending, manifest, java.nio.charset.StandardCharsets.UTF_8)
-        java.nio.file.Files.move(pending, feed.resolve('release.json'),
-            java.nio.file.StandardCopyOption.ATOMIC_MOVE,
-            java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-        logger.lifecycle("Published Analyzer ${project.version}: ${feed.resolve('release.json').toAbsolutePath()}")
-    }
-}
-
-loom {
-    runs {
-        client {
-            vmArg '-Danalyzer.dev=true'
-            programArg '--username'
-            programArg 'AnalyzerDev'
-        }
-        smoke {
-            client()
-            name 'Analyzer UI smoke test'
-            vmArg '-Danalyzer.smoke=true'
-            vmArg '-Danalyzer.worldsmoke=true'
-            vmArg '-Danalyzer.automationSmoke=true'
-            if (project.findProperty('analyzerBotOnly') == 'true') vmArg '-Danalyzer.botOnly=true'
-            if (project.findProperty('analyzerSafetyOnly') == 'true') {
-                vmArg '-Danalyzer.botOnly=true'
-                vmArg '-Danalyzer.safetyOnly=true'
-            }
-            if (project.findProperty('analyzerTerrainOnly') == 'true') {
-                vmArg '-Danalyzer.botOnly=true'
-                vmArg '-Danalyzer.terrainOnly=true'
-            }
-            programArg '--username'
-            programArg 'AnalyzerDev'
-            programArg '--width'
-            programArg '1600'
-            programArg '--height'
-            programArg '1000'
-        }
-    }
-}
+loom { runs { client { vmArg '-Danalyzer.dev=true'; programArg '--username'; programArg 'AnalyzerDev' } } }

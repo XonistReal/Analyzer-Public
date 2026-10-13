@@ -46,8 +46,7 @@ public final class HudEditorScreen extends Screen {
         toolbarX = (width - 810 * toolbarScale) / 2;
         toolbarY = height - 64 * toolbarScale - 10;
         draw.getMatrices().push(); draw.getMatrices().translate(toolbarX, toolbarY, 0); draw.getMatrices().scale(toolbarScale, toolbarScale, 1);
-        GuiDraw.glow(draw, 0, 0, 810, 64, 9, accent);
-        GuiDraw.outlined(draw, 0, 0, 810, 64, 9, Palette.alpha(accent, 140), 0xF5091520);
+        GuiDraw.panel(draw, 0, 0, 810, 64, 12, accent, core.getChoice("menu", "material").equals("Glass"), core.getChoice("menu", "theme"));
         GuiDraw.heading(draw, textRenderer, "HUD STUDIO", 12, 10, 1.04f, Palette.TEXT);
         button(draw, "theme", core.getChoice("hud", "theme"), 125, 8, 77, () -> {
             List<String> themes = List.of("Glass", "Classic", "Minimal", "Neon");
@@ -62,7 +61,8 @@ public final class HudEditorScreen extends Screen {
         button(draw, "selected-settings", "Settings", 558, 8, 73, () -> client.setScreen(new AnalyzerScreen(core).inspect(selected.equals("radar") ? "entity-esp" : selected)));
         button(draw, "reset-layout", "Reset layout", 637, 8, 91, this::resetLayout);
         button(draw, "done", "Done", 735, 8, 62, this::close);
-        GuiDraw.label(draw, textRenderer, GuiDraw.truncate(textRenderer, error ? status : selected + " / " + status, 786, 0.79f), 12, 44, 0.79f, error ? Palette.ERROR : Palette.MUTED);
+        button(draw, "menu-settings", "Menu settings", 12, 37, 121, () -> client.setScreen(new AnalyzerScreen(core).inspect("hud")));
+        GuiDraw.label(draw, textRenderer, GuiDraw.truncate(textRenderer, error ? status : selected + " / " + status, 640, 0.79f), 146, 46, 0.79f, error ? Palette.ERROR : Palette.MUTED);
         draw.getMatrices().pop();
     }
     private boolean enabled(String id) { return id.equals("radar") ? core.isEnabled("entity-esp") && core.getBoolean("entity-esp", "radar") : core.isEnabled(id); }

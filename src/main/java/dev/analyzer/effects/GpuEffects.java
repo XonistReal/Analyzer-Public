@@ -1,6 +1,7 @@
 package dev.analyzer.effects;
 
 import dev.analyzer.AnalyzerClient;
+import dev.analyzer.ui.Palette;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.DimensionEffects;
@@ -21,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 public final class GpuEffects {
     private static int grading, backdrop, sky, vao, copyTexture, copyWidth, copyHeight;
     private static boolean failed;
-    private static long skyFrames, worldFrames;
+    private static long skyFrames, worldFrames, menuFrames, menuSceneFrames;
     private static final long START = System.nanoTime();
     private GpuEffects() {}
 
@@ -29,6 +30,8 @@ public final class GpuEffects {
     public static String status() { return failed ? "GPU effect failed / reload resources to retry" : grading == 0 ? "Ready / initializes on first frame" : "GPU ready / sky + bloom + menu"; }
     public static long skyFrames() { return skyFrames; }
     public static long worldFrames() { return worldFrames; }
+    public static long menuFrames() { return menuFrames; }
+    public static long menuSceneFrames() { return menuSceneFrames; }
 
     /** Called in the actual Overworld sky pass, before terrain and celestial objects. */
     public static void renderSky() {
@@ -78,20 +81,7 @@ public final class GpuEffects {
         if (w < 1 || h < 1) return;
         try (State state = new State()) {
             ensurePrograms();
-            GL13.glActiveTexture(GL13.GL_TEXTURE0);
-            if (copyTexture == 0) copyTexture = GL11.glGenTextures();
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, copyTexture);
-            if (copyWidth != w || copyHeight != h) {
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, w, h, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer) null);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL13.GL_CLAMP_TO_EDGE);
-                GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL13.GL_CLAMP_TO_EDGE);
-                copyWidth = w; copyHeight = h;
-            }
-            GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, framebuffer.fbo);
-            GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
-            GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, framebuffer.fbo);
+            copyScene(framebuffer);
             prepare(w, h, grading);
             GL20.glUniform1i(GL20.glGetUniformLocation(grading, "Scene"), 0);
             GL20.glUniform2f(GL20.glGetUniformLocation(grading, "Resolution"), w, h);
@@ -103,23 +93,37 @@ public final class GpuEffects {
     }
 
     public static void drawBackdrop(DrawContext context) {
-        if (failed) return;
+        var client = MinecraftClient.getInstance();
+        var core = AnalyzerClient.CORE;
+        boolean glass = client.world != null && core != null && core.isEnabled("menu")
+                && core.getChoice("menu", "material").equals("Glass");
+        if (failed) { drawFallback(context, glass); return; }
         context.draw();
-        var window = MinecraftClient.getInstance().getWindow();
+        var window = client.getWindow();
+        int width = window.getFramebufferWidth(), height = window.getFramebufferHeight();
+        if (width < 1 || height < 1) return;
         try (State state = new State()) {
             ensurePrograms();
-            var core = AnalyzerClient.CORE;
-            boolean glass = MinecraftClient.getInstance().world != null && core != null && core.isEnabled("menu") && core.getChoice("menu", "material").equals("Glass");
-            if (glass) copyScene(MinecraftClient.getInstance().getFramebuffer());
-            prepare(window.getFramebufferWidth(), window.getFramebufferHeight(), backdrop);
+            if (glass) copyScene(client.getFramebuffer());
+            prepare(width, height, backdrop);
             float motion = core != null && core.isEnabled("menu") ? (float) core.getNumber("menu", "motion") : 0f;
             GL20.glUniform1i(GL20.glGetUniformLocation(backdrop, "Scene"), 0);
             GL20.glUniform1i(GL20.glGetUniformLocation(backdrop, "UseScene"), glass ? 1 : 0);
-            GL20.glUniform2f(GL20.glGetUniformLocation(backdrop, "Resolution"), window.getFramebufferWidth(), window.getFramebufferHeight());
+            GL20.glUniform2f(GL20.glGetUniformLocation(backdrop, "Resolution"), width, height);
             GL20.glUniform1f(GL20.glGetUniformLocation(backdrop, "Time"), (System.nanoTime() - START) / 1_000_000_000f * motion);
             GL20.glUniform1i(GL20.glGetUniformLocation(backdrop, "Accent"), core != null && core.isEnabled("menu") ? switch (core.getChoice("menu", "accent")) { case "Violet" -> 1; case "Gold" -> 2; default -> 0; } : 0);
+            GL20.glUniform1i(GL20.glGetUniformLocation(backdrop, "Theme"), core != null ? switch (core.getChoice("menu", "theme")) { case "Classic" -> 1; case "Minimal" -> 2; case "Neon" -> 3; default -> 0; } : 0);
             GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 3);
-        } catch (Exception ex) { reportFailure(ex); }
+            menuFrames++;
+            if (glass) menuSceneFrames++;
+        } catch (Exception ex) { reportFailure(ex); drawFallback(context, glass); }
+    }
+
+    /** Remains readable on unsupported GPUs; no sampling, animation or framebuffer allocation. */
+    private static void drawFallback(DrawContext context, boolean glass) {
+        var window = MinecraftClient.getInstance().getWindow();
+        context.fill(0, 0, window.getScaledWidth(), window.getScaledHeight(),
+                glass ? 0x7910171D : Palette.BACKGROUND);
     }
 
     private static void copyScene(net.minecraft.client.gl.Framebuffer framebuffer) {

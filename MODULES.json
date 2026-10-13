@@ -441,6 +441,18 @@
         ]
       },
       {
+        "id": "theme",
+        "label": "Menu theme",
+        "kind": "CHOICE",
+        "default": "Glass",
+        "choices": [
+          "Glass",
+          "Classic",
+          "Minimal",
+          "Neon"
+        ]
+      },
+      {
         "id": "accent",
         "label": "Accent color",
         "kind": "CHOICE",
@@ -778,9 +790,53 @@
     "id": "hud",
     "name": "HUD Studio",
     "category": "HUD",
-    "description": "Theme, scale and position controls for your entire HUD.",
+    "description": "Choose your menu, appearance and HUD widget layout.",
     "defaultEnabled": true,
     "settings": [
+      {
+        "id": "menu-layout",
+        "label": "Menu layout",
+        "kind": "CHOICE",
+        "default": "Workspace",
+        "choices": [
+          "Workspace",
+          "Classic",
+          "Compact"
+        ]
+      },
+      {
+        "id": "menu-material",
+        "label": "Menu material",
+        "kind": "CHOICE",
+        "default": "Glass",
+        "choices": [
+          "Glass",
+          "Solid"
+        ]
+      },
+      {
+        "id": "menu-theme",
+        "label": "Menu theme",
+        "kind": "CHOICE",
+        "default": "Glass",
+        "choices": [
+          "Glass",
+          "Classic",
+          "Minimal",
+          "Neon"
+        ]
+      },
+      {
+        "id": "menu-accent",
+        "label": "Accent color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "Mint",
+          "Violet",
+          "Gold"
+        ]
+      },
       {
         "id": "theme",
         "label": "HUD theme",
@@ -5970,7 +6026,7 @@
     "id": "kill-aura",
     "name": "Kill Aura",
     "category": "Combat",
-    "description": "Attack the nearest selected visible target within vanilla reach and cooldown.",
+    "description": "Choose, rotate toward and attack filtered targets with normal reach and bounded charged actions.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -5992,8 +6048,41 @@
         "default": false
       },
       {
+        "id": "other-living",
+        "label": "Other living entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range from eyes to hitbox",
         "kind": "NUMBER",
         "default": 3.0,
         "min": 1.0,
@@ -6002,30 +6091,216 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Target field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
-        "min": 20.0,
+        "min": 10.0,
         "max": 360.0,
         "step": 10.0
       },
       {
-        "id": "turn-speed",
-        "label": "Turn speed (degrees/tick)",
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Angle",
+          "Armor",
+          "Hurt time"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Allow obstructed targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "wall-range",
+        "label": "Obstructed target range",
         "kind": "NUMBER",
-        "default": 12.0,
+        "default": 0.0,
+        "min": 0.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "legit",
+        "label": "Require visible crosshair / 120 degree cone",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "mode",
+        "label": "Target mode",
+        "kind": "CHOICE",
+        "default": "Single",
+        "choices": [
+          "Single",
+          "Switch",
+          "Multi"
+        ]
+      },
+      {
+        "id": "switch-delay",
+        "label": "Switch delay (ms)",
+        "kind": "NUMBER",
+        "default": 250.0,
+        "min": 50.0,
+        "max": 1000.0,
+        "step": 50.0
+      },
+      {
+        "id": "max-targets",
+        "label": "Maximum targets per charged action",
+        "kind": "NUMBER",
+        "default": 3.0,
         "min": 1.0,
-        "max": 90.0,
+        "max": 8.0,
         "step": 1.0
       },
       {
+        "id": "aim-range",
+        "label": "Extra acquisition range",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 4.0,
+        "step": 0.25
+      },
+      {
+        "id": "rotation",
+        "label": "Rotation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "None"
+        ]
+      },
+      {
+        "id": "turn-speed",
+        "label": "Maximum turn (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "smoothing",
+        "label": "Slow down near aim point (%)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-point",
+        "label": "Aim point",
+        "kind": "CHOICE",
+        "default": "Head",
+        "choices": [
+          "Nearest",
+          "Chest",
+          "Head"
+        ]
+      },
+      {
+        "id": "hit-angle",
+        "label": "Maximum attack aim error (degrees)",
+        "kind": "NUMBER",
+        "default": 90.0,
+        "min": 1.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "timing",
+        "label": "Attack timing",
+        "kind": "CHOICE",
+        "default": "Cooldown",
+        "choices": [
+          "Cooldown",
+          "CPS"
+        ]
+      },
+      {
         "id": "cooldown",
-        "label": "Attack cooldown threshold",
+        "label": "Required attack charge",
         "kind": "NUMBER",
         "default": 0.95,
         "min": 0.2,
         "max": 1.0,
         "step": 0.05
+      },
+      {
+        "id": "attack-jitter",
+        "label": "Random delay after charge (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 300.0,
+        "step": 25.0
+      },
+      {
+        "id": "min-cps",
+        "label": "Minimum CPS",
+        "kind": "NUMBER",
+        "default": 9.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "max-cps",
+        "label": "Maximum CPS",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "hit-charge",
+        "label": "Required charge in CPS mode",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "wait-for-crit",
+        "label": "Wait for falling motion while airborne",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "weapon-only",
+        "label": "Only attack with a melee weapon",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "pause-using",
+        "label": "Pause attacks while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
       }
     ]
   },
@@ -6033,7 +6308,7 @@
     "id": "aim-assist",
     "name": "Aim Assist",
     "category": "Combat",
-    "description": "Smoothly turn toward a selected target while holding attack.",
+    "description": "Pull your actual camera toward a filtered target with configurable aim point, strength and smoothing.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6055,8 +6330,41 @@
         "default": false
       },
       {
+        "id": "other-living",
+        "label": "Other living entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range from eyes to hitbox",
         "kind": "NUMBER",
         "default": 6.0,
         "min": 1.0,
@@ -6065,20 +6373,105 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Target field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
-        "min": 20.0,
+        "min": 10.0,
         "max": 360.0,
         "step": 10.0
       },
       {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Angle",
+          "Armor",
+          "Hurt time"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Allow obstructed targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "wall-range",
+        "label": "Obstructed target range",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "rotation",
+        "label": "Rotation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "None"
+        ]
+      },
+      {
         "id": "turn-speed",
-        "label": "Turn speed (degrees/tick)",
+        "label": "Maximum turn (degrees/tick)",
         "kind": "NUMBER",
         "default": 12.0,
         "min": 1.0,
-        "max": 90.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "smoothing",
+        "label": "Slow down near aim point (%)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-point",
+        "label": "Aim point",
+        "kind": "CHOICE",
+        "default": "Head",
+        "choices": [
+          "Nearest",
+          "Chest",
+          "Head"
+        ]
+      },
+      {
+        "id": "legit",
+        "label": "Visible gradual assistance while clicking",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "hold-attack",
+        "label": "Only while holding attack",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "weapon-only",
+        "label": "Only while holding a melee weapon",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "strength",
+        "label": "Aim strength (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 1.0,
+        "max": 100.0,
         "step": 1.0
       }
     ]
@@ -6087,7 +6480,7 @@
     "id": "trigger-bot",
     "name": "Trigger Bot",
     "category": "Combat",
-    "description": "Attack a selected entity under your crosshair at the configured cooldown.",
+    "description": "Attack a filtered crosshair target after its reaction delay, normal reach and selected charge timing.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6109,8 +6502,41 @@
         "default": false
       },
       {
+        "id": "other-living",
+        "label": "Other living entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range from eyes to hitbox",
         "kind": "NUMBER",
         "default": 3.0,
         "min": 1.0,
@@ -6119,30 +6545,159 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Target field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
-        "min": 20.0,
+        "min": 10.0,
         "max": 360.0,
         "step": 10.0
       },
       {
+        "id": "rotation",
+        "label": "Rotation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "None"
+        ]
+      },
+      {
         "id": "turn-speed",
-        "label": "Turn speed (degrees/tick)",
+        "label": "Maximum turn (degrees/tick)",
         "kind": "NUMBER",
         "default": 12.0,
         "min": 1.0,
-        "max": 90.0,
+        "max": 180.0,
         "step": 1.0
       },
       {
+        "id": "smoothing",
+        "label": "Slow down near aim point (%)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-point",
+        "label": "Aim point",
+        "kind": "CHOICE",
+        "default": "Head",
+        "choices": [
+          "Nearest",
+          "Chest",
+          "Head"
+        ]
+      },
+      {
+        "id": "hit-angle",
+        "label": "Maximum attack aim error (degrees)",
+        "kind": "NUMBER",
+        "default": 90.0,
+        "min": 1.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "timing",
+        "label": "Attack timing",
+        "kind": "CHOICE",
+        "default": "Cooldown",
+        "choices": [
+          "Cooldown",
+          "CPS"
+        ]
+      },
+      {
         "id": "cooldown",
-        "label": "Attack cooldown threshold",
+        "label": "Required attack charge",
         "kind": "NUMBER",
         "default": 0.95,
         "min": 0.2,
         "max": 1.0,
         "step": 0.05
+      },
+      {
+        "id": "attack-jitter",
+        "label": "Random delay after charge (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 300.0,
+        "step": 25.0
+      },
+      {
+        "id": "min-cps",
+        "label": "Minimum CPS",
+        "kind": "NUMBER",
+        "default": 9.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "max-cps",
+        "label": "Maximum CPS",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "hit-charge",
+        "label": "Required charge in CPS mode",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "wait-for-crit",
+        "label": "Wait for falling motion while airborne",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "weapon-only",
+        "label": "Only attack with a melee weapon",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "pause-using",
+        "label": "Pause attacks while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "legit",
+        "label": "Reaction delay and varied charged attacks",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "reaction-delay",
+        "label": "Crosshair reaction delay (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 1000.0,
+        "step": 25.0
       }
     ]
   },
@@ -6150,7 +6705,7 @@
     "id": "auto-clicker",
     "name": "Auto Clicker",
     "category": "Combat",
-    "description": "Repeat entity attacks while you hold attack; respects reach and cooldown.",
+    "description": "Repeat held entity attacks or ordinary item/block use with bounded steady, random or paired timing.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6172,8 +6727,41 @@
         "default": false
       },
       {
+        "id": "other-living",
+        "label": "Other living entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range from eyes to hitbox",
         "kind": "NUMBER",
         "default": 3.0,
         "min": 1.0,
@@ -6182,25 +6770,74 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Target field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
-        "min": 20.0,
+        "min": 10.0,
         "max": 360.0,
         "step": 10.0
       },
       {
+        "id": "rotation",
+        "label": "Rotation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "None"
+        ]
+      },
+      {
         "id": "turn-speed",
-        "label": "Turn speed (degrees/tick)",
+        "label": "Maximum turn (degrees/tick)",
         "kind": "NUMBER",
         "default": 12.0,
         "min": 1.0,
-        "max": 90.0,
+        "max": 180.0,
         "step": 1.0
       },
       {
+        "id": "smoothing",
+        "label": "Slow down near aim point (%)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-point",
+        "label": "Aim point",
+        "kind": "CHOICE",
+        "default": "Head",
+        "choices": [
+          "Nearest",
+          "Chest",
+          "Head"
+        ]
+      },
+      {
+        "id": "hit-angle",
+        "label": "Maximum attack aim error (degrees)",
+        "kind": "NUMBER",
+        "default": 90.0,
+        "min": 1.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "timing",
+        "label": "Attack timing",
+        "kind": "CHOICE",
+        "default": "CPS",
+        "choices": [
+          "Cooldown",
+          "CPS"
+        ]
+      },
+      {
         "id": "cooldown",
-        "label": "Attack cooldown threshold",
+        "label": "Required attack charge",
         "kind": "NUMBER",
         "default": 0.95,
         "min": 0.2,
@@ -6208,13 +6845,112 @@
         "step": 0.05
       },
       {
-        "id": "cps",
-        "label": "Maximum clicks per second",
+        "id": "attack-jitter",
+        "label": "Random delay after charge (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 300.0,
+        "step": 25.0
+      },
+      {
+        "id": "min-cps",
+        "label": "Minimum CPS",
         "kind": "NUMBER",
         "default": 8.0,
         "min": 1.0,
         "max": 20.0,
         "step": 1.0
+      },
+      {
+        "id": "max-cps",
+        "label": "Maximum CPS",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "hit-charge",
+        "label": "Required charge in CPS mode",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "wait-for-crit",
+        "label": "Wait for falling motion while airborne",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "weapon-only",
+        "label": "Only attack with a melee weapon",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "pause-using",
+        "label": "Pause attacks while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "legit",
+        "label": "Vary clicks, cap at 12 CPS and occasionally skip",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "button",
+        "label": "Repeated button",
+        "kind": "CHOICE",
+        "default": "Left",
+        "choices": [
+          "Left",
+          "Right",
+          "Both"
+        ]
+      },
+      {
+        "id": "cps",
+        "label": "Maximum CPS cap",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "pattern",
+        "label": "Left-attack click pattern",
+        "kind": "CHOICE",
+        "default": "Steady",
+        "choices": [
+          "Steady",
+          "Random",
+          "Butterfly"
+        ]
+      },
+      {
+        "id": "respect-cooldown",
+        "label": "Wait for the selected attack charge",
+        "kind": "BOOLEAN",
+        "default": true
       }
     ]
   },
@@ -6222,23 +6958,126 @@
     "id": "auto-weapon",
     "name": "Auto Weapon",
     "category": "Combat",
-    "description": "Select a hotbar melee weapon by its material/damage estimate while attacking.",
+    "description": "Temporarily choose allowed hotbar melee weapons by material estimate or durability after a reaction delay.",
     "defaultEnabled": false,
-    "settings": []
+    "settings": [
+      {
+        "id": "legit",
+        "label": "Crosshair-only delayed switch; no same-tick attack",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "swords",
+        "label": "Allow swords",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "axes",
+        "label": "Allow axes",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "maces",
+        "label": "Allow maces",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tridents",
+        "label": "Allow tridents",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "preference",
+        "label": "Weapon preference",
+        "kind": "CHOICE",
+        "default": "Damage estimate",
+        "choices": [
+          "Damage estimate",
+          "Sword first",
+          "Axe first",
+          "Durability"
+        ]
+      },
+      {
+        "id": "reaction-delay",
+        "label": "Weapon switch delay (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 1000.0,
+        "step": 25.0
+      }
+    ]
   },
   {
     "id": "shield-breaker",
     "name": "Shield Breaker",
     "category": "Combat",
-    "description": "Select a hotbar axe and attack a visible blocking target at normal reach.",
+    "description": "Hold a usable hotbar axe for a blocking crosshair target, with reaction and release delays.",
     "defaultEnabled": false,
-    "settings": []
+    "settings": [
+      {
+        "id": "legit",
+        "label": "Delayed axe switch before attacking",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "reaction-delay",
+        "label": "Blocking-target reaction delay (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 1000.0,
+        "step": 25.0
+      },
+      {
+        "id": "release-delay",
+        "label": "Keep axe after blocking ends (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 1000.0,
+        "step": 25.0
+      },
+      {
+        "id": "cooldown",
+        "label": "Required attack charge",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      }
+    ]
   },
   {
     "id": "bow-aimbot",
     "name": "Bow Aimbot",
     "category": "Combat",
-    "description": "Aim a drawn bow at a visible target with velocity lead and gravity compensation.",
+    "description": "Aim the actual camera for selected drawn bows, charged crossbows or tridents using bounded lead/drop estimates.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6260,31 +7099,175 @@
         "default": false
       },
       {
+        "id": "other-living",
+        "label": "Other living entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range from eyes to hitbox",
         "kind": "NUMBER",
         "default": 48.0,
         "min": 1.0,
-        "max": 64.0,
+        "max": 120.0,
         "step": 0.25
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Target field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
-        "min": 20.0,
+        "min": 10.0,
         "max": 360.0,
         "step": 10.0
       },
       {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Angle",
+          "Armor",
+          "Hurt time"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Allow obstructed targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "wall-range",
+        "label": "Obstructed target range",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 120.0,
+        "step": 0.25
+      },
+      {
+        "id": "rotation",
+        "label": "Rotation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "None"
+        ]
+      },
+      {
         "id": "turn-speed",
-        "label": "Turn speed (degrees/tick)",
+        "label": "Maximum turn (degrees/tick)",
         "kind": "NUMBER",
         "default": 12.0,
         "min": 1.0,
-        "max": 90.0,
+        "max": 180.0,
         "step": 1.0
+      },
+      {
+        "id": "smoothing",
+        "label": "Slow down near aim point (%)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-point",
+        "label": "Aim point",
+        "kind": "CHOICE",
+        "default": "Head",
+        "choices": [
+          "Nearest",
+          "Chest",
+          "Head"
+        ]
+      },
+      {
+        "id": "bows",
+        "label": "Aim drawn bows",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "crossbows",
+        "label": "Aim held charged crossbows before firing",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "tridents",
+        "label": "Aim drawn tridents",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "predict-movement",
+        "label": "Lead target velocity",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "prediction",
+        "label": "Projectile compensation",
+        "kind": "CHOICE",
+        "default": "Lead and drop",
+        "choices": [
+          "Direct",
+          "Lead",
+          "Lead and drop"
+        ]
+      },
+      {
+        "id": "lead-factor",
+        "label": "Target velocity lead multiplier",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "min-charge",
+        "label": "Minimum bow / trident draw fraction",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
       }
     ]
   },
@@ -6292,7 +7275,7 @@
     "id": "criticals",
     "name": "Criticals",
     "category": "Combat",
-    "description": "Jump before melee attacks, then attack in the ordinary falling phase. Hold attack or enable an aura.",
+    "description": "Use real jumps or your own falling motion to time ordinary charged attacks; no packet critical spoofing.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6314,8 +7297,41 @@
         "default": false
       },
       {
+        "id": "other-living",
+        "label": "Other living entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range from eyes to hitbox",
         "kind": "NUMBER",
         "default": 3.0,
         "min": 1.0,
@@ -6324,30 +7340,226 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Target field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
-        "min": 20.0,
+        "min": 10.0,
         "max": 360.0,
         "step": 10.0
       },
       {
+        "id": "rotation",
+        "label": "Rotation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "None"
+        ]
+      },
+      {
         "id": "turn-speed",
-        "label": "Turn speed (degrees/tick)",
+        "label": "Maximum turn (degrees/tick)",
         "kind": "NUMBER",
         "default": 12.0,
         "min": 1.0,
-        "max": 90.0,
+        "max": 180.0,
         "step": 1.0
       },
       {
+        "id": "smoothing",
+        "label": "Slow down near aim point (%)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-point",
+        "label": "Aim point",
+        "kind": "CHOICE",
+        "default": "Head",
+        "choices": [
+          "Nearest",
+          "Chest",
+          "Head"
+        ]
+      },
+      {
+        "id": "hit-angle",
+        "label": "Maximum attack aim error (degrees)",
+        "kind": "NUMBER",
+        "default": 90.0,
+        "min": 1.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "timing",
+        "label": "Attack timing",
+        "kind": "CHOICE",
+        "default": "Cooldown",
+        "choices": [
+          "Cooldown",
+          "CPS"
+        ]
+      },
+      {
         "id": "cooldown",
-        "label": "Attack cooldown threshold",
+        "label": "Required attack charge",
         "kind": "NUMBER",
         "default": 0.95,
         "min": 0.2,
         "max": 1.0,
         "step": 0.05
+      },
+      {
+        "id": "attack-jitter",
+        "label": "Random delay after charge (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 300.0,
+        "step": 25.0
+      },
+      {
+        "id": "min-cps",
+        "label": "Minimum CPS",
+        "kind": "NUMBER",
+        "default": 9.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "max-cps",
+        "label": "Maximum CPS",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "hit-charge",
+        "label": "Required charge in CPS mode",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "weapon-only",
+        "label": "Only attack with a melee weapon",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "pause-using",
+        "label": "Pause attacks while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "legit",
+        "label": "Wait for your own normal jump",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "mode",
+        "label": "Critical movement",
+        "kind": "CHOICE",
+        "default": "Jump",
+        "choices": [
+          "Jump",
+          "Mini jump",
+          "Manual fall"
+        ]
+      },
+      {
+        "id": "crit-targets",
+        "label": "Apply critical timing to",
+        "kind": "CHOICE",
+        "default": "Living",
+        "choices": [
+          "Living",
+          "Players",
+          "Hostiles"
+        ]
+      },
+      {
+        "id": "min-charge",
+        "label": "Minimum charge for critical timing",
+        "kind": "NUMBER",
+        "default": 0.9,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "only-kill-aura",
+        "label": "Only apply to Kill Aura attacks",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "hop-height",
+        "label": "Mini jump upward velocity",
+        "kind": "NUMBER",
+        "default": 0.2,
+        "min": 0.08,
+        "max": 0.42,
+        "step": 0.01
+      },
+      {
+        "id": "min-interval",
+        "label": "Minimum time between automatic hops (ms)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 1000.0,
+        "step": 50.0
+      },
+      {
+        "id": "hold-time",
+        "label": "Maximum waiting time for a falling hit (ticks)",
+        "kind": "NUMBER",
+        "default": 14.0,
+        "min": 4.0,
+        "max": 30.0,
+        "step": 1.0
+      },
+      {
+        "id": "hop-while-moving",
+        "label": "Allow automatic hops while moving",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "sprint-reset",
+        "label": "Release sprint normally while waiting for a crit",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "crit-particles",
+        "label": "Show local critical cue on the falling attack",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -6355,7 +7567,7 @@
     "id": "crystal-aura",
     "name": "Crystal Aura",
     "category": "HVH",
-    "description": "Place crystals on real obsidian/bedrock and break reachable enemy-near crystals. No damage prediction.",
+    "description": "Score reachable crystals with loaded-world explosion exposure and conservative self/friend damage guards.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6378,7 +7590,7 @@
       },
       {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range (blocks)",
         "kind": "NUMBER",
         "default": 6.0,
         "min": 1.0,
@@ -6387,7 +7599,7 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
         "min": 20.0,
@@ -6395,8 +7607,43 @@
         "step": 10.0
       },
       {
+        "id": "ignore-naked",
+        "label": "Ignore unarmored players",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Armor"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Target through walls",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
         "id": "delay",
-        "label": "Action interval (ticks)",
+        "label": "Minimum action interval (ticks)",
         "kind": "NUMBER",
         "default": 4.0,
         "min": 1.0,
@@ -6426,7 +7673,7 @@
       },
       {
         "id": "self-distance",
-        "label": "Minimum self distance",
+        "label": "Minimum self distance (blocks)",
         "kind": "NUMBER",
         "default": 3.0,
         "min": 2.0,
@@ -6435,12 +7682,204 @@
       },
       {
         "id": "health",
-        "label": "Minimum health",
+        "label": "Minimum health (HP)",
         "kind": "NUMBER",
         "default": 12.0,
         "min": 1.0,
         "max": 20.0,
         "step": 1.0
+      },
+      {
+        "id": "place-delay",
+        "label": "Placement interval floor (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "break-delay",
+        "label": "Break interval floor (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "break-range",
+        "label": "Crystal break range (blocks)",
+        "kind": "NUMBER",
+        "default": 4.5,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "break-which",
+        "label": "Break which crystals",
+        "kind": "CHOICE",
+        "default": "Smart",
+        "choices": [
+          "Smart",
+          "Own",
+          "All"
+        ]
+      },
+      {
+        "id": "face-place-health",
+        "label": "Face place below enemy health (HP; 0 off)",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 0.0,
+        "max": 36.0,
+        "step": 1.0
+      },
+      {
+        "id": "face-place-hole",
+        "label": "Face place enemies in holes",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "place-range",
+        "label": "Placement reach cap (blocks)",
+        "kind": "NUMBER",
+        "default": 4.5,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "legit",
+        "label": "Require real crosshair + vanilla reach",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "rotate",
+        "label": "Turn real camera to interaction",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "aim-speed",
+        "label": "Camera turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 30.0,
+        "min": 5.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-smoothing",
+        "label": "Aim smoothing (%)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "switch",
+        "label": "Hotbar switch (Silent \u003d visible switch/back)",
+        "kind": "CHOICE",
+        "default": "Silent",
+        "choices": [
+          "None",
+          "Normal",
+          "Silent"
+        ]
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "pause-eating",
+        "label": "Pause while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-health",
+        "label": "Pause at health (HP; 0 off)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "render",
+        "label": "Show pending / accepted placement preview",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "red",
+        "label": "Preview red",
+        "kind": "NUMBER",
+        "default": 232.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Preview green",
+        "kind": "NUMBER",
+        "default": 200.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Preview blue",
+        "kind": "NUMBER",
+        "default": 114.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "min-damage",
+        "label": "Minimum predicted enemy damage (HP)",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 0.0,
+        "max": 36.0,
+        "step": 0.5
+      },
+      {
+        "id": "max-self-damage",
+        "label": "Maximum conservative self damage (HP)",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 0.0,
+        "max": 36.0,
+        "step": 0.5
+      },
+      {
+        "id": "anti-suicide",
+        "label": "Require health above self damage",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "protect-friends",
+        "label": "Reject blasts near friends",
+        "kind": "BOOLEAN",
+        "default": true
       }
     ]
   },
@@ -6448,7 +7887,7 @@
     "id": "anchor-aura",
     "name": "Anchor Aura",
     "category": "HVH",
-    "description": "Place, charge and use anchors only in dimensions where they explode. No damage prediction.",
+    "description": "Place, charge and detonate reachable anchors outside anchor-safe dimensions, with exposure damage guards.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6471,7 +7910,7 @@
       },
       {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range (blocks)",
         "kind": "NUMBER",
         "default": 6.0,
         "min": 1.0,
@@ -6480,12 +7919,47 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
         "min": 20.0,
         "max": 360.0,
         "step": 10.0
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore unarmored players",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Armor"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Target through walls",
+        "kind": "BOOLEAN",
+        "default": false
       },
       {
         "id": "delay",
@@ -6498,7 +7972,7 @@
       },
       {
         "id": "self-distance",
-        "label": "Minimum self distance",
+        "label": "Minimum self distance (blocks)",
         "kind": "NUMBER",
         "default": 3.5,
         "min": 2.0,
@@ -6507,12 +7981,157 @@
       },
       {
         "id": "health",
-        "label": "Minimum health",
+        "label": "Minimum health (HP)",
         "kind": "NUMBER",
         "default": 12.0,
         "min": 1.0,
         "max": 20.0,
         "step": 1.0
+      },
+      {
+        "id": "use-existing",
+        "label": "Use existing anchors",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "place-range",
+        "label": "Placement reach cap (blocks)",
+        "kind": "NUMBER",
+        "default": 4.5,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "legit",
+        "label": "Require real crosshair + vanilla reach",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "rotate",
+        "label": "Turn real camera to interaction",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "aim-speed",
+        "label": "Camera turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 30.0,
+        "min": 5.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-smoothing",
+        "label": "Aim smoothing (%)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "switch",
+        "label": "Hotbar switch (Silent \u003d visible switch/back)",
+        "kind": "CHOICE",
+        "default": "Silent",
+        "choices": [
+          "None",
+          "Normal",
+          "Silent"
+        ]
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "pause-eating",
+        "label": "Pause while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-health",
+        "label": "Pause at health (HP; 0 off)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "render",
+        "label": "Show pending / accepted placement preview",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "red",
+        "label": "Preview red",
+        "kind": "NUMBER",
+        "default": 232.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Preview green",
+        "kind": "NUMBER",
+        "default": 200.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Preview blue",
+        "kind": "NUMBER",
+        "default": 114.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "min-damage",
+        "label": "Minimum predicted enemy damage (HP)",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 36.0,
+        "step": 0.5
+      },
+      {
+        "id": "max-self-damage",
+        "label": "Maximum conservative self damage (HP)",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 36.0,
+        "step": 0.5
+      },
+      {
+        "id": "anti-suicide",
+        "label": "Require health above self damage",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "protect-friends",
+        "label": "Reject blasts near friends",
+        "kind": "BOOLEAN",
+        "default": true
       }
     ]
   },
@@ -6520,7 +8139,7 @@
     "id": "surround",
     "name": "Surround",
     "category": "HVH",
-    "description": "Place hotbar obsidian around your feet, one normal interaction at a time.",
+    "description": "Build a supported configurable shell around your occupied blocks using normal placement.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6537,6 +8156,189 @@
         "label": "Build lower supports",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "shape",
+        "label": "Surround shape",
+        "kind": "CHOICE",
+        "default": "Normal",
+        "choices": [
+          "Normal",
+          "Double",
+          "Anti-city"
+        ]
+      },
+      {
+        "id": "center",
+        "label": "Ease toward block center",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "floor",
+        "label": "Fill missing floor",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "extend",
+        "label": "Surround every occupied block",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "self-trap",
+        "label": "Cover above your head",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "off-jump",
+        "label": "Disable on upward jump",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "off-moved",
+        "label": "Disable after leaving start block",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "off-done",
+        "label": "Disable when complete",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "place-range",
+        "label": "Placement reach cap (blocks)",
+        "kind": "NUMBER",
+        "default": 4.5,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "legit",
+        "label": "Require real crosshair + vanilla reach",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "rotate",
+        "label": "Turn real camera to interaction",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "aim-speed",
+        "label": "Camera turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 35.0,
+        "min": 5.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-smoothing",
+        "label": "Aim smoothing (%)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "switch",
+        "label": "Hotbar switch (Silent \u003d visible switch/back)",
+        "kind": "CHOICE",
+        "default": "Silent",
+        "choices": [
+          "None",
+          "Normal",
+          "Silent"
+        ]
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "pause-eating",
+        "label": "Pause while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-health",
+        "label": "Pause at health (HP; 0 off)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "render",
+        "label": "Show pending / accepted placement preview",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "red",
+        "label": "Preview red",
+        "kind": "NUMBER",
+        "default": 232.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Preview green",
+        "kind": "NUMBER",
+        "default": 200.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Preview blue",
+        "kind": "NUMBER",
+        "default": 114.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blocks-per-tick",
+        "label": "Placements per tick (shared cap 8)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 1.0
+      },
+      {
+        "id": "block",
+        "label": "Building material",
+        "kind": "CHOICE",
+        "default": "Obsidian",
+        "choices": [
+          "Obsidian",
+          "Ender chest",
+          "Any hard",
+          "Any"
+        ]
       }
     ]
   },
@@ -6544,7 +8346,7 @@
     "id": "auto-trap",
     "name": "Auto Trap",
     "category": "HVH",
-    "description": "Place obsidian around a selected target and above its head with ordinary block use.",
+    "description": "Build a supported roof, head shell or full cage around a selected target.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6567,7 +8369,7 @@
       },
       {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range (blocks)",
         "kind": "NUMBER",
         "default": 6.0,
         "min": 1.0,
@@ -6576,12 +8378,47 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
         "min": 20.0,
         "max": 360.0,
         "step": 10.0
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore unarmored players",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Armor"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Target through walls",
+        "kind": "BOOLEAN",
+        "default": false
       },
       {
         "id": "delay",
@@ -6591,6 +8428,160 @@
         "min": 1.0,
         "max": 20.0,
         "step": 1.0
+      },
+      {
+        "id": "shape",
+        "label": "Trap shape",
+        "kind": "CHOICE",
+        "default": "Full + roof",
+        "choices": [
+          "Top",
+          "Head",
+          "Full",
+          "Full + roof"
+        ]
+      },
+      {
+        "id": "only-hole",
+        "label": "Only targets in holes",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "off-done",
+        "label": "Disable when cage complete",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "place-range",
+        "label": "Placement reach cap (blocks)",
+        "kind": "NUMBER",
+        "default": 4.5,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "legit",
+        "label": "Require real crosshair + vanilla reach",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "rotate",
+        "label": "Turn real camera to interaction",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "aim-speed",
+        "label": "Camera turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 35.0,
+        "min": 5.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-smoothing",
+        "label": "Aim smoothing (%)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "switch",
+        "label": "Hotbar switch (Silent \u003d visible switch/back)",
+        "kind": "CHOICE",
+        "default": "Silent",
+        "choices": [
+          "None",
+          "Normal",
+          "Silent"
+        ]
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "pause-eating",
+        "label": "Pause while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-health",
+        "label": "Pause at health (HP; 0 off)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "render",
+        "label": "Show pending / accepted placement preview",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "red",
+        "label": "Preview red",
+        "kind": "NUMBER",
+        "default": 232.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Preview green",
+        "kind": "NUMBER",
+        "default": 200.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Preview blue",
+        "kind": "NUMBER",
+        "default": 114.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blocks-per-tick",
+        "label": "Placements per tick (shared cap 8)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 1.0
+      },
+      {
+        "id": "block",
+        "label": "Building material",
+        "kind": "CHOICE",
+        "default": "Obsidian",
+        "choices": [
+          "Obsidian",
+          "Ender chest",
+          "Any hard",
+          "Any"
+        ]
       }
     ]
   },
@@ -6598,7 +8589,7 @@
     "id": "auto-web",
     "name": "Auto Web",
     "category": "HVH",
-    "description": "Place hotbar cobweb at a selected target\u0027s feet when support and reach permit.",
+    "description": "Place supported feet/head webs on selected enemies within reach and a per-tick budget.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6621,7 +8612,7 @@
       },
       {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range (blocks)",
         "kind": "NUMBER",
         "default": 6.0,
         "min": 1.0,
@@ -6630,12 +8621,47 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
         "min": 20.0,
         "max": 360.0,
         "step": 10.0
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore unarmored players",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Armor"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Target through walls",
+        "kind": "BOOLEAN",
+        "default": false
       },
       {
         "id": "delay",
@@ -6644,6 +8670,157 @@
         "default": 4.0,
         "min": 1.0,
         "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "feet",
+        "label": "Web target feet",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "head",
+        "label": "Web target head",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "every-enemy",
+        "label": "Web every selected enemy",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "moving-only",
+        "label": "Only moving targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "motion-threshold",
+        "label": "Moving threshold (blocks/tick)",
+        "kind": "NUMBER",
+        "default": 0.03,
+        "min": 0.01,
+        "max": 0.3,
+        "step": 0.01
+      },
+      {
+        "id": "place-range",
+        "label": "Placement reach cap (blocks)",
+        "kind": "NUMBER",
+        "default": 4.5,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "legit",
+        "label": "Require real crosshair + vanilla reach",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "rotate",
+        "label": "Turn real camera to interaction",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "aim-speed",
+        "label": "Camera turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 35.0,
+        "min": 5.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-smoothing",
+        "label": "Aim smoothing (%)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "switch",
+        "label": "Hotbar switch (Silent \u003d visible switch/back)",
+        "kind": "CHOICE",
+        "default": "Silent",
+        "choices": [
+          "None",
+          "Normal",
+          "Silent"
+        ]
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "pause-eating",
+        "label": "Pause while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-health",
+        "label": "Pause at health (HP; 0 off)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "render",
+        "label": "Show pending / accepted placement preview",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "red",
+        "label": "Preview red",
+        "kind": "NUMBER",
+        "default": 232.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Preview green",
+        "kind": "NUMBER",
+        "default": 200.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Preview blue",
+        "kind": "NUMBER",
+        "default": 114.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blocks-per-tick",
+        "label": "Placements per tick (shared cap 8)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 8.0,
         "step": 1.0
       }
     ]
@@ -6652,12 +8829,12 @@
     "id": "hole-filler",
     "name": "Hole Filler",
     "category": "HVH",
-    "description": "Fill nearby one-block holes with a solid floor and four solid walls using obsidian.",
+    "description": "Scan loaded nearby supported single/double holes and fill relevant unoccupied holes.",
     "defaultEnabled": false,
     "settings": [
       {
         "id": "range",
-        "label": "Search range",
+        "label": "Search range (blocks)",
         "kind": "NUMBER",
         "default": 4.0,
         "min": 1.0,
@@ -6672,6 +8849,178 @@
         "min": 1.0,
         "max": 20.0,
         "step": 1.0
+      },
+      {
+        "id": "near-enemies",
+        "label": "Only holes near enemies",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "enemy-distance",
+        "label": "Enemy distance to hole (blocks)",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "keep-yours",
+        "label": "Keep holes beside you",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "double-holes",
+        "label": "Include two-block holes",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "scan-delay",
+        "label": "Scan interval (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "protect-friends",
+        "label": "Keep holes beside friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "place-range",
+        "label": "Placement reach cap (blocks)",
+        "kind": "NUMBER",
+        "default": 4.5,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "legit",
+        "label": "Require real crosshair + vanilla reach",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "rotate",
+        "label": "Turn real camera to interaction",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "aim-speed",
+        "label": "Camera turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 35.0,
+        "min": 5.0,
+        "max": 90.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-smoothing",
+        "label": "Aim smoothing (%)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "switch",
+        "label": "Hotbar switch (Silent \u003d visible switch/back)",
+        "kind": "CHOICE",
+        "default": "Silent",
+        "choices": [
+          "None",
+          "Normal",
+          "Silent"
+        ]
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "pause-eating",
+        "label": "Pause while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-health",
+        "label": "Pause at health (HP; 0 off)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "render",
+        "label": "Show pending / accepted placement preview",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "red",
+        "label": "Preview red",
+        "kind": "NUMBER",
+        "default": 232.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Preview green",
+        "kind": "NUMBER",
+        "default": 200.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Preview blue",
+        "kind": "NUMBER",
+        "default": 114.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blocks-per-tick",
+        "label": "Placements per tick (shared cap 8)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 1.0
+      },
+      {
+        "id": "block",
+        "label": "Building material",
+        "kind": "CHOICE",
+        "default": "Obsidian",
+        "choices": [
+          "Obsidian",
+          "Ender chest",
+          "Any hard",
+          "Any"
+        ]
       }
     ]
   },
@@ -6679,7 +9028,7 @@
     "id": "target-strafe",
     "name": "Target Strafe",
     "category": "HVH",
-    "description": "Move tangentially around the nearest selected visible target; collision remains active.",
+    "description": "Orbit a selected target with checked support, collision, ordinary hops and optional camera/input steering.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -6702,7 +9051,7 @@
       },
       {
         "id": "range",
-        "label": "Target range",
+        "label": "Target range (blocks)",
         "kind": "NUMBER",
         "default": 6.0,
         "min": 1.0,
@@ -6711,7 +9060,7 @@
       },
       {
         "id": "fov",
-        "label": "Field of view",
+        "label": "Field of view (degrees)",
         "kind": "NUMBER",
         "default": 180.0,
         "min": 20.0,
@@ -6719,8 +9068,43 @@
         "step": 10.0
       },
       {
+        "id": "ignore-naked",
+        "label": "Ignore unarmored players",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Armor"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Target through walls",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
         "id": "radius",
-        "label": "Orbit radius",
+        "label": "Orbit radius (blocks)",
         "kind": "NUMBER",
         "default": 2.5,
         "min": 1.0,
@@ -6729,7 +9113,7 @@
       },
       {
         "id": "speed",
-        "label": "Horizontal speed",
+        "label": "Horizontal speed cap (blocks/tick)",
         "kind": "NUMBER",
         "default": 0.22,
         "min": 0.05,
@@ -6741,6 +9125,117 @@
         "label": "Clockwise",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "style",
+        "label": "Strafe style",
+        "kind": "CHOICE",
+        "default": "Circle",
+        "choices": [
+          "Circle",
+          "Vanilla hop",
+          "Blind hop",
+          "Hug"
+        ]
+      },
+      {
+        "id": "direction",
+        "label": "Direction override",
+        "kind": "CHOICE",
+        "default": "Saved clockwise",
+        "choices": [
+          "Saved clockwise",
+          "Right",
+          "Left",
+          "Flip"
+        ]
+      },
+      {
+        "id": "respect-wasd",
+        "label": "A/D direction and S pause",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ground-only",
+        "label": "Steer only on ground",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "auto-jump",
+        "label": "Jump while orbiting",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "natural-pace",
+        "label": "Ease at normal movement pace",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "sprint",
+        "label": "Use sprint pace",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "hug-distance",
+        "label": "Hug distance (blocks)",
+        "kind": "NUMBER",
+        "default": 0.4,
+        "min": 0.2,
+        "max": 1.5,
+        "step": 0.05
+      },
+      {
+        "id": "weave",
+        "label": "Reverse direction after landing",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hop-arc",
+        "label": "Blind hop arc (degrees)",
+        "kind": "NUMBER",
+        "default": 55.0,
+        "min": 20.0,
+        "max": 120.0,
+        "step": 5.0
+      },
+      {
+        "id": "view-cone",
+        "label": "Avoid target front cone (degrees)",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 30.0,
+        "max": 180.0,
+        "step": 5.0
+      },
+      {
+        "id": "direction-stability",
+        "label": "Direction stability (%)",
+        "kind": "NUMBER",
+        "default": 20.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "legit",
+        "label": "Camera + ordinary forward input",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "aim-speed",
+        "label": "Camera turn speed (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 30.0,
+        "min": 5.0,
+        "max": 90.0,
+        "step": 1.0
       }
     ]
   },
@@ -6748,33 +9243,118 @@
     "id": "keep-sprint",
     "name": "Keep Sprint",
     "category": "Movement",
-    "description": "Hold the normal sprint input while moving forward and able to sprint.",
+    "description": "Keep sprinting while vanilla movement and hunger conditions permit.",
     "defaultEnabled": false,
-    "settings": []
+    "settings": [
+      {
+        "id": "legit",
+        "label": "Use the normal sprint key",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "min-hunger",
+        "label": "Sprint above hunger",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "pause-on-use",
+        "label": "Pause while using items",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ground-only",
+        "label": "Only sprint on the ground",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
   },
   {
     "id": "auto-walk",
     "name": "Auto Walk",
     "category": "Movement",
-    "description": "Hold forward while the world is focused; releases the input when disabled.",
+    "description": "Hold a chosen movement key while the world is focused; input is released on pause or disable.",
     "defaultEnabled": false,
-    "settings": []
+    "settings": [
+      {
+        "id": "direction",
+        "label": "Direction",
+        "kind": "CHOICE",
+        "default": "Forward",
+        "choices": [
+          "Forward",
+          "Backward",
+          "Left",
+          "Right"
+        ]
+      },
+      {
+        "id": "sprint",
+        "label": "Sprint when walking forward",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "jump",
+        "label": "Hold jump",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "stop-on-collision",
+        "label": "Stop at a wall",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
   },
   {
     "id": "speed",
     "name": "Speed",
     "category": "Movement",
-    "description": "Set horizontal client velocity while directional input is held; servers may correct it.",
+    "description": "Choose direct motion, a grounded conservative profile, or normal sprint jumps.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Use normal sprint and jump keys",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "profile",
+        "label": "Profile",
+        "kind": "CHOICE",
+        "default": "Standard",
+        "choices": [
+          "Standard",
+          "Conservative",
+          "Sprint hop"
+        ]
+      },
+      {
         "id": "speed",
-        "label": "Speed (blocks/tick)",
+        "label": "Base speed (blocks/tick)",
         "kind": "NUMBER",
         "default": 0.35,
         "min": 0.1,
         "max": 1.0,
         "step": 0.01
+      },
+      {
+        "id": "multiplier",
+        "label": "Multiplier (direct profiles)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 4.0,
+        "step": 0.1
       }
     ]
   },
@@ -6782,17 +9362,67 @@
     "id": "fly",
     "name": "Fly",
     "category": "Movement",
-    "description": "Client velocity flight with jump/sneak vertical control; does not grant server flight permission.",
+    "description": "Client flight or descending glide; Legit uses an equipped elytra and hotbar rockets. Servers may correct direct motion.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Use elytra and normal rockets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "mode",
+        "label": "Mode",
+        "kind": "CHOICE",
+        "default": "Vanilla",
+        "choices": [
+          "Vanilla",
+          "Glide",
+          "Conservative glide"
+        ]
+      },
+      {
         "id": "speed",
-        "label": "Flight speed",
+        "label": "Horizontal speed (blocks/tick)",
         "kind": "NUMBER",
         "default": 0.35,
         "min": 0.05,
         "max": 1.0,
         "step": 0.01
+      },
+      {
+        "id": "vertical-speed",
+        "label": "Vertical speed (blocks/tick)",
+        "kind": "NUMBER",
+        "default": 0.35,
+        "min": 0.05,
+        "max": 1.0,
+        "step": 0.01
+      },
+      {
+        "id": "anti-hover",
+        "label": "Periodic downward hover pulse",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "pulse-interval",
+        "label": "Hover pulse interval (ticks)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "rocket-delay",
+        "label": "Legit rocket interval (ticks)",
+        "kind": "NUMBER",
+        "default": 30.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 1.0
       }
     ]
   },
@@ -6800,12 +9430,28 @@
     "id": "step",
     "name": "Step",
     "category": "Movement",
-    "description": "Temporarily raise the client step-height attribute; servers may correct movement.",
+    "description": "Raise the client step height, or use a normal jump at a checked one-block ledge.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Use the normal jump key",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "mode",
+        "label": "Mode",
+        "kind": "CHOICE",
+        "default": "Instant",
+        "choices": [
+          "Instant",
+          "Jump"
+        ]
+      },
+      {
         "id": "height",
-        "label": "Step height",
+        "label": "Maximum step height (blocks)",
         "kind": "NUMBER",
         "default": 1.0,
         "min": 0.6,
@@ -6818,33 +9464,83 @@
     "id": "parkour",
     "name": "Parkour",
     "category": "Movement",
-    "description": "Jump when approaching an unsupported edge while moving on the ground.",
+    "description": "Jump near a loaded unsupported edge while moving on the ground.",
     "defaultEnabled": false,
-    "settings": []
+    "settings": [
+      {
+        "id": "legit",
+        "label": "Use the normal jump key",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "sprint",
+        "label": "Sprint jumps",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "look-ahead",
+        "label": "Edge look-ahead (blocks)",
+        "kind": "NUMBER",
+        "default": 0.65,
+        "min": 0.2,
+        "max": 1.0,
+        "step": 0.01
+      }
+    ]
   },
   {
     "id": "safe-walk",
     "name": "Safe Walk",
     "category": "Movement",
-    "description": "Use vanilla ledge clipping without requiring the sneak key.",
+    "description": "Clip movement at ledges, or hold normal sneak near an edge.",
     "defaultEnabled": false,
-    "settings": []
+    "settings": [
+      {
+        "id": "legit",
+        "label": "Sneak at edges using normal input",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "only-sneaking",
+        "label": "Only while the sneak key is held",
+        "kind": "BOOLEAN",
+        "default": false
+      }
+    ]
   },
   {
     "id": "fast-ladder",
     "name": "Fast Ladder",
     "category": "Movement",
-    "description": "Increase upward velocity while climbing with forward or jump input.",
+    "description": "Increase climbing velocity; Legit holds normal forward and jump on climbable blocks.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Use normal forward and jump keys",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
         "id": "speed",
-        "label": "Climb speed",
+        "label": "Climb speed (blocks/tick)",
         "kind": "NUMBER",
         "default": 0.28,
         "min": 0.1,
         "max": 0.6,
         "step": 0.01
+      },
+      {
+        "id": "jump-multiplier",
+        "label": "Speed while holding jump",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 2.0,
+        "step": 0.1
       }
     ]
   },
@@ -6852,16 +9548,31 @@
     "id": "reverse-step",
     "name": "Reverse Step",
     "category": "Movement",
-    "description": "Accelerate downward when falling toward a nearby floor.",
+    "description": "Accelerate an existing descent only toward a loaded floor within the chosen drop. Legit sneaks through scaffolding.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Drop through scaffolding with sneak",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
         "id": "speed",
-        "label": "Downward speed",
+        "label": "Downward speed (blocks/tick)",
         "kind": "NUMBER",
         "default": 0.8,
         "min": 0.1,
         "max": 2.0,
+        "step": 0.01
+      },
+      {
+        "id": "max-drop",
+        "label": "Maximum nearby drop (blocks)",
+        "kind": "NUMBER",
+        "default": 1.5,
+        "min": 1.0,
+        "max": 6.0,
         "step": 0.01
       }
     ]
@@ -6870,16 +9581,31 @@
     "id": "fast-fall",
     "name": "Fast Fall",
     "category": "Movement",
-    "description": "Accelerate an existing fall after the configured distance; no fall-damage spoof.",
+    "description": "Accelerate an existing fall after a distance threshold. Legit only drops through scaffolding.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Drop through scaffolding with sneak",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
         "id": "speed",
-        "label": "Downward speed",
+        "label": "Downward speed (blocks/tick)",
         "kind": "NUMBER",
         "default": 1.0,
         "min": 0.2,
         "max": 3.0,
+        "step": 0.01
+      },
+      {
+        "id": "trigger-fall",
+        "label": "Trigger fall distance (blocks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.25,
+        "max": 10.0,
         "step": 0.01
       }
     ]
@@ -6888,12 +9614,18 @@
     "id": "glide",
     "name": "Glide",
     "category": "Movement",
-    "description": "Limit ordinary falling velocity outside fluids; servers may correct it.",
+    "description": "Limit falling velocity outside fluids; Legit opens an equipped usable elytra.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Open an equipped elytra normally",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
         "id": "speed",
-        "label": "Fall speed",
+        "label": "Fall speed (blocks/tick)",
         "kind": "NUMBER",
         "default": 0.1,
         "min": 0.02,
@@ -6906,12 +9638,18 @@
     "id": "high-jump",
     "name": "High Jump",
     "category": "Movement",
-    "description": "Increase upward velocity at the start of a normal jump.",
+    "description": "Increase an ordinary jump\u0027s upward velocity; Legit pillars with normal hotbar block use while jump is held.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Pillar with normal jumps and blocks",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
         "id": "height",
-        "label": "Upward velocity",
+        "label": "Upward velocity (blocks/tick)",
         "kind": "NUMBER",
         "default": 0.7,
         "min": 0.42,
@@ -6924,16 +9662,40 @@
     "id": "long-jump",
     "name": "Long Jump",
     "category": "Movement",
-    "description": "Add horizontal velocity at the start of a normal directional jump.",
+    "description": "Boost the start of a directional jump; Legit sprint-jumps near an edge without modifying velocity.",
     "defaultEnabled": false,
     "settings": [
       {
+        "id": "legit",
+        "label": "Normal sprint jump at a ledge",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
         "id": "speed",
-        "label": "Jump speed",
+        "label": "Base jump speed (blocks/tick)",
         "kind": "NUMBER",
         "default": 0.65,
         "min": 0.2,
         "max": 1.5,
+        "step": 0.01
+      },
+      {
+        "id": "boost",
+        "label": "Horizontal boost multiplier",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.1
+      },
+      {
+        "id": "height",
+        "label": "Minimum jump velocity",
+        "kind": "NUMBER",
+        "default": 0.42,
+        "min": 0.2,
+        "max": 1.0,
         "step": 0.01
       }
     ]
@@ -6942,17 +9704,75 @@
     "id": "elytra-boost",
     "name": "Elytra Boost",
     "category": "Movement",
-    "description": "Add a bounded impulse in the view direction while already gliding.",
+    "description": "Add a bounded gliding impulse and optional climb, or use real hotbar rockets when flight slows.",
     "defaultEnabled": false,
     "settings": [
+      {
+        "id": "legit",
+        "label": "Use normal hotbar rocket interactions",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "mode",
+        "label": "Mode",
+        "kind": "CHOICE",
+        "default": "Impulse",
+        "choices": [
+          "Impulse",
+          "Rockets"
+        ]
+      },
       {
         "id": "thrust",
         "label": "Impulse per tick",
         "kind": "NUMBER",
         "default": 0.035,
         "min": 0.005,
-        "max": 0.1,
+        "max": 0.3,
         "step": 0.01
+      },
+      {
+        "id": "climb",
+        "label": "Space climb velocity",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 1.5,
+        "step": 0.01
+      },
+      {
+        "id": "max-speed",
+        "label": "Maximum impulse speed",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 0.5,
+        "max": 5.0,
+        "step": 0.01
+      },
+      {
+        "id": "take-off",
+        "label": "Jump and open equipped elytra",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "rocket-below",
+        "label": "Use rocket below speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.1,
+        "max": 3.0,
+        "step": 0.01
+      },
+      {
+        "id": "rocket-delay",
+        "label": "Rocket interval (ticks)",
+        "kind": "NUMBER",
+        "default": 30.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 1.0
       }
     ]
   },
@@ -6960,9 +9780,35 @@
     "id": "ground-strafe",
     "name": "Ground Strafe",
     "category": "Movement",
-    "description": "Align existing horizontal momentum with your ground movement input.",
+    "description": "Align existing ground momentum, set a steady ground speed, or use ordinary sprint hops.",
     "defaultEnabled": false,
-    "settings": []
+    "settings": [
+      {
+        "id": "legit",
+        "label": "Use normal sprint and jump keys",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "mode",
+        "label": "Mode",
+        "kind": "CHOICE",
+        "default": "Momentum",
+        "choices": [
+          "Momentum",
+          "Steady"
+        ]
+      },
+      {
+        "id": "speed",
+        "label": "Steady ground speed (blocks/tick)",
+        "kind": "NUMBER",
+        "default": 0.32,
+        "min": 0.1,
+        "max": 0.8,
+        "step": 0.01
+      }
+    ]
   },
   {
     "id": "auto-eat",

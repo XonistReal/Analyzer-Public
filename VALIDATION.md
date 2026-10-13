@@ -1,5 +1,61 @@
 # Analyzer validation
 
+## Native UI overhaul — October 11, 2026
+
+The user-selected Focused workspace is implemented with rounded cards/switches, real scene frost, sidebar browsing and a grouped inspector. Workspace, Classic and Compact share native controls. HUD Studio exposes layout, material, menu theme and accent choices; menu and HUD themes remain independent. The catalogue contains **123 modules and 1,091 exposed settings: 1,087 canonical settings plus four presentation aliases**.
+
+Verified with Java 21, Minecraft 1.21.4, Fabric Loader 0.16.14 and Fabric API 0.119.4+1.21.4 on this computer:
+
+- Final `build runUiSmoke` and `publishLocal moduleCatalog` succeed with **1,017 build assertions**: 284 core, 38 ESP layout, 46 planner, 10 scoped-settings lease, 102 combat, 30 movement, 18 HVH and 489 configuration assertions. The new core checks cover aliases, independent themes, migration, canonical import precedence, persistence and reset behaviour.
+- The actual-world native UI fixture passes **280 assertions**, producing **19 framebuffer captures** in 290 fixture ticks. It checks catalogue/search/category contents, separate inspection and enable actions, long Combat/ESP inspectors, exact numeric input, Page Up/Down, visible hit regions, key capture/cancel/restore in all layouts, HUD menu switching and real save/reload, all four menu themes, Glass/Solid sampling, zero motion, resource reload and clean GL state.
+- Keyboard checks cover Tab/Shift+Tab, initial backwards focus, Enter, arrows and reopening a nonempty search with `/`. The actual narration hook produces focused labels, values, module toggle states and keybind descriptions. HUD, Automation and Profiles return to the original parent; Profiles also retains query/selection across layouts. Menu interaction does not trigger gameplay actions or retain movement inputs.
+- Captures cover **1280 × 800** and **1920 × 1080**, requested GUI scales 2/3/4. Minecraft clamps 1280 GUI 4 to effective scale 3; all other requested combinations reach their intended effective scale. Actual screenshot/hit-region dimensions are checked. The captures, including menu appearance settings and the visible Profiles Back control, were visually reviewed.
+- The focused gameplay regression also passes **66 runtime assertions** (41 movement/shared numeric input and 25 Combat/HVH), plus **23 introductory UI checks** for toggles, search, numeric editing, keybinds and profile save/load. It completes in 159 fixture ticks and produces three gameplay settings captures. Both final runtime logs contain no ERROR/FATAL entries.
+
+Final logs are `build/reports/native-ui-runtime.log` and `build/reports/native-ui-gameplay-runtime.log`. [UI controls and captures](UI-OVERHAUL.md) links the native images. Surface tokens were tuned using conservative bright/dark scene compositing; this is not a complete per-pixel contrast measurement. Spoken narrator output, the full Automation state/capture matrix, steady-frame performance comparison, Iris/Sodium and other GPU configurations remain outside this focused verification. Historical gameplay/production evidence below applies to its recorded artifacts.
+
+## Native UI Prism delivery — October 11, 2026
+
+The final remapped Analyzer 0.5.2 JAR, local updater manifest, import ZIP and installed Analyzer JAR share SHA-256 **`ec2747a16a997516b24b477601870049fe8139e49f5f61d9438324dc3dc9b592`**.
+
+- With Minecraft closed, the strict Windows PowerShell updater installed the new same-version build in the existing **Analyzer** instance at `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer`, retaining a recoverable backup of the previous Analyzer JAR. A subsequent strict check reports **up-to-date**.
+- A before/after hash audit verifies that all **five protected game/dependency/instance-setting files** remain byte-identical. Exactly one Analyzer JAR is installed. No worlds, configuration or saved user profiles are replaced; this instance had not yet created those game files. The local feed and Prism pre-launch updater remain connected.
+- `C:\Users\sould\Desktop\Analyzer-0.5.2-Prism-1.21.4.zip` is rebuilt with the matching Analyzer JAR, Fabric API, unchanged official Baritone API 1.13.1, corresponding dependency sources/notices, updater, current documentation, five original references and all **19 native UI captures**. ZIP CRC, dependency identities, embedded canonical profiles and matching build/feed/install/archive hashes are verified. The portable archive inherits Prism's Java settings; the existing installed instance keeps its explicit Java 21 path.
+- The updater code is unchanged from its earlier **74-check** integration run. Current installation/archive evidence is preserved in `build/reports/prism-native-ui-delivery.json`. The standing future-update instruction is recorded in [AGENTS.md](AGENTS.md). No Minecraft launch through Prism was needed for this distribution audit.
+
+## UI reference comparison before native implementation — October 11, 2026
+
+The five user-supplied screenshots are recorded in [UI-REFERENCES.md](UI-REFERENCES.md), with unchanged source copies under `design/ui-references`. Two interactive browser compositions compare **Focused workspace** and **Category desk** using the same complete catalogue: 123 modules and 1,086 settings. Entity ESP has 20 controls and Kill Aura has 33; conditional visibility follows the native settings rules. ESP's prototype grouping is a presentation proposal.
+
+The comparison passes **168 browser checks**, with zero failures or uncaught browser errors, at outer widths of 1024, 736 and 320 CSS pixels. Checks cover both carousel directions, catalogue equality, inspection versus enable switches, numeric entry/clamping, conditional controls, empty search, retained navigation/inspector context, narrow-screen Back, HUD scale/position, Pause/Stop, blocked requirements and missing Baritone. Screenshots were visually reviewed. An initial inspector/footer overlap and catalogue button-style regression were repaired before final verification.
+
+The browser comparison source SHA-256 is `de7b8c61bf532ec6f5c3e6cda92b49aef370eb6de3466146ffc415980bec211e`. Local verification output is in `build/ui-preview/QA.md`, `qa-results.json` and its captures. Task/HUD values are illustrative and edits remain local to the preview. These checks do not establish native Minecraft UI acceptance, performance or framebuffer readability. The existing native menus and game configuration are preserved while the user compares directions.
+
+The standing Prism delivery workflow also applies to this documentation update: `publishLocal` passes the 978 build assertions, the installed JAR matches the unchanged verified release, and the refreshed import ZIP includes the reference board and all five comparison images. Instance documentation is refreshed without modifying worlds, configuration, profiles or other game files.
+
+## Working-tree gameplay settings overhaul
+
+Verified October 11, 2026 on this Windows computer with Java 21, Minecraft 1.21.4, Fabric Loader 0.16.14, Fabric API 0.119.4+1.21.4 and NVIDIA RTX 4060 Ti. This update retains version 0.5.2 and is separate from the published October 9 artifact documented below.
+
+- `build runGameplaySmoke` succeeds with **978 build assertions**, including **489 old/new configuration migration assertions**. The catalogue still contains 123 modules; the existing 30 Movement/Combat/HVH modules now have **442 settings**, up from 94.
+- **66 focused runtime assertions** pass: 41 movement/UI and 25 combat/HVH, completing in 159 fixture ticks with three screenshots. Actual Survival profiles, Step cleanup, descending Fly and Safe Walk gates work. Rendered numeric controls open and commit keyboard entry in all three layouts; a long Combat inspector scrolls to its final group.
+- A real server-spawned target verifies filtering, camera speed, acquisition versus melee reach, charge gating and server-confirmed ordinary damage. Loaded terrain/armor/resistance/unloaded chunks and an existing anchor verify damage estimates without causing an explosion. Pending placement previews render with clean GL state.
+- Integration regressions cover critical-wait cleanup after losing melee reach, Target Strafe respecting sprint ownership, and placement retries staying within one turn per module/tick. An initial fixture race was repaired by waiting for authoritative arena setup and actual client synchronization; the two subsequent runs pass.
+- [Gameplay settings](GAMEPLAY-SETTINGS.md) records the implemented scope, explicit reference gaps and test details. Screenshots are [Workspace](screenshots/analyzer-gameplay-settings-workspace.png), [Compact](screenshots/analyzer-gameplay-settings-compact.png) and [Classic](screenshots/analyzer-gameplay-settings-classic.png). The final runtime log is preserved at `build/reports/gameplay-settings-runtime.log`.
+
+Multiplayer, every mode combination and actual explosion outcomes remain unverified; historical runtime and production checks below apply to their recorded artifacts.
+
+## Prism delivery — October 11, 2026
+
+- `publishLocal` completed with the 978 build assertions passing. The final remapped JAR, local manifest, import ZIP and installed JAR share SHA-256 `71586c31a6e842fb81bee801c0164cbc43037bbf5a379ab35e57bc0bd03e29cb`.
+- This computer had five Prism instances and no Analyzer instance. A new **Analyzer** instance was created at `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer`, with Minecraft 1.21.4, Fabric Loader 0.16.14, Fabric API 0.119.4+1.21.4 and the verified official Baritone API 1.13.1. Its explicit Java path uses the installed Java 21 runtime. All ten original instance-definition files remain byte-identical.
+- With Minecraft closed, the updater verified the feed, installed Analyzer, and subsequently reported **up-to-date**. The unchanged Windows PowerShell 5.1 updater suite passed all **74 isolated integration checks**.
+- The native import ZIP on the Desktop has root instance definitions, three mod JARs, updater configuration, current documentation/screenshots, Fabric API license and corresponding Baritone sources/notices. ZIP CRC, dependency metadata and matching Analyzer hashes were checked. The portable ZIP inherits Prism's Java settings rather than embedding this computer's Java path.
+- The packager now preflights required inputs and includes the gameplay settings guide and all three menu screenshots. Historical `VALIDATION.log` and `PIXEL-VALIDATION.log` are absent from this source archive; packaging reports their omission instead of failing or substituting fresh output for historical evidence.
+- The user's instruction to update Prism after every project update is saved in [AGENTS.md](AGENTS.md), with the verified instance/feed paths and delivery workflow. No Minecraft launch through Prism was performed during this distribution step.
+
+The installation and archive verification record is `build/reports/prism-delivery.json`.
+
 ## Analyzer 0.5.2 Creeper and terrain recovery
 
 Verified October 9, 2026 on Windows, Java 21, Minecraft 1.21.4, Fabric Loader 0.16.14, Fabric API 0.119.4+1.21.4, unchanged official Baritone API 1.13.1 and NVIDIA RTX 4060. These selected local scenarios cover the reported failure more closely; they do not establish universal survival.

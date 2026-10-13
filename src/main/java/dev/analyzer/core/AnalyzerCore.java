@@ -23,6 +23,7 @@ public final class AnalyzerCore {
     private final List<ModuleDefinition> modules;
     private final Map<String, ModuleDefinition> definitions = new LinkedHashMap<>();
     private final Map<String, ModuleState> states = new LinkedHashMap<>();
+    private final Map<SettingKey, SettingKey> aliases = new LinkedHashMap<>();
     private final ConfigStore config;
     private List<String> loadWarnings = List.of();
 
@@ -36,8 +37,13 @@ public final class AnalyzerCore {
             if (definitions.putIfAbsent(module.id(), module) != null) {
                 throw new IllegalArgumentException("Duplicate module: " + module.id());
             }
-            states.put(module.id(), defaults(module));
         }
+        // HUD Studio exposes the same menu controls as Interface, with one stored value.
+        registerHudMenuAlias("menu-layout", "layout");
+        registerHudMenuAlias("menu-material", "material");
+        registerHudMenuAlias("menu-theme", "theme");
+        registerHudMenuAlias("menu-accent", "accent");
+        for (ModuleDefinition module : this.modules) states.put(module.id(), defaults(module));
         config = new ConfigStore(configDirectory);
     }
 
@@ -62,13 +68,14 @@ public final class AnalyzerCore {
 
     public synchronized Object getValue(String moduleId, String settingId) {
         definition(moduleId).setting(settingId);
-        return state(moduleId).values.get(settingId);
+        SettingKey storage = storageKey(moduleId, settingId);
+        return state(storage.module()).values.get(storage.setting());
     }
 
     public synchronized <T> T getValue(String moduleId, Setting<T> setting) {
         Setting<?> registered = definition(moduleId).setting(setting.id());
         if (registered != setting) throw new IllegalArgumentException("Setting does not belong to " + moduleId);
-        return setting.valueType().cast(state(moduleId).values.get(setting.id()));
+        return setting.valueType().cast(getValue(moduleId, setting.id()));
     }
 
     public boolean getBoolean(String moduleId, String settingId) {
@@ -85,16 +92,25 @@ public final class AnalyzerCore {
 
     public synchronized void setValue(String moduleId, String settingId, Object value) {
         Setting<?> setting = definition(moduleId).setting(settingId);
-        state(moduleId).values.put(settingId, setting.normalize(value));
+        Object normalized = setting.normalize(value);
+        SettingKey storage = storageKey(moduleId, settingId);
+        Setting<?> canonical = definition(storage.module()).setting(storage.setting());
+        state(storage.module()).values.put(storage.setting(), canonical.normalize(normalized));
     }
 
     /** An immutable snapshot suitable for exporting or displaying the current settings. */
     public synchronized Map<String, Object> values(String moduleId) {
-        return Collections.unmodifiableMap(new LinkedHashMap<>(state(moduleId).values));
+        Map<String, Object> values = new LinkedHashMap<>();
+        for (Setting<?> setting : definition(moduleId).settings()) values.put(setting.id(), getValue(moduleId, setting.id()));
+        return Collections.unmodifiableMap(values);
     }
 
     public synchronized void reset(String moduleId) {
         states.put(moduleId, defaults(definition(moduleId)));
+        for (var alias : aliases.entrySet()) if (alias.getKey().module().equals(moduleId)) {
+            SettingKey target = alias.getValue();
+            state(target.module()).values.put(target.setting(), definition(target.module()).setting(target.setting()).defaultValue());
+        }
     }
 
     public synchronized void resetAll() {
@@ -129,11 +145,31 @@ public final class AnalyzerCore {
         return state;
     }
 
-    private static ModuleState defaults(ModuleDefinition module) {
+    private ModuleState defaults(ModuleDefinition module) {
         ModuleState state = new ModuleState();
         state.enabled = module.defaultEnabled();
-        for (Setting<?> setting : module.settings()) state.values.put(setting.id(), setting.defaultValue());
+        for (Setting<?> setting : module.settings()) if (!aliases.containsKey(new SettingKey(module.id(), setting.id()))) {
+            state.values.put(setting.id(), setting.defaultValue());
+        }
         return state;
+    }
+
+    private void registerHudMenuAlias(String aliasId, String canonicalId) {
+        ModuleDefinition hud = definitions.get("hud"), menu = definitions.get("menu");
+        if (hud == null || menu == null) return;
+        Setting<?> alias = hud.settings().stream().filter(setting -> setting.id().equals(aliasId)).findFirst().orElse(null);
+        Setting<?> canonical = menu.settings().stream().filter(setting -> setting.id().equals(canonicalId)).findFirst().orElse(null);
+        if (alias == null || canonical == null) return;
+        if (alias.kind() != canonical.kind() || alias.valueType() != canonical.valueType()
+                || !alias.choices().equals(canonical.choices())) {
+            throw new IllegalArgumentException("HUD menu alias must match menu/" + canonicalId);
+        }
+        aliases.put(new SettingKey("hud", aliasId), new SettingKey("menu", canonicalId));
+    }
+
+    private SettingKey storageKey(String moduleId, String settingId) {
+        SettingKey key = new SettingKey(moduleId, settingId);
+        return aliases.getOrDefault(key, key);
     }
 
     private JsonObject snapshot() {
@@ -196,6 +232,7 @@ public final class AnalyzerCore {
             }
             JsonObject settings = settingsElement.getAsJsonObject();
             for (Setting<?> setting : module.settings()) {
+                if (aliases.containsKey(new SettingKey(module.id(), setting.id()))) continue;
                 JsonElement value = settings.get(setting.id());
                 if (value == null) continue;
                 try {
@@ -206,9 +243,40 @@ public final class AnalyzerCore {
                 }
             }
         }
+        applyAliases(moduleData, loaded, warnings);
         states.clear();
         states.putAll(loaded);
         loadWarnings = List.copyOf(warnings);
+    }
+
+    /** Legacy Interface values win; alias-only imports can still set menu preferences. */
+    private void applyAliases(JsonObject moduleData, Map<String, ModuleState> loaded, List<String> warnings) {
+        for (var alias : aliases.entrySet()) {
+            SettingKey source = alias.getKey(), target = alias.getValue();
+            JsonElement aliasValue = settingValue(moduleData, source);
+            if (aliasValue == null) continue;
+            Setting<?> aliasSetting = definition(source.module()).setting(source.setting());
+            Setting<?> targetSetting = definition(target.module()).setting(target.setting());
+            Object normalized;
+            try { normalized = aliasSetting.normalize(decode(aliasSetting, aliasValue)); }
+            catch (IllegalArgumentException | IllegalStateException ex) {
+                warnings.add("Ignored invalid setting " + source.module() + "/" + source.setting());
+                continue;
+            }
+            JsonElement canonicalValue = settingValue(moduleData, target);
+            if (canonicalValue != null) {
+                try { targetSetting.normalize(decode(targetSetting, canonicalValue)); continue; }
+                catch (IllegalArgumentException | IllegalStateException ex) { /* A valid alias recovers an invalid canonical field. */ }
+            }
+            loaded.get(target.module()).values.put(target.setting(), targetSetting.normalize(normalized));
+        }
+    }
+
+    private static JsonElement settingValue(JsonObject modules, SettingKey key) {
+        JsonElement module = modules.get(key.module());
+        if (module == null || !module.isJsonObject()) return null;
+        JsonElement settings = module.getAsJsonObject().get("settings");
+        return settings != null && settings.isJsonObject() ? settings.getAsJsonObject().get(key.setting()) : null;
     }
 
     private static Object decode(Setting<?> setting, JsonElement value) {
@@ -228,6 +296,8 @@ public final class AnalyzerCore {
             }
         };
     }
+
+    private record SettingKey(String module, String setting) { }
 
     private static final class ModuleState {
         private boolean enabled;

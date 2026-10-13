@@ -48,6 +48,80 @@ public final class GuiDraw {
         rounded(context, x + 1, y + 1, width - 2, height - 2, radius - 1, inside);
     }
 
+    /** A one-pixel rim without a second translucent fill underneath the panel. */
+    public static void roundedBorder(DrawContext context, int x, int y, int width, int height,
+                                     int radius, int color) {
+        if (width <= 0 || height <= 0) return;
+        int r = Math.clamp(radius, 0, Math.min(width, height) / 2);
+        if (r == 0 || width < 3 || height < 3) {
+            context.fill(x, y, x + width, y + 1, color);
+            context.fill(x, y + height - 1, x + width, y + height, color);
+            if (height > 2) {
+                context.fill(x, y + 1, x + 1, y + height - 1, color);
+                context.fill(x + width - 1, y + 1, x + width, y + height - 1, color);
+            }
+            return;
+        }
+        int innerRadius = Math.max(0, r - 1);
+        // Straight sides use two quads, regardless of panel height.
+        if (height > r * 2) {
+            context.fill(x, y + r, x + 1, y + height - r, color);
+            context.fill(x + width - 1, y + r, x + width, y + height - r, color);
+        }
+        for (int row = 0; row < r; row++) {
+            int outerInset = roundedInset(row, height, r);
+            int bottom = y + height - row - 1;
+            if (row == 0) {
+                context.fill(x + outerInset, y + row, x + width - outerInset, y + row + 1, color);
+                context.fill(x + outerInset, bottom, x + width - outerInset, bottom + 1, color);
+            } else {
+                int innerInset = 1 + roundedInset(row - 1, height - 2, innerRadius);
+                context.fill(x + outerInset, y + row, x + innerInset, y + row + 1, color);
+                context.fill(x + width - innerInset, y + row, x + width - outerInset, y + row + 1, color);
+                context.fill(x + outerInset, bottom, x + innerInset, bottom + 1, color);
+                context.fill(x + width - innerInset, bottom, x + width - outerInset, bottom + 1, color);
+            }
+        }
+    }
+
+    private static int roundedInset(int row, int height, int radius) {
+        int edgeRow = Math.min(row, height - row - 1);
+        if (radius == 0 || edgeRow >= radius) return 0;
+        double dy = radius - edgeRow - 0.5;
+        return (int) Math.ceil(radius - Math.sqrt(Math.max(0, radius * radius - dy * dy)));
+    }
+
+    /** Shared frosted shell for every native menu; Solid stays fully opaque. */
+    public static void panel(DrawContext context, int x, int y, int width, int height, int radius,
+                             int accent, boolean glass, String theme) {
+        if (width <= 0 || height <= 0) return;
+        for (int layer = 3; layer >= 1; layer--) {
+            int spread = layer * 2;
+            rounded(context, x - spread, y - spread + 2, width + spread * 2, height + spread * 2,
+                    radius + spread, Palette.alpha(0xFF000000, 5 + (3 - layer) * 4));
+        }
+        rounded(context, x, y, width, height, radius, Palette.menuSurface(theme, glass));
+        // Shells are decoration, while card rims identify actionable controls and need stronger contrast.
+        int rim = Palette.menuBorder(theme, accent, false);
+        roundedBorder(context, x, y, width, height, radius, Palette.alpha(rim, Math.min(75, rim >>> 24)));
+        // A restrained top reflection gives glass an edge without a glowing box around every surface.
+        if (glass && width > radius * 2 + 2 && height > 3) {
+            context.fill(x + radius + 1, y + 1, x + width - radius - 1, y + 2,
+                    Palette.alpha(Palette.TEXT, "Minimal".equals(theme) ? 10 : 22));
+        }
+    }
+
+    /** Rounded, readable module cards. Selection remains separate from an enabled toggle. */
+    public static void card(DrawContext context, int x, int y, int width, int height, int radius,
+                            int accent, boolean glass, String theme, double hover, boolean selected) {
+        if (width <= 0 || height <= 0) return;
+        if (selected && "Neon".equals(theme)) glow(context, x, y, width, height, radius, accent);
+        int surface = Palette.menuCard(theme, glass, hover);
+        if (selected) surface = Palette.mix(surface, Palette.alpha(accent, surface >>> 24), 0.075);
+        rounded(context, x, y, width, height, radius, surface);
+        roundedBorder(context, x, y, width, height, radius, Palette.menuBorder(theme, accent, selected));
+    }
+
     public static void glow(DrawContext context, int x, int y, int width, int height, int radius, int color) {
         for (int layer = 6; layer >= 1; layer--) {
             rounded(context, x - layer * 2, y - layer * 2, width + layer * 4, height + layer * 4,

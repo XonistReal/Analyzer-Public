@@ -22,7 +22,11 @@ public final class ClientModules {
 
     public static List<ModuleDefinition> definitions() {
         List<ModuleDefinition> result = new ArrayList<>();
-        result.add(new ModuleDefinition("hud", "HUD Studio", "Theme, scale and position controls for your entire HUD.", Category.HUD, true, List.of(
+        result.add(new ModuleDefinition("hud", "HUD Studio", "Choose your menu, appearance and HUD widget layout.", Category.HUD, true, List.of(
+                Setting.choice("menu-layout", "Menu layout", "Workspace", "Workspace", "Classic", "Compact"),
+                Setting.choice("menu-material", "Menu material", "Glass", "Glass", "Solid"),
+                Setting.choice("menu-theme", "Menu theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
+                Setting.choice("menu-accent", "Accent color", "Mint", "Mint", "Violet", "Gold"),
                 Setting.choice("theme", "HUD theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
                 Setting.number("scale", "HUD scale", 0.6, 0.5, 1.75, 0.05),
                 Setting.number("max-modules", "Maximum list rows", 10, 3, 16, 1),

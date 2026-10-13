@@ -95,6 +95,7 @@
       "keybind": -1,
       "settings": {
         "material": "Glass",
+        "theme": "Neon",
         "accent": "Violet",
         "motion": 1.0,
         "layout": "Compact",
@@ -1016,10 +1017,36 @@
         "players": true,
         "hostiles": false,
         "passives": false,
+        "other-living": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "ignore-naked": false,
+        "ignore-new": 0.0,
         "range": 3.0,
         "fov": 180.0,
+        "priority": "Distance",
+        "through-walls": false,
+        "wall-range": 0.0,
+        "legit": false,
+        "mode": "Single",
+        "switch-delay": 250.0,
+        "max-targets": 3.0,
+        "aim-range": 0.0,
+        "rotation": "Client",
         "turn-speed": 12.0,
-        "cooldown": 0.95
+        "smoothing": 0.0,
+        "aim-point": "Head",
+        "hit-angle": 90.0,
+        "timing": "Cooldown",
+        "cooldown": 0.95,
+        "attack-jitter": 0.0,
+        "min-cps": 9.0,
+        "max-cps": 12.0,
+        "hit-charge": 0.95,
+        "wait-for-crit": false,
+        "weapon-only": false,
+        "pause-using": true,
+        "swing": "Client"
       }
     },
     "aim-assist": {
@@ -1029,9 +1056,24 @@
         "players": true,
         "hostiles": false,
         "passives": false,
+        "other-living": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "ignore-naked": false,
+        "ignore-new": 0.0,
         "range": 6.0,
         "fov": 180.0,
-        "turn-speed": 12.0
+        "priority": "Distance",
+        "through-walls": false,
+        "wall-range": 0.0,
+        "rotation": "Client",
+        "turn-speed": 12.0,
+        "smoothing": 0.0,
+        "aim-point": "Head",
+        "legit": false,
+        "hold-attack": true,
+        "weapon-only": false,
+        "strength": 100.0
       }
     },
     "trigger-bot": {
@@ -1041,10 +1083,30 @@
         "players": true,
         "hostiles": false,
         "passives": false,
+        "other-living": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "ignore-naked": false,
+        "ignore-new": 0.0,
         "range": 3.0,
         "fov": 180.0,
+        "rotation": "Client",
         "turn-speed": 12.0,
-        "cooldown": 0.95
+        "smoothing": 0.0,
+        "aim-point": "Head",
+        "hit-angle": 90.0,
+        "timing": "Cooldown",
+        "cooldown": 0.95,
+        "attack-jitter": 0.0,
+        "min-cps": 9.0,
+        "max-cps": 12.0,
+        "hit-charge": 0.95,
+        "wait-for-crit": false,
+        "weapon-only": false,
+        "pause-using": true,
+        "swing": "Client",
+        "legit": false,
+        "reaction-delay": 0.0
       }
     },
     "auto-clicker": {
@@ -1054,22 +1116,59 @@
         "players": true,
         "hostiles": false,
         "passives": false,
+        "other-living": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "ignore-naked": false,
+        "ignore-new": 0.0,
         "range": 3.0,
         "fov": 180.0,
+        "rotation": "Client",
         "turn-speed": 12.0,
+        "smoothing": 0.0,
+        "aim-point": "Head",
+        "hit-angle": 90.0,
+        "timing": "CPS",
         "cooldown": 0.95,
-        "cps": 8.0
+        "attack-jitter": 0.0,
+        "min-cps": 8.0,
+        "max-cps": 8.0,
+        "hit-charge": 0.95,
+        "wait-for-crit": false,
+        "weapon-only": false,
+        "pause-using": true,
+        "swing": "Client",
+        "legit": false,
+        "button": "Left",
+        "cps": 8.0,
+        "pattern": "Steady",
+        "respect-cooldown": true
       }
     },
     "auto-weapon": {
       "enabled": false,
       "keybind": -1,
-      "settings": {}
+      "settings": {
+        "legit": false,
+        "swords": true,
+        "axes": true,
+        "maces": true,
+        "tridents": true,
+        "preference": "Damage estimate",
+        "reaction-delay": 0.0
+      }
     },
     "shield-breaker": {
       "enabled": false,
       "keybind": -1,
-      "settings": {}
+      "settings": {
+        "legit": false,
+        "ignore-friends": true,
+        "reaction-delay": 0.0,
+        "release-delay": 0.0,
+        "cooldown": 0.95,
+        "swing": "Client"
+      }
     },
     "bow-aimbot": {
       "enabled": false,
@@ -1078,9 +1177,27 @@
         "players": true,
         "hostiles": false,
         "passives": false,
+        "other-living": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "ignore-naked": false,
+        "ignore-new": 0.0,
         "range": 48.0,
         "fov": 180.0,
-        "turn-speed": 12.0
+        "priority": "Distance",
+        "through-walls": false,
+        "wall-range": 0.0,
+        "rotation": "Client",
+        "turn-speed": 12.0,
+        "smoothing": 0.0,
+        "aim-point": "Head",
+        "bows": true,
+        "crossbows": false,
+        "tridents": false,
+        "predict-movement": true,
+        "prediction": "Lead and drop",
+        "lead-factor": 1.0,
+        "min-charge": 0.0
       }
     },
     "criticals": {
@@ -1090,10 +1207,38 @@
         "players": true,
         "hostiles": false,
         "passives": false,
+        "other-living": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "ignore-naked": false,
+        "ignore-new": 0.0,
         "range": 3.0,
         "fov": 180.0,
+        "rotation": "Client",
         "turn-speed": 12.0,
-        "cooldown": 0.95
+        "smoothing": 0.0,
+        "aim-point": "Head",
+        "hit-angle": 90.0,
+        "timing": "Cooldown",
+        "cooldown": 0.95,
+        "attack-jitter": 0.0,
+        "min-cps": 9.0,
+        "max-cps": 12.0,
+        "hit-charge": 0.95,
+        "weapon-only": false,
+        "pause-using": true,
+        "swing": "Client",
+        "legit": false,
+        "mode": "Jump",
+        "crit-targets": "Living",
+        "min-charge": 0.9,
+        "only-kill-aura": false,
+        "hop-height": 0.2,
+        "min-interval": 0.0,
+        "hold-time": 14.0,
+        "hop-while-moving": true,
+        "sprint-reset": true,
+        "crit-particles": false
       }
     },
     "crystal-aura": {
@@ -1105,12 +1250,40 @@
         "passives": false,
         "range": 6.0,
         "fov": 180.0,
+        "ignore-naked": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "priority": "Distance",
+        "through-walls": false,
         "delay": 4.0,
         "place": true,
         "break": true,
         "cooldown": 0.95,
         "self-distance": 3.0,
-        "health": 12.0
+        "health": 12.0,
+        "place-delay": 1.0,
+        "break-delay": 1.0,
+        "break-range": 4.5,
+        "break-which": "Smart",
+        "face-place-health": 8.0,
+        "face-place-hole": false,
+        "place-range": 4.5,
+        "legit": false,
+        "rotate": false,
+        "aim-speed": 30.0,
+        "aim-smoothing": 40.0,
+        "switch": "Silent",
+        "swing": "Client",
+        "pause-eating": true,
+        "pause-health": 0.0,
+        "render": true,
+        "red": 232.0,
+        "green": 200.0,
+        "blue": 114.0,
+        "min-damage": 6.0,
+        "max-self-damage": 8.0,
+        "anti-suicide": true,
+        "protect-friends": true
       }
     },
     "anchor-aura": {
@@ -1122,9 +1295,32 @@
         "passives": false,
         "range": 6.0,
         "fov": 180.0,
+        "ignore-naked": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "priority": "Distance",
+        "through-walls": false,
         "delay": 4.0,
         "self-distance": 3.5,
-        "health": 12.0
+        "health": 12.0,
+        "use-existing": true,
+        "place-range": 4.5,
+        "legit": false,
+        "rotate": false,
+        "aim-speed": 30.0,
+        "aim-smoothing": 40.0,
+        "switch": "Silent",
+        "swing": "Client",
+        "pause-eating": true,
+        "pause-health": 0.0,
+        "render": true,
+        "red": 232.0,
+        "green": 200.0,
+        "blue": 114.0,
+        "min-damage": 7.0,
+        "max-self-damage": 7.0,
+        "anti-suicide": true,
+        "protect-friends": true
       }
     },
     "surround": {
@@ -1132,7 +1328,30 @@
       "keybind": -1,
       "settings": {
         "delay": 3.0,
-        "support": true
+        "support": true,
+        "shape": "Normal",
+        "center": true,
+        "floor": true,
+        "extend": true,
+        "self-trap": false,
+        "off-jump": true,
+        "off-moved": true,
+        "off-done": false,
+        "place-range": 4.5,
+        "legit": false,
+        "rotate": false,
+        "aim-speed": 35.0,
+        "aim-smoothing": 40.0,
+        "switch": "Silent",
+        "swing": "Client",
+        "pause-eating": true,
+        "pause-health": 0.0,
+        "render": true,
+        "red": 232.0,
+        "green": 200.0,
+        "blue": 114.0,
+        "blocks-per-tick": 1.0,
+        "block": "Obsidian"
       }
     },
     "auto-trap": {
@@ -1144,7 +1363,30 @@
         "passives": false,
         "range": 6.0,
         "fov": 180.0,
-        "delay": 4.0
+        "ignore-naked": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "priority": "Distance",
+        "through-walls": false,
+        "delay": 4.0,
+        "shape": "Full + roof",
+        "only-hole": false,
+        "off-done": false,
+        "place-range": 4.5,
+        "legit": false,
+        "rotate": false,
+        "aim-speed": 35.0,
+        "aim-smoothing": 40.0,
+        "switch": "Silent",
+        "swing": "Client",
+        "pause-eating": true,
+        "pause-health": 0.0,
+        "render": true,
+        "red": 232.0,
+        "green": 200.0,
+        "blue": 114.0,
+        "blocks-per-tick": 1.0,
+        "block": "Obsidian"
       }
     },
     "auto-web": {
@@ -1156,7 +1398,31 @@
         "passives": false,
         "range": 6.0,
         "fov": 180.0,
-        "delay": 4.0
+        "ignore-naked": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "priority": "Distance",
+        "through-walls": false,
+        "delay": 4.0,
+        "feet": true,
+        "head": false,
+        "every-enemy": false,
+        "moving-only": false,
+        "motion-threshold": 0.03,
+        "place-range": 4.5,
+        "legit": false,
+        "rotate": false,
+        "aim-speed": 35.0,
+        "aim-smoothing": 40.0,
+        "switch": "Silent",
+        "swing": "Client",
+        "pause-eating": true,
+        "pause-health": 0.0,
+        "render": true,
+        "red": 232.0,
+        "green": 200.0,
+        "blue": 114.0,
+        "blocks-per-tick": 1.0
       }
     },
     "hole-filler": {
@@ -1164,7 +1430,28 @@
       "keybind": -1,
       "settings": {
         "range": 4.0,
-        "delay": 4.0
+        "delay": 4.0,
+        "near-enemies": true,
+        "enemy-distance": 3.0,
+        "keep-yours": true,
+        "double-holes": true,
+        "scan-delay": 4.0,
+        "protect-friends": true,
+        "place-range": 4.5,
+        "legit": false,
+        "rotate": false,
+        "aim-speed": 35.0,
+        "aim-smoothing": 40.0,
+        "switch": "Silent",
+        "swing": "Client",
+        "pause-eating": true,
+        "pause-health": 0.0,
+        "render": true,
+        "red": 232.0,
+        "green": 200.0,
+        "blue": 114.0,
+        "blocks-per-tick": 1.0,
+        "block": "Obsidian"
       }
     },
     "target-strafe": {
@@ -1176,77 +1463,131 @@
         "passives": false,
         "range": 6.0,
         "fov": 180.0,
+        "ignore-naked": false,
+        "ignore-friends": true,
+        "ignore-invisible": false,
+        "priority": "Distance",
+        "through-walls": false,
         "radius": 2.5,
         "speed": 0.22,
-        "clockwise": true
+        "clockwise": true,
+        "style": "Circle",
+        "direction": "Saved clockwise",
+        "respect-wasd": true,
+        "ground-only": true,
+        "auto-jump": false,
+        "natural-pace": true,
+        "sprint": false,
+        "hug-distance": 0.4,
+        "weave": true,
+        "hop-arc": 55.0,
+        "view-cone": 120.0,
+        "direction-stability": 20.0,
+        "legit": false,
+        "aim-speed": 30.0
       }
     },
     "keep-sprint": {
       "enabled": false,
       "keybind": -1,
-      "settings": {}
+      "settings": {
+        "legit": true,
+        "min-hunger": 6.0,
+        "pause-on-use": true,
+        "ground-only": false
+      }
     },
     "auto-walk": {
       "enabled": false,
       "keybind": -1,
-      "settings": {}
+      "settings": {
+        "direction": "Forward",
+        "sprint": false,
+        "jump": false,
+        "stop-on-collision": false
+      }
     },
     "speed": {
       "enabled": false,
       "keybind": -1,
       "settings": {
-        "speed": 0.35
+        "legit": false,
+        "profile": "Standard",
+        "speed": 0.35,
+        "multiplier": 1.0
       }
     },
     "fly": {
       "enabled": false,
       "keybind": -1,
       "settings": {
-        "speed": 0.35
+        "legit": false,
+        "mode": "Vanilla",
+        "speed": 0.35,
+        "vertical-speed": 0.35,
+        "anti-hover": false,
+        "pulse-interval": 40.0,
+        "rocket-delay": 30.0
       }
     },
     "step": {
       "enabled": false,
       "keybind": -1,
       "settings": {
+        "legit": false,
+        "mode": "Instant",
         "height": 1.0
       }
     },
     "parkour": {
       "enabled": false,
       "keybind": -1,
-      "settings": {}
+      "settings": {
+        "legit": false,
+        "sprint": true,
+        "look-ahead": 0.65
+      }
     },
     "safe-walk": {
       "enabled": false,
       "keybind": -1,
-      "settings": {}
+      "settings": {
+        "legit": false,
+        "only-sneaking": false
+      }
     },
     "fast-ladder": {
       "enabled": false,
       "keybind": -1,
       "settings": {
-        "speed": 0.28
+        "legit": false,
+        "speed": 0.28,
+        "jump-multiplier": 1.0
       }
     },
     "reverse-step": {
       "enabled": false,
       "keybind": -1,
       "settings": {
-        "speed": 0.8
+        "legit": false,
+        "speed": 0.8,
+        "max-drop": 1.5
       }
     },
     "fast-fall": {
       "enabled": false,
       "keybind": -1,
       "settings": {
-        "speed": 1.0
+        "legit": false,
+        "speed": 1.0,
+        "trigger-fall": 1.0
       }
     },
     "glide": {
       "enabled": false,
       "keybind": -1,
       "settings": {
+        "legit": false,
         "speed": 0.1
       }
     },
@@ -1254,6 +1595,7 @@
       "enabled": false,
       "keybind": -1,
       "settings": {
+        "legit": false,
         "height": 0.7
       }
     },
@@ -1261,20 +1603,34 @@
       "enabled": false,
       "keybind": -1,
       "settings": {
-        "speed": 0.65
+        "legit": false,
+        "speed": 0.65,
+        "boost": 1.0,
+        "height": 0.42
       }
     },
     "elytra-boost": {
       "enabled": false,
       "keybind": -1,
       "settings": {
-        "thrust": 0.035
+        "legit": false,
+        "mode": "Impulse",
+        "thrust": 0.035,
+        "climb": 0.0,
+        "max-speed": 3.0,
+        "take-off": false,
+        "rocket-below": 1.0,
+        "rocket-delay": 30.0
       }
     },
     "ground-strafe": {
       "enabled": false,
       "keybind": -1,
-      "settings": {}
+      "settings": {
+        "legit": false,
+        "mode": "Momentum",
+        "speed": 0.32
+      }
     },
     "auto-eat": {
       "enabled": false,

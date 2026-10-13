@@ -1,8 +1,6 @@
-> Analyzer 0.5.1 adds scoped safer routes and active PvE Survival protection for reviewed Automation tasks. The full UI redesign follows [UI-OVERHAUL-PLAN.md](UI-OVERHAUL-PLAN.md) after user references arrive.
-
 # Analyzer roadmap and reference coverage
 
-Reviewed 2026-10-09 for Analyzer 0.5.0, Minecraft Java 1.21.4.
+Reviewed 2026-10-11 for Analyzer 0.5.2, Minecraft Java 1.21.4.
 
 The actual registry has **123 modules**. The [Temple.nz public catalogue](https://temple.nz/assets/data/modules.json?v=be4c7e7b) contains **163 reference modules**. This comparison identifies **102 areas with a functional counterpart or narrower implementation**: **33 scoped counterparts**, **69 partial implementations**, and **61 planned/unimplemented areas**. These figures are separate from feature parity and runtime test coverage.
 
@@ -12,11 +10,11 @@ Evidence status: the matrix is based on the registered source definitions and co
 
 ## Next implementation priorities
 
-1. **Combat/HvH correctness:** deterministic explosion exposure/damage prediction, armor/resistance effects, self-damage/friend guards, stable rotation and placement state, target scoring, cooldowns and multi-module coordination. Extend Crystal/Anchor/Trap/Web tests before adding teleport combat.
+1. **Combat/HvH correctness:** broaden real-world Crystal/Anchor/Trap/Web evidence for the implemented exposure damage, conservative self/friend guards, target scoring and timing. Improve multi-module slot/rotation coordination and server reconciliation before adding teleport combat.
 2. **Movement:** No Slow with precise input hooks and cleanup, then Elytra Autopilot with route/altitude/collision control. Add controlled movement tests for every mode; client motion alone cannot promise server acceptance.
 3. **Rendering:** true model Chams; independent player Aurora curtains and wearable aura meshes; world water/foliage/wet-ground shader integration. Keep overlay effects and mesh/material replacements explicitly distinct.
 4. **Camera/UI:** Freecam, Freelook, Zoom/No Bob; deepen glass scene sampling and HUD/widget polish, preserving camera/options on exit and resource reload.
-5. **Coverage depth:** empty-slot Refill, enchant-aware weapon/armor scoring, crossbow/trident aiming, richer damage/totem events and remote block effects. Expand current partial rows rather than increasing the catalogue with unused switches.
+5. **Coverage depth:** empty-slot Refill, enchant-aware weapon/armor scoring, complete projectile drag/collision, richer damage/totem events and remote block effects. Expand current partial rows rather than increasing the catalogue with unused switches.
 
 ## Every reference module
 
@@ -102,17 +100,17 @@ Evidence status: the matrix is based on the registered source definitions and co
 | Cosmetics | Spinbot | `spinbot` | Partial | Local player render-state yaw/head pitch only; camera/entity/server rotations remain unchanged. |
 | Movement | No Fall | — | Planned | No direct implementation in this release; design and validation remain. |
 | Movement | Fly | `fly` | Counterpart | Client velocity flight with collisions; no server flight grant or bypass. |
-| Movement | Speed | `speed` | Partial | Directional client speed; no anticheat modes or guaranteed Target Strafe integration. |
+| Movement | Speed | `speed` | Partial | Standard/Conservative direct motion or ordinary sprint hops, with multiplier and accepted Target Strafe direction; no anticheat guarantee. |
 | Movement | Step | `step` | Counterpart | Temporary client step-height attribute with restoration. |
 | Movement | Jesus | — | Planned | No direct implementation in this release; design and validation remain. |
 | Movement | Spider | — | Planned | No direct implementation in this release; design and validation remain. |
 | Movement | Boat Fly | — | Planned | No direct implementation in this release; design and validation remain. |
-| Movement | Elytra Boost | `elytra-boost` | Partial | Bounded look-direction impulse during existing gliding; no autopilot. |
+| Movement | Elytra Boost | `elytra-boost` | Partial | Bounded impulse/climb/cap or actual rockets with optional takeoff; no autopilot. |
 | Movement | Entity Speed | — | Planned | No direct implementation in this release; design and validation remain. |
 | Movement | Fast Fall | `fast-fall` | Counterpart | Accelerates an existing fall; normal fall damage remains. |
 | Movement | Fast Ladder | `fast-ladder` | Counterpart | Upward velocity while already climbing. |
 | Movement | Glide | `glide` | Counterpart | Limits ordinary downward velocity outside fluids. |
-| Movement | Ground Strafe | `ground-strafe` | Partial | Aligns existing grounded momentum; no guaranteed constant server speed. |
+| Movement | Ground Strafe | `ground-strafe` | Partial | Momentum/Steady ground motion or normal sprint hops, following accepted orbit direction; no guaranteed constant server speed. |
 | Movement | High Jump | `high-jump` | Counterpart | Higher velocity at the beginning of an ordinary jump. |
 | Movement | Long Jump | `long-jump` | Counterpart | Directional impulse at the start of a jump. |
 | Movement | Noclip | — | Planned | No direct implementation in this release; design and validation remain. |
@@ -122,27 +120,27 @@ Evidence status: the matrix is based on the registered source definitions and co
 | Movement | Safe Walk | `safe-walk` | Counterpart | Vanilla ledge clipping without holding sneak. |
 | Movement | Blink | — | Planned | No direct implementation in this release; design and validation remain. |
 | Combat | Fake Lag | — | Planned | No direct implementation in this release; design and validation remain. |
-| Combat | Kill Aura | `kill-aura` | Partial | Visible targets, real view turn, normal reach/cooldown; no silent rotations. |
-| HVH | Crystal Aura | `crystal-aura` | Partial | Normal reachable placement/breaking with health/distance guards; no explosion damage prediction. |
-| HVH | Anchor Aura | `anchor-aura` | Partial | Normal place/charge/detonate in explosive dimensions; no damage prediction or crosshair-only mode. |
-| HVH | Surround | `surround` | Counterpart | Four sides at the feet with optional lower supports, one interaction at a time. |
+| Combat | Kill Aura | `kill-aura` | Partial | Single/Switch/Multi target modes, filters/priorities, real camera turn and cooldown/CPS timing; no silent rotations. |
+| HVH | Crystal Aura | `crystal-aura` | Partial | Smart/Own/All crystals, bounded place/break timing, exposure damage and conservative self/friend guards; no silent rotation or server outcome guarantee. |
+| HVH | Anchor Aura | `anchor-aura` | Partial | Normal place/charge/detonate with exposure damage, self/friend guards and optional actual crosshair; no silent rotation or server outcome guarantee. |
+| HVH | Surround | `surround` | Counterpart | Materials, shell shapes, occupied-block extension, centering, supports/floor and disable conditions under bounded placement. |
 | HVH | Auto Trap | `auto-trap` | Partial | Bounded sides/roof placement around a target; no advanced adaptive trap planner. |
-| HVH | Auto Web | `auto-web` | Counterpart | Normal supported, reachable web placement at target feet. |
-| HVH | Hole Filler | `hole-filler` | Partial | Nearby player-area one-block holes; no enemy escape prediction. |
+| HVH | Auto Web | `auto-web` | Counterpart | Supported reachable feet/head webs, selected enemies and motion conditions under a placement budget. |
+| HVH | Hole Filler | `hole-filler` | Partial | Loaded single/double holes, enemy relevance and self/friend preservation; no enemy escape prediction. |
 | HVH | Cover Planner | — | Planned | Exposure/damage simulation, self-damage state, mining cost and escape-route scoring. |
 | HVH | Trap Early Warning | — | Planned | Track nearby block changes, identify remaining exits and validate any escape action. |
 | HVH | TP Aura | — | Planned | No direct implementation in this release; design and validation remain. |
 | HVH | Pearl Trap | — | Planned | No direct implementation in this release; design and validation remain. |
 | Combat | Aim Assist | `aim-assist` | Counterpart | Smooth target turn while holding attack, with filters/FOV/range. |
-| Combat | Bow Aimbot | `bow-aimbot` | Partial | Drawn-bow velocity lead/drop estimate; no crossbow/trident aimbot or full drag simulation. |
+| Combat | Bow Aimbot | `bow-aimbot` | Partial | Bow/crossbow/trident lead and drop estimates with filters and camera controls; no full drag/collision simulation or silent shot redirection. |
 | Combat | Auto Block | — | Planned | No direct implementation in this release; design and validation remain. |
-| Combat | Auto Clicker | `auto-clicker` | Partial | Held-attack entity clicks capped by CPS and cooldown; no randomized timings or block-click mode. |
+| Combat | Auto Clicker | `auto-clicker` | Partial | Left/Right/Both normal interactions, held input, steady/random/paired timings and bounded CPS; no continuous-use item repetition. |
 | Combat | Auto Weapon | `auto-weapon` | Partial | Hotbar material/damage estimate and owned-slot restoration; no full enchantment score. |
 | Combat | Criticals | `criticals` | Partial | Real jump/falling-phase normal attacks; no packet critical spoof. |
 | Combat | Shield Breaker | `shield-breaker` | Counterpart | Hotbar axe for a blocking reachable target, with slot ownership/restoration. |
 | Movement | Keep Sprint | `keep-sprint` | Partial | Normal sprint input while moving forward; no guaranteed full knockback on every hit. |
 | Combat | Reach | — | Planned | No direct implementation in this release; design and validation remain. |
-| HVH | Target Strafe | `target-strafe` | Partial | Grounded client orbit; no enemy-view-angle planner, hopping or TP Aura integration. |
+| HVH | Target Strafe | `target-strafe` | Partial | Circle/Vanilla hop/Blind hop/Hug with WASD, flip/weave, normal pace and checked support; no camera-sharing/glance/pursuit or TP Aura integration. |
 | Combat | Trigger Bot | `trigger-bot` | Counterpart | Normal cooldown attacks on a selected crosshair entity. |
 | Combat | Velocity | — | Planned | No direct implementation in this release; design and validation remain. |
 | Player | Auto Eat | `auto-eat` | Counterpart | Hunger-triggered hotbar food with temporary use/slot ownership. |

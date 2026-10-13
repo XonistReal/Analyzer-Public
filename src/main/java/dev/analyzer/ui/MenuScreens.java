@@ -1,6 +1,7 @@
 package dev.analyzer.ui;
 
 import dev.analyzer.core.AnalyzerCore;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 
@@ -16,6 +17,33 @@ public final class MenuScreens {
             case "Classic" -> new ClassicScreen(core);
             case "Compact" -> new CompactScreen(core);
             default -> new AnalyzerScreen(core);
+        };
+    }
+    public static Screen create(AnalyzerCore core, String selectedModuleId) {
+        Screen screen = create(core);
+        if (selectedModuleId != null) {
+            if (screen instanceof AnalyzerScreen workspace) workspace.inspect(selectedModuleId);
+            else if (screen instanceof CatalogScreen catalog) catalog.inspect(selectedModuleId);
+        }
+        return screen;
+    }
+
+    /** Use after a deliberate layout edit, outside rendering/input dispatch. */
+    public static boolean refreshLayout(AnalyzerCore core, Screen screen, String selectedModuleId) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.currentScreen != screen || !(screen instanceof AnalyzerScreen || screen instanceof CatalogScreen)
+                || matchesLayout(core, screen)) return false;
+        Screen next = create(core, selectedModuleId);
+        if (screen instanceof CatalogScreen previous && next instanceof CatalogScreen catalog) catalog.restoreQueryText(previous.queryText());
+        client.setScreen(next);
+        return true;
+    }
+
+    public static boolean matchesLayout(AnalyzerCore core, Screen screen) {
+        return switch (core.getChoice("menu", "layout")) {
+            case "Classic" -> screen instanceof ClassicScreen;
+            case "Compact" -> screen instanceof CompactScreen;
+            default -> screen instanceof AnalyzerScreen;
         };
     }
     public static Screen select(AnalyzerCore core, String layout) {

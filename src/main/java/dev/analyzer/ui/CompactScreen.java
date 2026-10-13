@@ -19,6 +19,11 @@ public final class CompactScreen extends CatalogScreen {
 
     public CompactScreen(AnalyzerCore core) { super(core, "Analyzer / Compact"); selected = core.modules().getFirst(); }
     @Override protected String layout() { return "Compact"; }
+    @Override public CompactScreen inspect(String id) {
+        core.modules().stream().filter(module -> module.id().equals(id)).findFirst().ifPresent(module -> { selected = module; category = "ALL"; query = ""; scroll = Math.max(0, core.modules().indexOf(module) / 3 * 65 - 60); settingScroll = 0; });
+        return this;
+    }
+    @Override public String selectedModuleId() { return selected == null ? null : selected.id(); }
     private List<ModuleDefinition> visible() { return matching().stream().filter(module -> category.equals("ALL") || module.category().name().equals(category)).toList(); }
     @Override protected void body(DrawContext draw) {
         panel(draw, new Area(10, 88, 980, 474), false);
@@ -40,13 +45,13 @@ public final class CompactScreen extends CatalogScreen {
             Area card = new Area(cx, cy, 190, 58);
             if (card.bottom() < CATALOG.y() || card.y() > CATALOG.bottom()) continue;
             boolean enabled = core.isEnabled(module.id()), active = selected == module;
-            draw.fill(cx, cy, cx + 190, cy + 58, enabled ? Palette.alpha(accent, 62) : active ? Palette.CARD_HOVER : Palette.CARD);
-            draw.fill(cx, cy, cx + (active ? 4 : 2), cy + 58, enabled || active ? accent : Palette.BORDER);
+            GuiDraw.card(draw, cx, cy, 190, 58, radius(), accent, glass(), theme(), card.contains(mx, my) ? 1 : 0, active);
             label(draw, GuiDraw.truncate(textRenderer, module.name(), 145, 0.96f), cx + 11, cy + 10, 0.96f, Palette.TEXT);
             label(draw, module.category().label().toUpperCase(java.util.Locale.ROOT), cx + 11, cy + 30, 0.62f, enabled ? accent : Palette.SUBTLE);
             toggle(draw, cx + 155, cy + 29, enabled);
-            clippedControl("module:" + module.id(), card, CATALOG, 0, () -> { selected = module; core.toggle(module.id()); changed(); settingScroll = 0; });
+            clippedControl("inspect-left:" + module.id(), card, CATALOG, 0, () -> { selected = module; settingScroll = 0; searchFocused = false; capture = null; });
             clippedControl("inspect:" + module.id(), card, CATALOG, 1, () -> { selected = module; settingScroll = 0; searchFocused = false; capture = null; });
+            clippedControl("module:" + module.id(), new Area(cx + 151, cy + 25, 39, 27), CATALOG, 0, () -> { core.toggle(module.id()); changed(); });
         }
         draw.disableScissor();
         draw.fill(635, 140, 636, 544, Palette.BORDER);
@@ -57,9 +62,10 @@ public final class CompactScreen extends CatalogScreen {
         for (int line = 0; line < Math.min(2, description.size()); line++) label(draw, description.get(line), 653, 200 + line * 13, 0.81f, Palette.MUTED);
         toggle(draw, 934, 175, core.isEnabled(selected.id()));
         control("selected-toggle", new Area(926, 166, 46, 32), 0, () -> { core.toggle(selected.id()); changed(); });
-        maxSettingScroll = Math.max(0, settingsHeight(selected) - INSPECTOR.h());
+        maxSettingScroll = Math.max(0, settingsHeight(selected, INSPECTOR.w()) - INSPECTOR.h());
         settingScroll = Math.clamp(settingScroll, 0, maxSettingScroll);
         draw.enableScissor(INSPECTOR.x(), INSPECTOR.y(), INSPECTOR.right(), INSPECTOR.bottom());
+        diagnostics.put("settings-scroll", new Point(INSPECTOR.x() + INSPECTOR.w() / 2.0, INSPECTOR.y() + INSPECTOR.h() / 2.0));
         settings(draw, selected, INSPECTOR.x(), INSPECTOR.y() - (int) settingScroll, INSPECTOR.w(), INSPECTOR);
         draw.disableScissor();
     }
@@ -70,7 +76,7 @@ public final class CompactScreen extends CatalogScreen {
         return true;
     }
     @Override public boolean keyPressed(int key, int scan, int modifiers) {
-        if (!searchFocused && capture == null && selected != null && key == GLFW.GLFW_KEY_SPACE) { core.toggle(selected.id()); changed(); return true; }
+        if (!searchFocused && capture == null && focusedControl == null && selected != null && key == GLFW.GLFW_KEY_SPACE) { core.toggle(selected.id()); changed(); return true; }
         return super.keyPressed(key, scan, modifiers);
     }
 }

@@ -26,6 +26,7 @@ import java.util.List;
 final class DevSmoke {
     private static int ticks, worldTicks;
     private static boolean started, worldRequested, arenaReady;
+    private static volatile boolean arenaPrepared;
     private static long skyFramesAtDay;
     private static final List<String> captures = new ArrayList<>();
     static void tick(MinecraftClient client) {
@@ -40,6 +41,18 @@ final class DevSmoke {
         if (!started) return;
         ticks++;
         var core = AnalyzerClient.CORE;
+        // The current interface fixture uses rendered control diagnostics rather than the
+        // historical UI coordinates below, and always runs in the isolated dev world.
+        if (Boolean.getBoolean("analyzer.uiSmoke") && !worldRequested) {
+            worldRequested = true;
+            client.options.getViewDistance().setValue(5); client.options.getSimulationDistance().setValue(5);
+            String name = "Analyzer-Smoke";
+            if (java.nio.file.Files.exists(client.runDirectory.toPath().resolve("saves/" + name + "/level.dat")))
+                client.createIntegratedServerLoader().start(name, () -> client.scheduleStop());
+            else client.createIntegratedServerLoader().createAndStart(name,
+                new LevelInfo("Analyzer Smoke", GameMode.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(FeatureFlags.VANILLA_FEATURES), DataConfiguration.SAFE_MODE),
+                new GeneratorOptions(762831L, false, false), WorldPresets::createDemoOptions, new TitleScreen());
+        }
         if (Boolean.getBoolean("analyzer.botOnly") && !worldRequested) {
             worldRequested=true;
             client.options.getViewDistance().setValue(8); client.options.getSimulationDistance().setValue(8);
@@ -47,27 +60,27 @@ final class DevSmoke {
         }
         if (!worldRequested) {
             switch (ticks) {
-                case 36 -> click(client, 80, 134);
+                case 36 -> control(client, "category:VISUAL", 0);
                 case 40 -> screenshot(client, "analyzer-ui.png");
-                case 44 -> click(client, 352, 295);
+                case 44 -> control(client, "module:entity-esp", 0);
                 case 46 -> require(core.isEnabled("entity-esp"), "Module toggle click");
-                case 47 -> click(client, 800, 451);
+                case 47 -> control(client, "bind", 0);
                 case 48 -> client.currentScreen.keyPressed(GLFW.GLFW_KEY_G, 0, 0);
                 case 49 -> require(core.keybind("entity-esp") == GLFW.GLFW_KEY_G, "Module keybind capture");
-                case 50 -> { click(client, 700, 245); require(!core.getBoolean("entity-esp", "players"), "Boolean setting click"); }
-                case 54 -> { client.currentScreen.keyPressed(GLFW.GLFW_KEY_SLASH, 0, 0); type(client, "Atmosphere"); }
-                case 57 -> click(client, 247, 320);
-                case 60 -> click(client, 851, 190);
-                case 63 -> { require(core.isEnabled("shader"), "Search and inspector toggle"); click(client, 700, 264); }
+                case 50 -> { control(client, "setting:entity-esp:players", 0); require(!core.getBoolean("entity-esp", "players"), "Boolean setting click"); }
+                case 54 -> { control(client, "search", 0); type(client, "Atmosphere"); client.currentScreen.keyPressed(GLFW.GLFW_KEY_ENTER, 0, 0); }
+                case 57 -> control(client, "inspect:shader", 0);
+                case 60 -> control(client, "selected-toggle", 0);
+                case 63 -> { require(core.isEnabled("shader"), "Search and inspector toggle"); control(client, "setting:shader:preset", 0); }
                 case 66 -> require(core.getChoice("shader", "preset").equals("Ember"), "Choice setting click");
-                case 67 -> click(client, 874, 320);
-                case 68 -> require(core.getNumber("shader", "strength") == 1.0, "Slider maximum");
-                case 69 -> click(client, 776, 320);
-                case 70 -> require(core.getNumber("shader", "strength") == 0.6, "Slider precision");
+                case 67 -> { control(client, "number:shader:strength", 1); number(client, "1.0"); }
+                case 68 -> require(core.getNumber("shader", "strength") == 1.0, "Numeric setting maximum");
+                case 69 -> { control(client, "number:shader:strength", 1); number(client, "0.6"); }
+                case 70 -> require(core.getNumber("shader", "strength") == 0.6, "Numeric setting precision");
                 case 72 -> screenshot(client, "analyzer-atmosphere.png");
-                case 76 -> click(client, 80, 367);
-                case 80 -> { click(client, 315, 217); type(client, "smoke-profile"); }
-                case 84 -> click(client, 531, 217);
+                case 76 -> client.setScreen(new AnalyzerScreen(core).showProfiles());
+                case 80 -> { control(client, "profile-name", 0); type(client, "smoke-profile"); }
+                case 84 -> control(client, "save-profile", 0);
                 case 86 -> {
                     try { require(core.profiles().contains("smoke-profile"), "Profile save through UI"); }
                     catch (Exception ex) { throw new IllegalStateException(ex); }
@@ -92,7 +105,16 @@ final class DevSmoke {
             }
         } else if (client.world != null && client.player != null && client.getServer() != null && client.getOverlay() == null) {
             if (!arenaReady) { arenaReady = true; setupArena(client); }
+            if ((Boolean.getBoolean("analyzer.gameplaySettingsSmoke") || Boolean.getBoolean("analyzer.uiSmoke")) && !arenaPrepared) return;
             worldTicks++;
+            if (Boolean.getBoolean("analyzer.uiSmoke")) {
+                if (worldTicks >= 20) NativeUiSmoke.tick(client, worldTicks - 20);
+                return;
+            }
+            if (Boolean.getBoolean("analyzer.gameplaySettingsSmoke")) {
+                if (worldTicks >= 20) GameplaySettingsSmoke.tick(client, worldTicks - 20);
+                return;
+            }
             if (Boolean.getBoolean("analyzer.botOnly")) {
                 if(worldTicks>=20) AutomationReleaseSmoke.tick(client,worldTicks-20);
                 return;
@@ -242,14 +264,21 @@ final class DevSmoke {
             };
             for (String command : commands) server.getCommandManager().executeWithPrefix(source, command);
             AnalyzerClient.LOGGER.info("ANALYZER_SMOKE_ARENA_READY");
+            arenaPrepared = true;
         });
     }
 
-    private static void click(MinecraftClient client, double x, double y) {
-        float w = client.getWindow().getScaledWidth(), h = client.getWindow().getScaledHeight();
-        double scale = Math.max(0.15, Math.min(1.25, Math.min((w - 20) / 900, (h - 20) / 520)));
-        client.currentScreen.mouseClicked((w - 900 * scale) / 2 + x * scale, (h - 520 * scale) / 2 + y * scale, 0);
-        client.currentScreen.mouseReleased(0, 0, 0);
+    private static void control(MinecraftClient client, String id, int button) {
+        var screen = (AnalyzerScreen) client.currentScreen;
+        double[] point = screen.controlPoint(id);
+        require(point != null, "Actual rendered smoke control " + id);
+        screen.mouseClicked(point[0], point[1], button);
+        screen.mouseReleased(point[0], point[1], button);
+    }
+    private static void number(MinecraftClient client, String value) {
+        client.currentScreen.keyPressed(GLFW.GLFW_KEY_A, 0, GLFW.GLFW_MOD_CONTROL);
+        client.currentScreen.keyPressed(GLFW.GLFW_KEY_BACKSPACE, 0, 0);
+        type(client, value); client.currentScreen.keyPressed(GLFW.GLFW_KEY_ENTER, 0, 0);
     }
     private static void type(MinecraftClient client, String value) { for (char c : value.toCharArray()) client.currentScreen.charTyped(c, 0); }
     private static void require(boolean condition, String message) { if (!condition) throw new IllegalStateException("Smoke check failed: " + message); AnalyzerClient.LOGGER.info("Smoke check passed: {}", message); }
