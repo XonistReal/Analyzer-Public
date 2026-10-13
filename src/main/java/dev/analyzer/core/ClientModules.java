@@ -10,7 +10,7 @@ public final class ClientModules {
 
     public static List<Setting<?>> menuSettings() {
         List<Setting<?>> settings = new ArrayList<>();
-        settings.add(Setting.choice("layout", "Menu layout", "Workspace", "Workspace", "Classic", "Compact"));
+        settings.add(Setting.choice("layout", "Menu layout", "Studio", "Studio", "Workspace", "Classic", "Compact"));
         for (int i = 0; i < Category.values().length; i++) {
             String prefix = "classic-" + Category.values()[i].name().toLowerCase(Locale.ROOT);
             settings.add(Setting.number(prefix + "-x", Category.values()[i].label() + " column X", 2 + i % 5 * 24, 0, 100, 0.1));
@@ -23,10 +23,10 @@ public final class ClientModules {
     public static List<ModuleDefinition> definitions() {
         List<ModuleDefinition> result = new ArrayList<>();
         result.add(new ModuleDefinition("hud", "HUD Studio", "Choose your menu, appearance and HUD widget layout.", Category.HUD, true, List.of(
-                Setting.choice("menu-layout", "Menu layout", "Workspace", "Workspace", "Classic", "Compact"),
+                Setting.choice("menu-layout", "Menu layout", "Studio", "Studio", "Workspace", "Classic", "Compact"),
                 Setting.choice("menu-material", "Menu material", "Glass", "Glass", "Solid"),
                 Setting.choice("menu-theme", "Menu theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
-                Setting.choice("menu-accent", "Accent color", "Mint", "Mint", "Violet", "Gold"),
+                Setting.choice("menu-accent", "Accent color", "Rose", "Rose", "Mint", "Violet", "Gold"),
                 Setting.choice("theme", "HUD theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
                 Setting.number("scale", "HUD scale", 0.6, 0.5, 1.75, 0.05),
                 Setting.number("max-modules", "Maximum list rows", 10, 3, 16, 1),

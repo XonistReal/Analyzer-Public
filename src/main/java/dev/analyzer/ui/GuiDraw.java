@@ -1,5 +1,6 @@
 package dev.analyzer.ui;
 
+import dev.analyzer.effects.UiShader;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -11,14 +12,80 @@ import java.util.List;
 
 /** Small, dependency-free canvas primitives. All coordinates use the screen's logical canvas. */
 public final class GuiDraw {
-    private static final Identifier FONT = Identifier.of("analyzer", "ui");
-    private static final Identifier BOLD_FONT = Identifier.of("analyzer", "ui_bold");
+    private static final Identifier LEGACY_FONT = Identifier.of("analyzer", "ui");
+    private static final Identifier LEGACY_BOLD_FONT = Identifier.of("analyzer", "ui_bold");
+    private static final Identifier STUDIO_FONT = Identifier.of("analyzer", "studio");
+    private static final Identifier STUDIO_BOLD_FONT = Identifier.of("analyzer", "studio_bold");
+    private static boolean studioFont;
     private static final float MIN_TEXT_SCALE = 0.8f;
 
     private GuiDraw() {}
 
+    /** Scope rendering and measuring together; HUD and legacy screens retain their original font. */
+    public static FontScope sansFont() { return new FontScope(); }
+
+    public static final class FontScope implements AutoCloseable {
+        private final boolean previous = studioFont;
+        private boolean closed;
+        private FontScope() { studioFont = true; }
+        @Override public void close() {
+            if (!closed) { studioFont = previous; closed = true; }
+        }
+    }
+
+    /** Shader-rendered black shell: broad soft shadow, no repeated bright outline. */
+    public static void shaderPanel(DrawContext context, int x, int y, int width, int height, int radius,
+                                   int accent, boolean glass, String theme) {
+        int surface = switch (theme == null ? "Glass" : theme) {
+            case "Classic" -> 0xFF09090B;
+            case "Minimal" -> 0xFF111215;
+            case "Neon" -> 0xFF100C15;
+            default -> 0xFF09090C;
+        };
+        if (glass) surface = Palette.alpha(surface, "Minimal".equals(theme) ? 230 : 244);
+        int lower = Palette.mix(surface, Palette.alpha(0xFF000000, surface >>> 24), .10);
+        if (!UiShader.surface(context, x, y, width, height, radius, surface, lower, 0x80000000, 15f, 0, 0))
+            rounded(context, x, y, width, height, radius, surface);
+    }
+
+    /** The reference's inset gray cards; hover and selection use fill rather than wire rims. */
+    public static void shaderCard(DrawContext context, int x, int y, int width, int height, int radius,
+                                  int accent, boolean glass, String theme, double hover, boolean selected) {
+        int surface = switch (theme == null ? "Glass" : theme) {
+            case "Classic" -> 0xFF1C1C1F;
+            case "Minimal" -> 0xFF252629;
+            case "Neon" -> 0xFF25202C;
+            default -> 0xFF232326;
+        };
+        surface = Palette.mix(surface, 0xFFF4F0F5, Math.clamp(hover, 0, 1) * .045);
+        if (selected) surface = Palette.mix(surface, accent, .045);
+        if (glass) surface = Palette.alpha(surface, 238);
+        int lower = Palette.mix(surface, Palette.alpha(0xFF111113, surface >>> 24), .16);
+        int light = selected && "Neon".equals(theme) ? Palette.alpha(accent, 22) : 0;
+        if (!UiShader.surface(context, x, y, width, height, radius, surface, lower, 0x30000000, 4f, light, 7f))
+            rounded(context, x, y, width, height, radius, surface);
+    }
+
+    public static void shaderPill(DrawContext context, int x, int y, int width, int height, int accent, boolean enabled) {
+        shaderPill(context, x, y, width, height, accent, enabled ? 1.0 : 0.0);
+    }
+
+    /** White thumb and a softly luminous active track; progress can follow reduced-motion policy. */
+    public static void shaderPill(DrawContext context, int x, int y, int width, int height, int accent, double progress) {
+        double amount = Math.clamp(progress, 0.0, 1.0);
+        int fill = Palette.mix(0xFF505054, accent, amount);
+        int top = Palette.mix(fill, 0xFFFFFFFF, .06);
+        int light = Palette.alpha(accent, (int) (110 * amount));
+        if (!UiShader.surface(context, x, y, width, height, height * .5f, top, fill, 0x32000000, 3f, light, 8f))
+            rounded(context, x, y, width, height, height / 2, fill);
+        float knob = Math.max(4f, height - 4f), knobX = (float) (x + 2 + (width - height) * amount);
+        if (!UiShader.surface(context, knobX, y + 2, knob, knob, knob * .5f, 0xFFFFFFFF, 0xFFF6F6F8,
+                0x18000000, 2f, Palette.alpha(0xFFFFFFFF, (int) (38 * amount)), 5f))
+            rounded(context, Math.round(knobX), y + 2, Math.round(knob), Math.round(knob), Math.round(knob * .5f), 0xFFFFFFFF);
+    }
+
     public static Text text(String value) {
-        return Text.literal(value).styled(style -> style.withFont(FONT));
+        return Text.literal(value).styled(style -> style.withFont(studioFont ? STUDIO_FONT : LEGACY_FONT));
     }
 
     /** Keep rendering and all measuring helpers on the same minimum logical size. */
@@ -207,7 +274,7 @@ public final class GuiDraw {
         context.getMatrices().push();
         translateTextOrigin(context, x, y);
         context.getMatrices().scale(scale, scale, 1);
-        context.drawText(renderer, Text.literal(value).styled(style -> style.withFont(BOLD_FONT)), 0, 0, color, false);
+        context.drawText(renderer, Text.literal(value).styled(style -> style.withFont(studioFont ? STUDIO_BOLD_FONT : LEGACY_BOLD_FONT)), 0, 0, color, false);
         context.getMatrices().pop();
     }
 

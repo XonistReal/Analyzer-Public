@@ -456,8 +456,9 @@
         "id": "accent",
         "label": "Accent color",
         "kind": "CHOICE",
-        "default": "Mint",
+        "default": "Rose",
         "choices": [
+          "Rose",
           "Mint",
           "Violet",
           "Gold"
@@ -476,8 +477,9 @@
         "id": "layout",
         "label": "Menu layout",
         "kind": "CHOICE",
-        "default": "Workspace",
+        "default": "Studio",
         "choices": [
+          "Studio",
           "Workspace",
           "Classic",
           "Compact"
@@ -797,8 +799,9 @@
         "id": "menu-layout",
         "label": "Menu layout",
         "kind": "CHOICE",
-        "default": "Workspace",
+        "default": "Studio",
         "choices": [
+          "Studio",
           "Workspace",
           "Classic",
           "Compact"
@@ -830,8 +833,9 @@
         "id": "menu-accent",
         "label": "Accent color",
         "kind": "CHOICE",
-        "default": "Mint",
+        "default": "Rose",
         "choices": [
+          "Rose",
           "Mint",
           "Violet",
           "Gold"

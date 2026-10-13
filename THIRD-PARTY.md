@@ -8,8 +8,12 @@ Analyzer's original Java code, GLSL shaders, UI resources, and Python/PowerShell
 | --- | --- | --- |
 | `src/main/resources/assets/analyzer/font/ui.ttf` | [Rajdhani-Medium.ttf](https://github.com/google/fonts/blob/main/ofl/rajdhani/Rajdhani-Medium.ttf) | SIL Open Font License 1.1 |
 | `src/main/resources/assets/analyzer/font/ui_bold.ttf` | [Rajdhani-SemiBold.ttf](https://github.com/google/fonts/blob/main/ofl/rajdhani/Rajdhani-SemiBold.ttf) | SIL Open Font License 1.1 |
+| `src/main/resources/assets/analyzer/font/studio.ttf` | [Lato-Regular.ttf](https://github.com/google/fonts/blob/5d3b76120a319730fda218cc7410174a462b32cb/ofl/lato/Lato-Regular.ttf) | SIL Open Font License 1.1 |
+| `src/main/resources/assets/analyzer/font/studio_bold.ttf` | [Lato-Bold.ttf](https://github.com/google/fonts/blob/5d3b76120a319730fda218cc7410174a462b32cb/ofl/lato/Lato-Bold.ttf) | SIL Open Font License 1.1 |
 
 Rajdhani copyright: **Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com).** The font binaries were obtained from the [Google Fonts Rajdhani directory](https://github.com/google/fonts/tree/main/ofl/rajdhani); local filenames are shorter resource names. The accompanying upstream [OFL text](https://github.com/google/fonts/blob/main/ofl/rajdhani/OFL.txt) is preserved in `FONT-LICENSE.txt`. Include that copyright and license when redistributing the fonts or Analyzer packages containing them. Analyzer's MIT license does not replace the fonts' license.
+
+The Studio menu uses unmodified Lato Regular and Bold fonts obtained from the official [Google Fonts Lato directory](https://github.com/google/fonts/tree/5d3b76120a319730fda218cc7410174a462b32cb/ofl/lato), pinned to commit `5d3b76120a319730fda218cc7410174a462b32cb`. Their internal font names and contents are unchanged; `studio.ttf` and `studio_bold.ttf` are only Minecraft resource filenames. Copyright belongs to tyPoland Lukasz Dziedzic; the upstream copyright, reserved font name and full license are preserved in [LATO-OFL.txt](LATO-OFL.txt) and must accompany redistributed packages. SHA-256: Regular `d636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251`; Bold `8a0aace75d33794eece4b28187bfc1df0bbd2888b5d8a56e01788c8d65d16be1`.
 
 ## Runtime and build dependencies
 

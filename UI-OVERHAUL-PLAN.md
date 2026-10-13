@@ -1,6 +1,6 @@
 # Analyzer UI overhaul plan
 
-**Status: user-selected Focused workspace implemented, verified and delivered to Prism; broader acceptance checks remain scoped below.** On October 11, 2026 the user chose **Focused workspace**, with the third reference's rounded cards/switches and the second reference's glass appearance. [UI-REFERENCES.md](UI-REFERENCES.md) records that decision and preserves the earlier comparison. [UI-OVERHAUL.md](UI-OVERHAUL.md) describes the implemented controls and native captures. Existing Classic/Compact alternatives, independent HUD/menu themes and Mint/Violet/Gold accents remain available. Final focused native checks pass; this does not complete every item in the full acceptance matrix below.
+**Status: Analyzer 0.6.0 Studio is implemented, verified and delivered; [VALIDATION.md](VALIDATION.md) records the 91 native checks, 16 captures and Prism preservation audit.** The latest request supersedes the earlier Focused workspace default. The user wants the third reference's centered black/gray menu, pink controls, inline settings and shader rendering. [UI-REFERENCES.md](UI-REFERENCES.md) preserves that correction and the earlier comparison. [UI-OVERHAUL.md](UI-OVERHAUL.md) describes Studio. Workspace/Classic/Compact, independent HUD/menu themes and existing accents remain available. The full acceptance matrix below is broader than one focused release fixture.
 
 The goal is a polished interface that makes a large module catalogue easy to browse, settings easy to understand, and automation progress easy to control. Preserve the visual effects that give Analyzer its identity while making text and actions more prominent than decoration.
 
@@ -10,13 +10,13 @@ For each supplied screenshot, clip or client page, record useful details and tra
 
 Produce a short reference board with annotations and a decision sheet. Separate appearance from behaviour: a preferred colour treatment need not require that client's navigation. Create original Analyzer components; use reference assets only for comparison.
 
-The earlier comparison used the same **123-module, 1,086-setting** snapshot in both directions. The user selected Focused workspace's sidebar, two-column catalogue and substantial inspector, combined with rounded controls and glass. The native catalogue now exposes **1,091 controls: 1,087 canonical settings plus four HUD Studio aliases** for existing Interface preferences. Entity ESP retains 20 settings and Kill Aura 33. Mint/Violet/Gold accents and Glass/Classic/Minimal/Neon menu themes are selectable independently of the HUD theme. Keep the selected direction; do not ask the user to choose it again.
+The earlier comparison used a **123-module, 1,086-setting** snapshot. Its selected sidebar/catalogue/inspector direction was implemented in 0.5.2, but the user rejected its visual result as too similar to the baseline. The current direction changes that composition: **Studio** has a centered black/gray shell, top category tabs, three columns of cards, inline expanded settings, wide Lato type and **Rose** controls. The catalogue exposes **1,091 controls: 1,087 canonical settings plus four HUD Studio aliases**. Existing Workspace/Classic/Compact menus, Glass/Classic/Minimal/Neon themes and Mint/Violet/Gold accents remain; Studio/Rose are added defaults.
 
 ## 2. Define one visual system
 
 Use a small set of shared tokens for surfaces, text roles, semantic states, spacing, borders, corner treatment, and motion. Apply these to menus, profiles, HUD editing and Automation. Accent colour should mark selection and primary actions; status colours should consistently mean running, protecting, safety hold, paused, blocked, failed or complete. Include labels or icons with those states so colour is never the sole signal.
 
-Typography should have a clear title/body/caption hierarchy, measured text wrapping, stable number widths where helpful, and full labels in the settings inspector. Compare the current Rajdhani font with reference-led alternatives at real Minecraft framebuffer sizes. Judge legibility in game, including bright skies and dark caves. A larger settings panel or a wrapped label is preferable to shrinking important words to fit.
+Studio uses a clear title/body/caption hierarchy with Lato Regular/Bold, while retained menus and HUD keep Rajdhani. Measure wrapping with the same native font used for drawing. Judge text in actual Minecraft framebuffers, including bright skies and dark caves. An expanded card's scroll keeps full controls reachable instead of shrinking important words to fit. Shader surfaces do not substitute for typography or input behavior.
 
 Keep the scale systems separate:
 
@@ -30,7 +30,7 @@ Set explicit project contrast targets during the token pass: at least 4.5:1 for 
 
 ## 3. Make navigation and settings predictable
 
-The selected **Workspace** now has a category sidebar, two-column rounded module cards and a substantial grouped inspector. **Classic** retains draggable category columns with inline settings; **Compact** retains a denser catalogue and inspector. All use shared catalogue controls and menu appearance. **HUD Studio** exposes persisted Menu layout, Panel material, Menu theme and Accent colour controls that alias the canonical Interface settings. Header, sidebar and HUD editor shortcuts make these preferences reachable without searching for Interface.
+The selected **Studio** has top categories, three columns of rounded cards and settings inside each card. Long card settings scroll independently; scrolling at their boundary continues through the catalogue. The retained **Workspace** uses a sidebar and inspector, **Classic** uses draggable category columns with inline settings, and **Compact** uses a denser catalogue/inspector. **HUD Studio** exposes persisted layout, material, menu theme and accent controls aliasing canonical Interface settings. Studio's Appearance action and legacy/HUD-editor shortcuts make them reachable.
 
 Keep the following flows consistent across the retained layouts:
 
@@ -40,7 +40,7 @@ Keep the following flows consistent across the retained layouts:
 - Reach Profiles, Edit HUD and Automation from each supported layout. Preserve search/category context when returning from another screen.
 - Explain profile loading before the action: it replaces module settings and keybinds. Provide a visible success or save-failure message without relying on a brief footer flash.
 
-The shared inspector wraps full labels, separates inspection from the module switch, and supports numeric-value clicks or a right-click on the slider row for exact entry. Tab/Shift+Tab moves visible focus, Enter/Space activates a focused control, arrow keys adjust supported values, and Page Up/Down scrolls settings. The catalogue supplies labels through Minecraft's native narration hook. Returning from Profiles, HUD or Automation restores the parent screen's browsing context.
+Studio card settings and the retained inspectors wrap labels, separate inspection from the module switch, and supports numeric-value clicks or a right-click on the slider row for exact entry. Tab/Shift+Tab moves visible focus, Enter/Space activates a focused control, arrow keys adjust supported values, and Page Up/Down scrolls settings. The catalogue supplies labels through Minecraft's native narration hook. Returning from Profiles, HUD or Automation restores the parent screen's browsing context.
 
 Add presentation metadata only where it improves grouping, units or help text. Module IDs, setting IDs, validation bounds, profiles and saved values remain the source of behaviour; the redesign should not silently rename or reset them. HUD Studio's four menu aliases serialize through their canonical Interface fields, avoiding conflicting copies. The five current bundled profiles have been regenerated using canonical values; saved user profiles are not overwritten.
 
@@ -73,12 +73,12 @@ Do not add generic approval dialogs to routine configuration. Put concrete requi
 |---|---|---|---|
 | A. Stabilise current work | Existing native baseline recorded in [VALIDATION.md](VALIDATION.md). | Verify Baritone fixes and record the current UI baseline. | Runtime behaviour is sound before native UI work starts. |
 | B. Reference intake | Five references received; [reference board](UI-REFERENCES.md) prepared. | Annotated reference board, useful behaviours and open decisions. | User references have arrived; no premature style commitment. |
-| C. Compare directions | Complete: user selected Focused workspace plus rounded controls and glass. | Two compositions with identical catalogue/settings content; historical comparison preserved in [UI-REFERENCES.md](UI-REFERENCES.md). | Selected direction is recorded in [AGENTS.md](AGENTS.md). |
-| D. Native vertical slice | Implemented: sidebar, cards, shared inspector, appearance controls and parent-screen return. Final focused native checks pass. | Implement the chosen shell, search, inspector and state/control presentation using actual data. | Continue broader contrast, performance and live-state acceptance checks. |
-| E. Expand and migrate | Shared controls/appearance applied to retained layouts; canonical aliases and bundled profiles updated. | Preserve existing configurations, profiles and independent HUD/menu preferences. | Final migration and preservation evidence accompanies delivery. |
-| F. Verify and package | 280 native assertions, 19 reviewed captures and 1,017 build assertions pass; Prism and the import ZIP are updated. | Real in-game captures, interaction checks, migration evidence and release notes. | Full acceptance matrix is not yet declared complete; see limits in [UI-OVERHAUL.md](UI-OVERHAUL.md). |
+| C. Correct the direction | Earlier comparison is historical; latest user request selects reference 3's native shader card menu. | Centered black/gray Studio, top navigation, inline settings and Rose/Lato presentation. | The latest direction is recorded in [AGENTS.md](AGENTS.md). |
+| D. Native Studio | Implemented: original GLSL surfaces, three-column cards, inline settings, search, appearance controls and parent-screen return. | Render actual settings with a visibly different composition from the old Workspace. | Real framebuffer review and native interactions determine the result. |
+| E. Preserve settings | Added Studio/Rose choices retain all prior options; canonical HUD aliases and bundled profiles are updated. | Preserve configurations, profiles and independent HUD/menu preferences. Deliberately select Studio in the actual active instance. | Audit the selected instance and the configuration fields preserved. |
+| F. Verify and package | Final Studio fixture and delivery evidence are recorded in [VALIDATION.md](VALIDATION.md). Earlier 0.5.2 checks cover earlier artifacts. | Actual Studio captures, interaction checks, preservation evidence and the 0.6.0 Prism ZIP. | The full matrix remains scoped below; do not infer every item from fixture counts. |
 
-Use the shared native component layer for text, controls, layout, scrolling, focus, hit regions and animation. Workspace now extends `CatalogScreen`; `GuiDraw`, `Palette` and `MenuScreens` supply shared appearance and navigation. Continue extending shared presentation without changing gameplay or task-controller semantics as a side effect. Actual game-scene frost supplies the glass backdrop; Solid remains the opaque fallback.
+Use the native component layer for text, controls, scrolling, focus, hit regions and animation. Studio extends CatalogScreen and uses original UiShader GLSL signed-distance surfaces for rounded shapes, shadows and glow. Minecraft GUI matrices, clipping, native TTF text and Screen input remain the integration layer; no ImGui/browser is involved. Keep GL state restoration, resource reload, resize and a readable failure fallback. Glass can use the scene-frost backdrop; Solid presents a black/charcoal shell and cards. Gameplay and task-controller semantics remain unchanged.
 
 Motion should clarify feedback: short selection/toggle transitions, predictable panel entrances and gentle progress changes. Support reduced motion and a true zero-motion mode across all redesigned screens. Keep particles and glow behind content, bound their cost, and verify that moving elements never shift a click target away from the visible control. Use elapsed time rather than frame-dependent animation speed.
 
@@ -88,13 +88,15 @@ Capture the actual native client at **1280 × 800** and **1920 × 1080**, at Min
 
 The release review should show:
 
-- Catalogue/search, a long Entity ESP inspector, profiles, HUD editor, and Automation draft/running/protecting/safety-hold/paused/blocked/completed states. Include empty search, missing Baritone, a long requirement and a save-error state.
+- Studio catalogue/search, a long expanded Combat/Entity ESP card, profiles, HUD editor, and Automation draft/running/protecting/safety-hold/paused/blocked/completed states. Include empty search, missing Baritone, a long requirement and a save-error state.
 - Legible primary labels and numeric values; no clipped controls, inaccessible last settings, overlapping labels, or text concealed by decorative effects. Full requirement/error text is reachable.
 - Matching rendered and clickable control bounds after resize and scale changes. Mouse, scroll, keyboard focus, numeric entry, keybind capture, Escape/back and layout switching work predictably.
 - Visible keyboard focus, consistent Tab order and accessible control labels. Check Minecraft narration support for the chosen native controls; document any remaining limitation.
 - A 60% HUD that preserves usable text and unobstructed gameplay, alongside a dense ESP scene proving independent scale/range and label budgets.
 - Automation controls reflecting real state changes, Stop releasing owned actions, and no implicit start after profile/configuration loading.
 - Motion disabled without hidden movement; contrast checked against both bright and dark game backgrounds; no new OpenGL errors or meaningful steady-frame regression against the baseline on the same machine.
-- Migration evidence preserving module settings, keybinds, friends, profiles, HUD scale/positions, menu preference and applicable Classic column preferences. Take a recoverable configuration backup before any required schema migration and provide a fallback to the old UI during the rollout.
+- Migration evidence preserving module settings, keybinds, friends, profiles, HUD scale/positions, and applicable Classic column preferences. Existing menu choices remain valid; this requested delivery explicitly selects Studio/Rose/Glass theme/Solid material in the active instance. Take a recoverable configuration backup before any required schema migration and provide a fallback to the old UI during the rollout.
+
+The visual review must compare the old Workspace and new Studio in actual captures: centered black/gray shell, top tabs, three-column cards, inline settings, wider type and pink state controls must be apparent without looking at technical status text. Installing a new JAR while leaving the active instance on an old menu choice does not establish delivery of that visual result.
 
 Acceptance evidence should be actual runtime screenshots and interactions. Static prototypes help choose a direction; they are not proof that the finished Minecraft interface behaves correctly.

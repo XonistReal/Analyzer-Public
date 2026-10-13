@@ -96,9 +96,9 @@
       "settings": {
         "material": "Glass",
         "theme": "Glass",
-        "accent": "Mint",
+        "accent": "Rose",
         "motion": 1.0,
-        "layout": "Workspace",
+        "layout": "Studio",
         "classic-visual-x": 2.0,
         "classic-visual-y": 25.0,
         "classic-visual-collapsed": false,

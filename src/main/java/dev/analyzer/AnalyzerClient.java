@@ -60,9 +60,9 @@ public final class AnalyzerClient implements ClientModInitializer {
         });
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             public Identifier getFabricId() { return Identifier.of("analyzer", "effects"); }
-            public void reload(ResourceManager manager) { MinecraftClient.getInstance().execute(GpuEffects::close); }
+            public void reload(ResourceManager manager) { MinecraftClient.getInstance().execute(() -> {GpuEffects.close();dev.analyzer.effects.UiShader.close();}); }
         });
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { saveConfig(); GpuEffects.close(); });
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { saveConfig(); GpuEffects.close(); dev.analyzer.effects.UiShader.close(); });
         LOGGER.info("Analyzer initialized: {} modules, Minecraft 1.21.4", CORE.modules().size());
     }
 

@@ -42,6 +42,9 @@ public abstract class CatalogScreen extends Screen {
     @Override public boolean shouldPause(){return false;}
     protected abstract String layout();
     protected abstract void body(DrawContext draw);
+    protected boolean shaderStyle(){return this instanceof StudioScreen;}
+    protected float canvasScale(){return Math.max(.15f,Math.min(1.2f,Math.min((width-20f)/W,(height-20f)/H)));}
+    protected void backdrop(DrawContext draw){GpuEffects.drawBackdrop(draw);}
     public CatalogScreen inspect(String id){return this;}
     public String selectedModuleId(){return null;}
     public List<String> visibleModuleIds(){return matching().stream().map(ModuleDefinition::id).toList();}
@@ -49,20 +52,22 @@ public abstract class CatalogScreen extends Screen {
     public void restoreQueryText(String value){query=value==null?"":value;searchChanged();}
     @Override public void render(DrawContext draw,int mouseX,int mouseY,float delta){
         long now=System.nanoTime();frameSeconds=Math.clamp((now-lastFrame)/1e9,.001,.05);lastFrame=now;
-        scale=Math.max(.15f,Math.min(1.2f,Math.min((width-20f)/W,(height-20f)/H)));
+        scale=canvasScale();
         ox=(width-W*scale)/2;oy=(height-H*scale)/2;
         if(core.getNumber("menu","motion")>0)oy+=(float)(Math.exp(-(now-opened)/170_000_000.0)*9*scale);
         mx=(mouseX-ox)/scale;my=(mouseY-oy)/scale;
         accent=core.isEnabled("menu")?HudWidgets.accent(core):Palette.MINT;
         controls.clear();diagnostics.clear();hoveredSetting=null;
-        GpuEffects.drawBackdrop(draw);
+        backdrop(draw);
+        try(GuiDraw.FontScope font=shaderStyle()?GuiDraw.sansFont():null){
         draw.getMatrices().push();draw.getMatrices().translate(ox,oy,0);draw.getMatrices().scale(scale,scale,1);
-        GuiDraw.panel(draw,10,9,W-20,H-22,radius(),accent,glass(),theme());
-        MenuScreens.particles(core,draw,W,H,(now-opened)/1e9,mx,my);
+        if(shaderStyle())GuiDraw.shaderPanel(draw,10,9,W-20,H-22,24,accent,glass(),theme());
+        else{GuiDraw.panel(draw,10,9,W-20,H-22,radius(),accent,glass(),theme());MenuScreens.particles(core,draw,W,H,(now-opened)/1e9,mx,my);}
         header(draw);body(draw);footer(draw);
         if(focusedControl!=null)controls.stream().filter(c->c.id.equals(focusedControl)).findFirst().ifPresent(c->
             GuiDraw.roundedBorder(draw,c.area.x-2,c.area.y-2,c.area.w+4,c.area.h+4,5,accent));
         draw.getMatrices().pop();
+        }
         if(hoveredSetting!=null)draw.drawTooltip(textRenderer,Text.literal(hoveredSetting),mouseX,mouseY);
     }
     protected String theme(){return core.getChoice("menu","theme");}
@@ -189,7 +194,7 @@ public abstract class CatalogScreen extends Screen {
             clippedControl("keybind:"+id,hit,viewport,0,()->{capture=id;searchFocused=false;});
         }
     }
-    private void cycle(String id,Setting<?> setting,int direction){
+    protected void cycle(String id,Setting<?> setting,int direction){
         List<String> options=setting.choices();core.setValue(id,setting.id(),options.get(Math.floorMod(options.indexOf(core.getChoice(id,setting.id()))+direction,options.size())));changed();
         if((id.equals("hud")&&setting.id().equals("menu-layout"))||(id.equals("menu")&&setting.id().equals("layout")))layoutRefreshRequested=true;
     }

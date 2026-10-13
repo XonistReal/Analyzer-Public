@@ -1,14 +1,14 @@
 # Analyzer UI references and comparison
 
-Five screenshots were supplied by the user on October 11, 2026. Their unchanged source copies are saved in [design/ui-references](design/ui-references). The user subsequently chose **Focused workspace**, combined with **reference 3's rounded module cards/switches** and **reference 2's glass appearance**. Keep sidebar browsing and a substantial settings inspector, with menu switching inside HUD Studio. This is the recorded direction; the observations below do not imply endorsement of every detail in the source images. Images 1, 2 and 5 identify their clients in the screenshot; the other names describe their visible layouts.
+Five screenshots were supplied by the user on October 11, 2026. Their unchanged source copies are saved in [design/ui-references](design/ui-references). The user initially chose Focused workspace, then rejected the implemented result as too similar to the earlier interface and explicitly requested reference 3's black/gray menu, pink controls and shader rendering. **Studio is the current direction**: centered shell, top categories, three columns of cards, inline expanded settings and wider bold type. The earlier sidebar/inspector Workspace remains an optional layout. Images 1, 2 and 5 identify their clients; the other names describe visible layouts.
 
 ## Reference board
 
 | Reference | Useful details | Tradeoff to resolve in Analyzer |
 |---|---|---|
 | [1 — Temple Simple](design/ui-references/reference-1-temple-simple.png) | Persistent search, category sidebar, two-column compact cards, separate switches and restrained selection accents. | Descriptions are truncated. Analyzer needs a full description and a larger inspector for long settings. Small toolbar icons need discoverable labels and keyboard focus. |
-| [2 — Temple Glass](design/ui-references/reference-2-temple-glass.png) | Several categories remain visible at once, with enabled counts and compact rows. Familiar category columns support quick scanning across modules. | Long Render/Cosmetics columns run beyond the view. Transparent surfaces over detailed terrain make text harder to read. Columns need independent scrolling and stable controls; full settings belong in a separate inspector. |
-| [3 — Rounded cards](design/ui-references/reference-3-rounded-cards.png) | Strong title hierarchy, comfortable card spacing, obvious switches, short descriptions and inline settings. | Expanded cards consume catalogue space and the bottom settings are clipped. Preserve this clarity in the inspector rather than nesting 33 Kill Aura controls into a browsing card. Glow must stay behind the text. |
+| [2 — Temple Glass](design/ui-references/reference-2-temple-glass.png) | Scene translucency, category overview and compact rows. | Detailed terrain competes with text. Retain an optional Glass material with dark readable surfaces; the latest reference 3 direction also needs a Solid black/gray presentation. |
+| [3 — Rounded cards](design/ui-references/reference-3-rounded-cards.png) | **Current primary reference:** centered black shell, gray cards, top category navigation, bold sans serif names, obvious white-knob pink switches and settings inside each card. | Long expanded cards need their own scrolling as well as catalogue scrolling. Keep the last setting/keybind reachable. Restrict pink/glow to controls and selection instead of outlining every surface. |
 | [4 — Red workspace](design/ui-references/reference-4-red-workspace.png) | Visible keybinds, detailed colour editors, labeled sliders, category navigation and bounded settings sections. | Dense controls and faint secondary text are difficult to scan. Give controls more space, units and exact numeric entry; do not require a saturated red theme to make selection visible. |
 | [5 — Diablo](design/ui-references/reference-5-diablo.png) | Restrained dark surfaces, generous type hierarchy, clear category selection and expandable settings. | Large tiles leave considerable unused space with only a few controls. Keep readable type while fitting useful module content; enabled and inspected states need separate indicators. |
 
@@ -36,7 +36,7 @@ The reference images are comparison material. Analyzer's components should be or
 
 ## Historical comparison: two directions with identical content
 
-The October 11 interactive comparison in this conversation presented these directions with shared controls. The user selected Focused workspace. The machine-local browser preview remains historical design evidence; its 168 browser checks covered the simulated comparison, not Minecraft rendering or gameplay. The native implementation and evidence are recorded separately in [UI-OVERHAUL.md](UI-OVERHAUL.md).
+The October 11 interactive comparison presented these directions with shared controls. The user initially selected Focused workspace; the subsequent rejection supersedes it as the default direction. The machine-local browser preview remains historical design evidence; its 168 browser checks covered the simulated comparison, not Minecraft rendering or gameplay. The native implementation and evidence are recorded separately in [UI-OVERHAUL.md](UI-OVERHAUL.md).
 
 | | Focused workspace | Category desk |
 |---|---|---|
@@ -48,19 +48,30 @@ The October 11 interactive comparison in this conversation presented these direc
 
 Both compositions used a **123-module, 1,086-setting** snapshot. They compared layout rather than adding reference-only modules; preview edits remained inside the comparison. The current [module catalogue](MODULES.json) now exposes 1,091 settings, including four HUD Studio aliases for canonical Interface preferences. The snapshot count above describes the historical comparison.
 
-Shared behaviour retained as native requirements:
+Behavior retained across the new Studio and legacy menus:
 
-- Search remains visible while browsing modules. Keep query, category, selected module and inspector position while opening Profiles, HUD or Automation and returning. Switching direction preserves the same context and preview edits.
+- Search remains visible. Retain browsing context while opening Profiles, HUD or Automation and returning. Studio expands settings locally inside cards; long settings and the catalogue scroll independently.
 - Selecting a module opens inspection. Its visible switch changes enabled state independently. Selection, enabled state, keybind and live waiting/error status have different indicators.
-- Long settings use groups, full labels, units, meaningful bounds, keyboard numeric entry and independently scrollable content. Conditional controls retain their saved values when hidden.
+- Long settings use groups, wrapped labels, meaningful bounds, precise numeric entry and independently scrollable content. Conditional controls retain their saved values when hidden.
 - Profiles clearly explain replacement of module settings and keybinds before loading. Loading and saving have reachable success/error feedback.
 - HUD starts at the existing 60% default and preserves saved widget positions and scale. Menu sizing and ESP label sizing remain independent.
 - Automation retains compose → review → start. Show real controller states: draft/reviewed, running, protecting, safety hold, paused, blocked, completed and stopped. Dependency availability is separate. Pause/Stop remain easy to reach; safety monitoring and a resource-blocked stage are distinct. A comparison may show sample states, but native task status must come from the controller.
 
-## Selected native direction and remaining verification
+## Current Studio direction
 
-Workspace now implements sidebar browsing, two-column rounded cards, clear switches and a substantial grouped inspector. Glass uses actual scene frost behind its translucent surfaces; Solid is available for an opaque presentation. **Workspace / Classic / Compact** menu switching appears in **HUD Studio** settings. **Glass / Classic / Minimal / Neon** menu themes remain separate from the existing HUD theme, and **Mint / Violet / Gold** accents are implemented native choices. The existing Rajdhani font remains in use; native framebuffer checks determine readability.
+The earlier and recent Workspace screenshots both used a category sidebar, two-column catalogue and right inspector, together with narrow technical typography and outlined panels. Rounding and frost changed the surface treatment without changing that composition. The user's report of little visible improvement is consistent with that comparison.
 
-The four HUD Studio menu controls share the canonical Interface values instead of creating independent saved copies. Five current bundled profiles have been regenerated without duplicate alias serialization; saved user profiles remain untouched. Keep module and setting IDs, saved values, keybinds, friends, profiles, HUD positions/scale and applicable Classic column preferences. Presentation changes must not alter gameplay or automation ownership semantics.
+Studio makes a visible structural change: a centered black/charcoal window, category tabs across the top, three columns of cards, settings expanding inside their cards, Lato Regular/Bold typography and Rose switches/slider fills. The ambient particle network and pervasive outlined panels are removed from Studio's content. Original GLSL signed-distance surfaces supply smooth rounding, shadows and control glow. Minecraft screens, native TTF text and input dispatch remain in use; there is no ImGui. The reference screenshot cannot itself prove the source client's rendering architecture.
 
-The detailed [overhaul plan](UI-OVERHAUL-PLAN.md) retains the acceptance matrix: actual native captures at 1280 × 800 and 1920 × 1080, effective GUI scales 2/3/4, contrast over bright/dark worlds, keyboard/focus and hit-region checks, long settings and requirements, real Automation transitions, zero-motion support and GL/performance checks. The final focused native run passes 280 assertions with 19 reviewed captures, and Prism delivery is verified in [VALIDATION.md](VALIDATION.md). The full Automation state/capture matrix, renderer/GPU comparisons and complete acceptance matrix remain broader verification work.
+**HUD Studio** exposes **Studio / Workspace / Classic / Compact** layouts, **Glass / Solid** materials, independent menu **Glass / Classic / Minimal / Neon** themes and **Rose / Mint / Violet / Gold** accents. Fresh defaults are Studio/Rose; the opaque reference presentation uses Solid material. The four menu aliases share canonical Interface fields. Saved profiles, HUD scale/positions, keybinds, friends and Classic window preferences remain valid.
+
+Current captures use the `analyzer-studio-` prefix and are linked from [UI-OVERHAUL.md](UI-OVERHAUL.md). Older `analyzer-ui-overhaul-` captures and the 168 browser checks belong to earlier artifacts. Final runtime counts, release hashes and actual Prism delivery evidence are recorded in [VALIDATION.md](VALIDATION.md). The wider acceptance matrix, including comprehensive Automation-state captures, narrator audio, renderer/GPU combinations and steady-frame comparisons, remains separately scoped.
+
+## Primary rendering references
+
+- [LiquidBounce rounded rectangle shader](https://github.com/CCBlueX/LiquidBounce/blob/nextgen/src/main/resources/resources/liquidbounce/shaders/circle/rounded_rect.fsh): shader shape coverage and smooth edges.
+- [LiquidBounce UI blur shader](https://github.com/CCBlueX/LiquidBounce/blob/nextgen/src/main/resources/resources/liquidbounce/shaders/blur/ui_blur.frag): framebuffer sampling and alpha-controlled blur.
+- [ThunderHack native ClickGUI](https://github.com/Pan4ur/ThunderHack-Recode/blob/main/src/main/java/thunder/hack/gui/clickui/ClickGUI.java): native Minecraft Screen integration.
+- [Official Google Fonts Lato resources](https://github.com/google/fonts/tree/5d3b76120a319730fda218cc7410174a462b32cb/ofl/lato): unmodified static fonts for Studio, distributed with [LATO-OFL.txt](LATO-OFL.txt).
+
+These are architecture/design research references. Analyzer's Java and GLSL implementations are original; no GPL client code, cloud logo, avatar or other reference asset is bundled as a product component.

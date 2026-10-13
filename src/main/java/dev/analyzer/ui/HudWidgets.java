@@ -71,7 +71,12 @@ public final class HudWidgets {
         return value.substring(0, end) + "…";
     }
     public static int accent(AnalyzerCore core) {
-        return switch (core.getChoice("menu", "accent")) { case "Violet" -> Palette.VIOLET; case "Gold" -> Palette.GOLD; default -> Palette.MINT; };
+        return switch (core.getChoice("menu", "accent")) {
+            case "Rose" -> 0xFFDB85DA;
+            case "Violet" -> Palette.VIOLET;
+            case "Gold" -> Palette.GOLD;
+            default -> Palette.MINT;
+        };
     }
     public static List<WidgetBounds> bounds(AnalyzerCore core, DrawContext draw, boolean editor) {
         float scale = scale(core, draw);
