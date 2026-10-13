@@ -32,3 +32,7 @@ The user selected **Minecraft panorama** as the Home default on October 12, 2026
 ## Complete Studio styling and supplied branding
 
 On October 12, 2026 the user requested the remaining auxiliary menus and HUD to use Studio's native GLSL surfaces and Lato font. Keep Profiles, Automation, numeric entry and HUD editing on that presentation; Studio settings links must not force Workspace. Keep the explicit alternative layouts and independent HUD themes. HUD panels, slots, keycaps, bars, Radar and safety notices use shader surfaces while retaining real data and saved placement/scale. The user supplied transparent RGBA logos `minecraft-text (1).png` and `minecraft-text.png`; preserve their bytes and glow as the monogram/wordmark resources. Replace the generated Home A/text with these assets, use neutral Modules navigation, and show the supplied artwork in Studio and the HUD watermark. Current acceptance/delivery is in `STUDIO-COMPLETE.md` and `VALIDATION.md`.
+
+## Watermark logo choice
+
+The user explicitly requires the watermark to show exactly one supplied logo. Keep **Watermark → Logo → Analyzer logo / A logo**, defaulting to Analyzer logo for missing fields. Both gameplay and the HUD editor must render only the selected asset. Preserve this choice in saved configs/profiles and keep unrelated Home/Studio branding, widget placement, scale and themes independent. Do not restore the dual-logo watermark.

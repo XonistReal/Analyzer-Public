@@ -159,10 +159,11 @@ final class StudioRefreshSmoke {
         });
         add("Native profile save persists the actual snapshot", 5, client -> {
             require(profiles(core).contains(PROFILE), "The actual profile Save action writes its temporary profile");
-            core.setValue("kill-aura", "range", 3D); click(client, "load-selected");
+            core.setValue("kill-aura", "range", 3D); core.setValue("watermark", "logo", "A logo"); click(client, "load-selected");
         });
         add("Native profile load and delete retain existing profiles", 5, client -> {
             require(core.getNumber("kill-aura", "range") == 4.25, "The native Load action restores the saved precise setting");
+            require(core.getChoice("watermark", "logo").equals("Analyzer logo"), "The native profile Load restores its saved full-watermark logo choice");
             click(client, "delete-selected");
         });
         add("Profile return preserves its exact parent", 4, client -> {
@@ -173,8 +174,10 @@ final class StudioRefreshSmoke {
         add("HUD editor uses shader controls and live widget geometry", 5, client -> {
             require(editor instanceof HudEditorScreen && UiShader.surfaces() > surfacesBefore, "Studio opens the refreshed shader HUD editor");
             core.setEnabled("watermark", true); core.setEnabled("fps", true); core.setValue("hud", "show-disabled", true);
+            rememberBrandCounts();
         });
         add("HUD editor actually drags the shader widget", 4, client -> {
+            requireLogoFrames(core, "The default full-logo HUD editor preview");
             bounds(client, "widget:watermark", "theme", "selected-settings", "menu-settings", "done");
             originalWidgetX = HudWidgets.position(core, "watermark", true); originalWidgetY = HudWidgets.position(core, "watermark", false);
             double[] at = point(editor, "widget:watermark");
@@ -235,6 +238,50 @@ final class StudioRefreshSmoke {
             for (int i = 0; i < HudWidgets.IDS.size(); i++) { String id = HudWidgets.IDS.get(i); core.setEnabled(id, true); HudWidgets.move(core, id, i % 4 * 31D, i / 4 * 23D); }
             rememberWidgetCounts();
         });
+        add("Open the real Watermark setting card", 2, client -> {
+            studio = MenuScreens.create(core, "watermark"); client.setScreen(studio);
+        });
+        seek("setting:watermark:logo", client -> {
+            require(core.getChoice("watermark", "logo").equals("Analyzer logo"), "The Watermark logo choice defaults to the full wordmark");
+            click(client, "setting:watermark:logo");
+        });
+        add("Actual Watermark selector saves A logo", 4, client -> {
+            require(core.getChoice("watermark", "logo").equals("A logo"), "The real Watermark settings control selects the A monogram");
+            capture(client, "analyzer-watermark-settings.png");
+            save(core); require(loadedCore().getChoice("watermark", "logo").equals("A logo"), "The selected A logo survives a real active-config reload");
+            saveLogoProfile(core); client.setScreen(null); rememberBrandCounts();
+        });
+        add("Gameplay watermark renders only the selected A logo", 5, client -> {
+            requireLogoFrames(core, "The gameplay A watermark");
+            capture(client, "analyzer-watermark-a.png");
+            editor = new HudEditorScreen(core, studio); client.setScreen(editor); rememberBrandCounts();
+        });
+        add("A editor preview keeps asset exclusivity", 5, client -> {
+            requireLogoFrames(core, "The A-logo HUD editor preview");
+            capture(client, "analyzer-watermark-editor-a.png");
+            click(client, "done"); require(client.currentScreen == studio, "A-logo editing returns its exact Watermark settings card");
+        });
+        seek("setting:watermark:logo", client -> { click(client, "setting:watermark:logo"); });
+        add("Actual Watermark selector restores the full logo", 4, client -> {
+            require(core.getChoice("watermark", "logo").equals("Analyzer logo"), "The same native selector cycles back to the full wordmark");
+            save(core); require(loadedCore().getChoice("watermark", "logo").equals("Analyzer logo"), "The full logo survives a real active-config reload");
+            client.setScreen(null); rememberBrandCounts();
+        });
+        add("Gameplay watermark renders only the full wordmark", 5, client -> {
+            requireLogoFrames(core, "The gameplay full watermark");
+            capture(client, "analyzer-watermark-analyzer.png");
+            editor = new HudEditorScreen(core, studio); client.setScreen(editor); rememberBrandCounts();
+        });
+        add("Full editor preview keeps asset exclusivity", 5, client -> {
+            requireLogoFrames(core, "The full-logo HUD editor preview");
+            capture(client, "analyzer-watermark-editor-analyzer.png");
+            click(client, "done"); client.setScreen(null); core.setEnabled("watermark", false); rememberBrandCounts();
+        });
+        add("A disabled gameplay watermark draws no logo", 5, client -> {
+            require(client.currentScreen == null && BrandAssets.wordmarkFrames() == wordmarkBefore && BrandAssets.monogramFrames() == monogramBefore
+                    && !HudWidgets.lastRenderedWidgetIds().contains("watermark"), "Disabling the gameplay Watermark suppresses both logo assets and its panel");
+            core.setEnabled("watermark", true);
+        });
         for (String theme : List.of("Glass", "Classic", "Minimal", "Neon")) {
             add("Select independent HUD theme " + theme, 2, client -> {
                 core.setValue("hud", "theme", theme); rememberWidgetCounts(); hudSurfacesBefore = HudWidgets.shaderSurfaces();
@@ -243,7 +290,7 @@ final class StudioRefreshSmoke {
             add("Every actual HUD widget uses shaders for " + theme, 5, client -> {
                 require(core.getChoice("menu", "theme").equals("Glass") && core.getChoice("hud", "theme").equals(theme), "HUD " + theme + " preserves its independent menu theme");
                 require(HudWidgets.shaderSurfaces() > hudSurfacesBefore, "HUD " + theme + " submits new shader surfaces with menus closed");
-                require(BrandAssets.wordmarkFrames() > wordmarkBefore && BrandAssets.monogramFrames() > monogramBefore, "The gameplay watermark uses both supplied logo assets for " + theme);
+                requireLogoFrames(core, "The gameplay watermark for " + theme);
                 for (String id : HudWidgets.IDS) require(HudWidgets.shaderWidgetFrames(id) > widgetCounts.getOrDefault(id, 0L), "Actual shader widget rendered for " + theme + ": " + id);
                 widgetBounds(client); capture(client, "analyzer-refresh-hud-" + theme.toLowerCase(Locale.ROOT) + ".png");
             });
@@ -296,6 +343,21 @@ final class StudioRefreshSmoke {
         });
     }
 
+    private static void rememberBrandCounts() { wordmarkBefore = BrandAssets.wordmarkFrames(); monogramBefore = BrandAssets.monogramFrames(); }
+    private static void requireLogoFrames(AnalyzerCore core, String context) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        require(client.currentScreen == null || client.currentScreen instanceof HudEditorScreen, context + " is checked without Home or Studio logo rendering");
+        boolean monogram = core.getChoice("watermark", "logo").equals("A logo");
+        require(monogram ? BrandAssets.monogramFrames() > monogramBefore && BrandAssets.wordmarkFrames() == wordmarkBefore
+                : BrandAssets.wordmarkFrames() > wordmarkBefore && BrandAssets.monogramFrames() == monogramBefore,
+                context + " advances only its selected asset's actual native frame counter");
+    }
+    private static void saveLogoProfile(AnalyzerCore core) {
+        try {
+            core.saveProfile(PROFILE); core.setValue("watermark", "logo", "Analyzer logo"); core.loadProfile(PROFILE); core.deleteProfile(PROFILE);
+            require(core.getChoice("watermark", "logo").equals("A logo") && existingProfiles.equals(profileHashes()), "The A-logo profile roundtrip restores its choice and preserves every existing profile");
+        } catch (IOException failure) { throw new IllegalStateException("Cannot roundtrip the isolated watermark profile", failure); }
+    }
     private static void rememberWidgetCounts() { for (String id : HudWidgets.IDS) widgetCounts.put(id, HudWidgets.shaderWidgetFrames(id)); }
     private static void widgetBounds(MinecraftClient client) {
         List<HudWidgets.WidgetBounds> rendered = HudWidgets.lastRenderedBounds();
@@ -390,6 +452,6 @@ final class StudioRefreshSmoke {
     private static void await(String label, int waitTicks, Predicate<MinecraftClient> action) { steps.add(new Step(label, waitTicks, action)); }
     private static void require(boolean condition, String label) { if (!condition) throw new IllegalStateException("Studio refresh check " + phase + ": " + label); assertions++; AnalyzerClient.LOGGER.info("ANALYZER_STUDIO_REFRESH_ASSERT: {}", label); }
     private static void capture(MinecraftClient client, String name) { require(UiShader.isHealthy() && GL11.glGetError() == GL11.GL_NO_ERROR, "Actual shader/GL state before " + name); ScreenshotRecorder.saveScreenshot(client.runDirectory, name, client.getFramebuffer(), message -> AnalyzerClient.LOGGER.info("Studio refresh screenshot: {}", message.getString())); screenshots++; }
-    private static void finish(MinecraftClient client) { complete = true; AnalyzerClient.LOGGER.info("ANALYZER_STUDIO_REFRESH_SMOKE_COMPLETE: {} assertions, {} screenshots, {} phases, {} ticks; native auxiliary routes, precise numeric errors/apply/cancel, profile CRUD with preservation, HUD drag/return/persistence, four real HUD shader themes, framebuffer delta, six window/GUI cases, supplied-brand Home, zero motion and reload", assertions, screenshots, steps.size(), ticks); client.scheduleStop(); }
+    private static void finish(MinecraftClient client) { complete = true; AnalyzerClient.LOGGER.info("ANALYZER_STUDIO_REFRESH_SMOKE_COMPLETE: {} assertions, {} screenshots, {} phases, {} ticks; native auxiliary routes, precise numeric errors/apply/cancel, profile CRUD with preservation, HUD drag/return/persistence, exclusive Watermark selector/assets/disabled/config/profile roundtrips, four real HUD shader themes, framebuffer delta, six window/GUI cases, supplied-brand Home, zero motion and reload", assertions, screenshots, steps.size(), ticks); client.scheduleStop(); }
     private record Step(String label, int waitTicks, Predicate<MinecraftClient> action) { }
 }

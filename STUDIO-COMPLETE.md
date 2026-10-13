@@ -1,4 +1,4 @@
-# Studio screens, shader HUD and supplied branding — 0.7.1
+# Studio screens, shader HUD and supplied branding — 0.7.2
 
 Studio's auxiliary screens now share its charcoal shader surfaces, rounded controls and Lato typography. Profiles, Automation, the HUD editor and precise numeric entry no longer open or draw the previous Workspace interface. Settings links use the selected module-menu layout and return to their actual parent. The deliberately selectable Workspace / Classic / Compact alternatives remain available.
 
@@ -28,13 +28,17 @@ HUD **Glass / Classic / Minimal / Neon** themes remain independent of the menu t
 
 The user's `minecraft-text (1).png` and `minecraft-text.png` already contain RGBA transparency. Their bytes are preserved as `textures/brand/monogram.png` and `textures/brand/wordmark.png`, including the pink lettering, dark letter shadows and partially transparent glow. No background removal, recoloring or replacement artwork was performed.
 
-The old generated A glyph and plain pink Home wordmark are removed. Home uses the supplied monogram and panorama wordmark; **Modules** provides neutral navigation. Studio uses the supplied wordmark in its header; the HUD watermark fits both images into its existing footprint. Orbit keeps the large scene clear and shows the supplied monogram in the corner.
+The old generated A glyph and plain pink Home wordmark are removed. Home uses the supplied monogram and panorama wordmark; **Modules** provides neutral navigation. Studio uses the supplied wordmark in its header; the HUD watermark shows either supplied image, selected with **Watermark → Logo → Analyzer logo / A logo**. The default is Analyzer logo. Gameplay and the HUD editor never draw both together; the choice saves with active settings and named profiles, while the existing panel footprint and version caption are retained. Orbit keeps the large scene clear and shows the supplied monogram in the corner.
 
 ![Panorama Home with the supplied transparent artwork](screenshots/analyzer-refresh-home-logo.png)
 
+![Watermark with the full logo](screenshots/analyzer-watermark-analyzer.png)
+
+![Watermark with the A logo](screenshots/analyzer-watermark-a.png)
+
 ## Verification and delivery
 
-The final Java 21 checks pass **1,054 build assertions**, **542 Studio/HUD assertions** and **499 Home assertions**, with **48 new native captures**. The opt-in development fixture covers actual auxiliary navigation, profile save/load/delete with existing profile hashes preserved, numeric error/apply/cancel, Automation review without starting a task, editor dragging/persistence/parent return, all 17 actual HUD shader paths, four themes, live framebuffer differences, Radar, protection-notice presentation, six window/GUI-scale cases, motion zero and resource reload. Protection-banner presentation uses a labeled fixture snapshot without executing a task. A separate title-only Home regression checks the real world/server/options pages and vanilla fallback. [Validation](VALIDATION.md) records final counts and release hashes.
+The preceding complete Studio release passed **1,054 build assertions**, **542 Studio/HUD assertions** and **499 Home assertions**, with **48 new native captures**. The opt-in development fixture covers actual auxiliary navigation, profile save/load/delete with existing profile hashes preserved, numeric error/apply/cancel, Automation review without starting a task, editor dragging/persistence/parent return, all 17 actual HUD shader paths, four themes, live framebuffer differences, Radar, protection-notice presentation, six window/GUI-scale cases, motion zero and resource reload. Protection-banner presentation uses a labeled fixture snapshot without executing a task. A separate title-only Home regression checks the real world/server/options pages and vanilla fallback. [Validation](VALIDATION.md) records final counts and release hashes.
 
 Run with Java 21:
 

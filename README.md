@@ -1,24 +1,26 @@
-> **0.7.1 complete Studio styling:** Profiles, Automation, HUD editing and numeric entry now match Studio. All 17 HUD widgets use rounded native shader surfaces and Lato. The supplied transparent logos replace the generated Home branding and appear in Studio and the HUD watermark. See [controls and current captures](STUDIO-COMPLETE.md) and [validation/delivery](VALIDATION.md).
+> **0.7.2 watermark choice:** Profiles, Automation, HUD editing and numeric entry now match Studio. All 17 HUD widgets use rounded native shader surfaces and Lato. The supplied transparent logos replace the generated Home branding and appear in Studio and the HUD watermark. See [controls and current captures](STUDIO-COMPLETE.md) and [validation/delivery](VALIDATION.md).
 
 # Analyzer
 
-An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.7.1** has **123 registered modules**: world visuals, editable HUD widgets, a custom Home screen, four native module menus, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
+An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.7.2** has **123 registered modules**: world visuals, editable HUD widgets, a custom Home screen, four native module menus, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
 
 ![Studio with the supplied transparent wordmark](screenshots/analyzer-refresh-studio.png)
 
 ## Install and start
 
-**Prism Launcher:** drag `Analyzer-0.7.1-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, the official Baritone API and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; Baritone is a separate mod installed once for Automation.
+**Prism Launcher:** drag `Analyzer-0.7.2-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, the official Baritone API and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; Baritone is a separate mod installed once for Automation.
 
 Project updates also rebuild the Prism ZIP and update the user's local Analyzer instance. The standing delivery workflow is recorded in [AGENTS.md](AGENTS.md).
 
-For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.7.1.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. Add the separate official `baritone-api-fabric-1.13.1.jar` to run Automation. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
+For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.7.2.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. Add the separate official `baritone-api-fabric-1.13.1.jar` to run Automation. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
 
 The custom Home screen opens by default over Minecraft's panorama. Use its top-right button to switch to Orbit; **Vanilla menu** saves the original title preference. [Home controls](HOME-SCREEN.md) describes the real world/server and options pages. Click **Modules** on Home or **Analyzer** on the vanilla title screen or press **Right Shift** in game. Fresh installs open **Studio** with the **Rose** accent; choose **HUD Studio → Menu layout → Studio** to switch an existing preference. **Profiles → studio → Load** adds selected cosmetics and Studio appearance; **cinematic** retains Workspace, **classic** uses draggable category columns and **neon** uses Compact and Neon HUD. These four visual profiles leave gameplay automation off. Loading **hvh** explicitly enables Kill Aura, Crystal Aura, Surround, Auto Weapon, Auto Totem, Auto Armor and Keep Sprint, with combat HUD widgets. Earlier **showcase**, **arctic**, **cinder**, **aurora**, **ember** and **minimal** profiles remain available. Profiles opens from every menu; Back restores the parent catalogue context.
 
 Profiles are seeded once without overwriting existing files. An older saved profile can restore an older menu preference; use HUD Studio's appearance controls to select Studio again without replacing other settings. Loading a profile replaces active settings and module keybinds. Settings live in `config/analyzer/config.json`; profiles in `config/analyzer/profiles/`, friends in `config/analyzer/friends.txt`. The updater preserves these and your worlds.
 
 ## Menus and HUD
+
+**Watermark → Logo** selects **Analyzer logo** (default) or **A logo**. Gameplay and the HUD editor show one supplied image at a time. The choice saves with your settings and profiles; placement, scale, opacity and version caption are retained.
 
 - **Studio:** a centered black-and-charcoal shell, top category tabs, three columns of rounded cards and settings that expand inside each card. A card's switch enables/disables the module separately. Expanded cards scroll their long settings; the catalogue scrolls separately. GLSL draws smooth surfaces, shadows, pills and glow; the bundled Lato Regular/Bold font gives this menu a wider typeface.
 - **Workspace:** the retained sidebar, search, two-column cards and scrolling inspector. Click a card to inspect; its separate switch enables/disables it. **/** focuses search.
@@ -32,7 +34,7 @@ Profiles are seeded once without overwriting existing files. An older saved prof
 - Expanded cards and legacy inspectors group related settings and wrap labels; fields for inactive modes keep their saved values. Click a numeric value or **right-click its slider row** to type a precise value, then press Enter or Apply. **Tab / Shift+Tab** moves visible focus, **Enter / Space** activates the focused control, arrow keys adjust supported values, and **Page Up / Down** scrolls settings. Shared catalogue controls provide labels through Minecraft's native narration hook. See [Gameplay settings](GAMEPLAY-SETTINGS.md) for behavior and reference gaps.
 - Returning from **Profiles**, **Edit HUD** or **Automation** restores the parent screen's search/category/selection context. Loading a profile remains an explicit replacement of module settings and keybinds.
 
-The [complete Studio refresh](STUDIO-COMPLETE.md) extends that presentation to Profiles, Automation, numeric entry and HUD editing, removing forced Workspace routes. The latest direction in the [reference board](UI-REFERENCES.md) replaces the earlier Focused workspace choice: reference 3's black/gray cards, top navigation, inline settings and pink controls now define Studio. Previous Workspace captures and the browser comparison remain historical evidence. The native catalogue exposes **1,099 controls: 1,091 canonical settings plus eight HUD Studio appearance/Home aliases**. [UI-OVERHAUL.md](UI-OVERHAUL.md) records current controls and screenshots; [UI-OVERHAUL-PLAN.md](UI-OVERHAUL-PLAN.md) keeps the acceptance requirements and verification scope.
+The [complete Studio refresh](STUDIO-COMPLETE.md) extends that presentation to Profiles, Automation, numeric entry and HUD editing, removing forced Workspace routes. The latest direction in the [reference board](UI-REFERENCES.md) replaces the earlier Focused workspace choice: reference 3's black/gray cards, top navigation, inline settings and pink controls now define Studio. Previous Workspace captures and the browser comparison remain historical evidence. The native catalogue exposes **1,100 controls: 1,092 canonical settings plus eight HUD Studio appearance/Home aliases**. [UI-OVERHAUL.md](UI-OVERHAUL.md) records current controls and screenshots; [UI-OVERHAUL-PLAN.md](UI-OVERHAUL-PLAN.md) keeps the acceptance requirements and verification scope.
 
 ## Implemented features
 
@@ -96,7 +98,7 @@ Select a Java 21 JDK with `JAVA_HOME`, then run:
 .\gradlew.bat publishLocal   # publish to the Prism local update feed
 ```
 
-On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.7.1.jar`.
+On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.7.2.jar`.
 
 `runSmoke` uses the project-local `run/` directory, creates/updates only `run/saves/Analyzer-Smoke`, captures screenshots, and exits. Installed release builds never activate the development harness. See VALIDATION for assertions and results. Optional pixel checks use `python tools/verify_render.py` and `python tools/verify_visuals.py` with Pillow.
 

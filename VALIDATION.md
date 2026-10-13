@@ -1,3 +1,19 @@
+# Exclusive watermark logo choice — October 12, 2026
+
+Analyzer **0.7.2** adds **Watermark → Logo → Analyzer logo / A logo**. The full Analyzer logo is the default for missing fields. Gameplay and the HUD editor draw only the selected supplied asset; there is no combined-logo choice. Selection saves with the active config and named profiles. The existing panel footprint, position, opacity, scale and version/theme caption are preserved. Home and Studio branding are unchanged by this update.
+
+Java 21 **build / publishLocal** pass **1,054 assertions**. The final actual-Minecraft Studio/HUD fixture passes **574 assertions**, **88 phases**, **344 ticks** and **22 run captures**. The native settings control cycles Analyzer → A → Analyzer. Both choices survive config reload; saved-profile Load restores Analyzer, and a temporary A-logo profile roundtrip preserves every existing development profile hash. Real asset-frame counters advance only for the selected logo in closed-menu gameplay and in the HUD editor, while the other counter remains unchanged. Disabling Watermark submits neither image or widget panel. Counter checks exclude Home/Studio rendering, where both resources are independently valid.
+
+All 17 HUD widgets still submit native shader surfaces across four themes; numeric title pixel clarity, FPS framebuffer differences, six window/GUI cases and reload also pass. The final log has no ERROR/FATAL entries. Five new PNGs are copied unchanged to `screenshots/analyzer-watermark-*.png` and visually reviewed. Historical 0.7.1 captures/logs remain intact. No full Home regression or gameplay action sweep is repeated for this watermark-only change. Evidence: `build/reports/watermark-runtime.log` and `build/reports/watermark-coverage.json`.
+
+The registry contains **123 modules / 1,100 exposed settings / 1,092 canonical settings**, including eight HUD appearance aliases. Five regenerated canonical starter snapshots contain the new default; existing installed profiles are not overwritten.
+
+The final build/feed/install/archive Analyzer SHA-256 is **`4501ff58cc39b377642a4c14bbe42f5b8db6b7f8bd94efc85d49f65b95fc1913`**. Minecraft was closed for the strict update of `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.7.0-Prism-1.21.4`. Exactly one **analyzer-0.7.2-4501ff58cc39.jar** is installed and the final updater check reports **up-to-date**. The previous 0.7.1 JAR is backed up. All **109 protected game/dependency/launcher files** and **11 saved profiles** remain byte-identical, including active configuration, worlds, friends, unrelated mods, updater connection and Java preferences.
+
+`C:\Users\sould\Desktop\Analyzer-0.7.2-Prism-1.21.4.zip` includes the matching runtime/dependencies, updater, sources/notices, current docs and five watermark captures. ZIP CRC, exact Analyzer hashes, unchanged logo resources and five canonical snapshots are verified. The package inherits Prism's Java settings and contains no accounts, saved worlds or user configuration. Final delivery evidence is `build/reports/prism-watermark-delivery.json`.
+
+---
+
 # Complete Studio, shader HUD and supplied branding — October 12, 2026
 
 Analyzer **0.7.1** extends Studio's native GLSL surfaces and Lato to Profiles, Automation, HUD editing and numeric entry. Forced Workspace shortcuts are removed from the current Studio workflow. All 17 HUD widgets, Radar and protection notices use native shader panels; keycaps, item slots and target health bars use rounded shader geometry. Projected ESP label panels are styled without changing world-space target/depth rules. The user-supplied transparent monogram and wordmark replace the generated Home branding and appear in Studio and the HUD watermark. [Current controls and captures](STUDIO-COMPLETE.md) documents the update.

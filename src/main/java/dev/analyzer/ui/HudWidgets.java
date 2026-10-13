@@ -141,9 +141,15 @@ public final class HudWidgets {
                 SHADER_WIDGET_FRAMES.merge(widget.id, 1L, Long::sum);
             renderedIds.add(widget.id);
             if (widget.id.equals("watermark")) {
-                BrandAssets.monogram(draw, x + 11, y + 8, 24);
-                BrandAssets.wordmark(draw, x + 46, y + 12, Math.min(95, widget.width - 57));
                 int versionY = y + widget.height - (int) Math.ceil(12 * readableScale(theme, scale, .7f, true)) - 7;
+                float logoHeight = Math.min(30, Math.max(8, versionY - y - 3));
+                if (core.getChoice("watermark", "logo").equals("A logo")) {
+                    BrandAssets.monogram(draw, x + (widget.width - logoHeight * BrandAssets.MONOGRAM_ASPECT) / 2,
+                            y + 2, logoHeight);
+                } else {
+                    float logoWidth = Math.min(widget.width - 18, logoHeight * BrandAssets.WORDMARK_ASPECT);
+                    BrandAssets.wordmark(draw, x + (widget.width - logoWidth) / 2, y + 2, logoWidth);
+                }
                 text(draw, VERSION + "  ·  " + theme, x + 11, versionY, 0.7f, SECONDARY, theme);
             } else if (widget.id.equals("inventory")) drawInventory(draw, core, widget, x, y, theme);
             else if (widget.id.equals("armor")) drawArmor(draw, core, widget, x, y, theme);

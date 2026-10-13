@@ -42,7 +42,7 @@
 | Coordinates | Show position and dimension in your HUD. | On |
 | Crosshair | A crisp customizable crosshair. | Off |
 | HUD Studio | Choose your menu, appearance and HUD widget layout. | On |
-| Watermark | Analyzer identity and version badge. | On |
+| Watermark | Your selected logo and version badge. | On |
 | Active Modules | A bounded list of enabled gameplay modules. | On |
 | FPS | Current client frames per second. | On |
 | Ping | Actual player latency reported by the server. | Off |

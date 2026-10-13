@@ -40,7 +40,8 @@ public final class ClientModules {
                 Setting.number("coordinates-y", "Coordinates Y", 94, 0, 100, 0.1),
                 Setting.number("radar-x", "Radar X", 2, 0, 100, 0.1),
                 Setting.number("radar-y", "Radar Y", 26, 0, 100, 0.1))));
-        result.add(widget("watermark", "Watermark", "Analyzer identity and version badge.", true, 2, 2));
+        result.add(widget("watermark", "Watermark", "Your selected logo and version badge.", true, 2, 2,
+                Setting.choice("logo", "Logo", "Analyzer logo", "Analyzer logo", "A logo")));
         result.add(widget("active-modules", "Active Modules", "A bounded list of enabled gameplay modules.", true, 98, 2,
                 Setting.bool("details", "ESP target details", true), Setting.bool("hud-modules", "Include HUD modules", false)));
         result.add(widget("fps", "FPS", "Current client frames per second.", true, 2, 12));
