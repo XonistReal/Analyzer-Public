@@ -1,6 +1,16 @@
-# Native Studio UI — Analyzer 0.6.0
+# Native UI — Analyzer 0.8.0
 
-**Status: Studio is implemented, verified and delivered to the existing Prism instance.** The final run passes 91 native checks and 1,030 build assertions with 16 reviewed captures; [VALIDATION.md](VALIDATION.md) records the installation and archive hashes. The earlier 0.5.2 Workspace overhaul is historical. This release follows the user's subsequent request for the third reference's black/gray menu and pink controls.
+The current module layouts are **Studio / Click GUI**, selected in **HUD Studio → Menu layout**. Workspace, Classic and Compact implementations have been removed. Saved old layout values, including those inside user HVH profiles, decode to Studio without rewriting the profile file or changing its other settings. All five new bundled full profiles choose Studio. The rebuilt Click GUI uses shader category columns and Lato, with board paging, independent column scrolling, drag/collapse and shared typed controls.
+
+**Glass theme** now draws original scene-backed liquid surfaces with lens refraction, frost, curved-edge glints and soft shadows. **Panel material → Glass / Solid** remains the independent menu-background treatment. HUD Glass uses the optical shader too; HUD/menu themes, accents and the exclusive watermark logo choice remain separate saved settings. Current controls, captures and test results are in [LIQUID-GLASS.md](LIQUID-GLASS.md) and [VALIDATION.md](VALIDATION.md).
+
+![Current Studio with liquid Glass theme](screenshots/analyzer-liquid-studio-glass.png)
+
+---
+
+# Historical native Studio UI — Analyzer 0.6.0
+
+The following records the **historical 0.6.0 delivery**. Its retained layouts, counts and non-refractive rendering describe that build; they are superseded by the 0.8.0 controls above. The 0.6.0 run passed 91 native checks and 1,030 build assertions with 16 reviewed captures. It followed the user's request for the third reference's black/gray menu and pink controls.
 
 ![Native Studio with Solid material](screenshots/analyzer-studio-solid.png)
 

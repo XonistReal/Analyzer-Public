@@ -3,6 +3,7 @@ package dev.analyzer.ui;
 import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.effects.HomeEffects;
 import dev.analyzer.effects.UiShader;
+import dev.analyzer.effects.LiquidGlass;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
@@ -126,9 +127,11 @@ public final class HomeScreen extends Screen {
             GuiDraw.label(draw, textRenderer, "Welcome, " + client.getSession().getUsername(), 29, 64, .84f, MUTED);
             if (withPanel) {
                 int panelHeight = Math.round(canvasHeight() - 116);
-                if (!UiShader.surface(draw, 284, 68, 675, panelHeight, 17, 0xA21C1B20, 0xB0151419, 0x65000000, 19, 0, 0))
+                boolean optical = core.getChoice("menu", "theme").equals("Glass")
+                        && LiquidGlass.surface(draw, 284, 68, 675, panelHeight, 17, accent, .96f, 1);
+                if (!optical && !UiShader.surface(draw, 284, 68, 675, panelHeight, 17, 0xA21C1B20, 0xB0151419, 0x65000000, 19, 0, 0))
                     GuiDraw.rounded(draw, 284, 68, 675, panelHeight, 17, 0xA21C1B20);
-                GuiDraw.roundedBorder(draw, 284, 68, 675, panelHeight, 17, 0x22FFFFFF);
+                if (!optical) GuiDraw.roundedBorder(draw, 284, 68, 675, panelHeight, 17, 0x22FFFFFF);
                 String title = section.isBlank() ? "Home" : section.substring(0, 1).toUpperCase(Locale.ROOT) + section.substring(1);
                 GuiDraw.heading(draw, textRenderer, title, 307, 88, 1.35f, WHITE);
             } else if (backgroundMode().equals("Panorama")) {
@@ -140,8 +143,11 @@ public final class HomeScreen extends Screen {
         }
     }
     @Override public void render(DrawContext draw, int mouseX, int mouseY, float delta) {
-        drawBackdrop(draw, false);drawChrome(draw, mouseX, mouseY, "", false);
+        drawBackdrop(draw, false);
+        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(draw, core.getChoice("menu", "theme"))) {
+        drawChrome(draw, mouseX, mouseY, "", false);
         for (var child : children()) if (child instanceof Drawable drawable) drawable.render(draw, mouseX, mouseY, delta);
+        }
     }
     public double[] controlPoint(String id) {
         ButtonWidget button = controls.get(id);
@@ -159,7 +165,9 @@ public final class HomeScreen extends Screen {
             draw.getMatrices().push();draw.getMatrices().scale(u, u, 1);
             if (!nav || hover || focused || selected) {
                 int top = selected ? Palette.alpha(accent, 45) : button.active ? 0x681E1D23 : 0x351E1D23;
-                if (!UiShader.surface(draw, x, y, w, h, 8, top, top, 0, 0, 0, 0)) GuiDraw.rounded(draw, x, y, w, h, 8, top);
+                boolean optical = dev.analyzer.AnalyzerClient.CORE.getChoice("menu", "theme").equals("Glass")
+                        && LiquidGlass.surface(draw, x, y, w, h, 8, accent, button.active ? .94f : .65f, 1);
+                if (!optical && !UiShader.surface(draw, x, y, w, h, 8, top, top, 0, 0, 0, 0)) GuiDraw.rounded(draw, x, y, w, h, 8, top);
             }
             int color = !button.active ? 0xFF9B97A0 : selected ? accent : WHITE;
             boolean mainNav = nav && ((NavButton) button).id.startsWith("nav:");

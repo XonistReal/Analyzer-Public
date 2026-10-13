@@ -511,9 +511,7 @@
         "default": "Studio",
         "choices": [
           "Studio",
-          "Workspace",
-          "Classic",
-          "Compact"
+          "Click GUI"
         ]
       },
       {
@@ -833,9 +831,7 @@
         "default": "Studio",
         "choices": [
           "Studio",
-          "Workspace",
-          "Classic",
-          "Compact"
+          "Click GUI"
         ]
       },
       {

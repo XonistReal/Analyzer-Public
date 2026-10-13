@@ -96,14 +96,14 @@ final class CosmeticsSmoke {
             case 110 -> capture(mc,"analyzer-60-minimal-1280.png",true);
             case 115 -> theme("Neon");
             case 120 -> capture(mc,"analyzer-60-neon-1280.png",true);
-            case 125 -> { core.setValue("menu","layout","Classic"); mc.setScreen(MenuScreens.create(core)); }
-            case 135 -> capture(mc,"analyzer-readable-classic-1280.png",false);
-            case 145 -> { mc.setScreen(null); viewport(mc,1920,1080,3,"Glass"); core.setValue("menu","layout","Classic"); mc.setScreen(MenuScreens.create(core)); }
-            case 155 -> capture(mc,"analyzer-readable-classic-1920.png",false);
-            case 160 -> { core.setValue("menu","layout","Compact"); mc.setScreen(MenuScreens.create(core)); }
-            case 165 -> capture(mc,"analyzer-readable-compact.png",false);
-            case 170 -> { core.setValue("menu","layout","Workspace"); mc.setScreen(MenuScreens.create(core)); }
-            case 175 -> capture(mc,"analyzer-readable-workspace.png",false);
+            case 125 -> { core.setValue("menu","layout","Click GUI"); mc.setScreen(MenuScreens.create(core)); }
+            case 135 -> capture(mc,"analyzer-readable-click-gui-1280.png",false);
+            case 145 -> { mc.setScreen(null); viewport(mc,1920,1080,3,"Glass"); core.setValue("menu","layout","Click GUI"); mc.setScreen(MenuScreens.create(core)); }
+            case 155 -> capture(mc,"analyzer-readable-click-gui-1920.png",false);
+            case 160 -> { core.setValue("menu","layout","Click GUI"); mc.setScreen(MenuScreens.create(core)); }
+            case 165 -> capture(mc,"analyzer-readable-click-gui.png",false);
+            case 170 -> { core.setValue("menu","layout","Studio"); mc.setScreen(MenuScreens.create(core)); }
+            case 175 -> capture(mc,"analyzer-readable-studio.png",false);
             case 180 -> { mc.setScreen(null); audit=false; viewport(mc,1280,800,3,"Glass"); audit=false; core.setEnabled("air-effects",true); core.setValue("air-effects","style","Network"); core.setValue("air-effects","density",48); }
             case 190 -> { require(VisualEffects.cosmeticDiagnostics().ambientPoints()==48,"Ambient effect obeys configured bounded density"); require(VisualEffects.frameDiagnostics().segments()>0,"Ambient network submits real world geometry"); capture(mc,"analyzer-air-network.png",false); }
             case 200 -> core.setValue("air-effects","density",12);

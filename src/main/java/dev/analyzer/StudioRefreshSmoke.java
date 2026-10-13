@@ -153,7 +153,7 @@ final class StudioRefreshSmoke {
             surfacesBefore = UiShader.surfaces(); click(client, "profiles");
         });
         add("Profiles is a shader screen instead of Workspace", 5, client -> {
-            require(!(client.currentScreen instanceof dev.analyzer.ui.AnalyzerScreen) && UiShader.surfaces() > surfacesBefore, "Profiles no longer opens the old Workspace renderer");
+            require(client.currentScreen instanceof dev.analyzer.ui.ProfilesScreen && UiShader.surfaces() > surfacesBefore, "Profiles opens its shader renderer");
             bounds(client, "profile-name", "save-profile", "profiles-back");
             capture(client, "analyzer-refresh-profiles.png"); click(client, "profile-name"); type(client.currentScreen, PROFILE); click(client, "save-profile");
         });

@@ -15,17 +15,14 @@ public final class MenuScreens {
     public static Screen automation(AnalyzerCore core, Screen parent) { return new AutomationScreen(parent, dev.analyzer.automation.AutomationEngine.INSTANCE, core); }
     public static Screen create(AnalyzerCore core) {
         return switch (core.getChoice("menu", "layout")) {
-            case "Studio" -> new StudioScreen(core);
-            case "Classic" -> new ClassicScreen(core);
-            case "Compact" -> new CompactScreen(core);
-            default -> new AnalyzerScreen(core);
+            case "Click GUI" -> new ClickGuiScreen(core);
+            default -> new StudioScreen(core);
         };
     }
     public static Screen create(AnalyzerCore core, String selectedModuleId) {
         Screen screen = create(core);
         if (selectedModuleId != null) {
-            if (screen instanceof AnalyzerScreen workspace) workspace.inspect(selectedModuleId);
-            else if (screen instanceof CatalogScreen catalog) catalog.inspect(selectedModuleId);
+            if (screen instanceof CatalogScreen catalog) catalog.inspect(selectedModuleId);
         }
         return screen;
     }
@@ -33,7 +30,7 @@ public final class MenuScreens {
     /** Use after a deliberate layout edit, outside rendering/input dispatch. */
     public static boolean refreshLayout(AnalyzerCore core, Screen screen, String selectedModuleId) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.currentScreen != screen || !(screen instanceof AnalyzerScreen || screen instanceof CatalogScreen)
+        if (client.currentScreen != screen || !(screen instanceof CatalogScreen)
                 || matchesLayout(core, screen)) return false;
         Screen next = create(core, selectedModuleId);
         if (screen instanceof CatalogScreen previous && next instanceof CatalogScreen catalog) {catalog.restoreQueryText(previous.queryText());catalog.withParent(previous.parentScreen());}
@@ -43,10 +40,8 @@ public final class MenuScreens {
 
     public static boolean matchesLayout(AnalyzerCore core, Screen screen) {
         return switch (core.getChoice("menu", "layout")) {
-            case "Studio" -> screen instanceof StudioScreen;
-            case "Classic" -> screen instanceof ClassicScreen;
-            case "Compact" -> screen instanceof CompactScreen;
-            default -> screen instanceof AnalyzerScreen;
+            case "Click GUI" -> screen instanceof ClickGuiScreen;
+            default -> screen instanceof StudioScreen;
         };
     }
     public static Screen select(AnalyzerCore core, String layout) {

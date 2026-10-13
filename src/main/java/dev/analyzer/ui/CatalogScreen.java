@@ -43,7 +43,7 @@ public abstract class CatalogScreen extends Screen {
     @Override public boolean shouldPause(){return false;}
     protected abstract String layout();
     protected abstract void body(DrawContext draw);
-    protected boolean shaderStyle(){return this instanceof StudioScreen;}
+    protected boolean shaderStyle(){return true;}
     protected float canvasScale(){return Math.max(.15f,Math.min(1.2f,Math.min((width-20f)/W,(height-20f)/H)));}
     protected void backdrop(DrawContext draw){GpuEffects.drawBackdrop(draw);}
     public CatalogScreen inspect(String id){return this;}
@@ -61,33 +61,34 @@ public abstract class CatalogScreen extends Screen {
         mx=(mouseX-ox)/scale;my=(mouseY-oy)/scale;
         accent=core.isEnabled("menu")?HudWidgets.accent(core):Palette.MINT;
         controls.clear();diagnostics.clear();hoveredSetting=null;
+        try(GuiDraw.GlassScope optical=GuiDraw.glassScope(draw,theme())){
         backdrop(draw);
         try(GuiDraw.FontScope font=shaderStyle()?GuiDraw.sansFont():null){
         draw.getMatrices().push();draw.getMatrices().translate(ox,oy,0);draw.getMatrices().scale(scale,scale,1);
-        if(shaderStyle())GuiDraw.shaderPanel(draw,10,9,W-20,H-22,24,accent,glass(),theme());
-        else{GuiDraw.panel(draw,10,9,W-20,H-22,radius(),accent,glass(),theme());MenuScreens.particles(core,draw,W,H,(now-opened)/1e9,mx,my);}
+        GuiDraw.shaderPanel(draw,10,9,W-20,H-22,24,accent,glass(),theme());
         header(draw);body(draw);footer(draw);
         if(focusedControl!=null)controls.stream().filter(c->c.id.equals(focusedControl)).findFirst().ifPresent(c->
             GuiDraw.roundedBorder(draw,c.area.x-2,c.area.y-2,c.area.w+4,c.area.h+4,5,accent));
         draw.getMatrices().pop();
         }
         if(hoveredSetting!=null)draw.drawTooltip(textRenderer,Text.literal(hoveredSetting),mouseX,mouseY);
+        }
     }
     protected String theme(){return core.getChoice("menu","theme");}
     protected int radius(){return theme().equals("Minimal")?6:theme().equals("Classic")?9:16;}
     protected boolean glass(){return core.isEnabled("menu")&&core.getChoice("menu","material").equals("Glass")&&GpuEffects.isHealthy();}
     protected boolean profilesOpen(){return false;}
     protected void header(DrawContext draw){
-        GuiDraw.logo(draw,24,23,27,accent);
-        GuiDraw.heading(draw,textRenderer,"ANALYZER",62,22,1.15f,Palette.TEXT);
+        BrandAssets.monogram(draw,24,17,35);
+        BrandAssets.wordmark(draw,62,13,107);
         label(draw,layout()+" / 1.21.4",63,43,.75f,Palette.MUTED);
-        GuiDraw.card(draw,178,20,273,34,9,accent,glass(),theme(),searchFocused?1:0,searchFocused);
+        GuiDraw.shaderCard(draw,178,20,273,34,9,accent,glass(),theme(),searchFocused?1:0,searchFocused);
         label(draw,query.isEmpty()?"Search all modules…":GuiDraw.truncate(textRenderer,query,231,.95f),190,31,.95f,query.isEmpty()?Palette.MUTED:Palette.TEXT);
         control("search",new Area(178,20,244,34),0,()->{searchFocused=true;selectAll=false;capture=null;});
         button(draw,"search-clear","×",424,24,22,26,false,()->{query="";searchFocused=false;searchChanged();});
         int x=465;
-        for(String name:List.of("Workspace","Classic","Compact")){
-            int w=name.equals("Workspace")?87:name.equals("Classic")?65:74;
+        for(String name:List.of("Studio","Click GUI")){
+            int w=name.equals("Studio")?87:106;
             button(draw,"layout-"+name.toLowerCase(Locale.ROOT),name,x,23,w,28,name.equals(layout())&&!profilesOpen(),()->switchLayout(name));x+=w+6;
         }
         button(draw,"profiles","Profiles",709,23,69,28,profilesOpen(),()->client.setScreen(MenuScreens.profiles(core,this)));
@@ -111,13 +112,13 @@ public abstract class CatalogScreen extends Screen {
         return core.modules().stream().filter(m->(m.id()+" "+m.name()+" "+m.description()+" "+m.category().label()).toLowerCase(Locale.ROOT).contains(filter)).toList();
     }
     protected void panel(DrawContext draw,Area box,boolean selected){
-        GuiDraw.panel(draw,box.x,box.y,box.w,box.h,radius(),accent,glass(),theme());
+        GuiDraw.shaderPanel(draw,box.x,box.y,box.w,box.h,radius(),accent,glass(),theme());
         if(selected)GuiDraw.roundedBorder(draw,box.x,box.y,box.w,box.h,radius(),Palette.alpha(accent,170));
     }
     protected void label(DrawContext draw,String value,float x,float y,float size,int color){GuiDraw.label(draw,textRenderer,value,x,y,size,color);}
     protected void button(DrawContext draw,String id,String value,int x,int y,int w,int h,boolean selected,Runnable action){
         Area area=new Area(x,y,w,h);double hover=ease("button:"+id,area.contains(mx,my)?1:0);
-        GuiDraw.card(draw,x,y,w,h,Math.min(8,h/3),accent,glass(),theme(),hover,selected);
+        GuiDraw.shaderCard(draw,x,y,w,h,Math.min(8,h/3),accent,glass(),theme(),hover,selected);
         label(draw,value,x+(w-GuiDraw.width(textRenderer,value,.86f))/2,y+(h-9)/2,.86f,Palette.TEXT);
         control(id,area,0,action);
     }
@@ -125,8 +126,7 @@ public abstract class CatalogScreen extends Screen {
     protected void clippedControl(String id,Area area,Area clip,int button,Runnable action){Area intersection=area.intersect(clip);if(intersection.w>0&&intersection.h>0)control(id,intersection,button,action);}
     protected void toggle(DrawContext draw,int x,int y,boolean enabled){
         double amount=ease("toggle:"+x+":"+y,enabled?1:0);
-        GuiDraw.rounded(draw,x,y,32,18,9,Palette.mix(0xFF778994,accent,amount));
-        GuiDraw.rounded(draw,x+3+(int)(14*amount),y+3,12,12,6,Palette.TEXT);
+        GuiDraw.shaderPill(draw,x,y,32,18,accent,amount);
     }
     protected double ease(String id,double goal){
         double value=animation.getOrDefault(id,goal);
@@ -148,7 +148,7 @@ public abstract class CatalogScreen extends Screen {
             if(!group.equals(lastGroup)){
                 int groupHeight=30;
                 for(int next=index;next<fields.size()&&SettingSections.group(module,fields.get(next)).equals(group);next++)groupHeight+=rowHeight(fields.get(next),width);
-                GuiDraw.card(draw,x,y,width,groupHeight-5,radius(),accent,glass(),theme(),0,false);
+                GuiDraw.shaderCard(draw,x,y,width,groupHeight-5,radius(),accent,glass(),theme(),0,false);
                 label(draw,group.isEmpty()?"Settings":group,x+12,y+10,.94f,Palette.TEXT);y+=30;
             }
             lastGroup=group;List<String> lines=settingLines(setting,width);int pitch=rowHeight(setting,width);
@@ -164,7 +164,7 @@ public abstract class CatalogScreen extends Screen {
                     }
                     case CHOICE->{
                         Area hit=new Area(x+9,controlY,width-18,26);
-                        GuiDraw.card(draw,hit.x,hit.y,hit.w,hit.h,7,accent,glass(),theme(),hit.contains(mx,my)?1:0,false);
+                        GuiDraw.shaderCard(draw,hit.x,hit.y,hit.w,hit.h,7,accent,glass(),theme(),hit.contains(mx,my)?1:0,false);
                         label(draw,GuiDraw.truncate(textRenderer,core.getChoice(id,setting.id()),hit.w-28,.91f),hit.x+9,hit.y+8,.91f,accent);
                         label(draw,"›",hit.right()-15,hit.y+7,1,Palette.TEXT);
                         clippedControl("setting:"+id+":"+setting.id(),hit,viewport,0,()->cycle(id,setting,1));
@@ -173,11 +173,11 @@ public abstract class CatalogScreen extends Screen {
                     case NUMBER->{
                         double value=core.getNumber(id,setting.id());
                         Area track=new Area(x+12,controlY+13,Math.max(18,width-106),4),exact=new Area(x+width-83,controlY,70,27);
-                        GuiDraw.rounded(draw,track.x,track.y,track.w,4,2,0xFF778994);
+                        StudioAuxiliary.surface(draw,track.x,track.y,track.w,4,2,0xFF656169,0xFF656169,0,0,0,0);
                         double amount=(value-setting.min())/Math.max(.000001,setting.max()-setting.min());
-                        GuiDraw.rounded(draw,track.x,track.y,(int)(track.w*amount),4,2,accent);
-                        GuiDraw.rounded(draw,track.x+(int)(track.w*amount)-4,track.y-2,8,8,4,Palette.TEXT);
-                        GuiDraw.card(draw,exact.x,exact.y,exact.w,exact.h,7,accent,glass(),theme(),exact.contains(mx,my)?1:0,false);
+                        StudioAuxiliary.surface(draw,track.x,track.y,(int)(track.w*amount),4,2,accent,accent,0,0,0,0);
+                        StudioAuxiliary.surface(draw,track.x+(int)(track.w*amount)-4,track.y-2,8,8,4,Palette.TEXT,Palette.TEXT,0,0,0,0);
+                        GuiDraw.shaderCard(draw,exact.x,exact.y,exact.w,exact.h,7,accent,glass(),theme(),exact.contains(mx,my)?1:0,false);
                         label(draw,number(value),exact.x+9,exact.y+9,.91f,accent);
                         clippedControl("setting:"+id+":"+setting.id(),new Area(track.x-4,track.y-8,track.w+8,21),viewport,0,()->{slider=new Slider(id,setting,track);updateSlider(mx);});
                         clippedControl("number:"+id+":"+setting.id(),exact,viewport,0,()->client.setScreen(new NumericSettingScreen(core,id,setting,this)));
@@ -191,7 +191,7 @@ public abstract class CatalogScreen extends Screen {
         if(inlineKeybinds()&&y+44>=viewport.y&&y<viewport.bottom()){
             label(draw,"Keybind",x+12,y+6,.88f,Palette.MUTED);
             Area hit=new Area(x+9,y+20,width-18,25);
-            GuiDraw.card(draw,hit.x,hit.y,hit.w,hit.h,7,accent,glass(),theme(),hit.contains(mx,my)?1:0,capture!=null&&capture.equals(id));
+            GuiDraw.shaderCard(draw,hit.x,hit.y,hit.w,hit.h,7,accent,glass(),theme(),hit.contains(mx,my)?1:0,capture!=null&&capture.equals(id));
             String key=capture!=null&&capture.equals(id)?"Press a key…":core.keybind(id)<0?"Unbound":InputUtil.fromKeyCode(core.keybind(id),0).getLocalizedText().getString();
             label(draw,GuiDraw.truncate(textRenderer,key,width-38,.89f),x+18,y+28,.89f,Palette.TEXT);
             clippedControl("keybind:"+id,hit,viewport,0,()->{capture=id;searchFocused=false;});

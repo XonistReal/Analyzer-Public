@@ -1,6 +1,7 @@
 package dev.analyzer.ui;
 
 import dev.analyzer.effects.UiShader;
+import dev.analyzer.effects.LiquidGlass;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -23,6 +24,16 @@ public final class GuiDraw {
 
     /** Scope rendering and measuring together; HUD and legacy screens retain their original font. */
     public static FontScope sansFont() { return new FontScope(); }
+    /** Capture before UI paint; nested screens/widgets share a single immutable optical scene. */
+    public static GlassScope glassScope(DrawContext context, String theme) { return new GlassScope(context, theme); }
+    public static final class GlassScope implements AutoCloseable {
+        private final boolean owns;
+        private GlassScope(DrawContext context, String theme) {
+            owns = context != null && "Glass".equals(theme) && !LiquidGlass.isFrameActive();
+            if (owns) LiquidGlass.beginFrame(context);
+        }
+        @Override public void close() { if (owns) LiquidGlass.endFrame(); }
+    }
 
     public static final class FontScope implements AutoCloseable {
         private final boolean previous = studioFont;
@@ -36,6 +47,7 @@ public final class GuiDraw {
     /** Shader-rendered black shell: broad soft shadow, no repeated bright outline. */
     public static void shaderPanel(DrawContext context, int x, int y, int width, int height, int radius,
                                    int accent, boolean glass, String theme) {
+        if (glass && "Glass".equals(theme) && LiquidGlass.surface(context, x, y, width, height, radius, accent, .97f, 1)) return;
         int surface = switch (theme == null ? "Glass" : theme) {
             case "Classic" -> 0xFF09090B;
             case "Minimal" -> 0xFF111215;
@@ -51,6 +63,8 @@ public final class GuiDraw {
     /** The reference's inset gray cards; hover and selection use fill rather than wire rims. */
     public static void shaderCard(DrawContext context, int x, int y, int width, int height, int radius,
                                   int accent, boolean glass, String theme, double hover, boolean selected) {
+        if ("Glass".equals(theme) && LiquidGlass.surface(context, x, y, width, height, radius, accent,
+                selected ? .99f : hover > 0 ? .97f : .94f, 1)) return;
         int surface = switch (theme == null ? "Glass" : theme) {
             case "Classic" -> 0xFF1C1C1F;
             case "Minimal" -> 0xFF252629;
@@ -76,7 +90,10 @@ public final class GuiDraw {
         int fill = Palette.mix(0xFF505054, accent, amount);
         int top = Palette.mix(fill, 0xFFFFFFFF, .06);
         int light = Palette.alpha(accent, (int) (110 * amount));
-        if (!UiShader.surface(context, x, y, width, height, height * .5f, top, fill, 0x32000000, 3f, light, 8f))
+        boolean optical = LiquidGlass.isFrameReady() && dev.analyzer.AnalyzerClient.CORE != null
+                && "Glass".equals(dev.analyzer.AnalyzerClient.CORE.getChoice("menu", "theme"))
+                && LiquidGlass.surface(context, x, y, width, height, height * .5f, accent, .97f, 1);
+        if (!optical && !UiShader.surface(context, x, y, width, height, height * .5f, top, fill, 0x32000000, 3f, light, 8f))
             rounded(context, x, y, width, height, height / 2, fill);
         float knob = Math.max(4f, height - 4f), knobX = (float) (x + 2 + (width - height) * amount);
         if (!UiShader.surface(context, knobX, y + 2, knob, knob, knob * .5f, 0xFFFFFFFF, 0xFFF6F6F8,

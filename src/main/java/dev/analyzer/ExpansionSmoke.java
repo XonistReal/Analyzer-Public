@@ -5,10 +5,9 @@ import dev.analyzer.render.VisualEffects;
 import dev.analyzer.gameplay.GameplayEngine;
 import dev.analyzer.gameplay.UtilityEngine;
 import dev.analyzer.ui.MenuScreens;
-import dev.analyzer.ui.AnalyzerScreen;
+import dev.analyzer.ui.CatalogScreen;
+import dev.analyzer.ui.StudioScreen;
 import dev.analyzer.ui.HudEditorScreen;
-import dev.analyzer.ui.ClassicScreen;
-import dev.analyzer.ui.CompactScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.entity.LivingEntity;
@@ -130,21 +129,21 @@ final class ExpansionSmoke {
             case 232 -> screenshot(mc, "analyzer-hud-minimal.png");
             case 236 -> core.setValue("hud", "theme", "Neon");
             case 250 -> screenshot(mc, "analyzer-hud-neon.png");
-            case 255 -> { core.setValue("menu", "layout", "Workspace"); mc.setScreen(MenuScreens.create(core)); }
-            case 260 -> control(mc, "layout-classic", 0);
+            case 255 -> { core.setValue("menu", "layout", "Studio"); mc.setScreen(MenuScreens.create(core, "kill-aura")); }
+            case 260 -> require(mc.currentScreen instanceof StudioScreen, "Studio shader GUI factory");
             case 266 -> control(mc, "module:kill-aura", 0);
-            case 268 -> { require(core.isEnabled("kill-aura"), "Classic module toggle"); control(mc, "inspect:kill-aura", 1); }
+            case 268 -> { require(core.isEnabled("kill-aura"), "Studio module toggle"); ((CatalogScreen) mc.currentScreen).inspect("kill-aura"); }
             case 271 -> control(mc, "setting:kill-aura:hostiles", 0);
-            case 273 -> { require(!core.getBoolean("kill-aura", "hostiles"), "Classic inline boolean setting"); control(mc, "module:kill-aura", 0); }
-            case 275 -> { require(mc.currentScreen.getClass().getSimpleName().equals("ClassicScreen"), "Classic GUI factory"); screenshot(mc, "analyzer-gui-classic.png"); }
-            case 280 -> control(mc, "layout-compact", 0);
+            case 273 -> { require(!core.getBoolean("kill-aura", "hostiles"), "Studio inline boolean setting"); control(mc, "module:kill-aura", 0); }
+            case 275 -> { require(mc.currentScreen instanceof StudioScreen, "Studio GUI remains selected"); screenshot(mc, "analyzer-gui-studio.png"); }
+            case 280 -> { core.setValue("menu", "layout", "Click GUI"); mc.setScreen(MenuScreens.create(core)); }
             case 286 -> { control(mc, "search", 0); type(mc, "fly"); }
             case 290 -> control(mc, "module:fly", 0);
-            case 292 -> { require(core.isEnabled("fly"), "Compact filtered module toggle"); control(mc, "module:fly", 0); }
+            case 292 -> { require(core.isEnabled("fly"), "Click GUI filtered module toggle"); control(mc, "module:fly", 0); }
             case 294 -> { mc.currentScreen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_A, 0, org.lwjgl.glfw.GLFW.GLFW_MOD_CONTROL); mc.currentScreen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_BACKSPACE, 0, 0); }
-            case 300 -> { require(mc.currentScreen.getClass().getSimpleName().equals("CompactScreen"), "Compact GUI factory"); screenshot(mc, "analyzer-gui-compact.png"); }
-            case 305 -> control(mc, "layout-workspace", 0);
-            case 325 -> { require(mc.currentScreen instanceof AnalyzerScreen, "Workspace GUI factory"); screenshot(mc, "analyzer-gui-workspace.png"); }
+            case 300 -> { require(mc.currentScreen.getClass().getSimpleName().equals("ClickGuiScreen"), "New Click GUI factory"); screenshot(mc, "analyzer-gui-click-gui.png"); }
+            case 305 -> { core.setValue("menu", "layout", "Studio"); mc.setScreen(MenuScreens.create(core)); }
+            case 325 -> { require(mc.currentScreen instanceof StudioScreen, "Studio remains the module default"); screenshot(mc, "analyzer-gui-studio-return.png"); }
             case 330 -> control(mc, "hud-editor", 0);
             case 336 -> {
                 var editor = (HudEditorScreen) mc.currentScreen;
@@ -288,9 +287,7 @@ final class ExpansionSmoke {
     private static void type(MinecraftClient mc, String value) { for (char c : value.toCharArray()) mc.currentScreen.charTyped(c, 0); }
     private static void targetModule(String id) { var core = AnalyzerClient.CORE; core.setValue(id, "players", false); core.setValue(id, "hostiles", true); core.setValue(id, "range", 8); core.setValue(id, "fov", 360); }
     private static void control(MinecraftClient mc, String key, int button) {
-        double[] point = mc.currentScreen instanceof AnalyzerScreen screen ? screen.controlPoint(key)
-            : mc.currentScreen instanceof ClassicScreen screen ? screen.controlPoint(key)
-            : mc.currentScreen instanceof CompactScreen screen ? screen.controlPoint(key)
+        double[] point = mc.currentScreen instanceof CatalogScreen screen ? screen.controlPoint(key)
             : mc.currentScreen instanceof HudEditorScreen screen ? screen.controlPoint(key) : null;
         require(point != null, "Control is visible: " + key);
         mc.currentScreen.mouseClicked(point[0], point[1], button); mc.currentScreen.mouseReleased(point[0], point[1], button);

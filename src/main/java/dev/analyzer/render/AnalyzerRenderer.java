@@ -743,6 +743,7 @@ public final class AnalyzerRenderer {
 
     private void renderHud(DrawContext draw, RenderTickCounter tickCounter) {
         if (client.world == null || client.player == null || client.options.hudHidden || client.currentScreen != null) return;
+        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(draw, core.getChoice("hud", "theme"))) {
         if (core.isEnabled("crosshair") && client.options.getPerspective().isFirstPerson()) drawCrosshair(draw);
         float hudScale = HudWidgets.scale(core, draw);
         List<ScreenLabelRequest> labelRequests = new ArrayList<>();
@@ -766,6 +767,7 @@ public final class AnalyzerRenderer {
             draw.getMatrices().translate(x - 10, y - 57, 0);
             drawRadar(draw);
             draw.getMatrices().pop();
+        }
         }
     }
 

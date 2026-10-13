@@ -132,10 +132,12 @@ public final class HomePages {
 
     private static void render(HomePage page, Screen screen, DrawContext draw, int mouseX, int mouseY, float delta) {
         page.home().drawBackdrop(draw, true);
+        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(draw, page.home().core().getChoice("menu", "theme"))) {
         page.home().drawChrome(draw, mouseX, mouseY, page.section(), true);
         for (Element child : screen.children()) {
             if (child instanceof ClickableWidget widget && !widget.visible) continue;
             if (child instanceof Drawable drawable) drawable.render(draw, mouseX, mouseY, delta);
+        }
         }
     }
 

@@ -237,7 +237,7 @@ public final class AnalyzerCore {
                 JsonElement value = settings.get(setting.id());
                 if (value == null) continue;
                 try {
-                    Object decoded = decode(setting, value);
+                    Object decoded = decodeSaved(new SettingKey(module.id(), setting.id()), setting, value);
                     state.values.put(setting.id(), setting.normalize(decoded));
                 } catch (IllegalArgumentException | IllegalStateException ex) {
                     warnings.add("Ignored invalid setting " + module.id() + "/" + setting.id());
@@ -250,7 +250,7 @@ public final class AnalyzerCore {
         loadWarnings = List.copyOf(warnings);
     }
 
-    /** Legacy Interface values win; alias-only imports can still set menu preferences. */
+    /** Valid canonical values win after migration; alias-only imports still set preferences. */
     private void applyAliases(JsonObject moduleData, Map<String, ModuleState> loaded, List<String> warnings) {
         for (var alias : aliases.entrySet()) {
             SettingKey source = alias.getKey(), target = alias.getValue();
@@ -259,14 +259,14 @@ public final class AnalyzerCore {
             Setting<?> aliasSetting = definition(source.module()).setting(source.setting());
             Setting<?> targetSetting = definition(target.module()).setting(target.setting());
             Object normalized;
-            try { normalized = aliasSetting.normalize(decode(aliasSetting, aliasValue)); }
+            try { normalized = aliasSetting.normalize(decodeSaved(source, aliasSetting, aliasValue)); }
             catch (IllegalArgumentException | IllegalStateException ex) {
                 warnings.add("Ignored invalid setting " + source.module() + "/" + source.setting());
                 continue;
             }
             JsonElement canonicalValue = settingValue(moduleData, target);
             if (canonicalValue != null) {
-                try { targetSetting.normalize(decode(targetSetting, canonicalValue)); continue; }
+                try { targetSetting.normalize(decodeSaved(target, targetSetting, canonicalValue)); continue; }
                 catch (IllegalArgumentException | IllegalStateException ex) { /* A valid alias recovers an invalid canonical field. */ }
             }
             loaded.get(target.module()).values.put(target.setting(), targetSetting.normalize(normalized));
@@ -296,6 +296,16 @@ public final class AnalyzerCore {
                 yield primitive.getAsString();
             }
         };
+    }
+
+    /** Retired layouts migrate on disk reads only; live edits still validate current choices. */
+    private static Object decodeSaved(SettingKey key, Setting<?> setting, JsonElement value) {
+        Object decoded = decode(setting, value);
+        boolean layout = key.module().equals("menu") && key.setting().equals("layout")
+                || key.module().equals("hud") && key.setting().equals("menu-layout");
+        if (layout && decoded instanceof String name
+                && List.of("Workspace", "Classic", "Compact").contains(name)) return "Studio";
+        return decoded;
     }
 
     private record SettingKey(String module, String setting) { }

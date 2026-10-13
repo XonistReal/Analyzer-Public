@@ -4,9 +4,9 @@ import dev.analyzer.automation.AutomationEngine;
 import dev.analyzer.core.Category;
 import dev.analyzer.gameplay.GameplayEngine;
 import dev.analyzer.gameplay.GameplayCombatSmoke;
-import dev.analyzer.ui.AnalyzerScreen;
-import dev.analyzer.ui.ClassicScreen;
-import dev.analyzer.ui.CompactScreen;
+import dev.analyzer.ui.CatalogScreen;
+import dev.analyzer.ui.StudioScreen;
+import dev.analyzer.ui.MenuScreens;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -102,16 +102,16 @@ final class GameplaySettingsSmoke {
                 core.setValue("safe-walk", "legit", true); require(!GameplayEngine.safeWalkActive(), "Legit Safe Walk uses normal input instead of forcing the mixin gate");
                 core.setEnabled("safe-walk", false); mc.options.sneakKey.setPressed(false); command(mc, "tp AnalyzerDev 15.5 161 15.5 180 12");
                 core.setValue("fly", "mode", "Vanilla"); core.setValue("fly", "anti-hover", true);
-                editorParent = new AnalyzerScreen(core).inspect("fly"); mc.setScreen(editorParent); scrollAnchor = null; attempts = 0; next();
+                editorParent = new StudioScreen(core).inspect("fly"); mc.setScreen(editorParent); scrollAnchor = null; attempts = 0; next();
             }}
             case 9 -> { if (age >= 2 && openNumber(mc, "fly", "vertical-speed")) next(); }
-            case 10 -> { if (age >= 1) { applyNumber(mc, "0.47"); near(core.getNumber("fly", "vertical-speed"), .47, "Workspace right-click and Enter update the real numeric value"); next(); }}
+            case 10 -> { if (age >= 1) { applyNumber(mc, "0.47"); near(core.getNumber("fly", "vertical-speed"), .47, "Studio right-click and Enter update the real numeric value"); next(); }}
             case 11 -> {
                 if (age == 2) scroll(mc, -25);
                 if (age == 4) {
-                require(GL11.glGetError() == GL11.GL_NO_ERROR, "Workspace grouped inspector scroll has clean GL state");
-                require(point(editorParent, "setting:fly:pulse-interval") != null, "Workspace grouped scrolling renders its active Timing control");
-                editorParent = new AnalyzerScreen(core).inspect("kill-aura"); mc.setScreen(editorParent); scrollAnchor = null;
+                require(GL11.glGetError() == GL11.GL_NO_ERROR, "Studio grouped inspector scroll has clean GL state");
+                require(point(editorParent, "setting:fly:pulse-interval") != null, "Studio grouped scrolling renders its active Timing control");
+                editorParent = new StudioScreen(core).inspect("kill-aura"); mc.setScreen(editorParent); scrollAnchor = null;
                 }
                 if (age == 6) {
                     scrollAnchor = point(editorParent, "setting:kill-aura:players");
@@ -120,31 +120,26 @@ final class GameplaySettingsSmoke {
                 }
                 if (age >= 8) {
                 require(point(editorParent, "setting:kill-aura:pause-using") != null, "Long Combat inspector scrolling renders the last Safety group");
-                capture(mc, "analyzer-gameplay-settings-workspace.png");
-                editorParent = new CompactScreen(core); mc.setScreen(editorParent); search(editorParent, "Client flight or descending glide"); next();
+                capture(mc, "analyzer-gameplay-settings-studio.png");
+                core.setValue("menu", "layout", "Click GUI"); editorParent = MenuScreens.create(core, "fly"); mc.setScreen(editorParent); scrollAnchor = null; next();
             }}
-            case 12 -> { if (age >= 2) { click(mc, "inspect:fly", 1); scrollAnchor = null; attempts = 0; next(); }}
+            case 12 -> { if (age >= 2) { ((CatalogScreen) editorParent).inspect("fly"); scrollAnchor = null; attempts = 0; next(); }}
             case 13 -> { if (age >= 2 && openNumber(mc, "fly", "vertical-speed")) next(); }
-            case 14 -> { if (age >= 1) { applyNumber(mc, "0.48"); near(core.getNumber("fly", "vertical-speed"), .48, "Compact right-click and Enter update the real numeric value"); next(); }}
+            case 14 -> { if (age >= 1) { applyNumber(mc, "0.48"); near(core.getNumber("fly", "vertical-speed"), .48, "Click GUI right-click and Enter update the real numeric value"); next(); }}
             case 15 -> { if (age == 2) scroll(mc, -25); if (age >= 4) {
-                require(GL11.glGetError() == GL11.GL_NO_ERROR, "Compact grouped inspector scroll has clean GL state");
-                require(point(editorParent, "number:fly:pulse-interval") != null, "Compact grouped scrolling renders its active Timing control");
-                capture(mc, "analyzer-gameplay-settings-compact.png");
-                for (Category category : Category.values()) {
-                    String prefix = "classic-" + category.name().toLowerCase(java.util.Locale.ROOT);
-                    core.setValue("menu", prefix + "-collapsed", category != Category.MOVEMENT);
-                    core.setValue("menu", prefix + "-x", category == Category.MOVEMENT ? 50D : 0D);
-                    core.setValue("menu", prefix + "-y", category == Category.MOVEMENT ? 65D : 0D);
-                }
-                editorParent = new ClassicScreen(core); mc.setScreen(editorParent); search(editorParent, "Client flight or descending glide"); next();
+                require(GL11.glGetError() == GL11.GL_NO_ERROR, "Click GUI grouped inspector scroll has clean GL state");
+                require(point(editorParent, "number:fly:pulse-interval") != null, "Click GUI grouped scrolling renders its active Timing control");
+                capture(mc, "analyzer-gameplay-settings-click-gui.png");
+                core.setValue("menu", "layout", "Studio");
+                editorParent = MenuScreens.create(core, "fly"); mc.setScreen(editorParent); scrollAnchor = null; next();
             }}
-            case 16 -> { if (age >= 2) { click(mc, "inspect:fly", 1); scrollAnchor = null; attempts = 0; next(); }}
+            case 16 -> { if (age >= 2) { ((CatalogScreen) editorParent).inspect("fly"); scrollAnchor = null; attempts = 0; next(); }}
             case 17 -> { if (age >= 2 && openNumber(mc, "fly", "vertical-speed")) next(); }
-            case 18 -> { if (age >= 1) { applyNumber(mc, "0.49"); near(core.getNumber("fly", "vertical-speed"), .49, "Classic right-click and Enter update the real numeric value"); next(); }}
+            case 18 -> { if (age >= 1) { applyNumber(mc, "0.49"); near(core.getNumber("fly", "vertical-speed"), .49, "Studio right-click and Enter update the real numeric value"); next(); }}
             case 19 -> { if (age >= 2) { scroll(mc, -25); next(); }}
             case 20 -> { if (age >= 2) {
-                capture(mc, "analyzer-gameplay-settings-classic.png");
-                require(point(editorParent, "number:fly:pulse-interval") != null, "Classic scrolling exposes its active Timing group's real numeric control");
+                capture(mc, "analyzer-gameplay-settings-studio-repeat.png");
+                require(point(editorParent, "number:fly:pulse-interval") != null, "Studio scrolling exposes its active Timing group's real numeric control");
                 mc.setScreen(null); mc.options.forwardKey.setPressed(false); mc.options.jumpKey.setPressed(false); mc.options.sneakKey.setPressed(false); mc.options.sprintKey.setPressed(false);
                 core.resetAll();
                 try { core.save(); } catch (java.io.IOException failure) { throw new IllegalStateException("Cannot restore isolated smoke config", failure); }
@@ -157,13 +152,13 @@ final class GameplaySettingsSmoke {
                 try { core.save(); } catch (java.io.IOException failure) { throw new IllegalStateException("Cannot restore isolated smoke config", failure); }
                 require(!core.isEnabled("speed") && !core.isEnabled("fly") && !core.isEnabled("step"), "Test action modules are reset after the fixture");
                 complete = true;
-                AnalyzerClient.LOGGER.info("ANALYZER_GAMEPLAY_SETTINGS_SMOKE_COMPLETE: {} assertions, {} screenshots, {} ticks; actual movement profiles, Step cleanup, descending flight, Safe Walk gates, and precise numeric entry in all three layouts", assertions, screenshots, t);
+                AnalyzerClient.LOGGER.info("ANALYZER_GAMEPLAY_SETTINGS_SMOKE_COMPLETE: {} assertions, {} screenshots, {} ticks; actual movement profiles, Step cleanup, descending flight, Safe Walk gates, and precise numeric entry in current shader layouts", assertions, screenshots, t);
                 mc.scheduleStop();
             }}
         }
     }
     private static boolean openNumber(MinecraftClient mc, String module, String setting) {
-        double[] value = point(editorParent, editorParent instanceof AnalyzerScreen ? "setting:" + module + ":" + setting : "number:" + module + ":" + setting);
+        double[] value = point(editorParent, "number:" + module + ":" + setting);
         if (scrollAnchor == null) scrollAnchor = point(editorParent, "setting:" + module + ":legit");
         if (value == null) {
             if (++attempts > 8) throw new IllegalStateException("Numeric control never became visible in " + editorParent.getClass().getSimpleName());
@@ -187,9 +182,7 @@ final class GameplaySettingsSmoke {
         screen.keyPressed(GLFW.GLFW_KEY_ENTER, 0, 0);
     }
     private static double[] point(Screen screen, String id) {
-        if (screen instanceof AnalyzerScreen workspace) return workspace.controlPoint(id);
-        if (screen instanceof CompactScreen compact) return compact.controlPoint(id);
-        if (screen instanceof ClassicScreen classic) return classic.controlPoint(id);
+        if (screen instanceof CatalogScreen catalog) return catalog.controlPoint(id);
         return null;
     }
     private static void click(MinecraftClient mc, String id, int button) {

@@ -4,6 +4,7 @@ import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.core.Category;
 import dev.analyzer.core.ModuleDefinition;
 import dev.analyzer.gameplay.GameplayEngine;
+import dev.analyzer.effects.LiquidGlass;
 import dev.analyzer.effects.UiShader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -116,7 +117,8 @@ public final class HudWidgets {
     }
 
     public static List<WidgetBounds> render(AnalyzerCore core, DrawContext draw, boolean editor) {
-        try (GuiDraw.FontScope ignored = GuiDraw.sansFont()) {
+        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(draw, core.getChoice("hud", "theme"));
+             GuiDraw.FontScope ignored = GuiDraw.sansFont()) {
             return scopedRender(core, draw, editor);
         }
     }
@@ -330,6 +332,10 @@ public final class HudWidgets {
     /** The same SDF surface for gameplay, the editor, Radar and safety notices. */
     public static boolean panel(DrawContext draw, int x, int y, int width, int height, String theme, int color, double opacity) {
         double alpha = Math.clamp(opacity, 0, 1);
+        if ("Glass".equals(theme) && LiquidGlass.surface(draw, x, y, width, height, 11, color, (float) alpha, 1)) {
+            if (width > 0 && height > 0 && alpha > 0) shaderSurfaces++;
+            return true;
+        }
         int fill = switch (theme) {
             case "Classic" -> 0xFF19191C;
             case "Minimal" -> 0xFF151519;

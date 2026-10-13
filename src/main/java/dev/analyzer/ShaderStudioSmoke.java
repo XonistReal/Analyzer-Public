@@ -8,8 +8,6 @@ import dev.analyzer.effects.UiShader;
 import dev.analyzer.gameplay.GameplayEngine;
 import dev.analyzer.ui.AutomationScreen;
 import dev.analyzer.ui.CatalogScreen;
-import dev.analyzer.ui.ClassicScreen;
-import dev.analyzer.ui.CompactScreen;
 import dev.analyzer.ui.HudEditorScreen;
 import dev.analyzer.ui.MenuScreens;
 import dev.analyzer.ui.StudioScreen;
@@ -60,21 +58,27 @@ final class ShaderStudioSmoke {
         add("Isolated daylight fixture with an existing Classic preference", 0, client -> {
             AutomationEngine.INSTANCE.stop(); core.resetAll();
             core.setEnabled("sky", false); core.setValue("menu", "motion", 0D);
-            core.setValue("menu", "layout", "Classic");
+            core.setValue("menu", "layout", "Studio");
             core.setValue("menu", "classic-visual-x", 17D);
             core.setValue("menu", "classic-visual-y", 36D);
             core.setValue("menu", "classic-visual-collapsed", true);
             save(core);
+            try {
+                var path = FabricLoader.getInstance().getConfigDir().resolve("analyzer/config.json");
+                var legacy = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(path)).getAsJsonObject();
+                legacy.getAsJsonObject("modules").getAsJsonObject("menu").getAsJsonObject("settings").addProperty("layout", "Classic");
+                java.nio.file.Files.writeString(path, legacy.toString());core.load();
+            } catch (IOException failure) {throw new IllegalStateException("Cannot prepare isolated retired-layout fixture", failure);}
             command(client, "time set 1000"); command(client, "weather clear");
             command(client, "kill @e[type=!minecraft:player]");
             client.inGameHud.getChatHud().clear(false); client.getToastManager().clear();
             viewport(client, 1280, 800, 2);
             client.setScreen(MenuScreens.create(core, "hud"));
         });
-        add("Explicit menu selection preserves the saved old preference", 5, client -> {
-            require(client.currentScreen instanceof ClassicScreen && core.getChoice("hud", "menu-layout").equals("Classic"), "An existing Classic preference still opens Classic before an explicit selection");
+        add("Saved retired preference migrates before the native factory opens", 5, client -> {
+            require(client.currentScreen instanceof StudioScreen && core.getChoice("hud", "menu-layout").equals("Studio"), "An existing Classic preference now opens Studio");
             AnalyzerCore loaded = loadedCore();
-            require(loaded.getChoice("menu", "layout").equals("Classic") && loaded.getNumber("menu", "classic-visual-x") == 17D, "Reload does not silently replace the old layout or its window positions");
+            require(loaded.getChoice("menu", "layout").equals("Studio") && loaded.getNumber("menu", "classic-visual-x") == 17D, "Reload migrates the retired layout while retaining saved window positions");
             surfacesBefore = UiShader.surfaces(); sceneFramesBefore = GpuEffects.menuSceneFrames();
         });
         chooseHud("menu-layout", "Studio");
@@ -211,15 +215,11 @@ final class ShaderStudioSmoke {
         });
         chooseHud("menu-material", "Glass");
 
-        chooseHud("menu-layout", "Classic");
-        add("HUD settings still switch to Classic", 4, client -> {
-            require(client.currentScreen instanceof ClassicScreen && MenuScreens.matchesLayout(core, client.currentScreen), "HUD Studio layout changes switch the live native menu to Classic");
-            capture(client, "analyzer-studio-retained-classic.png");
-            click(client, "layout-compact", GLFW.GLFW_MOUSE_BUTTON_LEFT);
-        });
-        add("Retained Compact menu", 4, client -> {
-            require(client.currentScreen instanceof CompactScreen && core.getChoice("hud", "menu-layout").equals("Compact"), "Compact remains a selectable saved alternative");
-            capture(client, "analyzer-studio-retained-compact.png");
+        chooseHud("menu-layout", "Click GUI");
+        add("HUD settings switch to the new shader Click GUI", 4, client -> {
+            require(client.currentScreen.getClass().getSimpleName().equals("ClickGuiScreen") && MenuScreens.matchesLayout(core, client.currentScreen), "HUD Studio selects the new shader Click GUI");
+            require(core.getChoice("hud", "menu-layout").equals("Click GUI"), "Only the current Click GUI alternative is persisted");
+            capture(client, "analyzer-studio-click-gui.png");
         });
         chooseHud("menu-layout", "Studio");
         add("Profiles preserve their Studio parent", 3, client -> {
@@ -346,6 +346,6 @@ final class ShaderStudioSmoke {
         mc.inGameHud.getChatHud().clear(false); mc.getToastManager().clear();
         ScreenshotRecorder.saveScreenshot(mc.runDirectory, name, mc.getFramebuffer(), message -> AnalyzerClient.LOGGER.info("Shader Studio screenshot: {}", message.getString())); captures++;
     }
-    private static void finish(MinecraftClient mc) { complete = true; AnalyzerClient.LOGGER.info("ANALYZER_SHADER_STUDIO_SMOKE_COMPLETE: {} assertions, {} screenshots, {} ticks; actual GLSL card surfaces, explicit old-layout preservation, separate inspection/switches, precise numbers, HUD aliases/themes/accents, persistence, contextual Back, resource reload and effective GUI scales", assertions, captures, tick); mc.scheduleStop(); }
+    private static void finish(MinecraftClient mc) { complete = true; AnalyzerClient.LOGGER.info("ANALYZER_SHADER_STUDIO_SMOKE_COMPLETE: {} assertions, {} screenshots, {} ticks; actual GLSL card surfaces, retired-layout migration, separate inspection/switches, precise numbers, HUD aliases/themes/accents, persistence, contextual Back, resource reload and effective GUI scales", assertions, captures, tick); mc.scheduleStop(); }
     private record Step(String label, int waitTicks, Predicate<MinecraftClient> action) { }
 }

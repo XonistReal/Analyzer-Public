@@ -3,6 +3,7 @@ package dev.analyzer.ui;
 import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.effects.GpuEffects;
 import dev.analyzer.effects.UiShader;
+import dev.analyzer.effects.LiquidGlass;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -46,7 +47,8 @@ public final class StudioAuxiliary {
             GuiDraw.rounded(draw, Math.round(x), Math.round(y), Math.round(w), Math.round(h), Math.round(radius), top);
     }
     public static void field(DrawContext draw, AnalyzerCore core, int x, int y, int w, int h, boolean focused) {
-        surface(draw, x, y, w, h, 10, focused ? 0xFF38333C : 0xFF202023, 0xFF202023,
+        boolean optical = "Glass".equals(theme(core)) && LiquidGlass.surface(draw, x, y, w, h, 10, accent(core), .97f, 1);
+        if (!optical) surface(draw, x, y, w, h, 10, focused ? 0xFF38333C : 0xFF202023, 0xFF202023,
                 0x25000000, 3, focused ? Palette.alpha(accent(core), 36) : 0, 6);
         if (focused) surface(draw, x + 10, y + h - 2, w - 20, 1.5f, .75f,
                 Palette.alpha(accent(core), 150), Palette.alpha(accent(core), 150), 0, 0, 0, 0);

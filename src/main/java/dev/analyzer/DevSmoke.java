@@ -1,6 +1,7 @@
 package dev.analyzer;
 
-import dev.analyzer.ui.AnalyzerScreen;
+import dev.analyzer.ui.CatalogScreen;
+import dev.analyzer.ui.MenuScreens;
 import dev.analyzer.render.AnalyzerRenderer;
 import dev.analyzer.effects.GpuEffects;
 import com.mojang.authlib.GameProfile;
@@ -36,14 +37,14 @@ final class DevSmoke {
             client.getTutorialManager().setStep(net.minecraft.client.tutorial.TutorialStep.NONE);
             client.getToastManager().clear();
             GLFW.glfwHideWindow(client.getWindow().getHandle());
-            client.setScreen(new AnalyzerScreen(AnalyzerClient.CORE));
+            client.setScreen(MenuScreens.create(AnalyzerClient.CORE, "entity-esp"));
         }
         if (!started) return;
         ticks++;
         var core = AnalyzerClient.CORE;
         // The current interface fixture uses rendered control diagnostics rather than the
         // historical UI coordinates below, and always runs in the isolated dev world.
-        if ((Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep") || Boolean.getBoolean("analyzer.studioRefreshSmoke")) && !worldRequested) {
+        if ((Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep") || Boolean.getBoolean("analyzer.studioRefreshSmoke") || Boolean.getBoolean("analyzer.liquidLayoutSmoke")) && !worldRequested) {
             worldRequested = true;
             client.options.getViewDistance().setValue(5); client.options.getSimulationDistance().setValue(5);
             String name = "Analyzer-Smoke";
@@ -64,9 +65,9 @@ final class DevSmoke {
                 case 40 -> screenshot(client, "analyzer-ui.png");
                 case 44 -> control(client, "module:entity-esp", 0);
                 case 46 -> require(core.isEnabled("entity-esp"), "Module toggle click");
-                case 47 -> control(client, "bind", 0);
-                case 48 -> client.currentScreen.keyPressed(GLFW.GLFW_KEY_G, 0, 0);
-                case 49 -> require(core.keybind("entity-esp") == GLFW.GLFW_KEY_G, "Module keybind capture");
+                case 47 -> { ((CatalogScreen) client.currentScreen).inspect("entity-esp"); scrollMenu(client, -100); }
+                case 48 -> { control(client, "keybind:entity-esp", 0); client.currentScreen.keyPressed(GLFW.GLFW_KEY_G, 0, 0); }
+                case 49 -> { require(core.keybind("entity-esp") == GLFW.GLFW_KEY_G, "Module keybind capture"); scrollMenu(client, 100); }
                 case 50 -> { control(client, "setting:entity-esp:players", 0); require(!core.getBoolean("entity-esp", "players"), "Boolean setting click"); }
                 case 54 -> { control(client, "search", 0); type(client, "Atmosphere"); client.currentScreen.keyPressed(GLFW.GLFW_KEY_ENTER, 0, 0); }
                 case 57 -> control(client, "inspect:shader", 0);
@@ -78,7 +79,7 @@ final class DevSmoke {
                 case 69 -> { control(client, "number:shader:strength", 1); number(client, "0.6"); }
                 case 70 -> require(core.getNumber("shader", "strength") == 0.6, "Numeric setting precision");
                 case 72 -> screenshot(client, "analyzer-atmosphere.png");
-                case 76 -> client.setScreen(new AnalyzerScreen(core).showProfiles());
+                case 76 -> client.setScreen(MenuScreens.profiles(core, MenuScreens.create(core)));
                 case 80 -> { control(client, "profile-name", 0); type(client, "smoke-profile"); }
                 case 84 -> control(client, "save-profile", 0);
                 case 86 -> {
@@ -105,8 +106,12 @@ final class DevSmoke {
             }
         } else if (client.world != null && client.player != null && client.getServer() != null && client.getOverlay() == null) {
             if (!arenaReady) { arenaReady = true; setupArena(client); }
-            if ((Boolean.getBoolean("analyzer.gameplaySettingsSmoke") || Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep") || Boolean.getBoolean("analyzer.studioRefreshSmoke")) && !arenaPrepared) return;
+            if ((Boolean.getBoolean("analyzer.gameplaySettingsSmoke") || Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep") || Boolean.getBoolean("analyzer.studioRefreshSmoke") || Boolean.getBoolean("analyzer.liquidLayoutSmoke")) && !arenaPrepared) return;
             worldTicks++;
+            if (Boolean.getBoolean("analyzer.liquidLayoutSmoke")) {
+                if (worldTicks >= 20) LiquidLayoutSmoke.tick(client, worldTicks - 20);
+                return;
+            }
             if (Boolean.getBoolean("analyzer.studioRefreshSmoke")) {
                 if (worldTicks >= 20) StudioRefreshSmoke.tick(client, worldTicks - 20);
                 return;
@@ -165,7 +170,7 @@ final class DevSmoke {
                 case 140 -> screenshot(client, "analyzer-world-frost.png");
                 case 145 -> { core.setEnabled("fullbright", false); core.setEnabled("shader", false); }
                 case 160 -> screenshot(client, "analyzer-world-vanilla.png");
-                case 165 -> { core.setEnabled("shader", true); client.setScreen(new AnalyzerScreen(core)); client.reloadResources(); }
+                case 165 -> { core.setEnabled("shader", true); client.setScreen(MenuScreens.create(core)); client.reloadResources(); }
                 case 175 -> GLFW.glfwSetWindowSize(client.getWindow().getHandle(), 1280, 800);
                 case 225 -> { if (client.getOverlay() == null) screenshot(client, "analyzer-world-menu.png"); }
                 case 240 -> client.setScreen(null);
@@ -225,7 +230,7 @@ final class DevSmoke {
                 case 535 -> {
                     screenshot(client, "analyzer-sky-night.png"); loadProfile("cinder");
                     core.setValue("menu", "material", "Solid"); core.setEnabled("particles", false);
-                    client.setScreen(new AnalyzerScreen(core));
+                    client.setScreen(MenuScreens.create(core));
                 }
                 case 555 -> screenshot(client, "analyzer-menu-gold-solid.png");
                 case 560 -> {
@@ -281,11 +286,15 @@ final class DevSmoke {
     }
 
     private static void control(MinecraftClient client, String id, int button) {
-        var screen = (AnalyzerScreen) client.currentScreen;
+        var screen = (CatalogScreen) client.currentScreen;
         double[] point = screen.controlPoint(id);
         require(point != null, "Actual rendered smoke control " + id);
         screen.mouseClicked(point[0], point[1], button);
         screen.mouseReleased(point[0], point[1], button);
+    }
+    private static void scrollMenu(MinecraftClient client, double amount) {
+        double[] anchor = ((CatalogScreen) client.currentScreen).controlPoint("settings-scroll");
+        if (anchor != null) client.currentScreen.mouseScrolled(anchor[0], anchor[1], 0, amount);
     }
     private static void number(MinecraftClient client, String value) {
         client.currentScreen.keyPressed(GLFW.GLFW_KEY_A, 0, GLFW.GLFW_MOD_CONTROL);

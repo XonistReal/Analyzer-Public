@@ -3,7 +3,6 @@ package dev.analyzer;
 import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.effects.GpuEffects;
 import dev.analyzer.render.AnalyzerRenderer;
-import dev.analyzer.ui.AnalyzerScreen;
 import dev.analyzer.ui.MenuScreens;
 import dev.analyzer.render.VisualEffects;
 import dev.analyzer.gameplay.GameplayEngine;
@@ -65,9 +64,9 @@ public final class AnalyzerClient implements ClientModInitializer {
         });
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             public Identifier getFabricId() { return Identifier.of("analyzer", "effects"); }
-            public void reload(ResourceManager manager) { MinecraftClient.getInstance().execute(() -> {GpuEffects.close();dev.analyzer.effects.UiShader.close();dev.analyzer.effects.HomeEffects.close();}); }
+            public void reload(ResourceManager manager) { MinecraftClient.getInstance().execute(() -> {GpuEffects.close();dev.analyzer.effects.UiShader.close();dev.analyzer.effects.HomeEffects.close();dev.analyzer.effects.LiquidGlass.close();}); }
         });
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { saveConfig(); GpuEffects.close(); dev.analyzer.effects.UiShader.close(); dev.analyzer.effects.HomeEffects.close(); });
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { saveConfig(); GpuEffects.close(); dev.analyzer.effects.UiShader.close(); dev.analyzer.effects.HomeEffects.close(); dev.analyzer.effects.LiquidGlass.close(); });
         LOGGER.info("Analyzer initialized: {} modules, Minecraft 1.21.4", CORE.modules().size());
     }
 

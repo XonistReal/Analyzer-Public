@@ -31,6 +31,8 @@ public final class HudEditorScreen extends Screen {
     public HudEditorScreen(AnalyzerCore core, Screen back) { super(Text.literal("Analyzer / HUD Studio")); this.core = core; this.back = back; }
     @Override public boolean shouldPause() { return false; }
     @Override public void render(DrawContext draw, int mouseX, int mouseY, float delta) {
+        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(draw,
+                core.getChoice("hud", "theme").equals("Glass") ? "Glass" : StudioAuxiliary.theme(core))) {
         draw.fill(0, 0, width, height, 0x24000000);
         int accent = StudioAuxiliary.accent(core);
         List<HudWidgets.WidgetBounds> layout = new ArrayList<>(HudWidgets.render(core, draw, true));
@@ -75,6 +77,7 @@ public final class HudEditorScreen extends Screen {
         GuiDraw.label(draw, textRenderer, GuiDraw.truncate(textRenderer, status, 650, .89f), 324, 86, .89f, error ? Palette.ERROR : StudioAuxiliary.MUTED);
         }
         draw.getMatrices().pop();
+        }
     }
     private void openSettings(String id) {
         Screen settings = MenuScreens.create(core, id);

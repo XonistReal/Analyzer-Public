@@ -141,7 +141,7 @@ final class HomeSmoke {
         nativeFooter("home-language", "Language");
         nativeFooter("home-accessibility", "Accessibility");
         nativeFooter("home-credits", "Credits");
-        for (String layout : List.of("Studio", "Workspace", "Classic", "Compact")) {
+        for (String layout : List.of("Studio", "Click GUI")) {
             add("Open " + layout + " from Home", 3, client -> { core.setValue("menu", "layout", layout); click(client, "home-analyzer"); });
             add("Native " + layout + " returns to Home", 4, client -> {
                 require(MenuScreens.isAnalyzerScreen(client.currentScreen) && MenuScreens.matchesLayout(core, client.currentScreen), "Home opens the saved " + layout + " module menu");
@@ -294,6 +294,9 @@ final class HomeSmoke {
     private static void require(boolean condition, String label) { if (!condition) throw new IllegalStateException("Home smoke " + stage + ": " + label); assertions++; AnalyzerClient.LOGGER.info("ANALYZER_HOME_ASSERT: {}", label); }
     private static void capture(MinecraftClient mc, String name) {
         require(GL11.glGetError() == GL11.GL_NO_ERROR && HomeEffects.isHealthy(), "Actual native GL/shader state before " + name);
+        String prefix = System.getProperty("analyzer.homeCapturePrefix", "analyzer-home-");
+        if (!prefix.matches("[a-z0-9-]+")) throw new IllegalArgumentException("Invalid Home capture prefix");
+        name = name.replace("analyzer-home-", prefix);
         ScreenshotRecorder.saveScreenshot(mc.runDirectory, name, mc.getFramebuffer(), message -> AnalyzerClient.LOGGER.info("Home screenshot: {}", message.getString())); screenshots++;
     }
     private static void finish(MinecraftClient mc) {

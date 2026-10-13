@@ -30,7 +30,8 @@ public final class SafetyHud {
 
     /** Invoke from HudRenderCallback while the task is PROTECTING; this class registers no callbacks itself. */
     public static void render(DrawContext context, AnalyzerCore core, String message, boolean critical) {
-        try (GuiDraw.FontScope ignored = GuiDraw.sansFont()) {
+        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(context, core == null ? "Classic" : core.getChoice("hud", "theme"));
+             GuiDraw.FontScope ignored = GuiDraw.sansFont()) {
             scopedRender(context, core, message, critical);
         }
     }

@@ -42,6 +42,7 @@ public final class NumericSettingScreen extends Screen {
         catch (IOException ex) { error = "Could not save: " + ex.getMessage(); }
     }
     @Override public void render(DrawContext draw, int mouseX, int mouseY, float delta) {
+        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(draw, StudioAuxiliary.theme(core))) {
         geometry();
         StudioAuxiliary.backdrop(draw, core, width, height);
         draw.getMatrices().push(); draw.getMatrices().translate(originX, originY, 0); draw.getMatrices().scale(scale, scale, 1);
@@ -55,6 +56,7 @@ public final class NumericSettingScreen extends Screen {
                     20, 209, .94f, error.isEmpty() ? StudioAuxiliary.SUBTLE : Palette.ERROR);
         }
         draw.getMatrices().pop();
+        }
     }
     private void geometry() {
         scale = StudioAuxiliary.canvasScale(client, W, H, .82, .70);

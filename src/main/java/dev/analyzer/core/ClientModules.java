@@ -10,7 +10,7 @@ public final class ClientModules {
 
     public static List<Setting<?>> menuSettings() {
         List<Setting<?>> settings = new ArrayList<>();
-        settings.add(Setting.choice("layout", "Menu layout", "Studio", "Studio", "Workspace", "Classic", "Compact"));
+        settings.add(Setting.choice("layout", "Menu layout", "Studio", "Studio", "Click GUI"));
         for (int i = 0; i < Category.values().length; i++) {
             String prefix = "classic-" + Category.values()[i].name().toLowerCase(Locale.ROOT);
             settings.add(Setting.number(prefix + "-x", Category.values()[i].label() + " column X", 2 + i % 5 * 24, 0, 100, 0.1));
@@ -23,7 +23,7 @@ public final class ClientModules {
     public static List<ModuleDefinition> definitions() {
         List<ModuleDefinition> result = new ArrayList<>();
         result.add(new ModuleDefinition("hud", "HUD Studio", "Choose your menu, appearance and HUD widget layout.", Category.HUD, true, List.of(
-                Setting.choice("menu-layout", "Menu layout", "Studio", "Studio", "Workspace", "Classic", "Compact"),
+                Setting.choice("menu-layout", "Menu layout", "Studio", "Studio", "Click GUI"),
                 Setting.choice("menu-material", "Menu material", "Glass", "Glass", "Solid"),
                 Setting.choice("menu-theme", "Menu theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
                 Setting.choice("menu-accent", "Accent color", "Rose", "Rose", "Mint", "Violet", "Gold"),

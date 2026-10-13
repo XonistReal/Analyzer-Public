@@ -1,6 +1,6 @@
 # Analyzer UI references and comparison
 
-Five screenshots were supplied by the user on October 11, 2026. Their unchanged source copies are saved in [design/ui-references](design/ui-references). The user initially chose Focused workspace, then rejected the implemented result as too similar to the earlier interface and explicitly requested reference 3's black/gray menu, pink controls and shader rendering. **Studio is the current direction**: centered shell, top categories, three columns of cards, inline expanded settings and wider bold type. The earlier sidebar/inspector Workspace remains an optional layout. Images 1, 2 and 5 identify their clients; the other names describe visible layouts.
+Five screenshots were supplied by the user on October 11, 2026. Their unchanged source copies are saved in [design/ui-references](design/ui-references). The user initially chose Focused workspace, then rejected the implemented result as too similar to the earlier interface and explicitly requested reference 3's black/gray menu, pink controls and shader rendering. **Studio is the current default**: centered shell, top categories, three columns of cards, inline expanded settings and wider bold type. The October 12 request removes Workspace, Classic and Compact layouts and adds a rebuilt shader **Click GUI** plus actual liquid-glass surfaces inspired by the new Temple glass reference. Images 1, 2 and 5 identify their clients; the other names describe visible layouts.
 
 ## Reference board
 
@@ -46,9 +46,9 @@ The October 11 interactive comparison presented these directions with shared con
 | Main cost | Another category requires a navigation action. | Less space per category; horizontal scrolling or fewer visible columns is necessary at smaller sizes. |
 | Shared test content | All 123 modules; Entity ESP's 20 controls and Kill Aura's 33 controls. | Exactly the same catalogue, values and inspector content. |
 
-Both compositions used a **123-module, 1,086-setting** snapshot. They compared layout rather than adding reference-only modules; preview edits remained inside the comparison. The current [module catalogue](MODULES.json) now exposes 1,091 settings, including four HUD Studio aliases for canonical Interface preferences. The snapshot count above describes the historical comparison.
+Both compositions used a **123-module, 1,086-setting** snapshot. They compared layout rather than adding reference-only modules; preview edits remained inside the comparison. The current [module catalogue](MODULES.json) exposes **1,100 settings**, including eight HUD Studio aliases for canonical Interface preferences. The snapshot count above describes the historical comparison.
 
-Behavior retained across the new Studio and legacy menus:
+Behavior retained across current Studio and Click GUI:
 
 - Search remains visible. Retain browsing context while opening Profiles, HUD or Automation and returning. Studio expands settings locally inside cards; long settings and the catalogue scroll independently.
 - Selecting a module opens inspection. Its visible switch changes enabled state independently. Selection, enabled state, keybind and live waiting/error status have different indicators.
@@ -63,9 +63,9 @@ The earlier and recent Workspace screenshots both used a category sidebar, two-c
 
 Studio makes a visible structural change: a centered black/charcoal window, category tabs across the top, three columns of cards, settings expanding inside their cards, Lato Regular/Bold typography and Rose switches/slider fills. The ambient particle network and pervasive outlined panels are removed from Studio's content. Original GLSL signed-distance surfaces supply smooth rounding, shadows and control glow. Minecraft screens, native TTF text and input dispatch remain in use; there is no ImGui. The reference screenshot cannot itself prove the source client's rendering architecture.
 
-**HUD Studio** exposes **Studio / Workspace / Classic / Compact** layouts, **Glass / Solid** materials, independent menu **Glass / Classic / Minimal / Neon** themes and **Rose / Mint / Violet / Gold** accents. Fresh defaults are Studio/Rose; the opaque reference presentation uses Solid material. The four menu aliases share canonical Interface fields. Saved profiles, HUD scale/positions, keybinds, friends and Classic window preferences remain valid.
+**HUD Studio** exposes only **Studio / Click GUI** layouts, **Glass / Solid** materials, independent menu **Glass / Classic / Minimal / Neon** themes and **Rose / Mint / Violet / Gold** accents. Fresh defaults are Studio/Rose. Glass theme now uses an original lens/refraction shader; Solid material keeps the surrounding scene sharp. Eight Home/menu aliases share canonical Interface fields. Old layout values migrate to Studio while saved profiles, HUD scale/positions, keybinds and friends are preserved. Stored category positions are adapted for the rebuilt Click GUI; removed screens cannot be reopened.
 
-Current captures use the `analyzer-studio-` prefix and are linked from [UI-OVERHAUL.md](UI-OVERHAUL.md). Older `analyzer-ui-overhaul-` captures and the 168 browser checks belong to earlier artifacts. Final runtime counts, release hashes and actual Prism delivery evidence are recorded in [VALIDATION.md](VALIDATION.md). The wider acceptance matrix, including comprehensive Automation-state captures, narrator audio, renderer/GPU combinations and steady-frame comparisons, remains separately scoped.
+Current captures use the `analyzer-liquid-` prefix and are linked from [LIQUID-GLASS.md](LIQUID-GLASS.md). Older screenshot prefixes and the 168 browser checks belong to earlier artifacts. Final runtime counts, release hashes and actual Prism delivery evidence are recorded in [VALIDATION.md](VALIDATION.md). The wider acceptance matrix, including comprehensive Automation-state captures, narrator audio, renderer/GPU combinations and steady-frame comparisons, remains separately scoped.
 
 ## Primary rendering references
 

@@ -70,6 +70,7 @@ public final class AutomationScreen extends Screen {
     @Override public void close() { if (client != null) client.setScreen(parent); }
 
     @Override public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        try (GuiDraw.GlassScope optical = GuiDraw.glassScope(context, theme())) {
         canvasScale = StudioAuxiliary.canvasScale(client, W, H, .84, .88);
         canvasX = (width - W * canvasScale) / 2; canvasY = (height - H * canvasScale) / 2;
         mx = (mouseX - canvasX) / canvasScale; my = (mouseY - canvasY) / canvasScale;
@@ -93,6 +94,7 @@ public final class AutomationScreen extends Screen {
         GuiDraw.label(context, textRenderer, status, 476, 533, .9f, error ? Palette.ERROR : StudioAuxiliary.MUTED);
         }
         context.getMatrices().pop();
+        }
     }
 
     private void drawComposer(DrawContext context, View view, int accent) {
