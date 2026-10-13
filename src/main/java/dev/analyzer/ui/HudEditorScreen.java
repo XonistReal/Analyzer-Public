@@ -16,70 +16,98 @@ import java.util.Map;
 
 /** Drag the exact gameplay widgets; their normalized positions persist across resolution changes. */
 public final class HudEditorScreen extends Screen {
+    private static final int TOOLBAR_WIDTH = 1000, TOOLBAR_HEIGHT = 120;
     private final AnalyzerCore core;
     private final Screen back;
     private List<HudWidgets.WidgetBounds> widgets = List.of();
     private final List<Hit> hits = new ArrayList<>();
     private final Map<String, double[]> diagnostics = new HashMap<>();
-    private String selected = "watermark", dragging, status = "Drag a widget / right click to toggle / arrows move selection";
+    private String selected = "watermark", dragging, focusedControl, status = "Drag to move · right click to toggle · arrows move selection";
     private double grabX, grabY;
     private boolean dirty, error;
     private long changedAt;
     private float toolbarScale, toolbarX, toolbarY;
+    private double mx, my;
     public HudEditorScreen(AnalyzerCore core, Screen back) { super(Text.literal("Analyzer / HUD Studio")); this.core = core; this.back = back; }
     @Override public boolean shouldPause() { return false; }
     @Override public void render(DrawContext draw, int mouseX, int mouseY, float delta) {
-        draw.fill(0, 0, width, height, 0x4507121B);
-        int accent = HudWidgets.accent(core);
-        for (int x = 0; x < width; x += 16) draw.fill(x, 0, x + 1, height, 0x123AA2A4);
-        for (int y = 0; y < height; y += 16) draw.fill(0, y, width, y + 1, 0x123AA2A4);
+        draw.fill(0, 0, width, height, 0x24000000);
+        int accent = StudioAuxiliary.accent(core);
         List<HudWidgets.WidgetBounds> layout = new ArrayList<>(HudWidgets.render(core, draw, true));
         HudWidgets.WidgetBounds radar = AnalyzerRenderer.renderEditorRadar(draw);
         if (radar != null) layout.add(radar);
         widgets = List.copyOf(layout);
         for (HudWidgets.WidgetBounds widget : widgets) if (widget.id().equals(selected)) {
-            GuiDraw.wireBox(draw, widget.x() - 2, widget.y() - 2, widget.width() + 4, widget.height() + 4, true, 1.2f, accent);
-            draw.fill(widget.x() + widget.width() / 2, 0, widget.x() + widget.width() / 2 + 1, height, Palette.alpha(accent, 25));
+            StudioAuxiliary.surface(draw, widget.x() - 2, widget.y() - 2, widget.width() + 4, widget.height() + 4, 10,
+                    Palette.alpha(accent, 12), Palette.alpha(accent, 5), 0, 0, Palette.alpha(accent, 60), 3);
+            if (dragging != null) {
+                int centerX = widget.x() + widget.width() / 2, centerY = widget.y() + widget.height() / 2;
+                draw.fill(centerX, 0, centerX + 1, height, Palette.alpha(accent, 25));
+                draw.fill(0, centerY, width, centerY + 1, Palette.alpha(accent, 25));
+            }
         }
         hits.clear(); diagnostics.clear();
-        toolbarScale = Math.max(0.2f, Math.min(1, (width - 20f) / 810));
-        toolbarX = (width - 810 * toolbarScale) / 2;
-        toolbarY = height - 64 * toolbarScale - 10;
+        toolbarScale = StudioAuxiliary.canvasScale(client, TOOLBAR_WIDTH, TOOLBAR_HEIGHT, .92, .24);
+        toolbarX = (width - TOOLBAR_WIDTH * toolbarScale) / 2;
+        toolbarY = height - TOOLBAR_HEIGHT * toolbarScale - 10;
+        mx = (mouseX - toolbarX) / toolbarScale; my = (mouseY - toolbarY) / toolbarScale;
         draw.getMatrices().push(); draw.getMatrices().translate(toolbarX, toolbarY, 0); draw.getMatrices().scale(toolbarScale, toolbarScale, 1);
-        GuiDraw.panel(draw, 0, 0, 810, 64, 12, accent, core.getChoice("menu", "material").equals("Glass"), core.getChoice("menu", "theme"));
-        GuiDraw.heading(draw, textRenderer, "HUD STUDIO", 12, 10, 1.04f, Palette.TEXT);
-        button(draw, "theme", core.getChoice("hud", "theme"), 125, 8, 77, () -> {
+        try (var font = GuiDraw.sansFont()) {
+        GuiDraw.shaderPanel(draw, 0, 0, TOOLBAR_WIDTH, TOOLBAR_HEIGHT, 20, accent, StudioAuxiliary.glass(core), StudioAuxiliary.theme(core));
+        GuiDraw.heading(draw, textRenderer, "HUD Studio", 22, 15, 1.45f, StudioAuxiliary.TEXT);
+        GuiDraw.label(draw, textRenderer, "Arrange your widgets", 22, 40, .94f, StudioAuxiliary.MUTED);
+        button(draw, "theme", core.getChoice("hud", "theme"), 204, 13, 95, () -> {
             List<String> themes = List.of("Glass", "Classic", "Minimal", "Neon");
             core.setValue("hud", "theme", themes.get((themes.indexOf(core.getChoice("hud", "theme")) + 1) % themes.size())); changed();
         });
-        button(draw, "scale-minus", "−", 208, 8, 24, () -> { core.setValue("hud", "scale", core.getNumber("hud", "scale") - 0.05); changed(); });
-        GuiDraw.label(draw, textRenderer, Math.round(core.getNumber("hud", "scale") * 100) + "%", 238, 17, 0.81f, accent);
-        button(draw, "scale-plus", "+", 277, 8, 24, () -> { core.setValue("hud", "scale", core.getNumber("hud", "scale") + 0.05); changed(); });
-        button(draw, "snap", "Snap " + (core.getBoolean("hud", "snap") ? "on" : "off"), 310, 8, 73, () -> { core.setValue("hud", "snap", !core.getBoolean("hud", "snap")); changed(); });
-        button(draw, "disabled", "Show " + (core.getBoolean("hud", "show-disabled") ? "all" : "active"), 389, 8, 85, () -> { core.setValue("hud", "show-disabled", !core.getBoolean("hud", "show-disabled")); changed(); });
-        button(draw, "selected-toggle", enabled(selected) ? "Disable" : "Enable", 482, 8, 70, () -> { toggleSelected(); changed(); });
-        button(draw, "selected-settings", "Settings", 558, 8, 73, () -> client.setScreen(new AnalyzerScreen(core).inspect(selected.equals("radar") ? "entity-esp" : selected)));
-        button(draw, "reset-layout", "Reset layout", 637, 8, 91, this::resetLayout);
-        button(draw, "done", "Done", 735, 8, 62, this::close);
-        button(draw, "menu-settings", "Menu settings", 12, 37, 121, () -> client.setScreen(new AnalyzerScreen(core).inspect("hud")));
-        GuiDraw.label(draw, textRenderer, GuiDraw.truncate(textRenderer, error ? status : selected + " / " + status, 640, 0.79f), 146, 46, 0.79f, error ? Palette.ERROR : Palette.MUTED);
+        button(draw, "scale-minus", "−", 310, 13, 30, () -> { core.setValue("hud", "scale", core.getNumber("hud", "scale") - 0.05); changed(); });
+        GuiDraw.label(draw, textRenderer, Math.round(core.getNumber("hud", "scale") * 100) + "%", 350, 24, .96f, accent);
+        button(draw, "scale-plus", "+", 407, 13, 30, () -> { core.setValue("hud", "scale", core.getNumber("hud", "scale") + 0.05); changed(); });
+        toggleButton(draw, "snap", "Snap", 447, 13, 85, core.getBoolean("hud", "snap"), () -> { core.setValue("hud", "snap", !core.getBoolean("hud", "snap")); changed(); });
+        button(draw, "disabled", "Show " + (core.getBoolean("hud", "show-disabled") ? "all" : "active"), 544, 13, 99, () -> { core.setValue("hud", "show-disabled", !core.getBoolean("hud", "show-disabled")); changed(); });
+        button(draw, "selected-toggle", enabled(selected) ? "Disable" : "Enable", 654, 13, 92, () -> { toggleSelected(); changed(); });
+        button(draw, "selected-settings", "Settings", 758, 13, 89, () -> openSettings(selected.equals("radar") ? "entity-esp" : selected));
+        button(draw, "done", "Done", 901, 13, 77, this::close);
+        button(draw, "menu-settings", "Menu settings", 22, 66, 150, () -> openSettings("hud"));
+        button(draw, "reset-layout", "Reset layout", 184, 66, 118, this::resetLayout);
+        String name = selected.equals("radar") ? "Radar" : core.modules().stream().filter(module -> module.id().equals(selected)).map(ModuleDefinition::name).findFirst().orElse(selected);
+        GuiDraw.heading(draw, textRenderer, name, 324, 64, 1.12f, StudioAuxiliary.TEXT);
+        GuiDraw.label(draw, textRenderer, GuiDraw.truncate(textRenderer, status, 650, .89f), 324, 86, .89f, error ? Palette.ERROR : StudioAuxiliary.MUTED);
+        }
         draw.getMatrices().pop();
+    }
+    private void openSettings(String id) {
+        Screen settings = MenuScreens.create(core, id);
+        if (settings instanceof CatalogScreen catalog) catalog.withParent(this);
+        client.setScreen(settings);
     }
     private boolean enabled(String id) { return id.equals("radar") ? core.isEnabled("entity-esp") && core.getBoolean("entity-esp", "radar") : core.isEnabled(id); }
     private void toggleSelected() { if (selected.equals("radar")) core.setValue("entity-esp", "radar", !core.getBoolean("entity-esp", "radar")); else core.toggle(selected); }
     private void button(DrawContext draw, String id, String text, int x, int y, int w, Runnable action) {
-        GuiDraw.rounded(draw, x, y, w, 26, 5, 0xFF19303B);
-        GuiDraw.label(draw, textRenderer, text, x + 7, y + 8, 0.8f, Palette.TEXT);
-        hits.add(new Hit(x, y, w, 26, action));
-        diagnostics.put(id, new double[]{toolbarX + (x + w / 2.0) * toolbarScale, toolbarY + (y + 13) * toolbarScale});
+        boolean hover = mx >= x && my >= y && mx < x + w && my < y + 32;
+        StudioAuxiliary.button(draw, core, textRenderer, x, y, w, 32, text, true, false, hover);
+        control(draw, id, x, y, w, action);
+    }
+    private void toggleButton(DrawContext draw, String id, String text, int x, int y, int w, boolean enabled, Runnable action) {
+        boolean hover = mx >= x && my >= y && mx < x + w && my < y + 32;
+        GuiDraw.shaderCard(draw, x, y, w, 32, 10, StudioAuxiliary.accent(core), StudioAuxiliary.glass(core), StudioAuxiliary.theme(core), hover ? 1 : 0, false);
+        GuiDraw.label(draw, textRenderer, text, x + 10, y + 10, .95f, StudioAuxiliary.TEXT);
+        GuiDraw.shaderPill(draw, x + w - 37, y + 8, 29, 16, StudioAuxiliary.accent(core), enabled);
+        control(draw, id, x, y, w, action);
+    }
+    private void control(DrawContext draw, String id, int x, int y, int w, Runnable action) {
+        hits.add(new Hit(id, x, y, w, 32, action));
+        diagnostics.put(id, new double[]{toolbarX + (x + w / 2.0) * toolbarScale, toolbarY + (y + 16) * toolbarScale});
+        if (id.equals(focusedControl)) StudioAuxiliary.surface(draw, x + 8, y + 30, w - 16, 1.5f, .75f,
+                StudioAuxiliary.accent(core), StudioAuxiliary.accent(core), 0, 0, 0, 0);
     }
     @Override public boolean mouseClicked(double x, double y, int button) {
         double tx = (x - toolbarX) / toolbarScale, ty = (y - toolbarY) / toolbarScale;
-        if (button == 0) for (int i = hits.size() - 1; i >= 0; i--) { Hit hit = hits.get(i); if (hit.contains(tx, ty)) { hit.action.run(); return true; } }
+        if (button == 0) for (int i = hits.size() - 1; i >= 0; i--) { Hit hit = hits.get(i); if (hit.contains(tx, ty)) { focusedControl = hit.id; hit.action.run(); return true; } }
         for (int i = widgets.size() - 1; i >= 0; i--) {
             HudWidgets.WidgetBounds widget = widgets.get(i);
             if (!widget.contains(x, y)) continue;
-            selected = widget.id();
+            selected = widget.id(); focusedControl = null;
             if (button == 1) { toggleSelected(); changed(); }
             else if (button == 0) { dragging = selected; grabX = x - widget.x(); grabY = y - widget.y(); }
             return true;
@@ -98,6 +126,15 @@ public final class HudEditorScreen extends Screen {
     @Override public boolean mouseReleased(double x, double y, int button) { dragging = null; return true; }
     @Override public boolean keyPressed(int key, int scan, int modifiers) {
         if (key == GLFW.GLFW_KEY_ESCAPE) { close(); return true; }
+        if (key == GLFW.GLFW_KEY_TAB && !hits.isEmpty()) {
+            int current = -1;
+            for (int i = 0; i < hits.size(); i++) if (hits.get(i).id.equals(focusedControl)) current = i;
+            int direction = (modifiers & GLFW.GLFW_MOD_SHIFT) != 0 ? -1 : 1;
+            focusedControl = hits.get(Math.floorMod(current + direction, hits.size())).id; return true;
+        }
+        if (focusedControl != null && (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER || key == GLFW.GLFW_KEY_SPACE)) {
+            hits.stream().filter(hit -> hit.id.equals(focusedControl)).findFirst().ifPresent(hit -> hit.action.run()); return true;
+        }
         if (key == GLFW.GLFW_KEY_SPACE) { toggleSelected(); changed(); return true; }
         double step = (modifiers & GLFW.GLFW_MOD_SHIFT) != 0 ? 0.1 : 1;
         if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN) {
@@ -127,5 +164,5 @@ public final class HudEditorScreen extends Screen {
         return diagnostics.get(action);
     }
     public List<HudWidgets.WidgetBounds> widgetBounds() { return widgets; }
-    private record Hit(int x, int y, int w, int h, Runnable action) { boolean contains(double px, double py) { return px >= x && py >= y && px < x + w && py < y + h; } }
+    private record Hit(String id, int x, int y, int w, int h, Runnable action) { boolean contains(double px, double py) { return px >= x && py >= y && px < x + w && py < y + h; } }
 }

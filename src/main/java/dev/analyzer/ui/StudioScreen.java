@@ -63,8 +63,7 @@ public final class StudioScreen extends CatalogScreen {
         return this;
     }
     @Override protected void header(DrawContext draw) {
-        GuiDraw.heading(draw, textRenderer, "Analyzer", 423, 25, 2.0f, WHITE);
-        label(draw, "STUDIO", 469, 53, .8f, SECONDARY);
+        BrandAssets.wordmark(draw, 398, 4, 204);
         label(draw, net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer("analyzer").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("dev"), 43, 35, .96f, SECONDARY);
         button(draw, "close", "×", 927, 27, 30, 29, false, this::close);
         List<String> labels = new ArrayList<>(); labels.add("All");
@@ -86,7 +85,7 @@ public final class StudioScreen extends CatalogScreen {
                 query.isEmpty() ? SECONDARY : WHITE);
         control("search", new Area(42, 115, 292, 28), 0, () -> {searchFocused = true; selectAll = false; capture = null;});
         button(draw, "search-clear", "×", 337, 117, 26, 24, false, () -> { query = ""; searchFocused = false; searchChanged(); });
-        button(draw, "profiles", "Profiles", 396, 116, 91, 27, false, () -> client.setScreen(new AnalyzerScreen(core, this).showProfiles()));
+        button(draw, "profiles", "Profiles", 396, 116, 91, 27, false, () -> client.setScreen(MenuScreens.profiles(core, this)));
         button(draw, "hud-editor", "Edit HUD", 494, 116, 105, 27, false, () -> client.setScreen(new HudEditorScreen(core, this)));
         button(draw, "automation", "Automation", 606, 116, 129, 27, false, () -> client.setScreen(MenuScreens.automation(core, this)));
         button(draw, "appearance", "Appearance", 742, 116, 130, 27, false, () -> inspect("hud"));

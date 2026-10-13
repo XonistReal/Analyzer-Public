@@ -5,6 +5,7 @@ import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.core.ModuleDefinition;
 import dev.analyzer.ui.GuiDraw;
 import dev.analyzer.ui.HudWidgets;
+import dev.analyzer.effects.UiShader;
 import dev.analyzer.ui.Palette;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -51,6 +52,8 @@ import java.util.List;
 
 /** Native world overlays and HUD. No entity flags, game packets, or world state are changed. */
 public final class AnalyzerRenderer {
+    private static long radarShaderFrames;
+    public static long radarShaderFrames() { return radarShaderFrames; }
     private static final int MAX_ENTITY_TARGETS = 4096;
     private static final int MAX_LABELS = 128;
     private static final float LABEL_TEXT_PIXELS = 14;
@@ -646,10 +649,10 @@ public final class AnalyzerRenderer {
                     panel.width * pixelsPerPoint, panel.height * pixelsPerPoint));
             // Tags remain near their actual projected targets. Dense targets are omitted instead of
             // shifting tags through six large rows across the sky.
-            draw.fill(panel.x, panel.y, panel.right(), panel.bottom(), faded(0xD408131A, request.opacity));
-            int lineWidth = Math.max(1, Math.round(1 / pixelsPerPoint));
-            draw.fill(panel.x, panel.y, panel.x + lineWidth, panel.bottom(),
-                    faded(Palette.alpha(request.color, 220), request.opacity));
+            int fill = faded(0xDD232326, request.opacity);
+            if (!UiShader.surface(draw, panel.x, panel.y, panel.width, panel.height, 4 / pixelsPerPoint,
+                    fill, faded(0xDD17171A, request.opacity), faded(0x40000000, request.opacity), 2 / pixelsPerPoint, 0, 0))
+                GuiDraw.rounded(draw, panel.x, panel.y, panel.width, panel.height, Math.max(1, Math.round(4 / pixelsPerPoint)), fill);
             float x = panel.x + 4 / pixelsPerPoint, y = panel.y + 2 / pixelsPerPoint;
             // Direct draw deliberately bypasses GuiDraw's HUD/menu font floor.
             draw.getMatrices().push();
@@ -744,9 +747,11 @@ public final class AnalyzerRenderer {
         float hudScale = HudWidgets.scale(core, draw);
         List<ScreenLabelRequest> labelRequests = new ArrayList<>();
         List<HudRect> boxes = new ArrayList<>();
-        drawScreenTargets(draw, "entity-esp", screenEntities, labelRequests, boxes);
-        drawScreenTargets(draw, "storage-esp", screenStorage, labelRequests, boxes);
-        drawScreenLabels(draw, labelRequests, boxes, reservedHudAreas(draw, hudScale, List.of()));
+        try (GuiDraw.FontScope font = GuiDraw.sansFont()) {
+            drawScreenTargets(draw, "entity-esp", screenEntities, labelRequests, boxes);
+            drawScreenTargets(draw, "storage-esp", screenStorage, labelRequests, boxes);
+            drawScreenLabels(draw, labelRequests, boxes, reservedHudAreas(draw, hudScale, List.of()));
+        }
         if (client.getDebugHud().shouldShowDebugHud()) return;
         // HUD Studio draws these exact widgets itself, with its editing guides.
         if (client.currentScreen instanceof dev.analyzer.ui.HudEditorScreen) return;
@@ -789,11 +794,12 @@ public final class AnalyzerRenderer {
     }
 
     private void drawRadar(DrawContext draw) {
+        try (GuiDraw.FontScope font = GuiDraw.sansFont()) {
         int cx = 64, cy = 118, radius = 35;
         float titleSize = HudWidgets.readableTtfScale(core, draw, 0.8f);
         float smallSize = HudWidgets.readableTtfScale(core, draw, 0.65f);
         float summarySize = HudWidgets.readableTtfScale(core, draw, 0.7f);
-        GuiDraw.outlined(draw, 10, 57, 108, 133, 7, 0x5A4C7780, 0xD908141D);
+        if (HudWidgets.panel(draw, 10, 57, 108, 133, core.getChoice("hud", "theme"), HudWidgets.accent(core), .85)) radarShaderFrames++;
         GuiDraw.label(draw, client.textRenderer, "LOCAL RADAR", 20, 65, titleSize, Palette.TEXT);
         GuiDraw.label(draw, client.textRenderer, "N", cx - 2, cy - radius - 9, smallSize, Palette.MUTED);
         for (int ring = 1; ring <= 2; ring++) {
@@ -806,8 +812,8 @@ public final class AnalyzerRenderer {
         }
         GuiDraw.line(draw, cx - radius, cy, cx + radius, cy, 0x253F6570);
         GuiDraw.line(draw, cx, cy - radius, cx, cy + radius, 0x253F6570);
-        double sweep = System.nanoTime() / 1_000_000_000.0 * 0.75;
-        GuiDraw.line(draw, cx, cy, cx + Math.cos(sweep) * radius, cy + Math.sin(sweep) * radius, 0x3864EBD0);
+        double sweep = System.nanoTime() / 1_000_000_000.0 * 0.75 * core.getNumber("menu", "motion");
+        GuiDraw.line(draw, cx, cy, cx + Math.cos(sweep) * radius, cy + Math.sin(sweep) * radius, Palette.alpha(HudWidgets.accent(core), 55));
         double scale = radius / Math.max(1, core.getNumber("entity-esp", "range"));
         Vec3d origin = client.player.getPos();
         int count = 0;
@@ -817,8 +823,8 @@ public final class AnalyzerRenderer {
             double px = relative.x * scale, py = relative.z * scale;
             if (px * px + py * py > radius * radius) continue;
             int x = cx + (int) Math.round(px), y = cy + (int) Math.round(py);
-            draw.fill(x - 2, y - 2, x + 3, y + 3, Palette.alpha(target.color, 45));
-            draw.fill(x - 1, y - 1, x + 2, y + 2, target.color);
+            if (!UiShader.surface(draw, x - 1.5f, y - 1.5f, 3, 3, 1.5f, target.color, target.color, 0, 0, Palette.alpha(target.color, 45), 2))
+                GuiDraw.rounded(draw, x - 1, y - 1, 3, 3, 2, target.color);
             count++;
         }
         double yaw = Math.toRadians(client.player.getYaw());
@@ -837,6 +843,7 @@ public final class AnalyzerRenderer {
                 + Math.round(core.getNumber("entity-esp", "range")) + "m";
         GuiDraw.label(draw, client.textRenderer, GuiDraw.truncate(client.textRenderer, summary, 92, summarySize),
                 18, 178, summarySize, radarTargets.isEmpty() ? Palette.MUTED : Palette.MINT);
+        }
     }
 
     private void drawCrosshair(DrawContext draw) {

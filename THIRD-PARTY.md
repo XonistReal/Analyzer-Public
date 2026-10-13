@@ -2,6 +2,10 @@
 
 Analyzer's original Java code, GLSL shaders, UI resources, and Python/PowerShell distribution tools are licensed under the MIT license in `LICENSE`. The items below retain their own licenses. This document records direct assets/tooling and runtime dependencies; it does not relicense Minecraft or its transitive libraries.
 
+## User-supplied branding
+
+On October 12, 2026 the user supplied `minecraft-text (1).png` (341×392 monogram) and `minecraft-text.png` (1139×392 wordmark) for this client. They are preserved byte-for-byte as `src/main/resources/assets/analyzer/textures/brand/monogram.png` and `wordmark.png`. Both already contain RGBA transparency and a translucent glow. These supplied images replace the generated Home branding; their provenance is separate from Analyzer's original shader artwork and bundled font licenses.
+
 ## Bundled fonts
 
 | Local asset | Original upstream file | License |

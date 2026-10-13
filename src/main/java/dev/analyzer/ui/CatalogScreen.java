@@ -90,12 +90,12 @@ public abstract class CatalogScreen extends Screen {
             int w=name.equals("Workspace")?87:name.equals("Classic")?65:74;
             button(draw,"layout-"+name.toLowerCase(Locale.ROOT),name,x,23,w,28,name.equals(layout())&&!profilesOpen(),()->switchLayout(name));x+=w+6;
         }
-        button(draw,"profiles","Profiles",709,23,69,28,profilesOpen(),()->client.setScreen(new AnalyzerScreen(core,this).showProfiles()));
+        button(draw,"profiles","Profiles",709,23,69,28,profilesOpen(),()->client.setScreen(MenuScreens.profiles(core,this)));
         button(draw,"hud-editor","Edit HUD",784,23,77,28,false,()->client.setScreen(new HudEditorScreen(core,this)));
         button(draw,"automation","Automation",867,23,90,28,false,()->client.setScreen(MenuScreens.automation(core,this)));
         button(draw,"close","×",963,23,25,28,false,this::close);
         label(draw,core.modules().size()+" modules · "+theme()+" theme · "+core.getChoice("menu","accent")+" accent",179,62,.74f,Palette.MUTED);
-        button(draw,"appearance","HUD & menu settings",825,56,153,21,false,()->client.setScreen(new AnalyzerScreen(core).inspect("hud")));
+        button(draw,"appearance","HUD & menu settings",825,56,153,21,false,()->inspect("hud"));
         draw.fill(24,83,976,84,Palette.alpha(Palette.TEXT,28));
     }
     protected void footer(DrawContext draw){
@@ -205,7 +205,7 @@ public abstract class CatalogScreen extends Screen {
     protected void persist(){try{core.save();dirty=false;status="All changes saved.";failed=false;}catch(IOException e){failed=true;status="Save failed: "+e.getMessage();}}
     @Override public void tick(){if(dirty&&!failed&&System.currentTimeMillis()-changedAt>650)persist();if(layoutRefreshRequested){layoutRefreshRequested=false;if(dirty)persist();MenuScreens.refreshLayout(core,this,selectedModuleId());}}
     @Override public void removed(){if(dirty)persist();}
-    @Override public void close(){if(dirty)persist();if(returnParent!=null&&client.world==null)client.setScreen(returnParent);else super.close();}
+    @Override public void close(){if(dirty)persist();if(returnParent!=null)client.setScreen(returnParent);else super.close();}
     protected void switchLayout(String name){core.setValue("menu","layout",name);changed();persist();Screen next=MenuScreens.create(core,selectedModuleId());if(next instanceof CatalogScreen catalog){catalog.restoreQueryText(query);catalog.withParent(returnParent);}client.setScreen(next);}
     @Override public boolean mouseClicked(double x,double y,int button){
         mx=(x-ox)/scale;my=(y-oy)/scale;

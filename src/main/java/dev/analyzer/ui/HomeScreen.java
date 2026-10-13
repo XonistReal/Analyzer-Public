@@ -3,7 +3,6 @@ package dev.analyzer.ui;
 import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.effects.HomeEffects;
 import dev.analyzer.effects.UiShader;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
@@ -27,7 +26,7 @@ import java.util.Locale;
 /** Native title navigation over Minecraft's panorama or original Orbit GLSL. */
 public final class HomeScreen extends Screen {
     private static final String[] SECTIONS = {"singleplayer", "multiplayer", "realms", "analyzer", "options", "quit"};
-    private static final String[] LABELS = {"Singleplayer", "Multiplayer", "Realms", "Analyzer", "Options", "Quit"};
+    private static final String[] LABELS = {"Singleplayer", "Multiplayer", "Realms", "Modules", "Options", "Quit"};
     private static final String[] IDS = {"home-worlds", "home-servers", "home-realms", "home-analyzer", "home-options", "home-quit"};
     private static final int WHITE = 0xFFF8F7FA, MUTED = 0xFFD0CAD2;
     private final AnalyzerCore core;
@@ -36,7 +35,7 @@ public final class HomeScreen extends Screen {
     private String error = "";
     private float panoramaYaw = 35;
 
-    public HomeScreen(AnalyzerCore core) {super(Text.literal("Analyzer Home"));this.core = core;}
+    public HomeScreen(AnalyzerCore core) {super(Text.literal("Home"));this.core = core;}
     public AnalyzerCore core() {return core;}
     public String backgroundMode() {return core.getChoice("menu", "home-background");}
     public float panoramaYaw() {return panoramaYaw;}
@@ -123,9 +122,8 @@ public final class HomeScreen extends Screen {
         float u = unit();int accent = HudWidgets.accent(core);
         try (GuiDraw.FontScope font = GuiDraw.sansFont()) {
             draw.getMatrices().push();draw.getMatrices().scale(u, u, 1);
-            GuiDraw.logo(draw, 28, 24, 21, accent);
-            GuiDraw.heading(draw, textRenderer, "Analyzer", 61, 25, 1.15f, WHITE);
-            GuiDraw.label(draw, textRenderer, "Welcome, " + client.getSession().getUsername(), 29, 55, .84f, MUTED);
+            BrandAssets.monogram(draw, 26, 13, 44);
+            GuiDraw.label(draw, textRenderer, "Welcome, " + client.getSession().getUsername(), 29, 64, .84f, MUTED);
             if (withPanel) {
                 int panelHeight = Math.round(canvasHeight() - 116);
                 if (!UiShader.surface(draw, 284, 68, 675, panelHeight, 17, 0xA21C1B20, 0xB0151419, 0x65000000, 19, 0, 0))
@@ -134,12 +132,9 @@ public final class HomeScreen extends Screen {
                 String title = section.isBlank() ? "Home" : section.substring(0, 1).toUpperCase(Locale.ROOT) + section.substring(1);
                 GuiDraw.heading(draw, textRenderer, title, 307, 88, 1.35f, WHITE);
             } else if (backgroundMode().equals("Panorama")) {
-                String brand = "Analyzer";
-                float titleWidth = GuiDraw.width(textRenderer, brand, 4.7f);
-                GuiDraw.heading(draw, textRenderer, brand, 652 - titleWidth / 2, canvasHeight() * .45f, 4.7f, Palette.mix(accent, WHITE, .15));
+                BrandAssets.wordmark(draw, 477, canvasHeight() * .42f - 28, 350);
             }
-            String version = FabricLoader.getInstance().getModContainer("analyzer").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("dev");
-            GuiDraw.label(draw, textRenderer, "Minecraft 1.21.4  ·  Analyzer " + version, 28, canvasHeight() - 12, .8f, MUTED);
+            GuiDraw.label(draw, textRenderer, "Minecraft 1.21.4", 28, canvasHeight() - 12, .8f, MUTED);
             if (!error.isEmpty()) GuiDraw.label(draw, textRenderer, GuiDraw.truncate(textRenderer, error, 650, .9f), 307, canvasHeight() - 31, .9f, Palette.ERROR);
             draw.getMatrices().pop();
         }
@@ -178,7 +173,12 @@ public final class HomeScreen extends Screen {
         }
     }
     private static void drawIcon(DrawContext draw, String id, int x, int y, int color) {
-        if (id.endsWith("analyzer")) {GuiDraw.logo(draw, x - 1, y - 1, 14, color);return;}
+        if (id.endsWith("analyzer")) {
+            for (int row = 0; row < 2; row++) for (int column = 0; column < 2; column++)
+                if (!UiShader.surface(draw, x + column * 7, y + row * 7, 5, 5, 1.5f, color, color, 0, 0, 0, 0))
+                    GuiDraw.rounded(draw, x + column * 7, y + row * 7, 5, 5, 2, color);
+            return;
+        }
         if (id.endsWith("singleplayer")) {GuiDraw.cube(draw, x, y, 12, color);return;}
         if (id.endsWith("multiplayer") || id.endsWith("realms")) {
             if (!UiShader.surface(draw, x, y, 12, 12, 6, Palette.alpha(color, 40), Palette.alpha(color, 40), 0, 0, 0, 0)) GuiDraw.rounded(draw, x, y, 12, 12, 6, color);

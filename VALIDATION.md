@@ -1,3 +1,30 @@
+# Complete Studio, shader HUD and supplied branding — October 12, 2026
+
+Analyzer **0.7.1** extends Studio's native GLSL surfaces and Lato to Profiles, Automation, HUD editing and numeric entry. Forced Workspace shortcuts are removed from the current Studio workflow. All 17 HUD widgets, Radar and protection notices use native shader panels; keycaps, item slots and target health bars use rounded shader geometry. Projected ESP label panels are styled without changing world-space target/depth rules. The user-supplied transparent monogram and wordmark replace the generated Home branding and appear in Studio and the HUD watermark. [Current controls and captures](STUDIO-COMPLETE.md) documents the update.
+
+## Final checks
+
+- Java 21 **build / publishLocal / moduleCatalog** passed **1,054 build assertions**. The catalog remains **123 modules / 1,099 exposed settings / 1,091 canonical settings**, with eight appearance aliases; there are no new settings or gameplay policies in this presentation update.
+- The final native Studio/HUD fixture passed **542 assertions**, **17 screenshots**, **78 phases** and **303 ticks**. It checks real Profiles save/load/delete with every pre-existing development profile hash preserved, numeric invalid/apply/cancel behavior, actual Automation plan review without starting a task, exact parent navigation, editor dragging/persistence, all 17 HUD shader render paths in four themes, Radar, supplied logo rendering, six window/GUI cases, zero motion and resource reload.
+- Actual framebuffer differences confirm the new FPS panel is drawn (mean channel difference **0.037656**). Pixel inspection verifies the numeric title remains crisp (sharp-edge fraction **0.143414**). Visual QA caught the initial numeric modal double-blur: Minecraft's default background was running inside the modal's scaled canvas. The final override draws its backdrop once before the modal; the final capture and pixel regression pass.
+- The separate title-only Home regression passes **499 assertions**, **31 captures**, **70 phases** and **433 ticks**, covering native world/server/options pages, real FOV changes/restoration, all four module layouts returning to Home, saved vanilla fallback, background switching, visible blur pixels, six window/GUI cases, zero motion and reload. Realms/Quit controls are checked without invoking online services or an early exit.
+- Captures cover **1280×800 / 1920×1080**, requested GUI scales **2/3/4**. Minecraft clamps requested GUI4 at 1280 to effective scale3. All **48 current captures** are copied unchanged under `screenshots/analyzer-refresh-*`; historical Studio/Home prefixes remain intact. Primary Home, HUD, auxiliary, numeric and editor captures were visually reviewed. Both final runtime logs contain no ERROR/FATAL entries or shader/GL failures.
+- Safety notice presentation uses a labeled fixture snapshot and actual HUD callback without running a task or creating danger. The real protection controller and gameplay outcomes are unchanged; this presentation fixture does not repeat the full historical Survival/task matrix. Inventory/equipment/target widget data uses the isolated fixture's actual state. HUD Glass is translucent over the live world, rather than applying full-screen blur; explicit older module layouts remain optional. No live Prism launch, authenticated Realms request, public server join, performance benchmark or other renderer/GPU validation is claimed.
+
+Evidence: `build/reports/studio-refresh-runtime.log`, `build/reports/home-refresh-runtime.log` and `build/reports/studio-refresh-coverage.json`. Both supplied PNGs remain byte-identical RGBA images with alpha extrema **0–255**, including their original partial-alpha glow. Resource reload and native frame counters verify actual texture rendering.
+
+## Prism delivery
+
+The user imported the preceding 0.7.0 ZIP and removed the old 0.5.2 instance directory. The actual existing instance is now `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.7.0-Prism-1.21.4`; it is reused rather than duplicated. The updater remains connected to the local feed through its configuration and pre-launch command.
+
+The final build, feed, installed JAR and import archive share Analyzer SHA-256 **`f9f5bbb21096643a42ac998f2270fdf87a1d103fd560d030bb1088f4453481c8`**. Minecraft was closed for the strict update; **analyzer-0.7.1-f9f5bbb21096.jar** is the single installed Analyzer JAR and the updater's final check reports **up-to-date**. The replaced 0.7.0 release is backed up.
+
+All **109 protected game/dependency/launcher files** remain byte-identical, including the active Analyzer config and **11 saved profiles**. Worlds, friends, keybinds, appearance, widget placement/scale, unrelated mods and Prism-managed Java preferences are preserved. The Desktop `Analyzer-0.7.1-Prism-1.21.4.zip` contains the current runtime, matching dependencies, sources/notices, updater, current docs, 48 new native captures and the supplied logo resources. Archive CRC, metadata, 23 mixins, five canonical snapshots, shader/font resources and exact source PNG bytes/transparency are audited. It inherits launcher Java settings and contains no accounts, user configuration or saved worlds.
+
+Final delivery evidence is `build/reports/prism-studio-refresh-delivery.json`. Historical validation below applies to its recorded builds.
+
+---
+
 # Home screen and all-module sweep — October 12, 2026
 
 Analyzer **0.7.0** opens the custom Home by default over **Minecraft panorama**, as selected by the user. Optional **Orbit** is original procedural GLSL. Singleplayer, Multiplayer and Options retain real Minecraft data, controls and callbacks inside translucent panels. HUD Studio exposes the four canonical Home preferences through four aliases; all four module-menu layouts and existing themes remain available. [Home controls/captures](HOME-SCREEN.md) and the [comparison photos](HOME-REFERENCES.md) document the direction.

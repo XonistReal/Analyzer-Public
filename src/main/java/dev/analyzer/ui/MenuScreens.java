@@ -9,8 +9,9 @@ import net.minecraft.client.gui.screen.Screen;
 public final class MenuScreens {
     private MenuScreens() { }
     public static boolean isAnalyzerScreen(Screen screen) {
-        return screen instanceof StudioScreen || screen instanceof AnalyzerScreen || screen instanceof ClassicScreen || screen instanceof CompactScreen || screen instanceof HudEditorScreen || screen instanceof AutomationScreen;
+        return screen instanceof CatalogScreen || screen instanceof HudEditorScreen || screen instanceof AutomationScreen;
     }
+    public static Screen profiles(AnalyzerCore core, Screen parent) { return new ProfilesScreen(core, parent); }
     public static Screen automation(AnalyzerCore core, Screen parent) { return new AutomationScreen(parent, dev.analyzer.automation.AutomationEngine.INSTANCE, core); }
     public static Screen create(AnalyzerCore core) {
         return switch (core.getChoice("menu", "layout")) {

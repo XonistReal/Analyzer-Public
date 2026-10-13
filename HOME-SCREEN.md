@@ -1,12 +1,12 @@
-# Analyzer Home — 0.7.0
+# Analyzer Home — 0.7.1
 
-The custom title screen opens by default over **Minecraft's panorama**. Left navigation leads to Singleplayer, Multiplayer, Realms, Analyzer, Options and Quit. Language, Accessibility and Credits are available along the footer. The wordmark and selected navigation use the existing menu accent. Shader surfaces and Lato text use Minecraft's native Screen/input system.
+The custom title screen opens by default over **Minecraft's panorama**. Left navigation leads to Singleplayer, Multiplayer, Realms, Modules, Options and Quit. Language, Accessibility and Credits are available along the footer. The supplied transparent artwork replaces the old generated Home logo/text. Selected navigation uses the menu accent; the supplied logo colors and glow stay unchanged. Shader surfaces and Lato text use Minecraft's native Screen/input system.
 
-![Actual native panorama Home](screenshots/analyzer-home-panorama.png)
+![Actual native panorama Home](screenshots/analyzer-refresh-home-panorama.png)
 
 ## Appearance controls
 
-Open **Analyzer → Appearance → HUD Studio → Home screen** (or Interface) to change these shared, saved preferences:
+Open **Modules → Appearance → HUD Studio → Home screen** (or Interface) to change these shared, saved preferences:
 
 | Setting | Default | Behavior |
 | --- | --- | --- |
@@ -17,17 +17,17 @@ Open **Analyzer → Appearance → HUD Studio → Home screen** (or Interface) t
 
 **Vanilla menu** in the bottom-right saves the fallback preference. Minecraft's vanilla title then includes **Custom Home** to turn it back on. Menu layout, menu theme/accent and HUD theme remain separate; Studio / Workspace / Classic / Compact and Glass / Classic / Minimal / Neon are retained. Existing preferences and saved profile files are preserved by updates. Loading a profile remains an explicit replacement of active settings.
 
-![Original procedural Orbit](screenshots/analyzer-home-orbit.png)
+![Original procedural Orbit](screenshots/analyzer-refresh-home-orbit.png)
 
 ## Native pages
 
 Singleplayer wraps Minecraft's real world list, search, Create New World, Play, Edit, Delete and Re-Create controls. Multiplayer wraps the real saved-server list, LAN discovery, add/direct/refresh, edit/delete and join actions. Selected entries and account permissions determine which actions are enabled. Native multiplayer warnings remain in place. Options keeps the real FOV slider and Minecraft options callbacks; deeper settings screens use their native interfaces. Realms opens Minecraft's normal Realms screen subject to the account's permission.
 
-![Native Singleplayer panel](screenshots/analyzer-home-worlds.png)
+![Native Singleplayer panel](screenshots/analyzer-refresh-home-worlds.png)
 
-![Native Multiplayer panel](screenshots/analyzer-home-servers.png)
+![Native Multiplayer panel](screenshots/analyzer-refresh-home-servers.png)
 
-![Native Options panel](screenshots/analyzer-home-options.png)
+![Native Options panel](screenshots/analyzer-refresh-home-options.png)
 
 Back/Escape returns these pages to their Home parent. Opening any of the four Analyzer layouts from Home and closing it also returns Home. In-game menu behavior remains available through Right Shift. No world is auto-loaded, no server is auto-joined and no automation task starts from Home.
 
@@ -43,4 +43,4 @@ Run the fixture using Java 21:
 .\gradlew.bat build runHomeSmoke
 ```
 
-Native PNGs are in `screenshots/analyzer-home-*.png`; the runtime log is `build/reports/home-runtime.log`.
+Current native PNGs are in `screenshots/analyzer-refresh-home-*.png`; the runtime log is `build/reports/home-refresh-runtime.log`. [Complete Studio refresh](STUDIO-COMPLETE.md) includes the supplied branding and HUD screens.

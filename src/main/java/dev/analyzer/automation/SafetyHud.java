@@ -1,7 +1,9 @@
 package dev.analyzer.automation;
 
 import dev.analyzer.core.AnalyzerCore;
+import dev.analyzer.effects.UiShader;
 import dev.analyzer.ui.GuiDraw;
+import dev.analyzer.ui.HudWidgets;
 import dev.analyzer.ui.Palette;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -11,10 +13,11 @@ import java.util.List;
 
 /** A small real-status banner, drawn by the engine's HUD callback only while protection intervenes. */
 public final class SafetyHud {
-    private static final String TITLE = "TASK PAUSED FOR SAFETY";
+    private static final String TITLE = "Task paused for safety";
     private static final float TEXT_SCALE = 14f / 12f;
     private static final int PADDING = 14, LINE_HEIGHT = 16;
     private static long renderedFrames;
+    private static long shaderFrames;
     private static Bounds lastBounds;
 
     private SafetyHud() { }
@@ -22,10 +25,16 @@ public final class SafetyHud {
     /** Physical framebuffer bounds of the most recent draw; null when this call was intentionally hidden. */
     public static Bounds lastBounds() { return lastBounds; }
     public static long renderedFrames() { return renderedFrames; }
+    public static long shaderFrames() { return shaderFrames; }
     public record Bounds(int x, int y, int width, int height, float nominalTextPixels) { }
 
     /** Invoke from HudRenderCallback while the task is PROTECTING; this class registers no callbacks itself. */
     public static void render(DrawContext context, AnalyzerCore core, String message, boolean critical) {
+        try (GuiDraw.FontScope ignored = GuiDraw.sansFont()) {
+            scopedRender(context, core, message, critical);
+        }
+    }
+    private static void scopedRender(DrawContext context, AnalyzerCore core, String message, boolean critical) {
         lastBounds = null;
         MinecraftClient client = MinecraftClient.getInstance();
         if (context == null || core == null || client.player == null || client.world == null
@@ -55,18 +64,17 @@ public final class SafetyHud {
         int x = Math.max(0, (screenWidth - width) / 2);
         int y = Math.min(12, Math.max(2, (screenHeight - height) / 2));
         int color = critical ? Palette.ERROR : Palette.GOLD;
-        boolean glass = core.isEnabled("menu") && core.getChoice("menu", "material").equals("Glass");
 
         context.getMatrices().push();
         try {
             context.getMatrices().scale(1 / pixelsPerPoint, 1 / pixelsPerPoint, 1);
-            GuiDraw.outlined(context, x, y, width, height, 7, Palette.alpha(color, 160),
-                    glass ? Palette.alpha(Palette.SURFACE, 244) : Palette.SURFACE);
-            GuiDraw.rounded(context, x + 3, y + 9, 3, height - 18, 1, color);
-            GuiDraw.heading(context, client.textRenderer, title, x + PADDING + 4, y + 10,
+            if (HudWidgets.panel(context, x, y, width, height, core.getChoice("hud", "theme"), color, .98)) shaderFrames++;
+            if (!UiShader.surface(context, x + PADDING, y + 14, 7, 7, 3.5f, color, color, 0, 0, Palette.alpha(color, 48), 3))
+                GuiDraw.rounded(context, x + PADDING, y + 14, 7, 7, 3, color);
+            GuiDraw.heading(context, client.textRenderer, title, x + PADDING + 17, y + 10,
                     TEXT_SCALE, color);
             for (int i = 0; i < lines.size(); i++) {
-                GuiDraw.label(context, client.textRenderer, lines.get(i), x + PADDING + 4,
+                GuiDraw.label(context, client.textRenderer, lines.get(i), x + PADDING,
                         y + 31 + i * LINE_HEIGHT, TEXT_SCALE, Palette.TEXT);
             }
         } finally {
