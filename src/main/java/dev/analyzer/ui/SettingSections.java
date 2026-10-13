@@ -13,7 +13,7 @@ import java.util.Map;
 final class SettingSections {
     private SettingSections() { }
     static String group(ModuleDefinition module, Setting<?> setting) {
-        if (module.id().equals("hud")) return setting.id().startsWith("menu-") ? "Menu appearance" : "HUD appearance";
+        if (module.id().equals("hud")) return setting.id().startsWith("menu-") ? "Menu appearance" : setting.id().startsWith("home-") ? "Home screen" : "HUD appearance";
         if (module.id().equals("entity-esp")) {
             String id = setting.id();
             if (id.equals("players") || id.equals("hostiles") || id.equals("passives") || id.equals("items")) return "Targets";

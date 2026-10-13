@@ -35,7 +35,7 @@ public final class MenuScreens {
         if (client.currentScreen != screen || !(screen instanceof AnalyzerScreen || screen instanceof CatalogScreen)
                 || matchesLayout(core, screen)) return false;
         Screen next = create(core, selectedModuleId);
-        if (screen instanceof CatalogScreen previous && next instanceof CatalogScreen catalog) catalog.restoreQueryText(previous.queryText());
+        if (screen instanceof CatalogScreen previous && next instanceof CatalogScreen catalog) {catalog.restoreQueryText(previous.queryText());catalog.withParent(previous.parentScreen());}
         client.setScreen(next);
         return true;
     }

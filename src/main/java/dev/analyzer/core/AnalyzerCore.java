@@ -43,6 +43,7 @@ public final class AnalyzerCore {
         registerHudMenuAlias("menu-material", "material");
         registerHudMenuAlias("menu-theme", "theme");
         registerHudMenuAlias("menu-accent", "accent");
+        for (String home : List.of("home-enabled", "home-background", "home-motion", "home-blur")) registerHudMenuAlias(home, home);
         for (ModuleDefinition module : this.modules) states.put(module.id(), defaults(module));
         config = new ConfigStore(configDirectory);
     }

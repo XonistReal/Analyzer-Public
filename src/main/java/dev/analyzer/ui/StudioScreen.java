@@ -65,7 +65,7 @@ public final class StudioScreen extends CatalogScreen {
     @Override protected void header(DrawContext draw) {
         GuiDraw.heading(draw, textRenderer, "Analyzer", 423, 25, 2.0f, WHITE);
         label(draw, "STUDIO", 469, 53, .8f, SECONDARY);
-        label(draw, "0.6.0", 43, 35, .96f, SECONDARY);
+        label(draw, net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer("analyzer").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("dev"), 43, 35, .96f, SECONDARY);
         button(draw, "close", "×", 927, 27, 30, 29, false, this::close);
         List<String> labels = new ArrayList<>(); labels.add("All");
         for (Category item : CATEGORIES) labels.add(item.label());

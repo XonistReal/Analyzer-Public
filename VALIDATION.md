@@ -1,3 +1,36 @@
+# Home screen and all-module sweep — October 12, 2026
+
+Analyzer **0.7.0** opens the custom Home by default over **Minecraft panorama**, as selected by the user. Optional **Orbit** is original procedural GLSL. Singleplayer, Multiplayer and Options retain real Minecraft data, controls and callbacks inside translucent panels. HUD Studio exposes the four canonical Home preferences through four aliases; all four module-menu layouts and existing themes remain available. [Home controls/captures](HOME-SCREEN.md) and the [comparison photos](HOME-REFERENCES.md) document the direction.
+
+## Every-module quick sweep, preceding the Home implementation
+
+The isolated Minecraft fixture passed **123 modules × three contrasting settings combinations = 369 live variants**, with **13,051 sweep assertions** plus **25 focused Combat/HVH assertions**. It accepted **11,886 setting writes**, covering every choice, both booleans and numeric min/mid/max/clamps, rejected **1,091 invalid writes**, and completed **seven active-config plus seven profile roundtrips**. Nine category captures accompany the [per-module results and limits](MODULE-TESTS.md).
+
+That sweep used the 0.6.0 catalog before adding Home: **1,091 exposed / 1,087 canonical settings**. Empty inventory and creative-mode prerequisites gate equipment/container/task/death dependent actions; enabling and rendering alone does not prove their effects. Live combinations are three per module, not every combination. Coord Snapper remains behind its pause gate and the system clipboard is untouched. No user world, launcher configuration or public server was used. Final evidence is `build/reports/all-module-sweep-runtime.log` and `build/reports/all-module-sweep-coverage.json`.
+
+## Final Home acceptance
+
+- Java 21 **build / publishLocal / moduleCatalog** passed **1,054 assertions**: 321 core, 38 ESP layout, 46 planner, 10 scoped-settings lease, 102 Combat, 30 Movement, 18 HVH and 489 configuration checks. The 24 new core checks cover defaults for older configs, shared Home aliases, independent appearance, typed persistence, invalid values and reset.
+- Actual Minecraft 1.21.4/Fabric native acceptance passed **499 assertions**, **31 screenshots**, **70 phases** and **419 fixture ticks**. It checks actual custom-title startup, native world/server/options controls, Language/Accessibility/Credits parent return, all four Analyzer layouts, the registered menu shortcut returning to the exact Home parent, saved vanilla fallback and re-enabling Home.
+- The native FOV slider changes Minecraft's actual option and restores it. All ten Options actions, FOV and native world/server controls have real visible hit centers at **1280×800 / 1920×1080**, requested GUI scales **2/3/4**. Minecraft clamps 1280 GUI4 to effective scale3. Chrome is independent of GUI scale; real list rows retain Minecraft's font. Very short panes fall back to native pages with the same Home parent; the dedicated acceptance matrix does not cover every ultrawide aspect ratio.
+- Pixel readback verifies actual content in Panorama and Orbit, retained backgrounds outside translucent panels and amber disk pixels through the blurred Orbit pane. The first counter-only run missed a black blur source; visual review found it, and the final shader copies the actual incoming draw framebuffer. Native hover/narration/tooltip lifecycles are retained. A later capture review found native LAN status centered on the whole screen; the scoped renderer now centers that label inside the server panel, without changing discovery or narration.
+- Motion zero freezes native panorama yaw and submits zero Orbit time across actual frames. Blur on/off and resource reload pass with healthy Home/UI shaders and clean GL state. The final log has no ERROR/FATAL entries. Final PNGs were copied unchanged to `screenshots/analyzer-home-*.png`; the six-size/page capture matrix and primary captures were visually reviewed.
+- Realms and Quit controls are checked without online service calls or an early exit. The fixture never loads a world or joins a server; its saved-server list must be empty before opening Multiplayer. No Prism launch or authenticated Realms validation is claimed.
+
+The current catalog contains **123 modules / 1,099 exposed controls / 1,091 canonical settings**, including **eight HUD Studio presentation aliases**. This change adds Home preferences and presentation; gameplay policies remain those exercised in the preceding sweep. Final runtime evidence is `build/reports/home-runtime.log`. Original shaders and separate-copy blur do not simulate physical lensing/refraction. Iris/Sodium and other GPUs/renderers remain unverified.
+
+## Home Prism delivery
+
+The final remapped JAR, local feed, installed JAR and import archive share SHA-256 **`b0ec5109cef3f095a25dd6f67a5c878ef1d3d173d018f6ba0497ce2831f05bfc`**.
+
+- The existing instance is `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.5.2-Prism-1.21.4`; its old folder name records the original import. Minecraft was closed for the strict update. The updater installed **analyzer-0.7.0-b0ec5109cef3.jar** and its final check reports **up-to-date**; exactly one Analyzer JAR is installed and the replaced 0.6.0 build is backed up.
+- **All 78 protected game/dependency/launcher files** remain byte-identical, including active Analyzer configuration and all **11 saved profiles**. Missing Home preferences receive custom-Home/Panorama defaults. Current Studio/Rose/Solid preferences, worlds, friends, keybinds, unrelated mods, the feed connection, pre-launch command and Prism-managed Java selection are preserved.
+- `C:\Users\sould\Desktop\Analyzer-0.7.0-Prism-1.21.4.zip` includes the current JAR, matching Fabric API and official Baritone, dependency sources/notices, updater, current docs, original comparison photos, 31 Home captures and nine module-sweep captures. The portable package inherits Prism's Java settings and contains no accounts, saved worlds or user configuration. Archive CRC, embedded shader/font resources, 23 registered mixins, five canonical snapshots and matching build/feed/install/archive hashes are audited.
+
+Final integrity/preservation evidence is `build/reports/prism-home-delivery.json`. Historical validation below applies to its recorded versions.
+
+---
+
 # Analyzer validation
 
 ## Analyzer 0.6.0 shader Studio — October 12, 2026

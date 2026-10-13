@@ -56,20 +56,25 @@ public final class AnalyzerClient implements ClientModInitializer {
         dev.analyzer.render.HvhPreview.register(CORE);
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
-            if (screen instanceof TitleScreen) Screens.getButtons(screen).add(ButtonWidget.builder(Text.literal("Analyzer"), b -> client.setScreen(MenuScreens.create(CORE))).dimensions(w - 108, 10, 98, 20).build());
+            if (screen instanceof TitleScreen) {
+                Screens.getButtons(screen).add(ButtonWidget.builder(Text.literal("Analyzer"), b -> client.setScreen(MenuScreens.create(CORE))).dimensions(w - 108, 10, 98, 20).build());
+                Screens.getButtons(screen).add(ButtonWidget.builder(Text.literal("Custom Home"), b -> {
+                    CORE.setValue("menu", "home-enabled", true);saveConfig();client.setScreen(new dev.analyzer.ui.HomeScreen(CORE));
+                }).dimensions(w - 108, 34, 98, 20).build());
+            }
         });
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             public Identifier getFabricId() { return Identifier.of("analyzer", "effects"); }
-            public void reload(ResourceManager manager) { MinecraftClient.getInstance().execute(() -> {GpuEffects.close();dev.analyzer.effects.UiShader.close();}); }
+            public void reload(ResourceManager manager) { MinecraftClient.getInstance().execute(() -> {GpuEffects.close();dev.analyzer.effects.UiShader.close();dev.analyzer.effects.HomeEffects.close();}); }
         });
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { saveConfig(); GpuEffects.close(); dev.analyzer.effects.UiShader.close(); });
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { saveConfig(); GpuEffects.close(); dev.analyzer.effects.UiShader.close(); dev.analyzer.effects.HomeEffects.close(); });
         LOGGER.info("Analyzer initialized: {} modules, Minecraft 1.21.4", CORE.modules().size());
     }
 
     private void tick(MinecraftClient client) {
         while (open.wasPressed()) {
             if (client.currentScreen == null) client.setScreen(MenuScreens.create(CORE));
-            else if (MenuScreens.isAnalyzerScreen(client.currentScreen)) client.setScreen(null);
+            else if (MenuScreens.isAnalyzerScreen(client.currentScreen)) client.currentScreen.close();
         }
         long window = client.getWindow().getHandle();
         for (var module : CORE.modules()) {
@@ -83,7 +88,10 @@ public final class AnalyzerClient implements ClientModInitializer {
             }
         }
         if (saveCountdown > 0 && --saveCountdown == 0) saveConfig();
-        if (FabricLoader.getInstance().isDevelopmentEnvironment() && Boolean.getBoolean("analyzer.smoke")) DevSmoke.tick(client);
+        if (FabricLoader.getInstance().isDevelopmentEnvironment() && Boolean.getBoolean("analyzer.smoke")) {
+            if (Boolean.getBoolean("analyzer.homeSmoke")) HomeSmoke.tick(client);
+            else DevSmoke.tick(client);
+        }
     }
 
     public static void saveConfig() {

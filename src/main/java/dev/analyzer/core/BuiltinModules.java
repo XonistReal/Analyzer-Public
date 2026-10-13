@@ -97,7 +97,11 @@ public final class BuiltinModules {
             Setting.choice("material", "Panel material", "Glass", "Glass", "Solid"),
             Setting.choice("theme", "Menu theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
             Setting.choice("accent", "Accent color", "Rose", "Rose", "Mint", "Violet", "Gold"),
-            Setting.number("motion", "Motion amount", 0.8, 0, 1, 0.05)));
+            Setting.number("motion", "Motion amount", 0.8, 0, 1, 0.05),
+            Setting.bool("home-enabled", "Custom home screen", true),
+            Setting.choice("home-background", "Home background", "Panorama", "Panorama", "Orbit"),
+            Setting.number("home-motion", "Home animation", 0.65, 0, 1, 0.05),
+            Setting.bool("home-blur", "Blur home submenus", true)));
         settings.addAll(ClientModules.menuSettings());
         return List.copyOf(settings);
     }

@@ -5,6 +5,7 @@
   "client": ["GameRendererMixin", "SkyRenderingMixin", "LightmapMixin", "InGameHudMixin",
     "InteractionCooldownAccessor", "UtilityInteractionMixin", "FishingBobberAccessor", "SafeWalkMixin",
     "VisualInteractionMixin", "VisualNetworkMixin", "ItemPhysicsStateMixin", "ItemPhysicsRendererMixin",
-    "HandTweaksMixin", "CrystalCosmeticsMixin", "PlayerCosmeticsMixin", "PlayerPoseMixin", "AnalyzerFontMixin"],
+    "HandTweaksMixin", "CrystalCosmeticsMixin", "PlayerCosmeticsMixin", "PlayerPoseMixin", "AnalyzerFontMixin",
+    "HomeTitleMixin", "HomeListMixin", "HomeListWidthMixin", "HomeWidgetMixin", "HomeSliderMixin", "HomeScanningMixin"],
   "injectors": { "defaultRequire": 1 }
 }

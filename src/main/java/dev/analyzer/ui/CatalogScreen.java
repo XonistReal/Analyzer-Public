@@ -33,6 +33,7 @@ public abstract class CatalogScreen extends Screen {
     private boolean ignoreSearchShortcutChar;
     protected long changedAt;
     protected Slider slider;
+    protected Screen returnParent;
     private String hoveredSetting;
     private final long opened=System.nanoTime();
     private long lastFrame=opened;
@@ -46,6 +47,8 @@ public abstract class CatalogScreen extends Screen {
     protected float canvasScale(){return Math.max(.15f,Math.min(1.2f,Math.min((width-20f)/W,(height-20f)/H)));}
     protected void backdrop(DrawContext draw){GpuEffects.drawBackdrop(draw);}
     public CatalogScreen inspect(String id){return this;}
+    public CatalogScreen withParent(Screen parent){returnParent=parent;return this;}
+    public Screen parentScreen(){return returnParent;}
     public String selectedModuleId(){return null;}
     public List<String> visibleModuleIds(){return matching().stream().map(ModuleDefinition::id).toList();}
     public String queryText(){return query;}
@@ -202,8 +205,8 @@ public abstract class CatalogScreen extends Screen {
     protected void persist(){try{core.save();dirty=false;status="All changes saved.";failed=false;}catch(IOException e){failed=true;status="Save failed: "+e.getMessage();}}
     @Override public void tick(){if(dirty&&!failed&&System.currentTimeMillis()-changedAt>650)persist();if(layoutRefreshRequested){layoutRefreshRequested=false;if(dirty)persist();MenuScreens.refreshLayout(core,this,selectedModuleId());}}
     @Override public void removed(){if(dirty)persist();}
-    @Override public void close(){if(dirty)persist();super.close();}
-    protected void switchLayout(String name){core.setValue("menu","layout",name);changed();persist();Screen next=MenuScreens.create(core,selectedModuleId());if(next instanceof CatalogScreen catalog)catalog.restoreQueryText(query);client.setScreen(next);}
+    @Override public void close(){if(dirty)persist();if(returnParent!=null&&client.world==null)client.setScreen(returnParent);else super.close();}
+    protected void switchLayout(String name){core.setValue("menu","layout",name);changed();persist();Screen next=MenuScreens.create(core,selectedModuleId());if(next instanceof CatalogScreen catalog){catalog.restoreQueryText(query);catalog.withParent(returnParent);}client.setScreen(next);}
     @Override public boolean mouseClicked(double x,double y,int button){
         mx=(x-ox)/scale;my=(y-oy)/scale;
         for(int i=controls.size()-1;i>=0;i--){Control c=controls.get(i);if(c.button==button&&c.area.contains(mx,my)){focusedControl=c.id;c.action.run();applyKeyPressNarratorDelay();return true;}}

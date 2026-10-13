@@ -474,6 +474,37 @@
         "step": 0.05
       },
       {
+        "id": "home-enabled",
+        "label": "Custom home screen",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "home-background",
+        "label": "Home background",
+        "kind": "CHOICE",
+        "default": "Panorama",
+        "choices": [
+          "Panorama",
+          "Orbit"
+        ]
+      },
+      {
+        "id": "home-motion",
+        "label": "Home animation",
+        "kind": "NUMBER",
+        "default": 0.65,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "home-blur",
+        "label": "Blur home submenus",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
         "id": "layout",
         "label": "Menu layout",
         "kind": "CHOICE",
@@ -840,6 +871,37 @@
           "Violet",
           "Gold"
         ]
+      },
+      {
+        "id": "home-enabled",
+        "label": "Custom home screen",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "home-background",
+        "label": "Home background",
+        "kind": "CHOICE",
+        "default": "Panorama",
+        "choices": [
+          "Panorama",
+          "Orbit"
+        ]
+      },
+      {
+        "id": "home-motion",
+        "label": "Home animation",
+        "kind": "NUMBER",
+        "default": 0.65,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "home-blur",
+        "label": "Blur home submenus",
+        "kind": "BOOLEAN",
+        "default": true
       },
       {
         "id": "theme",

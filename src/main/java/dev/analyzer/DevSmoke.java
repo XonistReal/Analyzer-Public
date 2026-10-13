@@ -43,7 +43,7 @@ final class DevSmoke {
         var core = AnalyzerClient.CORE;
         // The current interface fixture uses rendered control diagnostics rather than the
         // historical UI coordinates below, and always runs in the isolated dev world.
-        if ((Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke")) && !worldRequested) {
+        if ((Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep")) && !worldRequested) {
             worldRequested = true;
             client.options.getViewDistance().setValue(5); client.options.getSimulationDistance().setValue(5);
             String name = "Analyzer-Smoke";
@@ -105,8 +105,12 @@ final class DevSmoke {
             }
         } else if (client.world != null && client.player != null && client.getServer() != null && client.getOverlay() == null) {
             if (!arenaReady) { arenaReady = true; setupArena(client); }
-            if ((Boolean.getBoolean("analyzer.gameplaySettingsSmoke") || Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke")) && !arenaPrepared) return;
+            if ((Boolean.getBoolean("analyzer.gameplaySettingsSmoke") || Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep")) && !arenaPrepared) return;
             worldTicks++;
+            if (Boolean.getBoolean("analyzer.moduleSweep")) {
+                if (worldTicks >= 20) AllModulesSmoke.tick(client, worldTicks - 20);
+                return;
+            }
             if (Boolean.getBoolean("analyzer.studioSmoke")) {
                 if (worldTicks >= 20) ShaderStudioSmoke.tick(client, worldTicks - 20);
                 return;
