@@ -6,6 +6,12 @@ The user explicitly requires Baritone to be removed entirely, with its open sour
 
 Task planning stays local; the user declined an AI service. Reviewed goals explicitly start/resume, saved checkpoints restore paused, and completion requires actual game state. Tool absence/breakage triggers material/tool recovery, enchanting budgets lapis, and schematic plans acquire every remaining required material before construction. Preserve source hashes, real palette states, selected sites and ordinary server-backed interactions. Do not claim general human intelligence, universal server success, arbitrary schematic support, autonomous XP/books/bastion discovery or an unknown stronghold route when those are not implemented. Document observed native acceptance separately from historical Baritone tests.
 
+## Task input and schematic selection in 0.10.1
+
+Start/Resume must wait for the launching menu click and any held movement/action controls to release, then start the explicitly authorized task automatically. Pending starts perform no task actions and Stop cancels them. Fresh manual input during execution still pauses the task; notices identify actual bound controls and distinguish waiting, pause, missing requirements and protection. Checkpoints always restore paused, including a saved pending start. Physical-input test overrides are strictly development-only.
+
+The user requested a folder-based schematic list instead of typing filenames. Keep **Automation → Schematics → Browse** with the active Minecraft game's `schematics` folder, subfolders, search, Refresh and Open folder. Selecting a supported file uses its actual absolute path and returns to material/site review before explicit Start. Preserve drag and drop and existing importer limits/source hashes. Folder listing must not parse every schematic or follow child links out of the library.
+
 ## Standing user preference: Prism delivery
 
 The user explicitly requested on October 11, 2026 that every Analyzer update also update their Prism Launcher instance. Treat publishing, packaging and installing as part of completing future project updates. This is already authorized; do not ask for the same permission again.
@@ -18,7 +24,7 @@ The user explicitly requested on October 11, 2026 that every Analyzer update als
 
 Current computer paths:
 
-- Prism instance: `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.9.0-Prism-1.21.4`
+- Prism instance: `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4` (located again on October 14; inspect embedded version rather than the folder name)
 - Local manifest: `C:\Users\sould\Desktop\analyzer-updates\release.json`
 - Import ZIP: `C:\Users\sould\Desktop\Analyzer-<version>-Prism-1.21.4.zip`
 - Java 21 JDK: `C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot`

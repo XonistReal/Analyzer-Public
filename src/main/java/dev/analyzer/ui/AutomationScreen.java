@@ -103,13 +103,14 @@ public final class AutomationScreen extends Screen {
 
     private void drawComposer(DrawContext context, View view, int accent) {
         GuiDraw.heading(context, textRenderer, "New task", 22, 86, 1.3f, StudioAuxiliary.TEXT);
-        button(context,"input-mode",220,84,188,27,schematicMode?"Task / goals":"Import schematic",!view.running&&!view.paused,false,()->{
+        button(context,"input-mode",220,84,188,27,schematicMode?"Task / goals":"Schematics",!view.running&&!view.paused,false,()->{
             if(schematicMode) { schematicPath=fields[0];fields[0]=taskText; }
             else { taskText=fields[0];fields[0]=schematicPath; }
-            schematicMode=!schematicMode;reviewed=null;showReviewed=true;message=schematicMode?"Drop a schematic onto this screen or paste its local file path.":"Type a goal or choose a preset.";
+            schematicMode=!schematicMode;focus=schematicMode?-1:0;reviewed=null;showReviewed=true;message=schematicMode?"Choose a schematic from your folder, or drop a file onto this screen.":"Type a goal or choose a preset.";
         });
-        GuiDraw.label(context, textRenderer, schematicMode?"Drop a .litematic, .schem or .schematic file here.":"Type a task or choose a preset.", 22, 111, .89f, StudioAuxiliary.MUTED);
-        field(context, 0, 22, 135, 386, 47, schematicMode?"SCHEMATIC FILE":"TASK");
+        GuiDraw.label(context, textRenderer, schematicMode?"Browse your schematics folder or drop a file here.":"Type a task or choose a preset.", 22, 111, .89f, StudioAuxiliary.MUTED);
+        if (schematicMode) schematicField(context, !view.running && !view.paused);
+        else field(context, 0, 22, 135, 386, 47, "TASK");
         if(schematicMode) {
             button(context,"auto-site",22,195,386,30,autoSite?"Site: choose a safe nearby location":"Site: use coordinates below",!view.running&&!view.paused,false,()->{autoSite=!autoSite;reviewed=null;showReviewed=true;});
             wrapped(context,"Review shows the chosen footprint and material requirements. Existing builds, liquids and unsafe or unloaded ground are excluded.",22,235,386,.9f,StudioAuxiliary.MUTED,15,3);
@@ -199,9 +200,27 @@ public final class AutomationScreen extends Screen {
             TaskPlanner.Options options = new TaskPlanner.Options(originX, originY, originZ,
                     Integer.parseInt(fields[1].trim()), Integer.parseInt(fields[2].trim()), Integer.parseInt(fields[3].trim()),
                     Integer.parseInt(fields[4].trim()), direction);
+            if (schematicMode && fields[0].isBlank()) throw new IllegalArgumentException("Choose a schematic from your folder before reviewing.");
             reviewed = schematicMode ? controller.schematicPlan(Path.of(fields[0].trim().replaceAll("^\"|\"$", "")),options,autoSite) : TaskPlanner.plan(fields[0],options);
             showReviewed = true; error = false; message = "Reviewed " + reviewed.steps().size() + " stages. Starting is a separate action."; stepScroll = 0; prerequisiteScroll = 0;
         } catch (RuntimeException e) { reviewed = null; error = true; message = e instanceof NumberFormatException ? "Coordinates and distance must be whole numbers." : Objects.requireNonNullElse(e.getMessage(), "This task is not supported."); }
+    }
+    private void schematicField(DrawContext context, boolean enabled) {
+        StudioAuxiliary.field(context, core, 22, 135, 386, 47, false);
+        GuiDraw.label(context, textRenderer, "SCHEMATIC FILE", 31, 141, .8f, StudioAuxiliary.SUBTLE);
+        Path selected = fields[0].isBlank() ? null : Path.of(fields[0]);
+        String filename = selected == null ? "Choose a schematic…" : selected.getFileName() == null ? selected.toString() : selected.getFileName().toString();
+        GuiDraw.label(context, textRenderer, GuiDraw.truncate(textRenderer, filename, 257, .98f), 31, 157, .98f, fields[0].isBlank() ? StudioAuxiliary.MUTED : StudioAuxiliary.TEXT);
+        button(context, "browse-schematics", 304, 144, 95, 29, "Browse", enabled, true, this::browseSchematics);
+        if (enabled) hits.add(new Hit(22, 135, 277, 47, this::browseSchematics));
+    }
+    private void browseSchematics() {
+        if (client == null) return;
+        client.setScreen(new SchematicBrowserScreen(core, this, client.runDirectory.toPath(), file -> {
+            if (!schematicMode) taskText = fields[0];
+            schematicMode = true; focus = -1; selectAll = false;
+            fields[0] = file.toAbsolutePath().normalize().toString(); schematicPath = fields[0]; review();
+        }));
     }
     private void field(DrawContext context, int index, int x, int y, int w, int h, String label) {
         StudioAuxiliary.field(context, core, x, y, w, h, focus == index);
@@ -250,7 +269,7 @@ public final class AutomationScreen extends Screen {
         if(files.size()!=1) { error=true;message="Drop one schematic at a time.";return; }
         if(controller.snapshot().running() || controller.snapshot().paused()) { error=true;message="Stop the current task before importing a schematic.";return; }
         if(!schematicMode)taskText=fields[0];
-        schematicMode=true;fields[0]=files.getFirst().toAbsolutePath().normalize().toString();schematicPath=fields[0];review();
+        schematicMode=true;focus=-1;fields[0]=files.getFirst().toAbsolutePath().normalize().toString();schematicPath=fields[0];review();
     }
     @Override public boolean mouseClicked(double x, double y, int button) {
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
@@ -268,7 +287,7 @@ public final class AutomationScreen extends Screen {
         if (key == GLFW.GLFW_KEY_ESCAPE) { close(); return true; }
         boolean shift = (modifiers & GLFW.GLFW_MOD_SHIFT) != 0 || hasShiftDown();
         boolean control = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0 || hasControlDown();
-        if (key == GLFW.GLFW_KEY_TAB) { focus = focus < 0 ? shift ? 4 : 0 : Math.floorMod(focus + (shift ? -1 : 1), 5); selectAll = true; return true; }
+        if (key == GLFW.GLFW_KEY_TAB) { focus = focus < 0 ? shift ? 4 : schematicMode ? 1 : 0 : Math.floorMod(focus + (shift ? -1 : 1), 5); if (schematicMode && focus == 0) focus = shift ? 4 : 1; selectAll = true; return true; }
         if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) { review(); return true; }
         if (focus < 0) return super.keyPressed(key, scan, modifiers);
         if (control && key == GLFW.GLFW_KEY_A) { selectAll = true; return true; }
@@ -282,7 +301,7 @@ public final class AutomationScreen extends Screen {
         return super.keyPressed(key, scan, modifiers);
     }
     @Override public boolean charTyped(char character, int modifiers) {
-        if (focus < 0 || Character.isISOControl(character)) return false;
+        if (focus < 0 || schematicMode && focus == 0 || Character.isISOControl(character)) return false;
         append(String.valueOf(character)); return true;
     }
     private void append(String text) {

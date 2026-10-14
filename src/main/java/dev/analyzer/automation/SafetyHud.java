@@ -30,12 +30,15 @@ public final class SafetyHud {
 
     /** Invoke from HudRenderCallback while the task is PROTECTING; this class registers no callbacks itself. */
     public static void render(DrawContext context, AnalyzerCore core, String message, boolean critical) {
+        render(context, core, TITLE, message, critical);
+    }
+    public static void render(DrawContext context, AnalyzerCore core, String title, String message, boolean critical) {
         try (GuiDraw.GlassScope optical = GuiDraw.glassScope(context, core == null ? "Classic" : core.getChoice("hud", "theme"));
              GuiDraw.FontScope ignored = GuiDraw.sansFont()) {
-            scopedRender(context, core, message, critical);
+            scopedRender(context, core, title, message, critical);
         }
     }
-    private static void scopedRender(DrawContext context, AnalyzerCore core, String message, boolean critical) {
+    private static void scopedRender(DrawContext context, AnalyzerCore core, String heading, String message, boolean critical) {
         lastBounds = null;
         MinecraftClient client = MinecraftClient.getInstance();
         if (context == null || core == null || client.player == null || client.world == null
@@ -49,7 +52,7 @@ public final class SafetyHud {
         // The title/body never inherit the menu canvas transform or its minimum logical font size.
         int maxWidth = Math.min(660, screenWidth - PADDING * 2);
         int contentWidth = maxWidth - PADDING * 2 - 12;
-        String title = GuiDraw.truncate(client.textRenderer, TITLE, contentWidth, TEXT_SCALE);
+        String title = GuiDraw.truncate(client.textRenderer, heading == null ? TITLE : heading, contentWidth, TEXT_SCALE);
         String text = bounded(message);
         List<String> wrapped = GuiDraw.wrap(client.textRenderer, text, contentWidth, TEXT_SCALE);
         int maxLines = Math.clamp((screenHeight - 44 - PADDING * 2) / LINE_HEIGHT, 1, 2);

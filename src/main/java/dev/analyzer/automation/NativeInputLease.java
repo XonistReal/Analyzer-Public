@@ -7,6 +7,8 @@ import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /** Reversible ordinary Minecraft key presses. Release restores actual hardware state, rather than a stale held key. */
@@ -57,13 +59,23 @@ final class NativeInputLease {
         return reservedGroup != null && reservedGroup != lease.group || controller != null && controller.group != lease.group;
     }
     static boolean hasPhysicalInput(MinecraftClient mc) {
-        for (KeyBinding key : new KeyBinding[]{mc.options.forwardKey, mc.options.backKey, mc.options.leftKey, mc.options.rightKey,
-                mc.options.jumpKey, mc.options.sneakKey, mc.options.sprintKey, mc.options.attackKey, mc.options.useKey})
-            if (physical(key, mc)) return true;
-        return false;
+        return !heldControls(mc).isEmpty();
+    }
+    static List<String> heldControls(MinecraftClient mc) {
+        KeyBinding[] bindings = {mc.options.forwardKey, mc.options.backKey, mc.options.leftKey, mc.options.rightKey,
+                mc.options.jumpKey, mc.options.sneakKey, mc.options.sprintKey, mc.options.attackKey, mc.options.useKey};
+        String[] ids = {"forward", "back", "left", "right", "jump", "sneak", "sprint", "attack", "use"};
+        String[] names = {"Forward", "Back", "Left", "Right", "Jump", "Sneak", "Sprint", "Attack", "Use"};
+        var fixture = AutomationInputDiagnostics.heldOverride();
+        var held = new ArrayList<String>();
+        for (int i = 0; i < bindings.length; i++)
+            if (fixture == null ? physical(bindings[i], mc) : fixture.contains(ids[i]))
+                held.add(names[i] + " (" + bindings[i].getBoundKeyLocalizedText().getString() + ")");
+        return List.copyOf(held);
     }
     private static boolean physical(KeyBinding binding, MinecraftClient mc) {
         InputUtil.Key key = KeyBindingHelper.getBoundKeyOf(binding); long handle = mc.getWindow().getHandle();
+        if (key.getCode() < 0) return false;
         if (key.getCategory() == InputUtil.Type.MOUSE) return key.getCode() >= 0 && GLFW.glfwGetMouseButton(handle, key.getCode()) == GLFW.GLFW_PRESS;
         if (key.getCategory() == InputUtil.Type.KEYSYM) return key.getCode() >= 0 && InputUtil.isKeyPressed(handle, key.getCode());
         // Scancode bindings need the current platform's GLFW mapping, not the integer treated as a keycode.

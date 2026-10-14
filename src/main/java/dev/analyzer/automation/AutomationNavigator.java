@@ -34,6 +34,7 @@ public final class AutomationNavigator {
     public record MotionStatus(boolean applied, double lastYawStep, double lastPitchStep, boolean headingHold, long rejectedInteractions) { }
     public record SafetyProfileStatus(boolean enabled, boolean applied, int changedSettings) { }
     public record RouteDiagnostics(String state, int expanded, int pathNodes, int nextNode, int replans) { }
+    public record InputStatus(boolean active, String description) { }
     public static final int SHELTER_MATERIAL_COUNT = ShelterSchematic.MATERIAL_COUNT;
     private enum Kind { TRAVEL, MINE, BUILD }
     private final MinecraftClient mc = MinecraftClient.getInstance();
@@ -87,9 +88,10 @@ public final class AutomationNavigator {
     public void endSafetyProfile() { safeRouting = false; clearSafetyInputs(); }
     /** Compatibility name: another Analyzer navigation controller is treated as external ownership. */
     public boolean manualTaskActive() {
-        return NativeInputLease.anotherController(inputs) || status.state() == State.RUNNING && ticks > 10 && mc.currentScreen == null
+        return anotherTaskOwnsControls() || status.state() == State.RUNNING && mc.currentScreen == null
                 && bool("pause-on-input", true) && NativeInputLease.hasPhysicalInput(mc);
     }
+    public boolean anotherTaskOwnsControls() { return NativeInputLease.anotherController(inputs); }
     public boolean travelXZ(int x, int z) { return travel(x, null, z); }
     public boolean travelXYZ(int x, int y, int z) { return travel(x, y, z); }
     /** Reach a checked interaction stand, centered and settled before reporting completion. */
@@ -144,8 +146,9 @@ public final class AutomationNavigator {
         if (!available() || !mc.player.isAlive()) return fail("Join a world with a living player first");
         if (status.owned()) return fail("Pause or cancel the current native task before starting another");
         if (manualTaskActive()) return fail("Another task owns movement; it was not replaced");
-        if (mc.currentScreen == null && bool("pause-on-input", true) && NativeInputLease.hasPhysicalInput(mc))
-            return fail("Release movement and action controls before starting the native task");
+        var input = inputStatus();
+        if (bool("pause-on-input", true) && input.active())
+            return fail("Release " + input.description() + ", then press Resume in Automation.");
         return true;
     }
     private void begin(String title) {
@@ -352,7 +355,14 @@ public final class AutomationNavigator {
         if (!available() || !mc.player.isAlive() || manualTaskActive() || status.owned() && !status.paused()) return false;
         safetyInputs = inputs.backward(jump); return safetyInputs;
     }
-    public boolean manualInputActive() { return available() && mc.currentScreen == null && NativeInputLease.hasPhysicalInput(mc); }
+    public boolean manualInputActive() { return inputStatus().active(); }
+    public InputStatus inputStatus() {
+        var held = available() && mc.currentScreen == null ? NativeInputLease.heldControls(mc) : List.<String>of();
+        String description = held.isEmpty() ? "movement or action buttons"
+                : String.join(", ", held.subList(0, Math.min(3, held.size()))) + (held.size() > 3 ? " and other controls" : "");
+        return new InputStatus(!held.isEmpty(), description);
+    }
+    boolean inputWindowFocused() { return AutomationInputDiagnostics.heldOverride() != null || mc.isWindowFocused(); }
     public void clearSafetyInputs() { if (safetyInputs) inputs.close(); safetyInputs = false; }
     public boolean lookToward(Vec3d point) { return available() && (status.paused() || safetyInputs || safeRouting && !status.owned()) && !manualTaskActive() && AutomationMotion.align(point, motion); }
     public boolean lookYaw(float yaw) { return available() && (status.paused() || safetyInputs || safeRouting && !status.owned()) && !manualTaskActive() && AutomationMotion.alignYaw(yaw, motion); }

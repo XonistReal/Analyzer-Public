@@ -1,4 +1,6 @@
-# Native automation safety — 0.10.0
+# Native automation safety — 0.10.1
+
+After explicit Start/Resume, a pending task waits for the menu click and other held movement/action controls to release in focused gameplay. It then starts automatically; Stop cancels that pending authorization. The wait performs no task actions. Fresh manual input while a task executes still pauses it until explicit Resume.
 
 Protection belongs to an explicitly running or resumed Analyzer task. It stays inactive for restored checkpoints and user-paused tasks. Movement, turning, mining, building and inventory actions are original local controllers; Baritone is not required.
 

@@ -1,0 +1,49 @@
+{
+  "release": "0.10.1",
+  "date": "2026-10-14",
+  "minecraft": "1.21.4",
+  "java": "21",
+  "baritoneLoaded": false,
+  "policyAssertions": 3982,
+  "policySuites": 17,
+  "inputHandoffAssertions": 111,
+  "schematicLibraryAssertions": 24,
+  "platformSkips": [
+    "Windows denied symlink creation; optional library symlink cases explicitly skipped"
+  ],
+  "nativeFocused": {
+    "task-ui": {
+      "pipelineChecks": 508,
+      "controllerAssertions": 495,
+      "captures": 4
+    },
+    "guard": {
+      "pipelineChecks": 721,
+      "controllerAssertions": 53,
+      "captures": 4
+    }
+  },
+  "inputFixture": "Development-only physical control snapshot override; real rendered screen clicks, production controllers and server-backed player travel; no operating-system hardware event injection.",
+  "scope": "Focused startup/resume/manual pause/Stop cancellation, folder selection/review, safety defense/food/retreat regression. The full native automation pipeline was last observed in 0.10.0 and is not claimed as rerun for 0.10.1.",
+  "captures": {
+    "analyzer-native-ui-safety-creeper-retreat.png": "479419e239b65f80a134d5af312bb58355ff3958debbe6b2c351ce7ee3a58ac1",
+    "analyzer-native-ui-safety-eating.png": "b625976b81c8e44d2c2fbcb2503ebdeab0acc40fd9578d31a0c5e93a5651d877",
+    "analyzer-native-ui-safety-mining-resumed.png": "537ecc4ff9bd77152dab50b6cd7db81900e9b339764b9a37e7460d62e15f512f",
+    "analyzer-native-ui-safety-zombie-defense.png": "9864eb5f78f59e9119872daf9157a8dcd66428e94f8946429c2909d41df5ec9a",
+    "analyzer-native-ui-schematic-browser.png": "372a8214ae77e3a665a2f86eff28e5d88fd4e54b9b1bc97fed9d1496d058dd43",
+    "analyzer-native-ui-schematic-selected-review.png": "6d14ad0d175a289ec936cd50f6149d7854836e74ee92db591fba42404976757f",
+    "analyzer-native-ui-start-waits-for-release.png": "c9f57c51a6447c580628de8750498ab39386256cb09764e350a71502e0ae1c5e",
+    "analyzer-native-ui-task-start-resume-complete.png": "a9c5c98fe7882beff6006bab4b630a4e7d5d0a2c24ba400c09e209862465de62"
+  },
+  "logs": {
+    "task-ui-build-checks.log": "86cd70af64dc739f732870369b3481a8c147130b82ff456b35bda6e669684470",
+    "task-ui-runtime.log": "20a2aa79cf36583d3cfe3a9ff535e2a73c2700d276ed8f14359dc63745129f2a",
+    "task-ui-guard-runtime.log": "1dcd4816d9c11955e878fa0767a9115e2d94731cc1d05e164cd4dcdce724259c",
+    "task-ui-publish.log": "825e07bcfc3b2d25881868c6aca7106dd4145ae7b2b573298437327284d6da49"
+  },
+  "artifact": {
+    "sha256": "a92b7edfe73951b8838b1dd38c930b3e6ef93b0ecf3a1536767a48b9014dffbe",
+    "version": "0.10.1",
+    "feedArtifact": "analyzer-0.10.1-a92b7edfe739.jar"
+  }
+}

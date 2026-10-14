@@ -1,12 +1,12 @@
 # Analyzer in Prism Launcher
 
-Analyzer **0.10.0** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Native Automation needs no Baritone or other bot mod. Minecraft account credentials, user worlds/configuration and Minecraft itself are not included.
+Analyzer **0.10.1** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Native Automation needs no Baritone or other bot mod. Minecraft account credentials, user worlds/configuration and Minecraft itself are not included.
 
 ## Import or update
 
-Drag `Analyzer-0.10.0-Prism-1.21.4.zip` onto Prism or use **Add Instance → Import**. The archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root. Use your own Minecraft account and Java 21. The portable ZIP inherits Prism's Java preferences and has no fixed Java path.
+Drag `Analyzer-0.10.1-Prism-1.21.4.zip` onto Prism or use **Add Instance → Import**. The archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root. Use your own Minecraft account and Java 21. The portable ZIP inherits Prism's Java preferences and has no fixed Java path.
 
-On this computer, reuse `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.9.0-Prism-1.21.4`. That folder records the original import; inspect the installed JAR/version/hash to identify the current build. Future updates preserve launcher Java preferences, worlds, configs, profiles, friends and unrelated mods.
+On this computer, reuse `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4`. That folder is the current imported instance located on October 14; inspect the installed JAR/version/hash to identify the current build. Future updates preserve launcher Java preferences, worlds, configs, profiles, friends and unrelated mods.
 
 With Minecraft closed, the verified updater installs the published Analyzer JAR. The native release also retires only the exact formerly bundled official Baritone 1.13.1 JAR to a recoverable `.analyzer-updater/retired-mods` backup. Unknown or modified mod files are retained with a reported reason; no unrelated mod is deleted. A running game's mod files are not overwritten. The next pre-launch update can complete a pending delivery after shutdown.
 
@@ -16,7 +16,7 @@ Press **Right Shift** for Studio or shader Click GUI. Keep **HUD Studio → Menu
 
 Home defaults to Minecraft panorama, with Orbit and Vanilla menu alternatives. Profiles, HUD editing, Automation and numeric entry retain Studio shader surfaces and bundled Lato. Worlds, servers and native options retain actual Minecraft data/callbacks. Server Privacy keeps its eight default protections and preserves saved opt-outs. See [SERVER-PRIVACY.md](SERVER-PRIVACY.md).
 
-Open **Automation → Review plan → Start reviewed plan** for local native goals, schematic import/material checklists, adjustable turning and action pacing, tool recovery and mob protection. Saved tasks restore paused. Read [AUTOMATION.md](AUTOMATION.md) and [SAFETY.md](SAFETY.md) for implemented behavior and world prerequisites.
+Open **Automation → Review plan → Start reviewed plan** for local native goals, the schematic folder browser and material checklists, adjustable turning and action pacing, tool recovery and mob protection. Saved tasks restore paused. Read [AUTOMATION.md](AUTOMATION.md) and [SAFETY.md](SAFETY.md) for implemented behavior and world prerequisites.
 
 ## Local development feed
 
@@ -31,8 +31,8 @@ The feed is `analyzer-updates/release.json` beside the checkout. `analyzer-updat
 Update a closed instance and check it:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir 'C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.9.0-Prism-1.21.4' -Strict
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir 'C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.9.0-Prism-1.21.4' -Strict -CheckOnly
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir 'C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4' -Strict
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir 'C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4' -Strict -CheckOnly
 ```
 
 Fresh packages use a new empty staging directory:

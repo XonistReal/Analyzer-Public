@@ -140,7 +140,7 @@ WrapperCommand=
     screenshots.mkdir()
     shutil.copyfile(repo / "screenshots/README.md", screenshots / "README.md")
     for capture in sorted((repo / "screenshots").glob("*.png")):
-        if capture.name in {"analyzer-ui.png", "analyzer-gui-classic.png"} or capture.name.startswith(("analyzer-esp-", "analyzer-bot-", "analyzer-automation-", "analyzer-native-automation-", "analyzer-safety-", "analyzer-gameplay-settings-", "analyzer-ui-overhaul-", "analyzer-studio-", "analyzer-home-", "analyzer-module-sweep-", "analyzer-refresh-", "analyzer-watermark-", "analyzer-liquid-", "analyzer-privacy-")):
+        if capture.name in {"analyzer-ui.png", "analyzer-gui-classic.png"} or capture.name.startswith(("analyzer-esp-", "analyzer-bot-", "analyzer-automation-", "analyzer-native-automation-", "analyzer-native-ui-", "analyzer-safety-", "analyzer-gameplay-settings-", "analyzer-ui-overhaul-", "analyzer-studio-", "analyzer-home-", "analyzer-module-sweep-", "analyzer-refresh-", "analyzer-watermark-", "analyzer-liquid-", "analyzer-privacy-")):
             shutil.copyfile(capture, screenshots / capture.name)
     licenses = instance / "licenses"
     licenses.mkdir()

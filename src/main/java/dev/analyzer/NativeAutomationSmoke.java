@@ -19,14 +19,15 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import java.nio.file.*;
 import java.util.List;
+import java.util.Set;
 
 /** Real integrated-server Survival actions in an isolated development run without an external bot. */
 final class NativeAutomationSmoke {
-    private enum Phase { SETUP, TRAVEL, PAUSE, RESUME, MINE_SETUP, MINE, BUILD_SETUP, BUILD, IMPORT, IMPORTED_BUILD, PORTAL_SETUP, PORTAL, RETURN, PROGRESSION, INVENTORY, TOOL_RECOVERY, GUARD, FINISH }
+    private enum Phase { SETUP, TRAVEL, PAUSE, RESUME, MINE_SETUP, MINE, BUILD_SETUP, BUILD, IMPORT, IMPORTED_BUILD, PORTAL_SETUP, PORTAL, RETURN, PROGRESSION, INVENTORY, TOOL_RECOVERY, GUARD, TASK_UI, FINISH }
     private static final AutomationNavigator NAV = new AutomationNavigator();
     private static final BlockPos ORE = new BlockPos(66,161,51), BUILD = new BlockPos(70,161,60);
     private static Phase phase=Phase.SETUP;
-    private static int entered, checks, captures, inventoryStart, guardStart, progressionStart, recoveryStart;
+    private static int entered, checks, captures, inventoryStart, guardStart, progressionStart, recoveryStart, taskUiStart;
     private static Vec3d paused;
     private static float lastYaw;
     private static long supplyBefore;
@@ -56,6 +57,7 @@ final class NativeAutomationSmoke {
                 if(age==0) {
                     require(!FabricLoader.getInstance().isModLoaded("baritone"),"No Baritone mod loads in the actual acceptance client");
                     AnalyzerClient.CORE.resetAll();AutomationEngine.INSTANCE.stop();mc.setScreen(null);
+                    AutomationInputDiagnostics.developmentOverride(Set.of());
                     AnalyzerClient.CORE.setValue("expedition","turn-speed",120.0);AnalyzerClient.CORE.setValue("expedition","turn-acceleration",360.0);
                     AnalyzerClient.CORE.setValue("expedition","auto-site",false);
                     mc.getServer().execute(()->{
@@ -78,6 +80,7 @@ final class NativeAutomationSmoke {
                     if(scenario.equals("progression")){progressionStart=tick+1;next(Phase.PROGRESSION,tick);return;}
                     if(scenario.equals("tool-recovery")){recoveryStart=tick+1;next(Phase.TOOL_RECOVERY,tick);return;}
                     if(scenario.equals("guard")){guardStart=tick+1;next(Phase.GUARD,tick);return;}
+                    if(scenario.equals("task-ui")){taskUiStart=tick+1;next(Phase.TASK_UI,tick);return;}
                     NAV.configureMotion(new AutomationNavigator.MotionProfile(true,120,360,25,5,4));
                     NAV.beginSafetyProfile();require(NAV.travelXYZ(65,161,50),"Original pathfinder accepts a goal beyond a wall");lastYaw=mc.player.getYaw();next(Phase.TRAVEL,tick);
                 }
@@ -177,12 +180,17 @@ final class NativeAutomationSmoke {
             }
             case GUARD -> {
                 SurvivalGuardSmoke.tick(mc,tick-guardStart);
-                if(SurvivalGuardSmoke.done())next(Phase.FINISH,tick);
+                if(SurvivalGuardSmoke.done()){taskUiStart=tick+1;next(focused("guard")?Phase.FINISH:Phase.TASK_UI,tick);}
+            }
+            case TASK_UI -> {
+                NativeTaskUiSmoke.tick(mc,tick-taskUiStart);
+                if(NativeTaskUiSmoke.done())next(Phase.FINISH,tick);
             }
             case FINISH -> {
                 AutomationEngine.INSTANCE.stop();NAV.cancel();require(!mc.options.forwardKey.isPressed()&&!mc.options.backKey.isPressed()&&!mc.options.sprintKey.isPressed()&&!mc.options.jumpKey.isPressed()&&!mc.options.sneakKey.isPressed()&&!mc.options.useKey.isPressed(),"Stop releases every owned movement and item-use key");
                 String scenario=System.getProperty("analyzer.nativeScenario","all");
                 AnalyzerClient.LOGGER.info("{}: scenario={}, {} checks, {} captures; no Baritone loaded; all selected Survival stages passed",scenario.equals("all")?"ANALYZER_NATIVE_AUTOMATION_COMPLETE":"ANALYZER_NATIVE_FOCUSED_COMPLETE",scenario,checks,captures);mc.scheduleStop();
+                AutomationInputDiagnostics.developmentOverride(null);
             }
         }
     }

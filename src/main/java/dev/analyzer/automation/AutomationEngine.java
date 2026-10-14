@@ -31,11 +31,12 @@ public final class AutomationEngine implements AutomationScreen.Controller {
     private final SurvivalGuard guard = new SurvivalGuard();
     private final DimensionAutomation dimensions = new DimensionAutomation(bridge, inventory);
     private final ToolRecovery tools = new ToolRecovery(bridge,inventory);
+    private final TaskInputHandoff inputHandoff = new TaskInputHandoff();
     private AnalyzerCore core;
     private TaskPlanner.Plan plan;
     private String state="READY",detail="Describe a task, review its stages, then press Start.",worldKey="";
     private String[] stepDetails=new String[0];
-    private int current,ticks,lastProgress,lastPersist,startedAt;
+    private int current,ticks,lastProgress,lastPersist;
     private Object world;
     private double bestDistance=Double.MAX_VALUE,lastBridgeProgress=-1;
     private int bestCount=-1,arrivalY=Integer.MIN_VALUE;
@@ -65,13 +66,15 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         core.setEnabled("expedition",false);
         ClientTickEvents.END_CLIENT_TICK.register(client->INSTANCE.tick());
         HudRenderCallback.EVENT.register((context,counter)->{
-            if(INSTANCE.activeTask && (INSTANCE.protecting() || INSTANCE.state.equals("BLOCKED")))
-                SafetyHud.render(context,core,INSTANCE.detail,INSTANCE.state.equals("BLOCKED") || INSTANCE.state.equals("SAFETY_HOLD"));
+            if(INSTANCE.activeTask && (INSTANCE.protecting() || INSTANCE.state.equals("BLOCKED") || INSTANCE.state.equals("WAITING_INPUT") || INSTANCE.state.equals("PAUSED"))) {
+                String title=switch(INSTANCE.state){case "WAITING_INPUT"->"Waiting to start";case "BLOCKED"->"Task needs attention";case "PAUSED"->"Task paused";case "PROTECTING"->"Protecting task";default->"Task paused for safety";};
+                SafetyHud.render(context,core,title,INSTANCE.detail,INSTANCE.state.equals("BLOCKED") || INSTANCE.state.equals("SAFETY_HOLD"));
+            }
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client->{INSTANCE.pause();INSTANCE.stopOwned();INSTANCE.persist();});
     }
     public boolean available(){return bridge.available();}
-    public boolean isRunning(){return activeTask && (state.equals("RUNNING") || protecting());}
+    public boolean isRunning(){return activeTask && (state.equals("RUNNING") || state.equals("WAITING_INPUT") || protecting());}
     private boolean protecting(){return state.equals("PROTECTING") || state.equals("SAFETY_HOLD");}
     public int currentStep(){return current;}
     public String state(){return state;}
@@ -140,7 +143,7 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         validate(requested);
         if(mc.player==null||mc.world==null)throw new IllegalArgumentException("Join a world before starting a task.");
         if(!available())throw new IllegalArgumentException(bridge.status().message());
-        if(bridge.manualTaskActive())throw new IllegalArgumentException("Release manual movement before starting an Analyzer plan.");
+        if(bridge.anotherTaskOwnsControls())throw new IllegalArgumentException("Another native task owns the controls. Stop it before starting this plan.");
         ReviewedBuild selected=reviewedBuild(requested);
         stopOwned();
         clearIdleInterruption();
@@ -148,24 +151,43 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         plan=requested;current=0;stepDetails=new String[plan.steps().size()];Arrays.fill(stepDetails,"");
         world=mc.world;worldKey=worldKey();arrivalY=Integer.MIN_VALUE;shelterOrigin=null;imported=null;importedOrigin=null;supplyResource="";supplyItem=null;transitionTicks=0;suspendConflicts();
         protectBuild(selected);
-        activeTask=true;startedAt=ticks;state="RUNNING";detail="Starting " + plan.steps().getFirst().label();core.setEnabled("expedition",true);startSafetyProfile();resetProgress();persist();
+        activeTask=true;core.setEnabled("expedition",true);beginInputHandoff();
     }
-    @Override public void pause(){if(activeTask && !state.equals("PAUSED")){guard.cleanup();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="PAUSED";detail="Paused. Resume continues the current stage.";persist();}}
+    @Override public void pause(){if(activeTask && !state.equals("PAUSED")){inputHandoff.cancel();guard.cleanup();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="PAUSED";detail="Paused. Open Automation and press Resume to continue the current stage.";persist();}}
     @Override public void resume() {
         if(plan==null||current>=plan.steps().size()){detail="Choose and start a new task.";return;}
         if(mc.world==null||mc.player==null){detail="Join the original world before resuming.";return;}
         if(!worldKey.equals(worldKey())){state="BLOCKED";detail="This plan belongs to a different world or dimension. Start a new plan for this location.";return;}
         if(!available()){state="BLOCKED";detail=bridge.status().message();return;}
-        if(bridge.manualTaskActive()){detail="Release manual movement before resuming this plan.";persist();return;}
+        if(bridge.anotherTaskOwnsControls()){detail="Another native task owns the controls. Stop it before resuming this plan.";persist();return;}
         try{protectBuild(reviewedBuild(plan));}catch(RuntimeException error){state="BLOCKED";detail=error.getMessage();persist();return;}
         clearIdleInterruption();
-        world=mc.world;suspendConflicts();core.setEnabled("expedition",true);activeTask=true;startedAt=ticks;state="RUNNING";
-        startSafetyProfile();
-        if(bridge.status().paused())bridge.resume();
-        resetProgress();detail="Resuming " + plan.steps().get(current).label();persist();
+        world=mc.world;suspendConflicts();core.setEnabled("expedition",true);activeTask=true;beginInputHandoff();
     }
     @Override public void stop(){stopOwned();state="STOPPED";detail=inventory.recovery().isBlank()?"Stopped. Owned pathing and inventory actions have been released.":inventory.recovery();if(core!=null)core.setEnabled("expedition",false);persist();}
-    private void stopOwned(){activeTask=false;guard.cleanup();dimensions.stop();tools.reset();AutomationMotion.reset();bridge.endSafetyProfile();bridge.cancel();bridge.setMiningExclusion(null);inventory.setPlacementExclusion(null);inventory.stop();dispatched=false;supplyResource="";supplyGoal=0;materialCrafting=false;portalScreenGrace=portalLoadingTicks=transitionTicks=0;returnBlocked=false;blockedDetail="";restoreConflicts();}
+    private void stopOwned(){activeTask=false;inputHandoff.cancel();guard.cleanup();dimensions.stop();tools.reset();AutomationMotion.reset();bridge.endSafetyProfile();bridge.cancel();bridge.setMiningExclusion(null);inventory.setPlacementExclusion(null);inventory.stop();dispatched=false;supplyResource="";supplyGoal=0;materialCrafting=false;portalScreenGrace=portalLoadingTicks=transitionTicks=0;returnBlocked=false;blockedDetail="";restoreConflicts();}
+    private void beginInputHandoff(){
+        guard.cleanup();bridge.endSafetyProfile();bridge.pause();inputHandoff.request();state="WAITING_INPUT";
+        detail="Close the menu and release its button. The task will start automatically.";resetProgress();persist();
+    }
+    private boolean awaitInputHandoff(){
+        if(!inputHandoff.pending())return false;
+        var input=bridge.inputStatus();
+        var result=inputHandoff.poll(mc.currentScreen!=null,bridge.inputWindowFocused(),input.active());
+        switch(result){
+            case MENU_OPEN -> detail="Close the menu to start the reviewed task.";
+            case UNFOCUSED -> detail="Return to the Minecraft window to start the reviewed task.";
+            case CONTROLS_HELD -> detail="Release "+input.description()+". The task will start automatically.";
+            case START -> {
+                state="RUNNING";startSafetyProfile();
+                if(bridge.status().paused())bridge.resume();
+                resetProgress();detail="Starting "+plan.steps().get(current).label();persist();
+            }
+            default -> { }
+        }
+        // No path, mining, placement, inventory or guard action runs during the handoff tick.
+        progress();return true;
+    }
     private void startSafetyProfile(){if(core.getBoolean("expedition","safe-routing"))bridge.beginSafetyProfile();else bridge.endSafetyProfile();}
     /** Only an explicit Start/Resume may retry after external control has ended. */
     private void clearIdleInterruption(){if((bridge.status().state()==AutomationNavigator.State.INTERRUPTED || bridge.status().state()==AutomationNavigator.State.FAILED) && !bridge.status().owned())bridge.clearStatus();}
@@ -177,14 +199,14 @@ public final class AutomationEngine implements AutomationScreen.Controller {
     }
     private void restoreConflicts(){if(core!=null){for(var entry:suspended.entrySet())if(hasModule(entry.getKey())&&!core.isEnabled(entry.getKey()))core.setEnabled(entry.getKey(),entry.getValue());}suspended.clear();}
 
-    private void block(String reason){guard.cleanup();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="BLOCKED";detail=reason;if(current<stepDetails.length)stepDetails[current]=reason;persist();}
+    private void block(String reason){inputHandoff.cancel();guard.cleanup();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="BLOCKED";detail=reason;if(current<stepDetails.length)stepDetails[current]=reason;persist();}
     private void resetProgress(){lastProgress=ticks;bestCount=-1;bestDistance=Double.MAX_VALUE;lastBridgeProgress=-1;lastClicks=inventory.clicks();dispatched=bridge.status().active();}
     private void progress(){lastProgress=ticks;}
     private void tick() {
         ticks++;
         bridge.configureMotion(new AutomationNavigator.MotionProfile(core.getBoolean("expedition","smooth-turns"),core.getNumber("expedition","turn-speed"),core.getNumber("expedition","turn-acceleration"),core.getNumber("expedition","movement-angle"),(int)core.getNumber("expedition","break-delay"),(int)core.getNumber("expedition","place-delay")));
         inventory.actionDelayTicks((int)core.getNumber("expedition","place-delay"));
-        try { bridge.tick(); }
+        try { if(!inputHandoff.pending())bridge.tick(); }
         catch(RuntimeException | LinkageError error) {
             bridge.cancel();inventory.stop();
             if(activeTask)block("Native task paused after an execution error. Check the local game log before resuming.");
@@ -207,14 +229,16 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         if(activeTask && !mc.player.isAlive()){stopOwned();block("The player died. Review inventory and position before resuming.");return;}
         // A live blocked task still watches for danger. User Pause and restored checkpoints do not act.
         if(!activeTask || state.equals("PAUSED"))return;
+        if(awaitInputHandoff())return;
         if(mc.currentScreen instanceof DownloadingTerrainScreen && (dimensions.awaitingTransition() || portalScreenGrace>0)) {
             if(++portalLoadingTicks>200){pause();detail="Portal terrain loading did not finish. Resume after the world is ready.";persist();}
             else{detail="Waiting for the authorized portal terrain to finish loading.";progress();}
             return;
         }
         portalLoadingTicks=0;if(portalScreenGrace>0)portalScreenGrace--;
-        if(ticks-startedAt>10 && core.getBoolean("expedition","pause-on-input") && bridge.manualInputActive()) {
-            pause();detail="Paused for manual movement or interaction. Resume when ready.";persist();return;
+        var input=bridge.inputStatus();
+        if(core.getBoolean("expedition","pause-on-input") && input.active()) {
+            pause();detail="Paused for "+input.description()+". Open Automation and press Resume when ready.";persist();return;
         }
         if(mc.player.isSpectator()){block("Automation cannot act in Spectator mode.");return;}
         if(mc.getOverlay()!=null){pause();detail="Paused for a resource reload. Resume after loading finishes.";persist();return;}

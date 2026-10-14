@@ -1,10 +1,10 @@
-# Native Analyzer Automation — 0.10.0
+# Native Analyzer Automation — 0.10.1
 
 Automation now runs entirely in Analyzer against Minecraft/Fabric APIs. Baritone and its native helper are removed from the current build, mod metadata and Prism package. Historical sources/notices remain for earlier releases and research. The new navigation, motion, mining, building and safety code is original; no external bot or AI service is required.
 
 ## Start and control
 
-Open **Right Shift → Automation**, type a supported goal or select a preset, then **Review plan → Start reviewed plan**. Review exposes actual stages, materials and unmet requirements. Start and Resume are explicit. Saved checkpoints restore paused. Pause/Stop release owned movement, breaking and item use; unrelated modules and manual cursor items remain preserved. Loading profiles never starts a task.
+Open **Right Shift → Automation**, type a supported goal or select a preset, then **Review plan → Start reviewed plan**. Review exposes actual stages, materials and unmet requirements. Start and Resume are explicit. Saved checkpoints restore paused. Pause/Stop release owned movement, breaking and item use; unrelated modules and manual cursor items remain preserved. Loading profiles never starts a task. After an explicit Start/Resume, **WAITING_INPUT** waits for gameplay focus and release of held movement/action controls, including the menu click. The HUD identifies any held controls. Once released, that authorized task starts automatically. Waiting performs no task movement, interaction or protection. Manual input during execution still pauses the task; open Automation and choose Resume when ready. Stop cancels a pending start.
 
 Examples: `go to 1500 64 -2200`, `escape spawn 25000 blocks east`, `mine 32 diamonds`, `mine 16 ancient debris`, `get diamond armor`, `get fully enchanted diamond armor`, `get netherite armor`, `go to the nether`, `return to the overworld`, `go to the end`, or combined escape/base/gear goals. These are supported local intents, not arbitrary language or executable commands.
 
@@ -22,7 +22,7 @@ A missing or nearly broken required pickaxe starts a local prerequisite queue: g
 
 ## Schematics and material-first construction
 
-Choose **Import schematic**, paste a local path, or drag one file onto the Automation screen. Supported imports are Litematica `.litematic` versions 4–7, mapped MCEdit `.schematic`, and Sponge `.schem` versions 1–3. Review shows dimensions, material totals, selected site and importer warnings. Automatic site selection surveys nearby loaded level ground, full support, existing blocks/containers, fluids and nearby hostiles; it does not select a place by pretending unloaded chunks are empty.
+Choose **Schematics → Choose schematic** to browse the active Minecraft instance's `schematics` folder. Use **Open folder** to add your files, **Refresh** after copying, browse subfolders or filter by filename, then select a file and choose **Use selected**. The selected file enters the existing plan review; construction still requires **Start reviewed plan**. Dragging one file onto Automation remains supported. Supported imports are Litematica `.litematic` versions 4–7, mapped MCEdit `.schematic`, and Sponge `.schem` versions 1–3. Review shows dimensions, material totals, selected site and importer warnings. Automatic site selection surveys nearby loaded level ground, full support, existing blocks/containers, fluids and nearby hostiles; it does not select a place by pretending unloaded chunks are empty.
 
 Every remaining material is acquired before the construction stage. A curated material catalog gathers and crafts ordinary wood/stone/glass and related building blocks; unsupported recipes require the actual owned item. Construction checks the reviewed file hash and supplies again, then uses the original native builder. World state, orientations, support, player clearance and material consumption are observed. Exact selected block states are verified before completion. Existing structures and block-entity contents are preserved. Only replaceable foliage or recorded task-owned mistaken placements can be cleared.
 

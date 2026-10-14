@@ -80,7 +80,8 @@ tasks.register('packPrivacyCheck', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.analyzer.privacy.PackPrivacySelfTest'
 }
-['automationMotion': 'MotionPolicySelfTest', 'nativePathfinder': 'NativePathfinderSelfTest', 'schematic': 'SchematicSelfTest', 'retreat': 'RetreatPlannerSelfTest'].each { area, entry ->
+['automationMotion': 'MotionPolicySelfTest', 'nativePathfinder': 'NativePathfinderSelfTest', 'schematic': 'SchematicSelfTest', 'retreat': 'RetreatPlannerSelfTest',
+ 'automationInput': 'TaskInputHandoffSelfTest', 'schematicLibrary': 'SchematicLibrarySelfTest'].each { area, entry ->
     tasks.register("${area}Check", JavaExec) {
         dependsOn testClasses
         classpath = sourceSets.test.runtimeClasspath
@@ -89,7 +90,8 @@ tasks.register('packPrivacyCheck', JavaExec) {
 }
 tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck'), tasks.named('safetyCheck'),
     tasks.named('combatCheck'), tasks.named('movementCheck'), tasks.named('hvhCheck'), tasks.named('gameplayConfigCheck'), tasks.named('privacyConfigCheck'), tasks.named('privacyCheck'), tasks.named('packPrivacyCheck'),
-    tasks.named('automationMotionCheck'), tasks.named('nativePathfinderCheck'), tasks.named('schematicCheck'), tasks.named('retreatCheck') }
+    tasks.named('automationMotionCheck'), tasks.named('nativePathfinderCheck'), tasks.named('schematicCheck'), tasks.named('retreatCheck'),
+    tasks.named('automationInputCheck'), tasks.named('schematicLibraryCheck') }
 tasks.register('moduleCatalog', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath

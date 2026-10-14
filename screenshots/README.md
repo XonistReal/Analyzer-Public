@@ -1,5 +1,13 @@
 # Native captures
 
+Analyzer **0.10.1** adds eight current `analyzer-native-ui-*` captures from focused native startup/browser and protection regressions. The [validation record](../VALIDATION.md) distinguishes simulated physical-input snapshots from real rendered screen input, authoritative player travel and normal Survival interactions.
+
+- [Schematic folder browser](analyzer-native-ui-schematic-browser.png), [selected file and material review](analyzer-native-ui-schematic-selected-review.png)
+- [Held Start waits for release](analyzer-native-ui-start-waits-for-release.png), [resumed task reaches its destination](analyzer-native-ui-task-start-resume-complete.png)
+- [Zombie defense](analyzer-native-ui-safety-zombie-defense.png), [mining resumes](analyzer-native-ui-safety-mining-resumed.png), [food recovery](analyzer-native-ui-safety-eating.png), [creeper retreat](analyzer-native-ui-safety-creeper-retreat.png)
+
+## Earlier 0.10.0 captures
+
 Analyzer **0.10.0** adds **14** native automation captures under `analyzer-native-automation-*`. They come from the complete isolated Survival sequence without Baritone: route/pause/resume, actual mining, exact construction, schematic material review, Nether travel, real smithing, crafting/enchanting, repeated broken-tool recovery and mob/food protection. The full run and its limits are recorded in [Validation](../VALIDATION.md).
 
 - [Material-first schematic review](analyzer-native-automation-console.png), [exact construction](analyzer-native-automation-building.png)

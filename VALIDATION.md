@@ -1,3 +1,20 @@
+# Task startup and schematic browser — October 14, 2026
+
+Analyzer **0.10.1** fixes the menu click being treated as gameplay input on the first native task dispatch. Explicit Start/Resume enter **WAITING_INPUT**, perform no task actions while the menu, focus or held controls prevent handoff, then automatically start after release. The wait has no timeout that grants unchecked input. Fresh manual input pauses immediately and requires explicit Resume; Stop cancels a pending start. Checkpoints still restore paused. HUD notices distinguish waiting, manual pause, unmet requirements and actual protection, naming the bound controls when held.
+
+**Automation → Schematics → Browse** lists the current Minecraft instance's `schematics` folder. It supports subfolders, filename search, Refresh, Open folder, file metadata and explicit Use selected. Choosing a file resolves its real path and returns to material/site review before Start. Listing is bounded and does not parse schematic contents; existing import formats, file limits and source hashes remain enforced. Drag and drop remains available.
+
+Java 21 `build moduleCatalog` and `publishLocal` pass **3,982 assertions across 17 policy/configuration suites**, including **111 input-handoff assertions** and **24 real temporary-folder library assertions**. Windows denied symlink creation, so those optional platform cases were explicitly skipped. The module export remains 124 modules and 1,124 controls.
+
+- `runNativeAutomationSmoke -PanalyzerNativeScenario=task-ui` passes **508 pipeline checks plus 495 sustained UI/controller assertions**, with four captures. Real rendered browser controls select a local Litematica file and review its material-first plan. Held Start and Resume remain inert beyond the old ten-tick grace, release starts actual server-backed travel, fresh movement pauses without automatic resumption, and Stop prevents a cancelled pending task from starting. Final movement/action cleanup, shaders and GL state pass.
+- `runNativeAutomationSmoke -PanalyzerNativeScenario=guard` passes **721 pipeline checks plus 53 guard assertions**, with four captures. Real AI zombie defense, resumed mining, available-food recovery, critical-health creeper retreat, neutral-mob filtering, Pause/Resume and cleanup remain operational after the input changes.
+
+The startup regression supplies physical-control snapshots through a strictly development-only fixture; it does **not** inject operating-system hardware events. Screens, production task controllers, normal interactions and authoritative Survival player movement are real. Both isolated native logs complete without ERROR/FATAL entries. No personal world or installed instance is used for testing. The complete mining/building/portal/gear pipeline was last observed in **0.10.0** below and was not rerun in full for this focused update.
+
+Eight current captures use `screenshots/analyzer-native-ui-*`; the [acceptance record](production-validation/native-0.10.1/acceptance.json) preserves their hashes and the focused log hashes. The current remapped JAR and local feed match SHA-256 **`a92b7edfe73951b8838b1dd38c930b3e6ef93b0ecf3a1536767a48b9014dffbe`**. Prism packaging checks its embedded version/hash, dependencies, archive integrity and exclusion of accounts/config/saves. Updates target the located **Analyzer-0.10.0-Prism-1.21.4** instance and preserve its settings, worlds, profiles, unrelated mods and selected Java runtime. Its folder name does not identify the embedded installed version.
+
+## Earlier 0.10.0 complete automation evidence
+
 # Native automation replacement — October 14, 2026
 
 Analyzer **0.10.0** removes Baritone and its native helper from the current Gradle dependencies, mod metadata and Prism package. The original native controllers use Minecraft/Fabric APIs. Planning stays local, reviewed goals require explicit Start/Resume, checkpoints restore paused, and only observed inventory/world state completes a stage. Historical Baritone tests below are evidence for those earlier releases only.
