@@ -44,7 +44,7 @@ final class DevSmoke {
         var core = AnalyzerClient.CORE;
         // The current interface fixture uses rendered control diagnostics rather than the
         // historical UI coordinates below, and always runs in the isolated dev world.
-        if ((Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep") || Boolean.getBoolean("analyzer.studioRefreshSmoke") || Boolean.getBoolean("analyzer.liquidLayoutSmoke")) && !worldRequested) {
+        if ((Boolean.getBoolean("analyzer.nativeAutomationSmoke") || Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep") || Boolean.getBoolean("analyzer.studioRefreshSmoke") || Boolean.getBoolean("analyzer.liquidLayoutSmoke")) && !worldRequested) {
             worldRequested = true;
             client.options.getViewDistance().setValue(5); client.options.getSimulationDistance().setValue(5);
             String name = "Analyzer-Smoke";
@@ -106,8 +106,12 @@ final class DevSmoke {
             }
         } else if (client.world != null && client.player != null && client.getServer() != null && client.getOverlay() == null) {
             if (!arenaReady) { arenaReady = true; setupArena(client); }
-            if ((Boolean.getBoolean("analyzer.gameplaySettingsSmoke") || Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep") || Boolean.getBoolean("analyzer.studioRefreshSmoke") || Boolean.getBoolean("analyzer.liquidLayoutSmoke")) && !arenaPrepared) return;
+            if ((Boolean.getBoolean("analyzer.nativeAutomationSmoke") || Boolean.getBoolean("analyzer.gameplaySettingsSmoke") || Boolean.getBoolean("analyzer.uiSmoke") || Boolean.getBoolean("analyzer.studioSmoke") || Boolean.getBoolean("analyzer.moduleSweep") || Boolean.getBoolean("analyzer.studioRefreshSmoke") || Boolean.getBoolean("analyzer.liquidLayoutSmoke")) && !arenaPrepared) return;
             worldTicks++;
+            if (Boolean.getBoolean("analyzer.nativeAutomationSmoke")) {
+                if(worldTicks>=20) NativeAutomationSmoke.tick(client,worldTicks-20);
+                return;
+            }
             if (Boolean.getBoolean("analyzer.liquidLayoutSmoke")) {
                 if (worldTicks >= 20) LiquidLayoutSmoke.tick(client, worldTicks - 20);
                 return;
@@ -246,7 +250,7 @@ final class DevSmoke {
             }
             if (worldTicks >= 625) ExpansionSmoke.tick(client, worldTicks - 625);
         }
-        if (ticks > (Boolean.getBoolean("analyzer.automationSmoke") ? 10000 : 4000)) throw new IllegalStateException("Smoke test timed out");
+        if (ticks > (Boolean.getBoolean("analyzer.nativeAutomationSmoke") ? 16000 : Boolean.getBoolean("analyzer.automationSmoke") ? 10000 : 4000)) throw new IllegalStateException("Smoke test timed out");
     }
 
     private static void loadProfile(String name) {

@@ -8,7 +8,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import org.lwjgl.opengl.GL11;
@@ -20,17 +23,30 @@ final class SurvivalGuardSmoke {
     private static int stage, since, assertions, screenshots;
     private static long attacks, retreat, foodUses;
     private static boolean protectedMine, damagedMob, resumedMine, captured, foodEnabled, criticalDamage, done;
+    private static final EquipmentSlot[] ARMOR_SLOTS={EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET};
+    private static final net.minecraft.item.Item[] IRON_ARMOR={Items.IRON_HELMET,Items.IRON_CHESTPLATE,Items.IRON_LEGGINGS,Items.IRON_BOOTS};
     private static Vec3d pausedAt;
     private static double initialDistance;
+    private static volatile boolean fixtureReady;
+    private static volatile String fixtureFailure="";
     static boolean done(){return done;}
     static void tick(MinecraftClient mc,int t){
         if(done)return;
+        if(!fixtureFailure.isEmpty())throw new IllegalStateException("Survival guard setup failed: "+fixtureFailure);
         var core=AnalyzerClient.CORE;
         int age=t-since;
         switch(stage){
             case 0 -> {
                 ENGINE.stop();core.resetAll();mc.setScreen(null);mc.options.setPerspective(Perspective.FIRST_PERSON);
                 core.setValue("expedition","resume-delay",.5);core.setValue("expedition","auto-food",false);
+                core.setValue("expedition","proactive-avoidance",false);
+                // Commands execute on the server after this preload. A /fill against unloaded
+                // chunks can fail silently and leave the player falling below the test arena.
+                fixtureReady=false;fixtureFailure="";
+                mc.getServer().execute(()->{
+                    try {for(int x=8;x<=11;x++)for(int z=8;z<=11;z++)mc.getServer().getOverworld().getChunk(x,z);}
+                    catch(RuntimeException failure){fixtureFailure=failure.toString();}
+                });
                 command(mc,"kill @e[type=!minecraft:player]");command(mc,"gamemode creative AnalyzerDev");
                 command(mc,"clear AnalyzerDev");command(mc,"effect clear AnalyzerDev");command(mc,"difficulty normal");
                 command(mc,"fill 130 160 130 185 160 175 minecraft:bedrock");command(mc,"fill 130 161 130 185 170 175 minecraft:air");
@@ -39,17 +55,41 @@ final class SurvivalGuardSmoke {
                 command(mc,"time set 18000");command(mc,"weather clear");
                 command(mc,"gamemode survival AnalyzerDev");command(mc,"item replace entity AnalyzerDev hotbar.0 with minecraft:diamond_pickaxe");
                 command(mc,"item replace entity AnalyzerDev hotbar.1 with minecraft:diamond_sword");
+                command(mc,"item replace entity AnalyzerDev armor.head with minecraft:iron_helmet");
+                command(mc,"item replace entity AnalyzerDev armor.chest with minecraft:iron_chestplate");
+                command(mc,"item replace entity AnalyzerDev armor.legs with minecraft:iron_leggings");
+                command(mc,"item replace entity AnalyzerDev armor.feet with minecraft:iron_boots");
                 command(mc,"effect give AnalyzerDev minecraft:instant_health 1 5 true");command(mc,"effect give AnalyzerDev minecraft:saturation 1 5 true");
+                mc.getServer().execute(()->{
+                    try {
+                        var serverWorld=mc.getServer().getOverworld();
+                        var player=mc.getServer().getPlayerManager().getPlayer("AnalyzerDev");
+                        if(player==null || player.getWorld()!=serverWorld || !player.isAlive() || Math.abs(player.getY()-161)>.01)
+                            throw new IllegalStateException("Expected a living Overworld player standing at arena Y=161");
+                        for(int x=130;x<=185;x++)for(int z=130;z<=175;z++)
+                            if(!serverWorld.getBlockState(new BlockPos(x,160,z)).isOf(Blocks.BEDROCK))
+                                throw new IllegalStateException("The server bedrock floor is missing at "+x+",160,"+z);
+                        if(!serverWorld.getBlockState(new BlockPos(142,161,140)).isOf(Blocks.STONE))
+                            throw new IllegalStateException("The server mining vein was not created");
+                        for(int i=0;i<ARMOR_SLOTS.length;i++)if(!player.getEquippedStack(ARMOR_SLOTS[i]).isOf(IRON_ARMOR[i]))
+                            throw new IllegalStateException("The real iron defense armor is missing from server slot "+ARMOR_SLOTS[i]);
+                        fixtureReady=true;
+                    }catch(RuntimeException failure){fixtureFailure=failure.toString();}
+                });
                 next(t);
             }
             case 1 -> {if(age>=20){
+                if(!fixtureReady){timeout(age,120,"Authoritative safety arena setup did not finish");return;}
+                requireGround(mc,140,140,"Night-mining fixture");
                 require(mc.interactionManager.getCurrentGameMode()==GameMode.SURVIVAL,"Safety fixture runs in real Survival mode");
+                for(int i=0;i<ARMOR_SLOTS.length;i++)require(mc.player.getEquippedStack(ARMOR_SLOTS[i]).isOf(IRON_ARMOR[i]),
+                        "Defense fixture wears ordinary server-backed iron armor in "+ARMOR_SLOTS[i]);
                 require(mc.world.isNight(),"Stationary-miner defense fixture is at night");mc.player.getInventory().selectedSlot=0;
                 ENGINE.submit(new TaskPlanner.Plan("Night mining safety","Actual mining while attacked",List.of(new TaskPlanner.Step("stone",TaskPlanner.Action.MINE,"Mine stone safely","cobblestone",8,0,0,0)),List.of()));
                 attacks=ENGINE.safetyDiagnostics().attacks();next(t);
             }}
             case 2 -> {if(age>=8 && ENGINE.pathStatus().owned()){
-                require(ENGINE.routingSafety().applied(),"Reviewed task applies scoped safer Baritone routing while mining");
+                require(ENGINE.routingSafety().applied(),"Reviewed task applies scoped safer Analyzer routing while mining");
                 var p=mc.player.getPos();command(mc,"summon minecraft:zombie "+p.x+" "+p.y+" "+(p.z+2.2)+" {CustomName:'\"AnalyzerSafetyZombie\"',PersistenceRequired:1b}");next(t);
             }else timeout(age,120,"Mining process never became owned");}
             case 3 -> {
@@ -79,9 +119,10 @@ final class SurvivalGuardSmoke {
                     command(mc,"item replace entity AnalyzerDev inventory.0 with minecraft:cooked_beef 5");
                     mc.getServer().execute(()->{var player=mc.getServer().getPlayerManager().getPlayer("AnalyzerDev");player.getHungerManager().setFoodLevel(8);player.getHungerManager().setSaturationLevel(0);});
                     next(t);
-                }else timeout(age,600,"Original stone mining did not finish after defense");
+                }else timeout(age,1200,"Original stone mining did not finish after defense");
             }
             case 5 -> {if(age>=20){
+                requireGround(mc,150,155,"Food-recovery fixture");
                 require(mc.player.getHungerManager().getFoodLevel()==8,"Food fixture uses authoritative low hunger");mc.player.getInventory().selectedSlot=2;
                 require(mc.player.getInventory().getStack(9).isOf(Items.COOKED_BEEF),"Usable food starts in main inventory, outside a full hotbar");
                 foodUses=ENGINE.safetyDiagnostics().foodUses();ENGINE.submit(travel("Food recovery",170,155));next(t);
@@ -90,7 +131,7 @@ final class SurvivalGuardSmoke {
                 if(!foodEnabled && ENGINE.pathStatus().owned()){core.setValue("expedition","auto-food",true);foodEnabled=true;}
                 if(ENGINE.safetyDiagnostics().consuming()){
                     require(ENGINE.state().equals("PROTECTING"),"Low hunger interrupts a reviewed task for normal food use");
-                    require(ENGINE.pathStatus().paused(),"Food recovery pauses an actual owned Baritone route");
+                    require(ENGINE.pathStatus().paused(),"Food recovery pauses an actual owned Analyzer route");
                     capture(mc,"analyzer-safety-eating.png");ENGINE.pause();next(t);
                 }else timeout(age,80,"Ordinary food consumption never started");
             }
@@ -107,10 +148,15 @@ final class SurvivalGuardSmoke {
                     require(InventoryAutomation.count(Items.COOKED_BEEF)<5,"Recovery consumes actual food instead of changing inventory locally");
                     require(mc.player.currentScreenHandler.getCursorStack().isEmpty(),"Food swapping leaves no held inventory cursor");
                     ENGINE.stop();command(mc,"tp AnalyzerDev 154.5 161 155.5 -90 15");command(mc,"effect give AnalyzerDev minecraft:saturation 1 5 true");
+                    for(String slot:new String[]{"head","chest","legs","feet"})command(mc,"item replace entity AnalyzerDev armor."+slot+" with minecraft:air");
                     command(mc,"setblock 153 160 155 minecraft:lava");command(mc,"item replace entity AnalyzerDev hotbar.1 with minecraft:diamond_sword");next(t);
                 }else timeout(age,240,"Food recovery did not consume server food and release intervention");
             }
             case 9 -> {if(age>=20){
+                core.setValue("expedition","proactive-avoidance",true);
+                requireGround(mc,154,155,"Creeper-retreat fixture");
+                for(EquipmentSlot slot:ARMOR_SLOTS)require(mc.player.getEquippedStack(slot).isEmpty(),"Critical-health retreat removes the defense fixture armor from "+slot);
+                require(mc.world.getBlockState(new BlockPos(153,160,155)).isOf(Blocks.LAVA),"The actual adjacent lava hazard exists before retreat");
                 ENGINE.submit(travel("Creeper retreat",179,155));retreat=ENGINE.safetyDiagnostics().retreatTicks();next(t);
             }}
             case 10 -> {if(age>=6 && ENGINE.pathStatus().owned()){
@@ -136,7 +182,7 @@ final class SurvivalGuardSmoke {
                 command(mc,"effect give AnalyzerDev minecraft:instant_health 1 5 true");
                 command(mc,"summon minecraft:enderman 150.5 161 159.5 {PersistenceRequired:1b}");command(mc,"summon minecraft:cow 149.5 161 159.5 {PersistenceRequired:1b}");next(t);
             }}
-            case 13 -> {if(age>=15){ENGINE.submit(travel("Neutral mob filtering",169,155));attacks=ENGINE.safetyDiagnostics().attacks();next(t);}}
+            case 13 -> {if(age>=15){requireGround(mc,150,155,"Neutral-mob fixture");ENGINE.submit(travel("Neutral mob filtering",169,155));attacks=ENGINE.safetyDiagnostics().attacks();next(t);}}
             case 14 -> {if(age>=25){
                 require(ENGINE.isRunning(),"Healthy task continues beside unprovoked neutral mobs");
                 require(!ENGINE.safetyDiagnostics().intervening() && ENGINE.safetyDiagnostics().threatCount()==0,"Unprovoked enderman and passive cow do not trigger defense");
@@ -150,6 +196,11 @@ final class SurvivalGuardSmoke {
         }
     }
     private static void next(int t){stage++;since=t;}
+    private static void requireGround(MinecraftClient mc,int x,int z,String label){
+        require(mc.world.getRegistryKey()==net.minecraft.world.World.OVERWORLD && mc.player.isAlive() && mc.player.isOnGround()
+                && Math.abs(mc.player.getY()-161)<.01 && Math.hypot(mc.player.getX()-(x+.5),mc.player.getZ()-(z+.5))<.15
+                && mc.world.getBlockState(new BlockPos(x,160,z)).isOf(Blocks.BEDROCK),label+" starts on its real loaded bedrock floor at the requested position");
+    }
     private static TaskPlanner.Plan travel(String title,int x,int z){return new TaskPlanner.Plan(title,"Local safety fixture",List.of(new TaskPlanner.Step("travel",TaskPlanner.Action.TRAVEL,"Walk to the goal","",0,x,161,z)),List.of());}
     private static LivingEntity mob(MinecraftClient mc,String name){for(var e:mc.world.getEntities())if(e instanceof LivingEntity living && e.getName().getString().equals(name) && living.isAlive())return living;return null;}
     private static void timeout(int age,int limit,String message){if(age>limit)throw new IllegalStateException(message+" / "+ENGINE.state()+" / "+ENGINE.detail()+" / "+ENGINE.pathStatus()+" / "+ENGINE.safetyDiagnostics());}

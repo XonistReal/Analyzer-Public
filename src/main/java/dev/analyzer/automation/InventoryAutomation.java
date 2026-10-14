@@ -15,6 +15,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import java.util.*;
@@ -30,8 +31,9 @@ public final class InventoryAutomation {
     private record Recipe(Item output, int width, Item[] cells) { }
     private static final MinecraftClient MC = MinecraftClient.getInstance();
     private static final Item[] ARMOR = {Items.DIAMOND_HELMET, Items.DIAMOND_CHESTPLATE, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS};
+    private static final Item[] NETHERITE_ARMOR = {Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS};
     private static final EquipmentSlot[] EQUIPMENT = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-    private final BaritoneBridge bridge;
+    private final AutomationNavigator bridge;
     private String job = "";
     private Recipe recipe;
     private int cell, source = -1, phase, wait, ownedSync = -1, transactionSync = -1;
@@ -46,12 +48,46 @@ public final class InventoryAutomation {
     private Object cursorWorld;
     private String recovery="";
     private int buildAmount=ShelterSchematic.MATERIAL_COUNT;
-    public InventoryAutomation(BaritoneBridge bridge) { this.bridge = bridge; }
+    private int actionDelayTicks = 5;
+    private Item materialItem = Items.AIR;
+    private int materialTarget;
+    private boolean ordinaryMiningDrops;
+    private Box placementExclusion;
+    public InventoryAutomation(AutomationNavigator bridge) { this.bridge = bridge; }
     public long clicks() { return clickCount; }
     public boolean ownsScreen() { return ownedScreen && MC.player != null && MC.player.currentScreenHandler.syncId == ownedSync || ownedScreen && MC.player != null && ownedSync < 0 && expectedHandler != null && expectedHandler.isInstance(MC.player.currentScreenHandler); }
     public String currentJob() { return job; }
     public String recovery() { return recovery; }
+    /** Recovery alone can require a replacement that yields ordinary ore/stone drops. */
+    public void requireOrdinaryMiningDrops(boolean required) { ordinaryMiningDrops = required; }
+    /** Keep prerequisite workstations out of the reviewed construction footprint. */
+    public void setPlacementExclusion(Box bounds) { placementExclusion = bounds; }
+    /** Whether a workstation can be used without first acquiring or crafting its block item. */
+    public boolean workstationAvailable(Block block, Item item) {
+        if (MC.player == null || MC.world == null || block == null || item == null) return false;
+        if (count(item) > 0 || hasNearby(block)) return true;
+        if (!ownsScreen()) return false;
+        ScreenHandler handler = MC.player.currentScreenHandler;
+        return block == Blocks.CRAFTING_TABLE && handler instanceof CraftingScreenHandler
+                || block == Blocks.FURNACE && handler instanceof AbstractFurnaceScreenHandler
+                || block == Blocks.SMITHING_TABLE && handler instanceof SmithingScreenHandler
+                || block == Blocks.ENCHANTING_TABLE && handler instanceof EnchantmentScreenHandler
+                || block == Blocks.ANVIL && handler instanceof AnvilScreenHandler;
+    }
     public Result prepareBuild(int amount) {buildAmount=Math.clamp(amount,0,ShelterSchematic.MATERIAL_COUNT);return tick("build-hotbar",30); }
+    public void actionDelayTicks(int ticks) { actionDelayTicks = Math.clamp(ticks, 1, 100); }
+    /** Makes an owned material available without issuing a click before its slot update arrives. */
+    public Result prepareItem(Item item, int required) {
+        if (MC.player == null || MC.world == null || MC.interactionManager == null) return Result.need("Join a world to continue.");
+        if (wait > 0) { wait--; return Result.waitFor("Waiting for the hotbar update"); }
+        return prepareHotbar(item, required);
+    }
+    public Result tickMaterial(Item item, int targetCount) {
+        Objects.requireNonNull(item);
+        if (targetCount < 1 || targetCount > 4096 || item == Items.AIR) return Result.need("Choose a real building material and a target from 1 to 4096.");
+        materialItem = item; materialTarget = targetCount;
+        return tick("material:" + Registries.ITEM.getId(item), 30);
+    }
 
     public static int count(Item item) { return count(s -> s.isOf(item)); }
     public static int count(Predicate<ItemStack> test) {
@@ -70,7 +106,9 @@ public final class InventoryAutomation {
             default -> count(Registries.ITEM.get(Identifier.of("minecraft", name)));
         };
     }
-    public static boolean diamondKit() { for (Item item : ARMOR) if (count(item) < 1) return false; return count(Items.DIAMOND_PICKAXE) > 0 && count(Items.DIAMOND_SWORD) > 0; }
+    public static boolean diamondKit() { for (Item item : ARMOR) if (count(item) < 1) return false; return durableTool(Items.DIAMOND_PICKAXE) && count(Items.DIAMOND_SWORD) > 0; }
+    public static boolean durableTool(Item item) { return count(stack -> stack.isOf(item) && (!stack.isDamageable() || stack.getMaxDamage() - stack.getDamage() >= 16)) > 0; }
+    public static boolean netheriteArmor() { for (Item item : NETHERITE_ARMOR) if (count(item) < 1) return false; return true; }
     public static boolean goodArmor() { for (Item item : ARMOR) { ItemStack s = findItem(item); if (level(s, "protection") < 4 || level(s, "unbreaking") < 3) return false; } return true; }
     private static ItemStack findItem(Item item) { if (MC.player != null) for (int i = 0; i < MC.player.getInventory().size(); i++) if (MC.player.getInventory().getStack(i).isOf(item)) return MC.player.getInventory().getStack(i); if (MC.player != null && (MC.player.currentScreenHandler instanceof EnchantmentScreenHandler || MC.player.currentScreenHandler instanceof AnvilScreenHandler) && MC.player.currentScreenHandler.getSlot(0).getStack().isOf(item)) return MC.player.currentScreenHandler.getSlot(0).getStack(); return ItemStack.EMPTY; }
     public static int level(ItemStack stack, String id) {
@@ -95,24 +133,67 @@ public final class InventoryAutomation {
             case "stone-tools" -> stoneTools();
             case "iron-tools" -> ironTools();
             case "diamond-kit" -> diamondCraft();
+            case "diamond-pickaxe" -> diamondPickaxe();
+            case "portal-kit" -> portalKit();
+            case "netherite-template" -> count(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE) > 0 || netheriteArmor() ? finish("Owned Netherite Upgrade template verified") : Result.need("Supply one Netherite Upgrade smithing template from a bastion before starting this expedition. Discovery and looting are not automated.");
+            case "smelt-gold" -> smeltGoal(Items.RAW_GOLD, Items.GOLD_INGOT, 16);
+            case "smelt-extra-iron" -> smeltGoal(Items.RAW_IRON, Items.IRON_INGOT, 1);
+            case "smelt-debris" -> smeltGoal(Items.ANCIENT_DEBRIS, Items.NETHERITE_SCRAP, 16);
+            case "netherite-ingots" -> netheriteIngots();
+            case "netherite-armor" -> smithArmor();
             case "shelter-materials" -> shelterMaterials();
             case "build-hotbar" -> prepareHotbar(Items.COBBLESTONE, buildAmount);
             case "mining-hotbar" -> preparePickaxe();
             case "equip", "diamond-armor-equip" -> equip();
+            case "netherite-equip" -> equipArmor(NETHERITE_ARMOR, "netherite");
             case "diamond-armor", "enchanted-armor", "good-armor" -> enchant(enchantLevel);
-            default -> Result.need("Unsupported inventory task: " + requested);
+            default -> requested.startsWith("material:") ? buildingMaterial() : Result.need("Unsupported inventory task: " + requested);
         };
+    }
+    private Result buildingMaterial() {
+        if (count(materialItem) >= materialTarget) {
+            Result clearing = clearOwnedFurnace(); if (clearing != null) return clearing;
+            return finish("Verified " + materialTarget + " owned " + materialItem.getName().getString());
+        }
+        return materialCraft(materialItem, materialTarget, new HashSet<>());
+    }
+    private Result materialCraft(Item item, int target, Set<Item> chain) {
+        if (!chain.add(item) || chain.size() > 12) return Result.need("This material dependency could not be resolved safely.");
+        String id = Registries.ITEM.getId(item).toString();
+        var found = BuildingMaterialCatalog.find(id);
+        if (found.isEmpty()) return Result.need("Supply owned " + item.getName().getString() + ". This palette material does not have an automated vanilla recipe.");
+        var specification = found.get();
+        if (specification.job() == BuildingMaterialCatalog.Job.DIRECT)
+            return Result.need("Gather " + Math.max(1, target - count(item)) + " more " + item.getName().getString() + " before resuming material crafting.");
+        if (specification.job() == BuildingMaterialCatalog.Job.SMELT) {
+            Item source = Registries.ITEM.get(Identifier.of("minecraft", specification.cells().getFirst()));
+            if (count(source) == 0 && !(MC.player.currentScreenHandler instanceof AbstractFurnaceScreenHandler && ownsScreen() && MC.player.currentScreenHandler.getSlot(0).getStack().isOf(source)))
+                return materialCraft(source, Math.max(1, target - count(item)), chain);
+            if (count(Items.FURNACE) == 0 && !hasNearby(Blocks.FURNACE) && !(MC.player.currentScreenHandler instanceof AbstractFurnaceScreenHandler))
+                return materialCraft(Items.FURNACE, 1, chain);
+            return smelt(source, item, target);
+        }
+        Result clearing = clearOwnedFurnace(); if (clearing != null) return clearing;
+        if (specification.width() == 3 && count(Items.CRAFTING_TABLE) == 0 && !hasNearby(Blocks.CRAFTING_TABLE) && !(MC.player.currentScreenHandler instanceof CraftingScreenHandler))
+            return materialCraft(Items.CRAFTING_TABLE, 1, chain);
+        for (var ingredient : specification.ingredients()) {
+            Item source = Registries.ITEM.get(Identifier.of("minecraft", ingredient.itemId()));
+            if (count(source) < ingredient.count()) return materialCraft(source, ingredient.count(), chain);
+        }
+        Item[] cells = specification.cells().stream().map(value -> value.isEmpty() ? null : Registries.ITEM.get(Identifier.of("minecraft", value))).toArray(Item[]::new);
+        return begin(new Recipe(item, specification.width(), cells));
     }
 
     private Result bootstrap() {
         if (count(Items.CRAFTING_TABLE) == 0 && !hasNearby(Blocks.CRAFTING_TABLE)) {
             if (planks() < 4) return makePlanks();
-            return begin(new Recipe(Items.CRAFTING_TABLE, 2, new Item[]{plank(), plank(), plank(), plank()}));
+            return begin(new Recipe(Items.CRAFTING_TABLE, 2, plankIngredients(4)));
         }
-        if (count(Items.STICK) < 4) { if (planks() < 2) return makePlanks(); return begin(new Recipe(Items.STICK, 2, new Item[]{plank(), null, plank(), null})); }
+        if (count(Items.STICK) < 4) return sticks();
         if (hasPick(Items.WOODEN_PICKAXE) || hasPick(Items.STONE_PICKAXE) || hasPick(Items.IRON_PICKAXE) || hasPick(Items.DIAMOND_PICKAXE) || hasPick(Items.NETHERITE_PICKAXE)) return finish("Crafting table and mining tools ready");
         if (planks() < 3) return makePlanks();
-        return begin(pickRecipe(Items.WOODEN_PICKAXE, plank()));
+        Item[] heads = plankIngredients(3);
+        return begin(new Recipe(Items.WOODEN_PICKAXE, 3, new Item[]{heads[0], heads[1], heads[2], null, Items.STICK, null, null, Items.STICK, null}));
     }
     private Result stoneTools() {
         if (count(Items.FURNACE) == 0 && !hasNearby(Blocks.FURNACE)) {
@@ -136,8 +217,8 @@ public final class InventoryAutomation {
     }
     private Result diamondCraft() {
         if (diamondKit()) return finish("Diamond armor, pickaxe and sword crafted");
-        if (count(Items.STICK) < 4 && (count(Items.DIAMOND_PICKAXE) == 0 || count(Items.DIAMOND_SWORD) == 0)) return sticks();
-        if (count(Items.DIAMOND_PICKAXE) == 0) return diamondRecipe(pickRecipe(Items.DIAMOND_PICKAXE, Items.DIAMOND));
+        if (count(Items.STICK) < 4 && (!hasPick(Items.DIAMOND_PICKAXE) || count(Items.DIAMOND_SWORD) == 0)) return sticks();
+        if (!hasPick(Items.DIAMOND_PICKAXE)) return diamondRecipe(pickRecipe(Items.DIAMOND_PICKAXE, Items.DIAMOND));
         if (count(Items.DIAMOND_SWORD) == 0) return diamondRecipe(new Recipe(Items.DIAMOND_SWORD, 3, new Item[]{null, Items.DIAMOND, null, null, Items.DIAMOND, null, null, Items.STICK, null}));
         if (count(ARMOR[0]) == 0) return diamondRecipe(new Recipe(ARMOR[0], 3, new Item[]{Items.DIAMOND, Items.DIAMOND, Items.DIAMOND, Items.DIAMOND, null, Items.DIAMOND, null, null, null}));
         if (count(ARMOR[1]) == 0) return diamondRecipe(new Recipe(ARMOR[1], 3, new Item[]{Items.DIAMOND, null, Items.DIAMOND, Items.DIAMOND, Items.DIAMOND, Items.DIAMOND, Items.DIAMOND, Items.DIAMOND, Items.DIAMOND}));
@@ -145,11 +226,122 @@ public final class InventoryAutomation {
         return diamondRecipe(new Recipe(ARMOR[3], 3, new Item[]{Items.DIAMOND, null, Items.DIAMOND, Items.DIAMOND, null, Items.DIAMOND, null, null, null}));
     }
     private Result diamondRecipe(Recipe value) { long needed = Arrays.stream(value.cells).filter(i -> i == Items.DIAMOND).count(); if (count(Items.DIAMOND) < needed) return Result.need("Need " + needed + " diamonds for " + value.output.getName().getString()); return begin(value); }
+    private Result diamondPickaxe() {
+        if (hasPick(Items.DIAMOND_PICKAXE) || hasPick(Items.NETHERITE_PICKAXE)) return finish("Diamond-tier mining tool verified");
+        if (count(Items.STICK) < 2) return sticks();
+        return diamondRecipe(pickRecipe(Items.DIAMOND_PICKAXE, Items.DIAMOND));
+    }
+    private Result portalKit() {
+        if (durableTool(Items.FLINT_AND_STEEL)) return finish("Durable flint and steel ready");
+        if (count(Items.FLINT) == 0) return Result.need("Need one flint or flint and steel to ignite a portal. Gravel drops are random; this task will not report a nonexistent igniter.");
+        if (count(Items.IRON_INGOT) == 0) {
+            if (count(Items.RAW_IRON) == 0) return Result.need("Need one iron ingot or raw iron to craft flint and steel.");
+            return smeltGoal(Items.RAW_IRON, Items.IRON_INGOT, 1);
+        }
+        Result clearing = clearOwnedFurnace(); if (clearing != null) return clearing;
+        return begin(new Recipe(Items.FLINT_AND_STEEL, 2, new Item[]{Items.IRON_INGOT, null, null, Items.FLINT}));
+    }
+    private Result smeltGoal(Item input, Item output, int required) {
+        if (count(output) >= required) {
+            Result clearing = clearOwnedFurnace(); if (clearing != null) return clearing;
+            return finish("Verified " + required + " " + output.getName().getString());
+        }
+        return smelt(input, output, required);
+    }
+    private Result clearOwnedFurnace() {
+        if (MC.player.currentScreenHandler instanceof AbstractFurnaceScreenHandler && ownsScreen()) {
+            if (freeSlots() < 1) return Result.need("Free an inventory slot to recover unused smelting ingredients.");
+            for (int i = 0; i < 3; i++) if (MC.player.currentScreenHandler.getSlot(i).hasStack()) {
+                click(i, 0, SlotActionType.QUICK_MOVE);
+                return Result.waitFor("Returning unused smelting ingredients and output");
+            }
+            closeOwned(); return Result.waitFor("Closing the completed furnace");
+        }
+        return null;
+    }
+    private Result netheriteIngots() {
+        if (netheriteArmor() || count(Items.NETHERITE_INGOT) >= 4) return finish("Four netherite armor upgrade ingots ready");
+        if (count(Items.NETHERITE_SCRAP) < 4 || count(Items.GOLD_INGOT) < 4) return Result.need("Each netherite ingot needs four netherite scrap and four gold ingots; smelt the reviewed resource goals first.");
+        return begin(new Recipe(Items.NETHERITE_INGOT, 3, new Item[]{Items.NETHERITE_SCRAP, Items.NETHERITE_SCRAP, Items.NETHERITE_SCRAP, Items.NETHERITE_SCRAP, Items.GOLD_INGOT, Items.GOLD_INGOT, Items.GOLD_INGOT, Items.GOLD_INGOT, null}));
+    }
+    private Result smithArmor() {
+        if (netheriteArmor()) return finish("Verified all four netherite armor pieces");
+        int missing = 0;
+        for (Item item : NETHERITE_ARMOR) if (count(item) == 0) missing++;
+        if (count(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE) < missing && !(MC.player.currentScreenHandler instanceof SmithingScreenHandler && ownsScreen())) {
+            if (count(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE) < 1) return Result.need("Need an owned Netherite Upgrade template. Bastion discovery and looting are not automated.");
+            if (count(Items.DIAMOND) < 7 || count(Items.NETHERRACK) < 1) return Result.need("Duplicate each missing upgrade template with seven diamonds and one netherrack.");
+            return begin(new Recipe(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 3, new Item[]{Items.DIAMOND, Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE, Items.DIAMOND, Items.DIAMOND, Items.NETHERRACK, Items.DIAMOND, Items.DIAMOND, Items.DIAMOND, Items.DIAMOND}));
+        }
+        if (count(Items.SMITHING_TABLE) == 0 && !hasNearby(Blocks.SMITHING_TABLE) && !(MC.player.currentScreenHandler instanceof SmithingScreenHandler)) {
+            if (count(Items.IRON_INGOT) < 2) {
+                if (count(Items.RAW_IRON) == 0) return Result.need("Need two iron ingots for a smithing table.");
+                return smeltGoal(Items.RAW_IRON, Items.IRON_INGOT, 2);
+            }
+            Result clearing = clearOwnedFurnace(); if (clearing != null) return clearing;
+            if (planks() < 4) return makePlanks();
+            Item[] wood = plankIngredients(4);
+            return begin(new Recipe(Items.SMITHING_TABLE, 3, new Item[]{Items.IRON_INGOT, Items.IRON_INGOT, null, wood[0], wood[1], null, wood[2], wood[3], null}));
+        }
+        Result workstation = ensureStation(Blocks.SMITHING_TABLE, Items.SMITHING_TABLE, SmithingScreenHandler.class);
+        if (workstation != null) return workstation;
+        var handler = MC.player.currentScreenHandler;
+        if (handler.getSlot(3).hasStack()) {
+            ItemStack result = handler.getSlot(3).getStack();
+            for (Item expected : NETHERITE_ARMOR) if (result.isOf(expected)) {
+                int armorIndex = Arrays.asList(NETHERITE_ARMOR).indexOf(expected);
+                if (!handler.getSlot(1).getStack().isOf(ARMOR[armorIndex])) return Result.need("Smithing output does not match the requested diamond armor input.");
+                for (var enchantment : EnchantmentHelper.getEnchantments(handler.getSlot(1).getStack()).getEnchantmentEntries())
+                    if (EnchantmentHelper.getLevel(enchantment.getKey(), result) < enchantment.getIntValue())
+                        return Result.need("The smithing output would lose an existing armor enchantment; no output was taken.");
+                click(3, 0, SlotActionType.QUICK_MOVE);
+                return Result.waitFor("Collecting verified " + result.getName().getString());
+            }
+            return Result.need("Unexpected smithing output; no item was taken.");
+        }
+        int next = -1;
+        for (int i = 0; i < NETHERITE_ARMOR.length; i++) if (count(NETHERITE_ARMOR[i]) == 0) { next = i; break; }
+        if (next < 0) return finish("Netherite armor verified");
+        Item input = ARMOR[next];
+        Item[] ingredients = {Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE, input, Items.NETHERITE_INGOT};
+        for (int i = 0; i < ingredients.length; i++) {
+            if (handler.getSlot(i).hasStack()) {
+                if (!handler.getSlot(i).getStack().isOf(ingredients[i])) return Result.need("The smithing table contains another ingredient. Clear it before resuming.");
+                continue;
+            }
+            final Item ingredient = ingredients[i];
+            int inventory = inventorySlot(s -> s.isOf(ingredient));
+            if (inventory < 0) {
+                if (i == 1) { closeOwned(); return unequip(input); }
+                return Result.need("Need " + ingredient.getName().getString() + " for the next armor upgrade.");
+            }
+            click(inventory, 0, SlotActionType.PICKUP); source = inventory; phase = 20 + i; transactionSync = handler.syncId;
+            return Result.waitFor("Loading " + ingredient.getName().getString() + " into the smithing table");
+        }
+        if (++observationWait > 120) return Result.need("The server did not offer the expected netherite upgrade. Inputs remain in the smithing table.");
+        return Result.waitFor("Waiting for server smithing output");
+    }
     private Recipe pickRecipe(Item output, Item head) { return new Recipe(output, 3, new Item[]{head, head, head, null, Items.STICK, null, null, Items.STICK, null}); }
-    private boolean hasPick(Item item) { return count(item) > 0; }
-    private Result sticks() { if (planks() < 2) return makePlanks(); return begin(new Recipe(Items.STICK, 2, new Item[]{plank(), null, plank(), null})); }
+    private boolean hasPick(Item item) {
+        return count(stack -> stack.isOf(item) && (!stack.isDamageable() || stack.getMaxDamage() - stack.getDamage() >= 16)
+                && (!ordinaryMiningDrops || level(stack, "silk_touch") == 0)) > 0;
+    }
+    private Result sticks() {
+        if (planks() < 2) return makePlanks();
+        Item[] wood = plankIngredients(2);
+        return begin(new Recipe(Items.STICK, 2, new Item[]{wood[0], null, wood[1], null}));
+    }
     private int planks() { return count(s -> Registries.ITEM.getId(s.getItem()).getPath().endsWith("_planks")); }
-    private Item plank() { for (int i=0;i<36;i++) { ItemStack s=MC.player.getInventory().getStack(i); if (Registries.ITEM.getId(s.getItem()).getPath().endsWith("_planks") && s.getCount() >= 2) return s.getItem(); } return Items.OAK_PLANKS; }
+    private Item[] plankIngredients(int amount) {
+        Item[] result = new Item[amount]; int next = 0;
+        for (int slot = 0; slot < 36 && next < amount; slot++) {
+            ItemStack stack = MC.player.getInventory().getStack(slot);
+            if (!Registries.ITEM.getId(stack.getItem()).getPath().endsWith("_planks")) continue;
+            for (int count = 0; count < stack.getCount() && next < amount; count++) result[next++] = stack.getItem();
+        }
+        if (next < amount) throw new IllegalStateException("The checked plank ingredients changed before crafting.");
+        return result;
+    }
     private Result makePlanks() {
         for (int i=0;i<36;i++) {
             ItemStack s=MC.player.getInventory().getStack(i); String id=Registries.ITEM.getId(s.getItem()).getPath();
@@ -169,8 +361,8 @@ public final class InventoryAutomation {
     private Result preparePickaxe() {
         if (!(MC.player.currentScreenHandler instanceof PlayerScreenHandler)) { closeOwned(); return Result.waitFor("Closing workstation for mining"); }
         for (Item item : new Item[]{Items.NETHERITE_PICKAXE,Items.DIAMOND_PICKAXE,Items.IRON_PICKAXE,Items.STONE_PICKAXE,Items.WOODEN_PICKAXE}) {
-            for (int i=0;i<9;i++) if(MC.player.getInventory().getStack(i).isOf(item)) return Result.finished("Mining tool is in the hotbar");
-            int slot=inventorySlot(s->s.isOf(item));
+            for (int i=0;i<9;i++) { var stack = MC.player.getInventory().getStack(i); if(stack.isOf(item) && stack.getMaxDamage() - stack.getDamage() >= 16 && (!ordinaryMiningDrops || level(stack,"silk_touch")==0)) return Result.finished("Mining tool is in the hotbar"); }
+            int slot=inventorySlot(s->s.isOf(item) && s.getMaxDamage() - s.getDamage() >= 16 && (!ordinaryMiningDrops || level(s,"silk_touch")==0));
             if(slot>=0) { click(slot,8,SlotActionType.SWAP); return Result.waitFor("Moving the mining tool into the hotbar"); }
         }
         return Result.finished("No mining pickaxe to prepare"); // Logs can be mined by hand; ore checks are made by the executor.
@@ -187,7 +379,13 @@ public final class InventoryAutomation {
 
     private Result begin(Recipe value) {
         if (freeSlots() < 2) return Result.need("Make at least two empty inventory slots before crafting.");
-        if (value.width == 3) { Result workstation=ensureStation(Blocks.CRAFTING_TABLE, Items.CRAFTING_TABLE, CraftingScreenHandler.class); if (workstation != null) return workstation; }
+        if (value.width == 3) {
+            if (!(MC.player.currentScreenHandler instanceof CraftingScreenHandler) && count(Items.CRAFTING_TABLE) == 0 && !hasNearby(Blocks.CRAFTING_TABLE)) {
+                if (planks() < 4) return makePlanks();
+                return begin(new Recipe(Items.CRAFTING_TABLE, 2, plankIngredients(4)));
+            }
+            Result workstation=ensureStation(Blocks.CRAFTING_TABLE, Items.CRAFTING_TABLE, CraftingScreenHandler.class); if (workstation != null) return workstation;
+        }
         else if (!(MC.player.currentScreenHandler instanceof PlayerScreenHandler) && !(MC.player.currentScreenHandler instanceof CraftingScreenHandler)) { closeOwned(); return Result.waitFor("Returning to the player crafting grid"); }
         ScreenHandler handler=MC.player.currentScreenHandler;
         if (!handler.getCursorStack().isEmpty()) return Result.need("Put the item on your cursor back into the inventory, then resume.");
@@ -230,34 +428,41 @@ public final class InventoryAutomation {
         }
         return Result.waitFor("Crafting " + recipe.output.getName().getString());
     }
-    private Result smeltIron() {
+    private Result smeltIron() { return smelt(Items.RAW_IRON, Items.IRON_INGOT, 3); }
+    private Result smelt(Item input, Item output, int required) {
+        if (!(MC.player.currentScreenHandler instanceof AbstractFurnaceScreenHandler) && count(Items.FURNACE) == 0 && !hasNearby(Blocks.FURNACE)) {
+            if (count(Items.COBBLESTONE) < 8) return Result.need("Need eight cobblestone to recover a furnace at this location.");
+            return begin(new Recipe(Items.FURNACE, 3, new Item[]{Items.COBBLESTONE, Items.COBBLESTONE, Items.COBBLESTONE, Items.COBBLESTONE, null, Items.COBBLESTONE, Items.COBBLESTONE, Items.COBBLESTONE, Items.COBBLESTONE}));
+        }
         Result workstation=ensureStation(Blocks.FURNACE,Items.FURNACE,AbstractFurnaceScreenHandler.class); if(workstation!=null) return workstation;
         ScreenHandler h=MC.player.currentScreenHandler;
-        if(h.getSlot(2).getStack().isOf(Items.IRON_INGOT)) { click(2,0,SlotActionType.QUICK_MOVE); return Result.waitFor("Collecting smelted iron"); }
-        if(h.getSlot(0).hasStack() && !h.getSlot(0).getStack().isOf(Items.RAW_IRON)) return Result.need("The furnace contains another input. Choose an empty furnace.");
+        if(h.getSlot(2).hasStack() && !h.getSlot(2).getStack().isOf(output)) return Result.need("The furnace contains another output. Choose an empty furnace.");
+        if(h.getSlot(2).getStack().isOf(output)) { click(2,0,SlotActionType.QUICK_MOVE); return Result.waitFor("Collecting " + output.getName().getString()); }
+        if(h.getSlot(0).hasStack() && !h.getSlot(0).getStack().isOf(input)) return Result.need("The furnace contains another input. Choose an empty furnace.");
         if(!h.getSlot(0).hasStack()) {
-            int slot=inventorySlot(s -> s.isOf(Items.RAW_IRON)); if(slot<0) return Result.need("Need raw iron for three iron ingots.");
-            click(slot,0,SlotActionType.QUICK_MOVE); return Result.waitFor("Loading raw iron");
+            int slot=inventorySlot(s -> s.isOf(input)); if(slot<0) return Result.need("Need " + input.getName().getString() + " to smelt " + required + " " + output.getName().getString());
+            click(slot,0,SlotActionType.QUICK_MOVE); return Result.waitFor("Loading " + input.getName().getString());
         }
         if(!h.getSlot(1).hasStack()) {
             int slot=inventorySlot(s -> s.isOf(Items.COAL)||s.isOf(Items.CHARCOAL)); if(slot<0) return Result.need("Need coal or charcoal for smelting.");
             click(slot,0,SlotActionType.QUICK_MOVE); return Result.waitFor("Loading furnace fuel");
         }
-        return Result.waitFor("Smelting iron: " + count(Items.IRON_INGOT) + "/3 ingots");
+        return Result.waitFor("Smelting " + output.getName().getString() + ": " + count(output) + "/" + required);
     }
-    private Result equip() {
+    private Result equip() { return equipArmor(ARMOR, "diamond"); }
+    private Result equipArmor(Item[] armor, String material) {
         if(!(MC.player.currentScreenHandler instanceof PlayerScreenHandler)) {closeOwned();return Result.waitFor("Returning to inventory to equip armor");}
-        for(int i=0;i<ARMOR.length;i++) {
-            if(MC.player.getEquippedStack(EQUIPMENT[i]).isOf(ARMOR[i])) continue;
+        for(int i=0;i<armor.length;i++) {
+            if(MC.player.getEquippedStack(EQUIPMENT[i]).isOf(armor[i])) continue;
             int target=5+i;
             if(MC.player.currentScreenHandler.getSlot(target).hasStack()) {
                 if(freeSlots()<1) return Result.need("Need one empty slot to store current armor.");
                 click(target,0,SlotActionType.QUICK_MOVE); return Result.waitFor("Storing previous armor");
             }
-            final Item armorItem=ARMOR[i]; int slot=inventorySlot(s -> s.isOf(armorItem)); if(slot<0) return Result.need("Missing " + ARMOR[i].getName().getString());
-            click(slot,0,SlotActionType.QUICK_MOVE); return Result.waitFor("Equipping diamond armor");
+            final Item armorItem=armor[i]; int slot=inventorySlot(s -> s.isOf(armorItem)); if(slot<0) return Result.need("Missing " + armor[i].getName().getString());
+            click(slot,0,SlotActionType.QUICK_MOVE); return Result.waitFor("Equipping " + material + " armor");
         }
-        return finish("All four diamond armor pieces equipped");
+        return finish("All four " + material + " armor pieces equipped");
     }
 
     /** Table enchant unenchanted pieces, then apply matching available books through a real anvil. */
@@ -337,13 +542,14 @@ public final class InventoryAutomation {
 
     /** Handle the two explicit anvil pickup placements before choosing another action. */
     public Result tickTransfer() {
-        if(phase!=10 && phase!=11)return null;
+        if(phase!=10 && phase!=11 && (phase<20 || phase>22))return null;
         if(wait>0){wait--;return Result.waitFor("Waiting for server slot update");}
-        if(MC.player==null || MC.player.currentScreenHandler.syncId!=transactionSync){resetTransaction();return Result.need("Anvil window changed.");}
+        if(MC.player==null || MC.player.currentScreenHandler.syncId!=transactionSync){resetTransaction();return Result.need("The workstation window changed.");}
         if(!MC.player.currentScreenHandler.getCursorStack().isEmpty()) {
-            click(phase==10?0:1,0,SlotActionType.PICKUP);phase=0;transactionSync=-1;return Result.waitFor("Placing the anvil input");
+            int slot = phase >= 20 ? phase - 20 : phase == 10 ? 0 : 1;
+            click(slot,0,SlotActionType.PICKUP);phase=0;transactionSync=-1;return Result.waitFor("Placing the workstation input");
         }
-        phase=0;transactionSync=-1;return Result.need("The server rejected the anvil input pickup.");
+        phase=0;transactionSync=-1;return Result.need("The server rejected the workstation input pickup.");
     }
 
     private Result ensureStation(Block block,Item item,Class<? extends ScreenHandler> type) {
@@ -364,7 +570,10 @@ public final class InventoryAutomation {
             return Result.waitFor("Walking to " + block.getName().getString());
         }
         if(bridge.status().owned())bridge.cancel();
-        MC.interactionManager.interactBlock(MC.player,Hand.MAIN_HAND,new BlockHitResult(station.toCenterPos(),Direction.UP,station,false));
+        if (!AutomationMotion.align(station.toCenterPos())) return Result.waitFor("Turning toward " + block.getName().getString());
+        var hit = MC.player.raycast(4.5, 1, false);
+        if (!(hit instanceof BlockHitResult observed) || !observed.getBlockPos().equals(station)) return Result.need("The workstation is occluded. Reach a clear view of it, then resume.");
+        MC.interactionManager.interactBlock(MC.player,Hand.MAIN_HAND,observed);
         ownedScreen=true;ownedSync=-1;expectedHandler=type;wait=8;observationWait=0;
         return Result.waitFor("Opening " + block.getName().getString());
     }
@@ -380,19 +589,23 @@ public final class InventoryAutomation {
     private Result placeStation(Item item) {
         BlockPos p=MC.player.getBlockPos(),target=null;
         for(BlockPos test:BlockPos.iterate(p.add(-3,-1,-3),p.add(3,0,3))) {
-            if(test.getSquaredDistance(p)<4 || !MC.world.getBlockState(test).isReplaceable() || MC.world.getBlockState(test.down()).isAir() || !MC.world.getFluidState(test).isEmpty())continue;
+            if(placementExclusion!=null && placementExclusion.intersects(new Box(test)))continue;
+            if(test.getSquaredDistance(p)<4 || !MC.world.getBlockState(test).isReplaceable() || !MC.world.getBlockState(test.down()).isSideSolidFullSquare(MC.world, test.down(), Direction.UP)
+                    || MC.world.getBlockState(test.down()).hasBlockEntity() || !MC.world.getFluidState(test.down()).isEmpty() || !MC.world.getFluidState(test).isEmpty())continue;
             if(MC.player.getEyePos().squaredDistanceTo(test.down().toCenterPos())<=16){target=test.toImmutable();break;}
         }
         if(target==null)return Result.need("Need a clear, reachable solid surface to place a workstation.");
-        int inv=-1;for(int i=0;i<36;i++)if(MC.player.getInventory().getStack(i).isOf(item)){inv=i;break;}
+        Result preparation = prepareHotbar(item, 1); if (!preparation.done()) return preparation;
+        int inv=-1;for(int i=0;i<9;i++)if(MC.player.getInventory().getStack(i).isOf(item)){inv=i;break;}
         if(inv<0)return Result.need("Workstation item is missing.");
+        if (!AutomationMotion.align(Vec3d.ofCenter(target.down()).add(0, 0.5, 0))) return Result.waitFor("Turning toward the workstation surface");
+        var observedHit = MC.player.raycast(4.5, 1, false);
+        if (!(observedHit instanceof BlockHitResult actualHit) || !actualHit.getBlockPos().equals(target.down()) || actualHit.getSide() != Direction.UP)
+            return Result.need("The real crosshair cannot reach a clear workstation placement surface.");
         oldSelected=MC.player.getInventory().selectedSlot;
-        if(inv>=9) {
-            swapSource=inv;swapHotbar=oldSelected;
-            MC.interactionManager.clickSlot(0,inv,oldSelected,SlotActionType.SWAP,MC.player);clickCount++;
-        } else MC.player.getInventory().selectedSlot=inv;
+        MC.player.getInventory().selectedSlot=inv;
         BlockPos ground=target.down();
-        MC.interactionManager.interactBlock(MC.player,Hand.MAIN_HAND,new BlockHitResult(Vec3d.ofCenter(ground).add(0,0.5,0),Direction.UP,ground,false));
+        MC.interactionManager.interactBlock(MC.player,Hand.MAIN_HAND,actualHit);
         MC.player.getInventory().selectedSlot=oldSelected;
         station=target;throttle();
         return Result.waitFor("Placing the workstation through normal block interaction");
@@ -413,7 +626,7 @@ public final class InventoryAutomation {
         MC.interactionManager.clickSlot(h.syncId,slot,button,action,MC.player);clickCount++;throttle();
         if(h.getCursorStack().isEmpty()){cursorOwned=false;recovery="";}
     }
-    private void throttle(){int latency=0;if(MC.getNetworkHandler()!=null&&MC.player!=null){var entry=MC.getNetworkHandler().getPlayerListEntry(MC.player.getUuid());if(entry!=null)latency=entry.getLatency();}wait=Math.max(5,Math.min(60,(latency+49)/50+3));}
+    private void throttle(){int latency=0;if(MC.getNetworkHandler()!=null&&MC.player!=null){var entry=MC.getNetworkHandler().getPlayerListEntry(MC.player.getUuid());if(entry!=null)latency=entry.getLatency();}wait=Math.max(actionDelayTicks,Math.min(60,(latency+49)/50+3));}
     private Result returnCursor(){
         ScreenHandler h=MC.player.currentScreenHandler;
         if(!cursorOwned || h.syncId!=cursorSync || MC.world!=cursorWorld)return Result.need("The item on the cursor belongs to you; put it back before resuming.");
@@ -425,7 +638,7 @@ public final class InventoryAutomation {
         click(slot,0,SlotActionType.PICKUP);return Result.waitFor("Returning owned cursor item to inventory");
     }
     private Result finish(String text){closeOwned();resetTransaction();return Result.finished(text);}
-    private void closeOwned(){if(ownedScreen && MC.player!=null && MC.player.currentScreenHandler!=MC.player.playerScreenHandler && MC.player.currentScreenHandler.getCursorStack().isEmpty())MC.player.closeHandledScreen();ownedScreen=false;ownedSync=-1;expectedHandler=null;station=null;}
+    private void closeOwned(){if(ownedScreen && MC.player!=null && MC.player.currentScreenHandler!=MC.player.playerScreenHandler && MC.player.currentScreenHandler.getCursorStack().isEmpty()){MC.player.closeHandledScreen();throttle();}ownedScreen=false;ownedSync=-1;expectedHandler=null;station=null;}
     private void resetTransaction(){recipe=null;cell=0;source=-1;phase=0;transactionSync=-1;observationWait=0;}
     public void stop(){
         if(MC.player!=null && MC.interactionManager!=null){

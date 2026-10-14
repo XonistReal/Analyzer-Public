@@ -1,6 +1,7 @@
 .gradle/
 build/
 run/
+run-native-automation/
 .idea/
 *.iml
 .DS_Store

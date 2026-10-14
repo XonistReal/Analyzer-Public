@@ -1,5 +1,14 @@
 # Native captures
 
+Analyzer **0.10.0** adds **14** native automation captures under `analyzer-native-automation-*`. They come from the complete isolated Survival sequence without Baritone: route/pause/resume, actual mining, exact construction, schematic material review, Nether travel, real smithing, crafting/enchanting, repeated broken-tool recovery and mob/food protection. The full run and its limits are recorded in [Validation](../VALIDATION.md).
+
+- [Material-first schematic review](analyzer-native-automation-console.png), [exact construction](analyzer-native-automation-building.png)
+- [Native Nether travel](analyzer-native-automation-nether.png), [real smithing upgrades](analyzer-native-automation-smithing.png)
+- [Repeated tool recovery](analyzer-native-automation-tool-recovery.png), [enchanted armor](analyzer-native-automation-enchanted-kit.png)
+- [Zombie defense](analyzer-native-automation-safety-zombie-defense.png), [food recovery](analyzer-native-automation-safety-eating.png), [creeper retreat](analyzer-native-automation-safety-creeper-retreat.png)
+
+## Earlier 0.9.0 captures
+
 Analyzer **0.9.0** adds Server Privacy. Its final native acceptance has **250 checks and four title-menu captures**; a fresh-frame poison test verifies zero differences after preceding framebuffer content is erased. Separate current runs pass **919 layout/optics checks with 11 captures** and **491 Home checks with 31 captures**. All **46 new images** use `analyzer-privacy-`; the first 0.9.0 QA captures are replaced by the final corrected title render.
 
 - [Privacy in Studio](analyzer-privacy-studio.png), [Solid material](analyzer-privacy-studio-solid.png)

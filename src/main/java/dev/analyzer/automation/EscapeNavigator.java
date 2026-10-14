@@ -16,17 +16,77 @@ import net.minecraft.util.math.Vec3d;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import net.minecraft.world.RaycastContext;
+import net.minecraft.util.hit.HitResult;
 
 /** Short, loaded-terrain escape checks. It never requests a route, edits blocks or moves the player. */
 public final class EscapeNavigator {
     public record Route(Vec3d direction, boolean jump, boolean swimming, String terrain) { }
     private record Step(double feetY, boolean jump, boolean water, String terrain) { }
     private record Support(double top, boolean water) { }
-    private record Corridor(double distance, boolean jump, boolean water, String terrain) { }
+    private record Corridor(double distance, boolean jump, boolean water, String terrain, double feetY) { }
     private static final double STEP = .25, LOOK_AHEAD = 2.0, MAX_HEIGHT_CHANGE = 1.03;
     private static final double EPSILON = .001;
 
     private EscapeNavigator() { }
+
+    /** A short-lived loaded graph route, with the next actual swept corridor checked each tick. */
+    public static final class Navigator {
+        private List<RetreatPlanner.Point> path = List.of();
+        private Object world;
+        private int age;
+        public void reset() { path = List.of(); world = null; age = 0; }
+        public Route choose(MinecraftClient mc, List<LivingEntity> threats, int radius, boolean cover) {
+            if(mc.world==null || mc.player==null || threats.isEmpty() || mc.player.isInLava() || mc.player.isClimbing() || mc.player.isGliding()) { reset(); return null; }
+            if(world!=mc.world) { reset(); world=mc.world; }
+            Survey survey = new Survey(mc);
+            Vec3d start=mc.player.getPos();
+            if(path.isEmpty() || ++age>=10) {
+                age=0;
+                List<RetreatPlanner.Threat> snapshot=threats.stream().limit(24).map(entity -> {
+                    Vec3d velocity=entity.getVelocity();
+                    boolean blast=entity instanceof CreeperEntity c && (c.isIgnited() || c.getFuseSpeed()>0 || c.squaredDistanceTo(mc.player)<(c.isCharged()?144:64));
+                    return new RetreatPlanner.Threat(entity.getX(),entity.getY(),entity.getZ(),velocity.x,velocity.z,blast);
+                }).toList();
+                final long deadline=System.nanoTime()+10_000_000L;
+                var terrain=new RetreatPlanner.Terrain() {
+                    public List<RetreatPlanner.Edge> neighbors(RetreatPlanner.Point point) {
+                        if(System.nanoTime()>deadline) return List.of();
+                        List<RetreatPlanner.Edge> edges=new ArrayList<>();
+                        Vec3d origin=new Vec3d(point.x(),point.y(),point.z());
+                        for(int[] offset:new int[][]{{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}}) {
+                            double distance=Math.hypot(offset[0],offset[1]);
+                            Corridor corridor=survey.corridorFrom(origin,new Vec3d(offset[0]/distance,0,offset[1]/distance),distance);
+                            if(corridor==null || corridor.distance+EPSILON<distance)continue;
+                            // Normalize stable surface heights, so graph keys do not drift by floating-point epsilon.
+                            double y=Math.rint(corridor.feetY*1024)/1024;
+                            edges.add(new RetreatPlanner.Edge(new RetreatPlanner.Point(point.x()+offset[0],y,point.z()+offset[1]),distance+(corridor.water?.6:0)+(corridor.jump?.2:0)));
+                        }
+                        return edges;
+                    }
+                    public boolean cover(RetreatPlanner.Point point) {
+                        Vec3d eyes=new Vec3d(point.x(),point.y()+1.6,point.z());
+                        for(LivingEntity entity:threats.stream().limit(8).toList())
+                            if(mc.world.raycast(new RaycastContext(eyes,entity.getEyePos(),RaycastContext.ShapeType.COLLIDER,RaycastContext.FluidHandling.NONE,mc.player)).getType()!=HitResult.Type.BLOCK)return false;
+                        return true;
+                    }
+                };
+                path=RetreatPlanner.search(new RetreatPlanner.Point(start.x,start.y,start.z),snapshot,terrain,Math.clamp(radius,4,24),128,cover).path();
+            }
+            while(!path.isEmpty() && Math.hypot(path.getFirst().x()-start.x,path.getFirst().z()-start.z)<.65)path=path.subList(1,path.size());
+            if(path.isEmpty())return EscapeNavigator.choose(mc,threats);
+            Vec3d delta=new Vec3d(path.getFirst().x()-start.x,0,path.getFirst().z()-start.z);
+            Vec3d direction=delta.normalize();
+            Corridor corridor=survey.corridorFrom(start,direction,Math.min(LOOK_AHEAD,delta.length()));
+            if(corridor==null || corridor.distance<.5) { path=List.of(); return EscapeNavigator.choose(mc,threats); }
+            for(LivingEntity entity:threats) if(entity instanceof CreeperEntity c && (c.isIgnited() || c.getFuseSpeed()>0)) {
+                Vec3d end=start.add(direction.multiply(corridor.distance));
+                if(RetreatPlanner.approachesBlast(new RetreatPlanner.Point(start.x,start.y,start.z),new RetreatPlanner.Point(end.x,end.y,end.z),new RetreatPlanner.Threat(entity.getX(),entity.getY(),entity.getZ(),0,0,true))) { path=List.of(); return EscapeNavigator.choose(mc,threats); }
+            }
+            return new Route(direction,corridor.jump,corridor.water,"surveyed escape route ("+path.size()+" waypoints)");
+        }
+    }
 
     /**
      * Select a checked short corridor, prioritizing an imminent blast over ordinary pursuers.
@@ -109,9 +169,10 @@ public final class EscapeNavigator {
 
     private static final class Survey {
         private final MinecraftClient mc;
-        private final Vec3d origin;
+        private Vec3d origin;
         private final Box originalBody;
-        private final double radius, height, initialWaterSurface;
+        private final double radius, height;
+        private double initialWaterSurface;
         private final Map<BlockPos, BlockState> states = new HashMap<>();
         private final Map<BlockPos, List<Box>> shapes = new HashMap<>();
         private String lastRejection = "none";
@@ -127,12 +188,23 @@ public final class EscapeNavigator {
         }
 
         Corridor corridor(Vec3d direction) {
+            return corridorFrom(origin,direction,LOOK_AHEAD);
+        }
+        Corridor corridorFrom(Vec3d start,Vec3d direction,double limit) {
+            Vec3d oldOrigin=origin;double oldSurface=initialWaterSurface;
+            origin=start;
+            initialWaterSurface=mc.player.isTouchingWater()?waterSurface(origin.x,origin.z,origin.y):Double.NaN;
+            try { return surveyCorridor(direction,limit); }
+            finally { origin=oldOrigin;initialWaterSurface=oldSurface; }
+        }
+        private Corridor surveyCorridor(Vec3d direction,double limit) {
             lastRejection = "none";
             Vec3d previous = origin;
             double feetY = origin.y, reached = 0;
             boolean jump = false, water = false;
             String terrain = "checked ground";
-            for (double distance = STEP; distance <= LOOK_AHEAD + EPSILON; distance += STEP) {
+            for (int segment = 1; segment <= (int)Math.ceil(limit / STEP); segment++) {
+                double distance = Math.min(limit, segment * STEP);
                 Vec3d point = origin.add(direction.multiply(distance));
                 Step step = step(point.x, point.z, feetY);
                 if (step == null) break;
@@ -146,7 +218,7 @@ public final class EscapeNavigator {
                 jump |= step.jump; water |= step.water;
                 if (!step.terrain.equals("checked ground")) terrain = step.terrain;
             }
-            return reached == 0 ? null : new Corridor(reached, jump, water, terrain);
+            return reached == 0 ? null : new Corridor(reached, jump, water, terrain, feetY);
         }
 
         private Step step(double x, double z, double previousY) {
@@ -257,7 +329,7 @@ public final class EscapeNavigator {
         }
 
         private BlockState state(BlockPos pos) {
-            if (!mc.world.isChunkLoaded(pos)) return null;
+            if (!mc.world.isInBuildLimit(pos) || !mc.world.getWorldBorder().contains(pos) || !mc.world.isChunkLoaded(pos)) return null;
             return states.computeIfAbsent(pos.toImmutable(), mc.world::getBlockState);
         }
 

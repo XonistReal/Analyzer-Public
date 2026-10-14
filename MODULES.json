@@ -10358,13 +10358,136 @@
     "settings": [
       {
         "id": "safe-routing",
-        "label": "Use safer Baritone routes",
+        "label": "Use cautious native routes",
         "kind": "BOOLEAN",
         "default": true
       },
       {
+        "id": "path-budget",
+        "label": "Path search nodes per tick",
+        "kind": "NUMBER",
+        "default": 256.0,
+        "min": 64.0,
+        "max": 512.0,
+        "step": 64.0
+      },
+      {
+        "id": "path-radius",
+        "label": "Path segment radius (blocks)",
+        "kind": "NUMBER",
+        "default": 24.0,
+        "min": 8.0,
+        "max": 48.0,
+        "step": 4.0
+      },
+      {
+        "id": "max-drop",
+        "label": "Maximum planned drop (blocks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 3.0,
+        "step": 1.0
+      },
+      {
+        "id": "smooth-turns",
+        "label": "Smooth visible turning",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "turn-speed",
+        "label": "Turning speed (degrees / second)",
+        "kind": "NUMBER",
+        "default": 150.0,
+        "min": 30.0,
+        "max": 720.0,
+        "step": 10.0
+      },
+      {
+        "id": "turn-acceleration",
+        "label": "Turning acceleration (degrees / second²)",
+        "kind": "NUMBER",
+        "default": 600.0,
+        "min": 60.0,
+        "max": 3600.0,
+        "step": 60.0
+      },
+      {
+        "id": "movement-angle",
+        "label": "Move within heading angle (degrees)",
+        "kind": "NUMBER",
+        "default": 35.0,
+        "min": 5.0,
+        "max": 60.0,
+        "step": 5.0
+      },
+      {
+        "id": "break-delay",
+        "label": "Delay between broken blocks (ticks)",
+        "kind": "NUMBER",
+        "default": 5.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "place-delay",
+        "label": "Delay between block placements (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "auto-site",
+        "label": "Find a suitable nearby build site",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "site-radius",
+        "label": "Build site search radius (blocks)",
+        "kind": "NUMBER",
+        "default": 24.0,
+        "min": 8.0,
+        "max": 64.0,
+        "step": 4.0
+      },
+      {
         "id": "defense",
         "label": "Protect against nearby hostile mobs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "proactive-avoidance",
+        "label": "Avoid hostile patrols before contact",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "avoid-range",
+        "label": "Proactive threat range (blocks)",
+        "kind": "NUMBER",
+        "default": 16.0,
+        "min": 8.0,
+        "max": 32.0,
+        "step": 1.0
+      },
+      {
+        "id": "escape-radius",
+        "label": "Escape route search radius (blocks)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 4.0,
+        "max": 24.0,
+        "step": 1.0
+      },
+      {
+        "id": "prefer-cover",
+        "label": "Prefer cover from ranged mobs",
         "kind": "BOOLEAN",
         "default": true
       },
@@ -10440,6 +10563,12 @@
       {
         "id": "pause-on-menu",
         "label": "Pause while other menus are open",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-on-input",
+        "label": "Yield to manual movement or action input",
         "kind": "BOOLEAN",
         "default": true
       }

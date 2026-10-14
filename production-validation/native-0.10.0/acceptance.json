@@ -1,0 +1,48 @@
+{
+  "release": "0.10.0",
+  "date": "2026-10-14",
+  "minecraft": "1.21.4",
+  "java": "21",
+  "baritoneLoaded": false,
+  "policyAssertions": 3847,
+  "nativePipelineChecks": 13057,
+  "nativeControllers": {
+    "smithing": 51,
+    "inventory": 60,
+    "toolRecovery": 26,
+    "survivalGuard": 53
+  },
+  "updaterIntegrationChecks": 100,
+  "captures": {
+    "analyzer-native-automation-route.png": "138919e77c42292c72e4f12a0b16f41048fca935aef43330aea83d48292881fc",
+    "analyzer-native-automation-mining.png": "9490bfff3f444cb2f57639380dd09ff1f5a873767686b9ac578684c808d647c9",
+    "analyzer-native-automation-building.png": "42931cdcfba00f62e9a4316ffe50290b21d0e65619fd6110f73dd2cb94085c25",
+    "analyzer-native-automation-console.png": "a8a50e6de99c006df0e9fa6e0d7ccb4f0446834f6571ebf7447d52623f9f69bf",
+    "analyzer-native-automation-nether.png": "d7424fdecf424252d37d5db682bbf968ea51fbf3b46c8346a65e9b34650181c7",
+    "analyzer-native-automation-smithing.png": "f77858e7a407cec87199a58bef6a3302435fd30598092d0f54be2c2344c0f5e9",
+    "analyzer-native-automation-tool-recovery.png": "d75f4b6d5e327d1a0196373b5b33e27c4ee6d901c7a35af6c26409d2d38992b0",
+    "analyzer-native-automation-crafted-kit.png": "13eae66b7315c688ba67bd82393806175af8cdd92947e38547d5eecc5c2e4cba",
+    "analyzer-native-automation-enchanted-kit.png": "b45ce082979577df3ca2c02e2968e72beb29d7d7c04f54279b6bef86a98f033b",
+    "analyzer-native-automation-expedition-plan.png": "341bdd49b360a97fb9f86614099d3ea9f67fe9bb66d605a2da640307a4f262a9",
+    "analyzer-native-automation-safety-zombie-defense.png": "47f6f8e5584c9657a46e3243ccb0912fbb7a50f8d3a06a4ba93b5d89da82e0c7",
+    "analyzer-native-automation-safety-mining-resumed.png": "4f06d0d1feaed0f7ec75920d354d0c8d44019e1b0934c1cbc85c89877da0529b",
+    "analyzer-native-automation-safety-eating.png": "76860be4ae36028e4c388622df47401ee6d053e839884839a6ae65580b83e642",
+    "analyzer-native-automation-safety-creeper-retreat.png": "c3fa25d6b7a10e05856b278250295dc7780b3a8d0b321cf913baa09f3f6388dc"
+  },
+  "logs": {
+    "native-automation-runtime.log": "ec844c03eec92a5ede1a22589609c01ce073a8ac5a6375ad672bc344d80fd49a",
+    "native-automation-build-checks.log": "b37eef57f47a39840391a5eaa5b399e07877e22fb6891272a8c0118d35e3a8b7",
+    "updater-native-final-tests.log": "449f2914cf869005c2fba52801327ff9fb1abf0935dc94df3075260430a2791d"
+  },
+  "delivery": {
+    "analyzerSha256": "d68ea74143a7301e421ee7f7dcd2fc09a7e5f53d4c40a734d141bc123b561dbf",
+    "installedEmbeddedVersion": "0.10.0",
+    "activeMods": [
+      "analyzer",
+      "fabric-api"
+    ],
+    "protectedFilesPreserved": 22,
+    "legacyBaritoneRetiredWithBackup": true,
+    "minecraftClosed": true
+  }
+}

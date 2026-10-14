@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 /** A small local intent compiler. It never executes text as a command or calls an AI service. */
 public final class TaskPlanner {
-    public enum Action { TRAVEL, MINE, CRAFT, BUILD_SHELTER, EQUIP, ENCHANT }
+    public enum Action { TRAVEL, MINE, CRAFT, BUILD_SHELTER, EQUIP, ENCHANT, DIMENSION, BUILD_SCHEMATIC, SUPPLY_MATERIAL }
     public enum Direction { NORTH, EAST, SOUTH, WEST }
     public record Step(String id, Action action, String label, String resource, int count, int x, int y, int z) {
         public Step {
@@ -37,7 +37,7 @@ public final class TaskPlanner {
         }
     }
     private static final Pattern COORDINATES = Pattern.compile("(?:to|at|coordinates?)\\s+(-?\\d+)\\s*[, ]\\s*(-?\\d+)(?:\\s*[, ]\\s*(-?\\d+))?", Pattern.CASE_INSENSITIVE);
-    private static final Pattern RESOURCE = Pattern.compile("(?:mine|gather|collect)\\s+(?:(\\d+)\\s+)?(logs?|wood|cobblestone|stone|raw[ _-]?iron|iron(?:[ _-]?ore)?|coal|diamonds?)\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern RESOURCE = Pattern.compile("(?:mine|gather|collect|get)\\s+(?:(\\d+)\\s+)?(ancient[ _-]?debris|lapis[ _-]?lazuli|lapis|raw[ _-]?(?:iron|copper|gold)|(?:iron|copper|gold|diamond|emerald|coal|redstone|quartz)(?:[ _-]?ores?)?|diamonds|emeralds|logs?|wood|cobblestone|stone|obsidian|gravel|flint|netherrack)\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern ESCAPE_DISTANCE = Pattern.compile("escape\\s+(?:spawn\\s+)?(?:by\\s+)?(\\d+)\\s*(?:blocks?|m)\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern ESCAPE_DIRECTION = Pattern.compile("\\b(north|east|south|west)\\b", Pattern.CASE_INSENSITIVE);
     private TaskPlanner() { }
@@ -49,13 +49,14 @@ public final class TaskPlanner {
         String text = input.toLowerCase(Locale.ROOT).replace('\n', ' ').trim();
         boolean escape = text.contains("escape") || text.contains("leave spawn") || text.contains("get out of spawn");
         boolean shelter = text.contains("base") || text.contains("shelter") || text.contains("house");
+        boolean netherite = text.contains("netherite armor") || text.contains("netherite armour") || text.contains("netherite kit");
         boolean enchant = text.contains("enchant") || text.contains("fully geared") || text.contains("fully kitted");
-        boolean kit = enchant || text.contains("diamond kit") || text.contains("diamond armor") || text.contains("diamond armour") || text.contains("kitted out");
+        boolean kit = netherite || enchant || text.contains("diamond kit") || text.contains("diamond armor") || text.contains("diamond armour") || text.contains("kitted out");
         boolean expedition = text.contains("expedition");
         if (expedition) { escape = true; shelter = true; kit = true; enchant = true; }
         List<Step> steps = new ArrayList<>();
-        List<String> prerequisites = new ArrayList<>(List.of("Baritone for Fabric 1.21.4 must be installed.",
-                "Stay connected to one world. Low health, hunger, missing materials and stalled progress pause the task.",
+        List<String> prerequisites = new ArrayList<>(List.of("Analyzer's original navigator uses loaded terrain, ordinary movement and server-verified actions; no external pathfinding mod is required.",
+                "Stay connected to the same server or save. Only reviewed portal stages permit expected dimension changes; other changes pause the task.",
                 "Conflicting action modules are paused for the task and restored when it stops."));
         int homeX = shelter && !escape ? options.travelX : options.originX;
         int homeY = shelter && !escape ? options.travelY : options.originY;
@@ -80,7 +81,8 @@ public final class TaskPlanner {
             prerequisites.add("Escape means reaching a coordinate offset from your current position, not a guarantee that a location is safe.");
         }
         Matcher coordinates = COORDINATES.matcher(text);
-        boolean travel = !escape && (text.contains("travel") || text.contains("go to") || text.contains("walk to") || text.contains("move to"));
+        String dimension = requestedDimension(text);
+        boolean travel = !escape && dimension.isEmpty() && (text.contains("travel") || text.contains("go to") || text.contains("walk to") || text.contains("move to"));
         if (travel || (!escape && shelter && coordinates.find())) {
             coordinates.reset();
             if (coordinates.find()) {
@@ -99,10 +101,11 @@ public final class TaskPlanner {
             steps.add(step("stone-tools", Action.CRAFT, "Craft a stone pickaxe and furnace", "stone-tools", 1, homeX, homeY, homeZ));
         }
         if (kit) {
-            steps.add(step("iron", Action.MINE, "Gather 8 raw iron", "raw_iron", 8, homeX, homeY, homeZ));
-            steps.add(step("coal", Action.MINE, "Gather 16 coal for smelting", "coal", 16, homeX, homeY, homeZ));
+            steps.add(step("iron", Action.MINE, "Gather " + (netherite ? 12 : 8) + " raw iron", "raw_iron", netherite ? 12 : 8, homeX, homeY, homeZ));
+            steps.add(step("coal", Action.MINE, "Gather " + (netherite ? 24 : 16) + " coal for smelting", "coal", netherite ? 24 : 16, homeX, homeY, homeZ));
             steps.add(step("iron-tools", Action.CRAFT, "Smelt iron and craft an iron pickaxe", "iron-tools", 1, homeX, homeY, homeZ));
-            steps.add(step("diamond", Action.MINE, "Gather 29 diamonds for armor and tools", "diamond", 29, homeX, homeY, homeZ));
+            int diamonds = netherite ? 50 : 29;
+            steps.add(step("diamond", Action.MINE, "Gather " + diamonds + " diamonds for armor, tools" + (netherite ? " and template duplication" : ""), "diamond", diamonds, homeX, homeY, homeZ));
             steps.add(step("diamond-kit", Action.CRAFT, "Craft four diamond armor pieces, a pickaxe and a sword", "diamond-kit", 1, homeX, homeY, homeZ));
             steps.add(step("equip", Action.EQUIP, "Equip the verified diamond armor", "diamond-kit", 1, homeX, homeY, homeZ));
             prerequisites.add("Diamond mining needs reachable ore and tool durability. Inventory targets credit items you already own.");
@@ -113,27 +116,84 @@ public final class TaskPlanner {
             prerequisites.add("The 168-block starter shelter needs a clear, solid site. The 256-cobblestone goal also covers tools, the furnace and a building margin.");
         }
         if (enchant) {
+            steps.add(step("enchant-lapis", Action.MINE, "Gather 12 lapis lazuli for armor enchanting", "lapis_lazuli", 12, homeX, homeY, homeZ));
             steps.add(step("enchant", Action.ENCHANT, "Enchant and verify the four armor pieces", "diamond-armor", 4, homeX, homeY, homeZ));
             steps.add(step("restore-armor", Action.EQUIP, "Re-equip the verified enchanted armor", "diamond-kit", 1, homeX, homeY, homeZ));
             prerequisites.add("Enchanting needs an accessible table, lapis and XP; level-30 options also need 15 correctly placed bookshelves.");
             prerequisites.add("The armor quality goal is Protection IV + Unbreaking III on all four pieces. Vanilla enchantments are random; suitable books and an anvil may be required. Mending is not guaranteed.");
         }
+        if (netherite) {
+            steps.add(step("netherite-template", Action.CRAFT, "Verify an owned Netherite Upgrade template before the expedition", "netherite-template", 1, homeX, homeY, homeZ));
+            steps.add(step("netherite-gold", Action.MINE, "Gather 16 raw gold for four netherite ingots", "raw_gold", 16, homeX, homeY, homeZ));
+            steps.add(step("netherite-gold-smelt", Action.CRAFT, "Smelt 16 gold ingots", "smelt-gold", 16, homeX, homeY, homeZ));
+            steps.add(step("netherite-obsidian", Action.MINE, "Gather 10 obsidian for a Nether portal if needed", "obsidian", 10, homeX, homeY, homeZ));
+            steps.add(step("netherite-flint", Action.MINE, "Collect one real flint drop for portal ignition", "flint", 1, homeX, homeY, homeZ));
+            steps.add(step("netherite-igniter", Action.CRAFT, "Craft flint and steel from owned flint and iron", "portal-kit", 1, homeX, homeY, homeZ));
+            steps.add(step("netherite-portal", Action.DIMENSION, "Enter the Nether through a verified portal", "the_nether", 1, homeX, homeY, homeZ));
+            steps.add(step("netherite-debris", Action.MINE, "Gather 16 ancient debris with a diamond-tier pickaxe", "ancient_debris", 16, homeX, homeY, homeZ));
+            steps.add(step("netherite-netherrack", Action.MINE, "Gather 3 netherrack for template duplication", "netherrack", 3, homeX, homeY, homeZ));
+            steps.add(step("netherite-return", Action.DIMENSION, "Return to the Overworld through a verified portal", "overworld", 1, homeX, homeY, homeZ));
+            steps.add(step("netherite-scrap", Action.CRAFT, "Smelt 16 ancient debris into netherite scrap", "smelt-debris", 16, homeX, homeY, homeZ));
+            steps.add(step("netherite-ingots", Action.CRAFT, "Craft four netherite ingots", "netherite-ingots", 4, homeX, homeY, homeZ));
+            steps.add(step("netherite-armor", Action.CRAFT, "Duplicate missing templates and upgrade four armor pieces at a smithing table", "netherite-armor", 4, homeX, homeY, homeZ));
+            steps.add(step("netherite-equip", Action.EQUIP, "Equip and verify four netherite armor pieces", "netherite-armor", 4, homeX, homeY, homeZ));
+            prerequisites.add("One Netherite Upgrade template must already be owned. Bastion discovery and looting are not assumed; the first template stage stays incomplete until supplied.");
+            prerequisites.add("Portal construction uses 10 owned obsidian, 13 cobblestone corner/stair supports and flint and steel, or crafts the igniter from an owned flint and iron ingot. Nether navigation, debris mining and portal use need reachable loaded terrain.");
+            prerequisites.add("Four armor upgrades cost 16 scrap, 16 gold and four templates. Missing templates are duplicated with 7 diamonds + 1 netherrack each; real smithing output must be verified.");
+        }
         if (!kit && !shelter) {
             Matcher resource = RESOURCE.matcher(text);
             if (resource.find()) {
-                int count = resource.group(1) == null ? 32 : Integer.parseInt(resource.group(1));
+                int count;
+                try { count = resource.group(1) == null ? 32 : Integer.parseInt(resource.group(1)); }
+                catch (NumberFormatException error) { throw new IllegalArgumentException("Gather between 1 and 4096 items per task."); }
                 if (count < 1 || count > 4096) throw new IllegalArgumentException("Gather between 1 and 4096 items per task.");
-                String name = resource.group(2).replaceAll("[ _-]", "");
-                String key = name.startsWith("diamond") ? "diamond" : name.startsWith("iron") || name.startsWith("rawiron") ? "raw_iron"
-                        : name.equals("wood") || name.startsWith("log") ? "logs" : name.equals("stone") ? "cobblestone" : name;
+                String key = ResourceCatalog.canonical(resource.group(2));
+                var spec = ResourceCatalog.get(key);
+                if (!spec.dimension().isEmpty()) {
+                    steps.add(step("resource-dimension", Action.DIMENSION, "Use " + dimensionLabel(spec.dimension()) + " for natural " + key.replace('_', ' ') + " deposits", spec.dimension(), 1, homeX, homeY, homeZ));
+                    portalPrerequisites(prerequisites, spec.dimension());
+                }
                 steps.add(step("resource", Action.MINE, "Gather " + count + " " + key.replace('_', ' '), key, count, homeX, homeY, homeZ));
-                prerequisites.add("Have a suitable pickaxe for stone, iron or diamonds; the gather task does not bootstrap tools.");
+                prerequisites.add("Missing or worn pickaxes trigger ordinary wood, stone, iron and diamond tool recovery. Inaccessible materials can pause this prerequisite queue; existing usable tools are credited.");
             }
         }
-        if (steps.isEmpty()) throw new IllegalArgumentException("Try: escape spawn, build a base, get diamond armor, enchant my armor, go to X Y Z, or mine 32 diamonds.");
-        String title = expedition || (escape && shelter && enchant) ? "Spawn-to-kit expedition" : enchant ? "Enchanted diamond kit"
+        if (!dimension.isEmpty() && !netherite) {
+            if (dimension.equals("the_nether") && !kit && !shelter) {
+                steps.add(step("portal-logs", Action.MINE, "Gather eight logs for portal preparation", "logs", 8, homeX, homeY, homeZ));
+                steps.add(step("portal-bootstrap", Action.CRAFT, "Prepare a crafting table and mining tools", "bootstrap", 1, homeX, homeY, homeZ));
+                steps.add(step("portal-obsidian", Action.MINE, "Gather 10 obsidian with a recovered diamond-tier pickaxe", "obsidian", 10, homeX, homeY, homeZ));
+                steps.add(step("portal-furnace-material", Action.MINE, "Gather 21 cobblestone for a furnace and portal supports", "cobblestone", 21, homeX, homeY, homeZ));
+                steps.add(step("portal-furnace", Action.CRAFT, "Prepare a furnace for the portal igniter", "stone-tools", 1, homeX, homeY, homeZ));
+                steps.add(step("portal-iron", Action.MINE, "Gather one additional raw iron for portal ignition", "raw_iron", 1, homeX, homeY, homeZ));
+                steps.add(step("portal-coal", Action.MINE, "Gather four coal for portal preparation", "coal", 4, homeX, homeY, homeZ));
+                steps.add(step("portal-iron-smelt", Action.CRAFT, "Smelt the portal igniter's iron ingot", "smelt-extra-iron", 1, homeX, homeY, homeZ));
+                steps.add(step("portal-flint", Action.MINE, "Collect one actual flint drop from gravel", "flint", 1, homeX, homeY, homeZ));
+                steps.add(step("portal-igniter", Action.CRAFT, "Craft and verify flint and steel", "portal-kit", 1, homeX, homeY, homeZ));
+                steps.add(step("portal-supports", Action.MINE, "Verify 13 cobblestone for the portal supports", "cobblestone", 13, homeX, homeY, homeZ));
+                prerequisites.add("Portal preparation recovers missing pickaxes and gathers actual flint drops. Gravel can be placed and broken again; random drops and inaccessible terrain can still pause this goal.");
+            }
+            steps.add(step("dimension", Action.DIMENSION, "Travel to " + dimensionLabel(dimension) + " through a real portal", dimension, 1, homeX, homeY, homeZ));
+            portalPrerequisites(prerequisites, dimension);
+        }
+        if (steps.isEmpty()) throw new IllegalArgumentException("Try: escape spawn, build a base, get diamond/netherite armor, enchant my armor, go to the Nether, go to X Y Z, or mine 32 diamonds.");
+        String title = netherite ? (enchant ? "Enchanted netherite armor" : "Netherite armor expedition") : expedition || (escape && shelter && enchant) ? "Spawn-to-kit expedition" : enchant ? "Enchanted diamond kit"
                 : kit ? "Diamond kit" : shelter ? "Starter shelter" : escape ? "Escape spawn" : steps.size() > 1 ? "Travel and gather" : steps.getFirst().label();
-        return new Plan(title, "A local, reviewable plan using ordinary Minecraft actions and Baritone pathfinding.", steps, prerequisites);
+        return new Plan(title, "A local, reviewable plan using ordinary Minecraft actions and Analyzer's native navigation.", steps, prerequisites);
+    }
+
+    private static String requestedDimension(String text) {
+        if (!Pattern.compile("\\b(go|travel|enter|return|visit|walk|move)\\b").matcher(text).find()) return "";
+        if (Pattern.compile("\\b(end|the_end)\\b").matcher(text).find()) return "the_end";
+        if (Pattern.compile("\\b(nether|the_nether)\\b").matcher(text).find()) return "the_nether";
+        if (text.contains("overworld")) return "overworld";
+        return "";
+    }
+    private static String dimensionLabel(String dimension) { return switch (dimension) { case "the_nether" -> "the Nether"; case "the_end" -> "the End"; default -> "the Overworld"; }; }
+    private static void portalPrerequisites(List<String> prerequisites, String dimension) {
+        if (dimension.equals("the_end")) prerequisites.add("The End requires a reachable loaded stronghold portal or activated End portal. Owned eyes can fill a complete frame; no stronghold teleport or world scan is available.");
+        else prerequisites.add("Use a reachable loaded Nether portal. A new frame needs 10 obsidian, 13 cobblestone support blocks, flint and steel, and a checked clear solid site; returning from the End requires a real exit portal.");
+        prerequisites.add("The task accepts only its expected dimension transition. Disconnects, unrelated worlds and unexpected portal destinations pause for review.");
     }
 
     private static Step step(String id, Action action, String label, String resource, int count, int x, int y, int z) {

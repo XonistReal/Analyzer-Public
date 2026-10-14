@@ -17,13 +17,6 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    // Optional at runtime; distributed as a separately replaceable LGPL dependency.
-    modCompileOnly files("third-party/baritone/baritone-api-fabric-1.13.1.jar")
-    modRuntimeOnly files("third-party/baritone/baritone-api-fabric-1.13.1.jar")
-    // Loom removes nested-mod declarations in dev remaps; keep the exact upstream helper discoverable.
-    modRuntimeOnly files(zipTree(file("third-party/baritone/baritone-api-fabric-1.13.1.jar")).matching {
-        include "META-INF/jars/nether-pathfinder-1.4.1.jar"
-    })
 }
 
 processResources {
@@ -87,8 +80,16 @@ tasks.register('packPrivacyCheck', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.analyzer.privacy.PackPrivacySelfTest'
 }
+['automationMotion': 'MotionPolicySelfTest', 'nativePathfinder': 'NativePathfinderSelfTest', 'schematic': 'SchematicSelfTest', 'retreat': 'RetreatPlannerSelfTest'].each { area, entry ->
+    tasks.register("${area}Check", JavaExec) {
+        dependsOn testClasses
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass = "dev.analyzer.automation.${entry}"
+    }
+}
 tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck'), tasks.named('safetyCheck'),
-    tasks.named('combatCheck'), tasks.named('movementCheck'), tasks.named('hvhCheck'), tasks.named('gameplayConfigCheck'), tasks.named('privacyConfigCheck'), tasks.named('privacyCheck'), tasks.named('packPrivacyCheck') }
+    tasks.named('combatCheck'), tasks.named('movementCheck'), tasks.named('hvhCheck'), tasks.named('gameplayConfigCheck'), tasks.named('privacyConfigCheck'), tasks.named('privacyCheck'), tasks.named('packPrivacyCheck'),
+    tasks.named('automationMotionCheck'), tasks.named('nativePathfinderCheck'), tasks.named('schematicCheck'), tasks.named('retreatCheck') }
 tasks.register('moduleCatalog', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -124,7 +125,8 @@ tasks.register('publishLocal') {
             minecraftVersion: project.minecraft_version.toString(),
             version: project.version.toString(),
             artifact: artifact,
-            sha256: digest
+            sha256: digest,
+            retireLegacyBaritone: true
         ])) + '\n'
         def pending = feed.resolve(".release-${UUID.randomUUID()}.json.tmp")
         java.nio.file.Files.writeString(pending, manifest, java.nio.charset.StandardCharsets.UTF_8)
@@ -137,6 +139,21 @@ tasks.register('publishLocal') {
 
 loom {
     runs {
+        nativeAutomationSmoke {
+            client()
+            name 'Analyzer original automation acceptance'
+            runDir 'run-native-automation'
+            vmArg '-Danalyzer.smoke=true'
+            vmArg '-Danalyzer.worldsmoke=true'
+            vmArg '-Danalyzer.nativeAutomationSmoke=true'
+            if (project.findProperty('analyzerNativeScenario')) vmArg "-Danalyzer.nativeScenario=${project.findProperty('analyzerNativeScenario')}"
+            programArg '--username'
+            programArg 'AnalyzerDev'
+            programArg '--width'
+            programArg '1280'
+            programArg '--height'
+            programArg '800'
+        }
         client {
             vmArg '-Danalyzer.dev=true'
             programArg '--username'

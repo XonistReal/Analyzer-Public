@@ -42,6 +42,6 @@ Future, RusherHack, Temple Client Legacy, Meteor, LiquidBounce, Lambda, Wurst an
 
 Iris, Sodium, Satin and third-party world shader packs are not included. Iris may be installed independently to provide world shader packs, but that combination and its version compatibility require separate testing. Analyzer's bundled effects are its own screen post-processing shaders and procedural menu backdrop.
 
-## Baritone optional runtime
+## Historical Baritone dependency and automation research
 
-Official Fabric API 1.13.1 for Minecraft 1.21.4 is shipped as a separate, replaceable mod under LGPL-3.0-or-later. Original Analyzer integration uses the public API. The verified artifact, upstream corresponding sources, license/notices and provenance are retained in [third-party/baritone](third-party/baritone/README.md); Prism imports include those notices and sources. No Baritone source is copied into Analyzer.
+Releases through 0.9.0 used the separately replaceable Baritone Fabric API 1.13.1 mod. Those historical binaries, corresponding sources and notices remain in [third-party/baritone](third-party/baritone/README.md) for old release provenance and source research. **0.10.0 removes Baritone from the build, mod metadata and Prism distribution.** The native path search, movement, miner, builder and task controllers are original Analyzer code against Minecraft/Fabric APIs. No Baritone implementation source was copied into these controllers and no Baritone classes or native helper are bundled in the current mod or Prism ZIP. Historical validation harnesses are retained as text under `production-validation/legacy-baritone`, outside compiled runtime source.

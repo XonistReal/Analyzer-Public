@@ -3,7 +3,8 @@
 param(
     [string] $UpdaterPath,
     [string] $WorkDir,
-    [string] $PowerShellPath
+    [string] $PowerShellPath,
+    [string] $LegacyBaritonePath
 )
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
@@ -11,6 +12,7 @@ $ErrorActionPreference = 'Stop'
 if ([string]::IsNullOrWhiteSpace($UpdaterPath)) { $UpdaterPath = Join-Path $PSScriptRoot 'Update-Analyzer.ps1' }
 if ([string]::IsNullOrWhiteSpace($WorkDir)) { $WorkDir = Join-Path $PSScriptRoot '../../../../work/updater-tests' }
 if ([string]::IsNullOrWhiteSpace($PowerShellPath)) { $PowerShellPath = Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe' }
+if ([string]::IsNullOrWhiteSpace($LegacyBaritonePath)) { $LegacyBaritonePath = Join-Path $PSScriptRoot '../../third-party/baritone/baritone-api-fabric-1.13.1.jar' }
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $testDir = [IO.Path]::Combine([IO.Path]::GetFullPath($WorkDir), [Guid]::NewGuid().ToString('N'))
@@ -82,6 +84,12 @@ function Invoke-Updater($Fixture, [switch] $CheckOnly, [switch] $FailSoft, [swit
         return @{ ExitCode = $code; Result = ($json[0] | ConvertFrom-Json) }
     }
     finally { if ($UseEnvironment) { $env:INST_DIR = $null } }
+}
+
+function Snapshot-Instance($Fixture) {
+    return (@(Get-ChildItem -LiteralPath $Fixture.Instance -File -Recurse | Sort-Object FullName | ForEach-Object {
+        $_.FullName.Substring($Fixture.Instance.Length) + '=' + (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash
+    }) -join '|')
 }
 
 try {
@@ -281,6 +289,91 @@ try {
     Assert-True ((Invoke-Updater $paused).Result.status -eq 'error') 'enabled must be a JSON boolean'
     Write-Json (Join-Path $paused.Instance 'analyzer-updater.json') @{ schemaVersion = '1'; enabled = $false; manifestPath = 'missing-release.json' }
     Assert-True ((Invoke-Updater $paused).Result.status -eq 'error') 'configuration schema version must be numeric'
+
+    # The actual official bytes prove the retirement acceptance path; unknown synthetic JARs remain protected.
+    $legacyHash = 'bfb79c3cdb8fe1f7697999b1f9c7f08ea29775f3b69d48ad90c387690ee67b05'
+    if (Test-Path -LiteralPath $LegacyBaritonePath -PathType Leaf) {
+        Assert-True ((Get-FileHash -LiteralPath $LegacyBaritonePath -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $legacyHash) 'archived official retirement fixture has the independently pinned SHA-256'
+
+        $keepLegacy = New-Fixture 'legacy-retirement-missing-or-disabled'
+        $keepRelease = Set-Release $keepLegacy '0.10.0'
+        $keepPath = Join-Path $keepLegacy.Mods 'my-old-bot.jar'
+        Copy-Item -LiteralPath $LegacyBaritonePath -Destination $keepPath
+        $keepResult = Invoke-Updater $keepLegacy
+        Assert-True ($keepResult.Result.status -eq 'installed' -and (Test-Path -LiteralPath $keepPath)) 'older manifests without retirement flag preserve the exact legacy JAR'
+        $keepRelease.retireLegacyBaritone = $false; Write-Json $keepLegacy.Manifest $keepRelease
+        $keepResult = Invoke-Updater $keepLegacy
+        Assert-True ($keepResult.Result.status -eq 'up-to-date' -and (Test-Path -LiteralPath $keepPath)) 'explicit retirement false also preserves the legacy dependency'
+        $keepRelease.retireLegacyBaritone = 'true'; Write-Json $keepLegacy.Manifest $keepRelease
+        $badRetirement = Invoke-Updater $keepLegacy
+        Assert-True ($badRetirement.ExitCode -eq 1 -and $badRetirement.Result.status -eq 'error') 'retirement directive requires a scalar JSON boolean'
+        Assert-True ((Get-FileHash -LiteralPath $keepPath -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $legacyHash) 'invalid directive changes no legacy bytes'
+
+        $retirement = New-Fixture 'current-analyzer-retirement'
+        $retirementRelease = Set-Release $retirement '0.10.0'
+        $retirementRelease.retireLegacyBaritone = $true; Write-Json $retirement.Manifest $retirementRelease
+        $currentPath = Join-Path $retirement.Mods $retirementRelease.artifact
+        Copy-Item -LiteralPath (Join-Path $retirement.Feed $retirementRelease.artifact) -Destination $currentPath
+        $legacyPath = Join-Path $retirement.Mods 'Renamed Official Bot (1).jar'
+        Copy-Item -LiteralPath $LegacyBaritonePath -Destination $legacyPath
+        $unknownPath = Join-Path $retirement.Mods 'baritone-custom.jar'; New-Mod $unknownPath '1.13.1' 'baritone' '1.21.4' 'unrecognized custom build'
+        $differentPath = Join-Path $retirement.Mods 'baritone-other-version.jar'; New-Mod $differentPath '1.13.2' 'baritone'
+        $unrelatedPath = Join-Path $retirement.Mods 'unrelated-mod.jar'; New-Mod $unrelatedPath '1.0.0' 'othermod'
+        $unknownHash = (Get-FileHash -LiteralPath $unknownPath).Hash
+        $differentHash = (Get-FileHash -LiteralPath $differentPath).Hash
+        $unrelatedHash = (Get-FileHash -LiteralPath $unrelatedPath).Hash
+        $beforeRetireCheck = Snapshot-Instance $retirement
+        $retireCheck = Invoke-Updater $retirement -CheckOnly
+        Assert-True ($retireCheck.Result.status -eq 'up-to-date') 'check-only recognizes the current Analyzer with retirement enabled'
+        Assert-True ((Snapshot-Instance $retirement) -ceq $beforeRetireCheck) 'check-only never writes or retires any file, even for a same-hash current release'
+        $retireResult = Invoke-Updater $retirement
+        Assert-True ($retireResult.ExitCode -eq 0 -and $retireResult.Result.status -eq 'up-to-date') 'retirement succeeds without reinstalling a matching Analyzer'
+        Assert-True (@($retireResult.Result.retiredMods).Count -eq 1 -and -not (Test-Path -LiteralPath $legacyPath)) 'only the exact recognized legacy mod is removed from active mods'
+        $retiredPath = $retireResult.Result.retiredMods[0].backupPath
+        Assert-True ((Test-Path -LiteralPath $retiredPath) -and (Get-FileHash -LiteralPath $retiredPath -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $legacyHash) 'atomic retirement preserves exact bytes in a recoverable backup'
+        Assert-True ($retiredPath.StartsWith((Join-Path $retirement.Instance '.analyzer-updater/retired-mods'),[StringComparison]::OrdinalIgnoreCase)) 'retired backup stays inside this instance outside active mods'
+        Assert-True ((Get-FileHash -LiteralPath $currentPath -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $retirementRelease.sha256) 'retirement leaves the verified Analyzer unchanged'
+        Assert-True ((Get-FileHash -LiteralPath $unknownPath).Hash -ceq $unknownHash -and (Get-FileHash -LiteralPath $differentPath).Hash -ceq $differentHash) 'unknown hashes and other Baritone versions are preserved'
+        Assert-True ((Get-FileHash -LiteralPath $unrelatedPath).Hash -ceq $unrelatedHash) 'unrelated mods are preserved during legacy retirement'
+        Assert-True (@($retireResult.Result.skippedRetirements).Count -eq 2) 'unknown or different legacy candidates have explicit skip reasons'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $retirement.Instance '.analyzer-updater/pending.json'))) 'legacy maintenance never creates or changes the Analyzer recovery journal'
+        $repeatRetire = Invoke-Updater $retirement
+        Assert-True (@($repeatRetire.Result.retiredMods).Count -eq 0 -and (Test-Path -LiteralPath $retiredPath)) 'repeat current-release checks do not duplicate or consume backups'
+
+        $installRetirement = New-Fixture 'retirement-after-analyzer-commit'
+        $installRetirementRelease = Set-Release $installRetirement '0.10.0'
+        $installRetirementRelease.retireLegacyBaritone = $true; Write-Json $installRetirement.Manifest $installRetirementRelease
+        $oldAnalyzer = Join-Path $installRetirement.Mods 'analyzer-0.9.0.jar'; New-Mod $oldAnalyzer '0.9.0'
+        $oldAnalyzerHash = (Get-FileHash -LiteralPath $oldAnalyzer).Hash
+        $commitLegacy = Join-Path $installRetirement.Mods 'legacy.jar'; Copy-Item -LiteralPath $LegacyBaritonePath -Destination $commitLegacy
+        $committed = Invoke-Updater $installRetirement
+        Assert-True ($committed.Result.status -eq 'installed' -and @($committed.Result.retiredMods).Count -eq 1) 'successful Analyzer replacement commits before optional legacy retirement'
+        Assert-True ((Get-FileHash -LiteralPath (Join-Path $committed.Result.backupDir 'analyzer-0.9.0.jar')).Hash -ceq $oldAnalyzerHash) 'the original Analyzer recovery backup remains intact'
+        Assert-True ((Get-FileHash -LiteralPath (Join-Path $installRetirement.Mods $installRetirementRelease.artifact) -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $installRetirementRelease.sha256) 'new Analyzer remains installed after retirement'
+
+        $lockedRetirement = New-Fixture 'locked-retirement-postcommit'
+        $lockedRelease = Set-Release $lockedRetirement '0.10.0'
+        $lockedRelease.retireLegacyBaritone = $true; Write-Json $lockedRetirement.Manifest $lockedRelease
+        $lockedLegacyPath = Join-Path $lockedRetirement.Mods 'baritone-locked.jar'; Copy-Item -LiteralPath $LegacyBaritonePath -Destination $lockedLegacyPath
+        $legacyLock = [IO.File]::Open($lockedLegacyPath,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+        try { $lockRetireResult = Invoke-Updater $lockedRetirement }
+        finally { $legacyLock.Dispose() }
+        Assert-True ($lockRetireResult.Result.status -eq 'installed' -and @($lockRetireResult.Result.skippedRetirements).Count -eq 1) 'a locked legacy JAR reports a skip without rolling back committed Analyzer'
+        Assert-True ((Get-FileHash -LiteralPath $lockedLegacyPath -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $legacyHash) 'failed atomic move leaves the original legacy JAR intact'
+        Assert-True ((Get-FileHash -LiteralPath (Join-Path $lockedRetirement.Mods $lockedRelease.artifact) -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $lockedRelease.sha256) 'retirement failure never enters the Analyzer transaction rollback'
+        Assert-True (@((Invoke-Updater $lockedRetirement).Result.retiredMods).Count -eq 1) 'an unlocked subsequent launch can safely finish deferred retirement'
+
+        $tamperedRetirement = New-Fixture 'retirement-needs-verified-analyzer'
+        $tamperedRelease = Set-Release $tamperedRetirement '0.10.0'
+        $tamperedRelease.retireLegacyBaritone = $true; Write-Json $tamperedRetirement.Manifest $tamperedRelease
+        $untouchedLegacy = Join-Path $tamperedRetirement.Mods 'baritone.jar'; Copy-Item -LiteralPath $LegacyBaritonePath -Destination $untouchedLegacy
+        [IO.File]::AppendAllText((Join-Path $tamperedRetirement.Feed $tamperedRelease.artifact),'tampered')
+        $tamperedRetireResult = Invoke-Updater $tamperedRetirement
+        Assert-True ($tamperedRetireResult.Result.status -eq 'error' -and (Test-Path -LiteralPath $untouchedLegacy)) 'unverified Analyzer releases cannot retire any existing dependency'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $tamperedRetirement.Instance '.analyzer-updater/retired-mods'))) 'failed verification creates no retirement backup paths'
+    } else {
+        Write-Output 'SKIP: Positive pinned-Baritone retirement fixtures need the archived official JAR; no positive retirement checks were counted.'
+    }
 
     Write-Output "Updater integration tests passed: $checks checks. Runtime: $PowerShellPath. Fixtures: $testDir"
 }

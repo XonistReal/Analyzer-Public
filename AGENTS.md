@@ -1,5 +1,11 @@
 # Analyzer project instructions
 
+## Native automation in 0.10.0
+
+The user explicitly requires Baritone to be removed entirely, with its open source used only as a reference. Current automation uses original Analyzer pathfinding, motion, mining, schematic construction, inventory and safety controllers against Minecraft/Fabric APIs. Keep Baritone and its native helper out of current build dependencies, mod metadata and Prism packages. Historical reference/source/license files remain archival; they are not runtime dependencies. Retire only the exact formerly bundled official Baritone JAR through the verified updater after installing the native release, preserving a recoverable backup and all unrelated mods.
+
+Task planning stays local; the user declined an AI service. Reviewed goals explicitly start/resume, saved checkpoints restore paused, and completion requires actual game state. Tool absence/breakage triggers material/tool recovery, enchanting budgets lapis, and schematic plans acquire every remaining required material before construction. Preserve source hashes, real palette states, selected sites and ordinary server-backed interactions. Do not claim general human intelligence, universal server success, arbitrary schematic support, autonomous XP/books/bastion discovery or an unknown stronghold route when those are not implemented. Document observed native acceptance separately from historical Baritone tests.
+
 ## Standing user preference: Prism delivery
 
 The user explicitly requested on October 11, 2026 that every Analyzer update also update their Prism Launcher instance. Treat publishing, packaging and installing as part of completing future project updates. This is already authorized; do not ask for the same permission again.

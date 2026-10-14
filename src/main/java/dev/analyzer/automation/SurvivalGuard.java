@@ -30,14 +30,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Scoped survival reactions for an explicitly running Analyzer plan. No player targeting or new routes. */
+/** Scoped survival decisions and surveyed retreat routes for an explicitly running Analyzer plan. */
 public final class SurvivalGuard {
     public record Result(boolean intervening, boolean fatalBlock, String message, boolean resumeReady) { }
     public record Diagnostics(long attacks, long foodUses, long retreatTicks, int threatCount, boolean intervening, boolean consuming) { }
     private static final Result CLEAR = new Result(false, false, "", false);
     private final MinecraftClient mc = MinecraftClient.getInstance();
     private final Map<KeyBinding, Boolean> keys = new LinkedHashMap<>();
-    private BaritoneBridge bridge;
+    private final EscapeNavigator.Navigator navigator = new EscapeNavigator.Navigator();
+    private AutomationNavigator bridge;
     private Object world, player;
     private boolean intervening, consuming;
     private int ticks, quietTicks, recoveryTicks, consumeTicks, lastAttack = -100, threatCount;
@@ -52,18 +53,19 @@ public final class SurvivalGuard {
     public Diagnostics diagnostics() { return new Diagnostics(attacks, foodUses, retreatTicks, threatCount, intervening, consuming); }
 
     /** The caller must invoke this only for active plans and call cleanup on manual pause/stop. */
-    public Result tick(AnalyzerCore core, BaritoneBridge route, InventoryAutomation inventory) {
+    public Result tick(AnalyzerCore core, AutomationNavigator route, InventoryAutomation inventory) {
         ticks++;
         if (mc.world == null || mc.player == null || mc.interactionManager == null || !mc.player.isAlive()
                 || mc.player.isSpectator() || mc.player.getAbilities().creativeMode) { cleanup(); return CLEAR; }
         if (mc.currentScreen != null && !inventory.ownsScreen()) { cleanup(); return CLEAR; }
         if (intervening && (world != mc.world || player != mc.player)) cleanup();
         boolean defense = bool(core, "defense", true), autoFood = bool(core, "auto-food", true);
-        double range = number(core, "threat-range", 12), retreatHealth = number(core, "retreat-health", 10);
+        boolean proactive = bool(core, "proactive-avoidance", true);
+        double range = proactive ? number(core,"avoid-range",16) : number(core,"threat-range",12), retreatHealth = number(core, "retreat-health", 10);
         double minimumHealth = number(core, "min-health", 6), minimumHunger = number(core, "min-hunger", 6);
         double resumeHealth = Math.max(minimumHealth, retreatHealth);
         int hunger = mc.player.getHungerManager().getFoodLevel();
-        List<LivingEntity> threats = defense ? threats(range) : List.of();
+        List<LivingEntity> threats = defense ? threats(range, proactive) : List.of();
         threatCount = threats.size();
         boolean foodAvailable = hotbarFood() >= 0 || inventoryFood() >= 0 || usableFood(mc.player.getOffHandStack());
         boolean hungry = autoFood && foodAvailable && (hunger < number(core, "eat-below", 14)
@@ -91,30 +93,34 @@ public final class SurvivalGuard {
             // Eating under a melee attacker prevents defending and is too slow to be a retreat.
             if (consuming && (distance < 4.5 || explosive)) stopFood();
             if (canEngage && distance <= 3.1 && mc.player.canInteractWithEntity(target, 0)) {
-                stopFood(); select(weapon); aim(target.getEyePos()); attack(target);
+                stopFood(); select(weapon); if(aim(target.getEyePos()))attack(target);
                 return new Result(true, false, "Defending against " + target.getName().getString() + "; original task is paused.", false);
             }
-            if (canEngage && distance <= 6 && !consuming) {
+            if (canEngage && distance <= 6 && !consuming && !proactive) {
                 Vec3d toward = target.getPos().subtract(mc.player.getPos()).multiply(1, 0, 1).normalize();
                 if (safeWalk(toward)) {
-                    select(weapon); aim(target.getEyePos()); move(route, false);
+                    select(weapon); if(aim(target.getEyePos()))move(route, false);
                     return new Result(true, false, "Closing normal attack distance to " + target.getName().getString() + "; original task is paused.", false);
                 }
             }
-            EscapeNavigator.Route escape = EscapeNavigator.choose(mc, threats);
+            EscapeNavigator.Route escape = proactive ? navigator.choose(mc, threats,(int)number(core,"escape-radius",12),bool(core,"prefer-cover",true)) : EscapeNavigator.choose(mc, threats);
             if (escape != null) {
-                aim(mc.player.getEyePos().add(escape.direction().multiply(4)));
+                float awayYaw=(float)(Math.toDegrees(Math.atan2(escape.direction().z,escape.direction().x))-90);
+                boolean backwards=explosive && Math.abs(MathHelper.wrapDegrees(awayYaw+180-mc.player.getYaw()))<=number(core,"movement-angle",35);
+                boolean aligned=backwards?AutomationMotion.alignYaw(awayYaw+180):aim(mc.player.getEyePos().add(escape.direction().multiply(4)));
                 boolean sprint = hunger > 6 && !consuming && !escape.swimming();
-                move(route, sprint, escape.jump()); retreatTicks++;
-                // A ranged opponent or a close pursuer can still be struck at normal reach while retreating.
-                if (!consuming && !explosive && weapon >= 0 && distance <= 3.0 && mc.player.canInteractWithEntity(target, 0)) {
-                    select(weapon); attack(target); // Keep the escape yaw, so walking continues away from the attacker.
+                if(aligned){
+                    if(backwards){if(!route.setSafetyBackwardInputs(escape.jump())){force(mc.options.backKey);if(escape.jump())force(mc.options.jumpKey);}}
+                    else move(route, sprint, escape.jump());
+                    retreatTicks++;
                 }
+                // A ranged opponent or a close pursuer can still be struck at normal reach while retreating.
+                // A retreat keeps facing its checked corridor. It never attacks behind the visible camera.
                 if (hungry && distance >= 6 && !explosive) food();
                 return new Result(true, false, "Retreating from " + target.getName().getString() + " via " + escape.terrain() + "; original task is paused.", false);
             }
             if (!explosive && weapon >= 0 && mc.player.canInteractWithEntity(target, 0)) {
-                stopFood(); select(weapon); aim(target.getEyePos()); attack(target);
+                stopFood(); select(weapon); if(aim(target.getEyePos()))attack(target);
                 return new Result(true, false, "No safe ground retreat found; defending in place. Move to cover if needed.", false);
             }
             String terrain = mc.player.isTouchingWater() ? "No checked water or shore escape yet"
@@ -143,14 +149,14 @@ public final class SurvivalGuard {
         return new Result(true, false, "Threat cleared; watching before resuming the original task.", false);
     }
 
-    private List<LivingEntity> threats(double range) {
+    private List<LivingEntity> threats(double range, boolean proactive) {
         List<LivingEntity> result = new ArrayList<>();
         int seen = 0;
         for (var entity : mc.world.getEntities()) {
             if (++seen > 1024) break;
             if (!(entity instanceof MobEntity mob) || !(mob instanceof Monster) || !mob.isAlive() || mob.isSpectator()
                     || mc.player.isTeammate(mob) || mob.squaredDistanceTo(mc.player) > range * range
-                    || !mc.player.canSee(mob) && !urgentCreeper(mob)) continue;
+                    || !proactive && !mc.player.canSee(mob) && !urgentCreeper(mob)) continue;
             if (mob.isAiDisabled() && !(mob instanceof CreeperEntity c && (c.isIgnited() || c.getFuseSpeed() > 0))) continue;
             boolean attackedUs = mc.player.getAttacker() == mob || mob.isAttacking();
             if (mob instanceof EndermanEntity enderman && !enderman.isAngry() && !attackedUs) continue;
@@ -189,15 +195,15 @@ public final class SurvivalGuard {
                 || state.isOf(Blocks.CACTUS) || state.isOf(Blocks.CAMPFIRE) || state.isOf(Blocks.SOUL_CAMPFIRE)
                 || state.isOf(Blocks.SWEET_BERRY_BUSH) || state.isOf(Blocks.POWDER_SNOW) || state.isOf(Blocks.WITHER_ROSE);
     }
-    private void move(BaritoneBridge route, boolean sprint) {
+    private void move(AutomationNavigator route, boolean sprint) {
         move(route,sprint,false);
     }
-    private void move(BaritoneBridge route, boolean sprint, boolean jump) {
+    private void move(AutomationNavigator route, boolean sprint, boolean jump) {
         if (!route.setSafetyInputs(true, sprint, jump)) { force(mc.options.forwardKey); if (sprint) force(mc.options.sprintKey); if(jump)force(mc.options.jumpKey); }
     }
     private void releaseMovement() {
         if (bridge != null) bridge.clearSafetyInputs();
-        release(mc.options.forwardKey); release(mc.options.sprintKey); release(mc.options.jumpKey);
+        release(mc.options.forwardKey); release(mc.options.backKey); release(mc.options.sprintKey); release(mc.options.jumpKey);
     }
     private void attack(LivingEntity target) {
         if (mc.player.isUsingItem() || ticks - lastAttack < 10 || mc.player.getAttackCooldownProgress(0) < .93f
@@ -273,12 +279,8 @@ public final class SurvivalGuard {
         if (savedSlot < 0) savedSlot = mc.player.getInventory().selectedSlot;
         mc.player.getInventory().selectedSlot = ownedSlot = slot;
     }
-    private void aim(Vec3d point) {
-        if (!ownsLook) { savedYaw = mc.player.getYaw(); savedPitch = mc.player.getPitch(); ownsLook = true; }
-        Vec3d delta = point.subtract(mc.player.getEyePos());
-        ownedYaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90);
-        ownedPitch = Math.clamp((float) -Math.toDegrees(Math.atan2(delta.y, Math.hypot(delta.x, delta.z))), -89, 89);
-        mc.player.setYaw(ownedYaw); mc.player.setPitch(ownedPitch);
+    private boolean aim(Vec3d point) {
+        return AutomationMotion.align(point);
     }
     private void force(KeyBinding key) { keys.putIfAbsent(key, key.isPressed()); key.setPressed(true); }
     private void release(KeyBinding key) {
@@ -296,11 +298,9 @@ public final class SurvivalGuard {
         if (mc.player != null && player == mc.player && world == mc.world) {
             restoreFoodSwap();
             if (savedSlot >= 0 && mc.player.getInventory().selectedSlot == ownedSlot) mc.player.getInventory().selectedSlot = savedSlot;
-            if (ownsLook && Math.abs(MathHelper.wrapDegrees(mc.player.getYaw() - ownedYaw)) < .1 && Math.abs(mc.player.getPitch() - ownedPitch) < .1) {
-                mc.player.setYaw(savedYaw); mc.player.setPitch(savedPitch);
-            }
         }
         savedSlot = ownedSlot = foodSwapSource = foodSwapHotbar = -1; swapOriginal = ItemStack.EMPTY; ownsLook = false;
+        navigator.reset();
         bridge = null; world = player = null; intervening = false; consuming = false; quietTicks = recoveryTicks = threatCount = 0;
     }
     private void restoreFoodSwap() {

@@ -1,7 +1,7 @@
 package dev.analyzer;
 
 import dev.analyzer.automation.AutomationEngine;
-import dev.analyzer.automation.BaritoneBridge;
+import dev.analyzer.automation.AutomationNavigator;
 import dev.analyzer.automation.InventoryAutomation;
 import dev.analyzer.automation.TaskPlanner;
 import dev.analyzer.ui.AutomationScreen;
@@ -25,7 +25,7 @@ import org.lwjgl.opengl.GL11;
 /** Isolated Survival fixtures exercising normal server-backed crafting and workstation actions. */
 final class AutomationInventorySmoke {
     static final int LAST_TICK = 3600;
-    private enum Stage { SETUP, CURSOR, CURSOR_VERIFY, BOOTSTRAP, BOOTSTRAP_VERIFY, STONE, STONE_VERIFY,
+    private enum Stage { MIXED_SETUP, MIXED, MIXED_VERIFY, SETUP, CURSOR, CURSOR_VERIFY, BOOTSTRAP, BOOTSTRAP_VERIFY, STONE, STONE_VERIFY,
         IRON, IRON_VERIFY, DIAMOND, DIAMOND_VERIFY, EQUIP, EQUIP_VERIFY, KIT_CAPTURE,
         TABLE_SETUP, TABLE, TABLE_VERIFY, QUALITY_SETUP, QUALITY, QUALITY_VERIFY, FINAL_EQUIP,
         FINAL_VERIFY, GEAR_CAPTURE, CONSOLE, CONSOLE_CAPTURE, FINISHED }
@@ -36,7 +36,6 @@ final class AutomationInventorySmoke {
     private static int entered, tick, assertions, captures;
     private static long clicksBefore;
     private static AutomationScreen console;
-    private static boolean reviewed;
     private AutomationInventorySmoke() { }
     static boolean done() { return stage == Stage.FINISHED; }
     static int assertions() { return assertions; }
@@ -47,8 +46,25 @@ final class AutomationInventorySmoke {
         tick = t;
         if (t > LAST_TICK) throw new IllegalStateException("Inventory automation smoke exceeded " + LAST_TICK + " ticks at " + stage);
         if (t - entered > 1800) throw new IllegalStateException("Inventory automation stage timed out: " + stage);
-        if (t == 0) setup(mc);
+        if (t == 0) setupMixed(mc);
         switch (stage) {
+            case MIXED_SETUP -> {
+                if (age() < 30) return;
+                require(countServer(mc, Items.OAK_PLANKS) == 2 && countServer(mc, Items.BIRCH_PLANKS) == 2
+                        && countServer(mc, Items.OAK_LOG) == 0, "Mixed-plank fixture has exactly two oak and two birch planks without logs");
+                enter(Stage.MIXED);
+            }
+            case MIXED -> runUntilDone("bootstrap", Stage.MIXED_VERIFY);
+            case MIXED_VERIFY -> {
+                if (age() < 20) return;
+                require(countServer(mc, Items.CRAFTING_TABLE) == 1 && countServer(mc, Items.OAK_PLANKS) == 0
+                        && countServer(mc, Items.BIRCH_PLANKS) == 0, "A real crafting-table recipe consumes the four mixed-species planks");
+                require(countServer(mc, Items.WOODEN_PICKAXE) == 1 && countServer(mc, Items.STICK) == 4,
+                        "Mixed-plank bootstrap preserves the supplied usable pickaxe and sticks");
+                require(mc.player.currentScreenHandler.getCursorStack().isEmpty() && itemEntities(mc) == 0,
+                        "Mixed-plank crafting leaves no cursor item or dropped ingredients");
+                worker.stop(); setup(mc); enter(Stage.SETUP);
+            }
             case SETUP -> {
                 if (age() < 30) return;
                 require(mc.getServer() != null && serverPlayer(mc) != null, "Inventory fixture uses an integrated server");
@@ -117,7 +133,7 @@ final class AutomationInventorySmoke {
             case TABLE_SETUP -> {
                 if (age() < 30) return;
                 require(serverPlayer(mc).experienceLevel == 100 && countServer(mc, Items.LAPIS_LAZULI) == 13, "Table fixture has real XP levels and lapis");
-                worker = new InventoryAutomation(new BaritoneBridge()); enter(Stage.TABLE);
+                worker = new InventoryAutomation(new AutomationNavigator()); enter(Stage.TABLE);
             }
             case TABLE -> {
                 ItemStack helmet = findServer(mc, Items.DIAMOND_HELMET);
@@ -139,7 +155,7 @@ final class AutomationInventorySmoke {
             case QUALITY_SETUP -> {
                 if (age() < 30) return;
                 require(countServer(mc, Items.ENCHANTED_BOOK) == 2, "Anvil fixture contains exactly one book for each requested upgrade");
-                worker = new InventoryAutomation(new BaritoneBridge()); enter(Stage.QUALITY);
+                worker = new InventoryAutomation(new AutomationNavigator()); enter(Stage.QUALITY);
             }
             case QUALITY -> runUntilDone("diamond-armor", Stage.QUALITY_VERIFY);
             case QUALITY_VERIFY -> {
@@ -172,13 +188,16 @@ final class AutomationInventorySmoke {
             }
             case CONSOLE -> {
                 if (age() == 10) {
-                    // Select the actual Expedition preset and click Review using screen input.
-                    clickConsole(mc, 22 + 131 + 60, 230 + 14);
+                    // Use the current rendered control positions, including the actual canvas transform.
+                    clickConsole("preset:3");
                 }
-                if (age() == 15) { clickConsole(mc, 215, 497); reviewed = true; }
+                if (age() == 15) clickConsole("review");
                 if (age() < 25) return;
-                require(reviewed && mc.currentScreen == console, "Automation console opens and reviews the Expedition preset through real UI input");
-                require(reviewedPlan().title().equals("Spawn-to-kit expedition") && reviewedPlan().steps().stream().anyMatch(s -> s.action() == TaskPlanner.Action.ENCHANT), "Actual reviewed console plan contains expedition and enchanting stages");
+                TaskPlanner.Plan plan = console.reviewedPlan();
+                require(mc.currentScreen == console && plan != null && !console.isReviewError(),
+                        "Automation console reviews the Enchanted kit preset through real UI input: " + console.errorText());
+                require(plan.title().equals("Enchanted diamond kit") && plan.steps().stream().anyMatch(s -> s.action() == TaskPlanner.Action.ENCHANT),
+                        "Actual reviewed console plan contains the selected enchanted kit and enchanting stages");
                 enter(Stage.CONSOLE_CAPTURE);
             }
             case CONSOLE_CAPTURE -> {
@@ -193,6 +212,13 @@ final class AutomationInventorySmoke {
         }
     }
 
+    private static void setupMixed(MinecraftClient mc) {
+        setup(mc);
+        command(mc, "clear AnalyzerDev");
+        command(mc, "give AnalyzerDev minecraft:oak_planks 2"); command(mc, "give AnalyzerDev minecraft:birch_planks 2");
+        command(mc, "give AnalyzerDev minecraft:stick 4"); command(mc, "give AnalyzerDev minecraft:wooden_pickaxe");
+        stage = Stage.MIXED_SETUP;
+    }
     private static void setup(MinecraftClient mc) {
         mc.setScreen(null); AnalyzerClient.CORE.setEnabled("expedition", false);
         for (var module : AnalyzerClient.CORE.modules()) if (module.category() == dev.analyzer.core.Category.COMBAT || module.category() == dev.analyzer.core.Category.HVH || module.category() == dev.analyzer.core.Category.MOVEMENT || module.category() == dev.analyzer.core.Category.PLAYER) AnalyzerClient.CORE.setEnabled(module.id(), false);
@@ -203,7 +229,7 @@ final class AutomationInventorySmoke {
         command(mc, "time set 1000"); command(mc, "weather clear"); command(mc, "tp AnalyzerDev 40.5 161 40.5 180 15");
         command(mc, "give AnalyzerDev minecraft:oak_log 16"); command(mc, "give AnalyzerDev minecraft:raw_iron 8");
         command(mc, "give AnalyzerDev minecraft:coal 16"); command(mc, "give AnalyzerDev minecraft:cobblestone 32"); command(mc, "give AnalyzerDev minecraft:diamond 29");
-        worker = new InventoryAutomation(new BaritoneBridge()); entered = 0;
+        worker = new InventoryAutomation(new AutomationNavigator()); entered = tick;
     }
     private static void setupTable(MinecraftClient mc) {
         worker.stop(); command(mc, "clear AnalyzerDev"); command(mc, "fill 38 161 36 46 166 46 minecraft:air");
@@ -247,14 +273,11 @@ final class AutomationInventorySmoke {
         for (BlockPos pos : BlockPos.iterate(mc.player.getBlockPos().add(-8, -2, -8), mc.player.getBlockPos().add(8, 2, 8))) if (world.getBlockState(pos).isOf(block)) return true;
         return false;
     }
-    private static TaskPlanner.Plan reviewedPlan() {
-        try { var field = AutomationScreen.class.getDeclaredField("reviewed"); field.setAccessible(true); return (TaskPlanner.Plan) field.get(console); }
-        catch (ReflectiveOperationException e) { throw new IllegalStateException("Could not inspect the actual reviewed console plan", e); }
-    }
-    private static void clickConsole(MinecraftClient mc, double x, double y) {
-        float scale = Math.max(.15f, Math.min(1.25f, Math.min((console.width - 20f) / 960, (console.height - 20f) / 560)));
-        double cx = (console.width - 960 * scale) / 2, cy = (console.height - 560 * scale) / 2;
-        console.mouseClicked(cx + x * scale, cy + y * scale, GLFW.GLFW_MOUSE_BUTTON_LEFT);
+    private static void clickConsole(String control) {
+        double[] point = console.controlPoint(control);
+        require(point != null, "The automation console renders the " + control + " control");
+        require(console.mouseClicked(point[0], point[1], GLFW.GLFW_MOUSE_BUTTON_LEFT),
+                "The rendered " + control + " control accepts normal mouse input");
     }
     private static void command(MinecraftClient mc, String text) { mc.getServer().execute(() -> mc.getServer().getCommandManager().executeWithPrefix(mc.getServer().getCommandSource().withSilent(), text)); }
     private static void require(boolean condition, String message) { if (!condition) throw new IllegalStateException("Inventory check failed at " + stage + " / " + tick + ": " + message); assertions++; AnalyzerClient.LOGGER.info("Inventory check passed: {}", message); }

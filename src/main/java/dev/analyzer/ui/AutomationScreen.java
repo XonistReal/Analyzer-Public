@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.Map;
+import java.nio.file.Path;
 
 /** An explicit plan review and live task console, backed by a real automation controller. */
 public final class AutomationScreen extends Screen {
@@ -22,12 +23,13 @@ public final class AutomationScreen extends Screen {
         void pause();
         void resume();
         void stop();
+        default TaskPlanner.Plan schematicPlan(Path file,TaskPlanner.Options options,boolean autoSite) { throw new IllegalArgumentException("Schematic import is unavailable."); }
     }
     public record StepView(String label, String status, String detail) {
         public StepView { label = Objects.requireNonNullElse(label, ""); status = Objects.requireNonNullElse(status, "Queued"); detail = Objects.requireNonNullElse(detail, ""); }
     }
     public record View(String title, String state, String detail, int currentStep, List<StepView> steps,
-                       boolean running, boolean paused, boolean baritoneAvailable) {
+                       boolean running, boolean paused, boolean executionAvailable) {
         public View {
             title = Objects.requireNonNullElse(title, "No active task"); state = Objects.requireNonNullElse(state, "Idle");
             detail = Objects.requireNonNullElse(detail, ""); steps = steps == null ? List.of() : List.copyOf(steps);
@@ -37,8 +39,8 @@ public final class AutomationScreen extends Screen {
         boolean contains(double px, double py) { return px >= x && py >= y && px < x + w && py < y + h; }
     }
     private static final int W = 960, H = 560;
-    private static final String[] PRESETS = { "Escape spawn", "Build a base", "Diamond kit", "Enchanted kit", "Expedition", "Mine diamonds" };
-    private static final String[] PHRASES = { "escape spawn", "build a base", "get diamond armor", "get fully enchanted diamond armor", "escape spawn, build a base and get fully enchanted diamond armor", "mine 32 diamonds" };
+    private static final String[] PRESETS = { "Escape spawn", "Build a base", "Diamond kit", "Enchanted kit", "Netherite kit", "Go to Nether" };
+    private static final String[] PHRASES = { "escape spawn", "build a base", "get diamond armor", "get fully enchanted diamond armor", "get netherite armor", "go to the nether" };
     private final Screen parent;
     private final Controller controller;
     private final AnalyzerCore core;
@@ -50,6 +52,8 @@ public final class AutomationScreen extends Screen {
     private String message = "Choose a task, review its steps, then start.";
     private int focus = 0, stepScroll, prerequisiteScroll;
     private boolean selectAll, error, showReviewed, originSeeded;
+    private boolean schematicMode, autoSite = true;
+    private String schematicPath = "", taskText = "escape spawn";
     private float canvasScale = 1, canvasX, canvasY;
     private double mx, my;
     private int originX, originY, originZ;
@@ -82,8 +86,8 @@ public final class AutomationScreen extends Screen {
         try (var font = GuiDraw.sansFont()) {
         GuiDraw.shaderPanel(context, 0, 0, W, H, 24, accent, glass(), theme());
         GuiDraw.heading(context, textRenderer, "Automation", 23, 18, 1.75f, StudioAuxiliary.TEXT);
-        GuiDraw.label(context, textRenderer, "Plan a task and follow its progress.", 24, 45, .95f, StudioAuxiliary.MUTED);
-        statusPill(context, 675, 20, view.baritoneAvailable ? "BARITONE CONNECTED" : "BARITONE REQUIRED", view.baritoneAvailable ? accent : Palette.GOLD);
+        GuiDraw.label(context, textRenderer, "Local goals, smooth controls and surveyed safety routes.", 24, 45, .95f, StudioAuxiliary.MUTED);
+        statusPill(context, 675, 20, view.executionAvailable ? "ANALYZER AUTOMATION" : "JOIN A WORLD", view.executionAvailable ? accent : Palette.GOLD);
         button(context, "back", 867, 18, 74, 32, "Back", true, false, this::close);
         GuiDraw.shaderCard(context, 8, 75, 414, 439, 18, accent, glass(), theme(), 0, false);
         GuiDraw.shaderCard(context, 438, 75, 506, 439, 18, accent, glass(), theme(), 0, false);
@@ -99,13 +103,23 @@ public final class AutomationScreen extends Screen {
 
     private void drawComposer(DrawContext context, View view, int accent) {
         GuiDraw.heading(context, textRenderer, "New task", 22, 86, 1.3f, StudioAuxiliary.TEXT);
-        GuiDraw.label(context, textRenderer, "Type a task or choose a preset.", 22, 111, .95f, StudioAuxiliary.MUTED);
-        field(context, 0, 22, 135, 386, 47, "TASK");
+        button(context,"input-mode",220,84,188,27,schematicMode?"Task / goals":"Import schematic",!view.running&&!view.paused,false,()->{
+            if(schematicMode) { schematicPath=fields[0];fields[0]=taskText; }
+            else { taskText=fields[0];fields[0]=schematicPath; }
+            schematicMode=!schematicMode;reviewed=null;showReviewed=true;message=schematicMode?"Drop a schematic onto this screen or paste its local file path.":"Type a goal or choose a preset.";
+        });
+        GuiDraw.label(context, textRenderer, schematicMode?"Drop a .litematic, .schem or .schematic file here.":"Type a task or choose a preset.", 22, 111, .89f, StudioAuxiliary.MUTED);
+        field(context, 0, 22, 135, 386, 47, schematicMode?"SCHEMATIC FILE":"TASK");
+        if(schematicMode) {
+            button(context,"auto-site",22,195,386,30,autoSite?"Site: choose a safe nearby location":"Site: use coordinates below",!view.running&&!view.paused,false,()->{autoSite=!autoSite;reviewed=null;showReviewed=true;});
+            wrapped(context,"Review shows the chosen footprint and material requirements. Existing builds, liquids and unsafe or unloaded ground are excluded.",22,235,386,.9f,StudioAuxiliary.MUTED,15,3);
+        } else {
         for (int i = 0; i < PRESETS.length; i++) {
             int index = i;
             button(context, "preset:" + i, 22 + i % 3 * 131, 195 + i / 3 * 35, 124, 28, PRESETS[i], !view.running && !view.paused, false, () -> {
                 fields[0] = PHRASES[index]; reviewed = null; showReviewed = true; error = false; message = "Review this task to see every stage.";
             });
+        }
         }
         GuiDraw.heading(context, textRenderer, "Route", 22, 278, 1.05f, StudioAuxiliary.TEXT);
         GuiDraw.label(context, textRenderer, "Travel / shelter coordinates; current location by default.", 22, 303, .86f, StudioAuxiliary.MUTED);
@@ -114,9 +128,9 @@ public final class AutomationScreen extends Screen {
         button(context, "direction", 220, 378, 188, 42, "Direction: " + direction.name(), !view.running && !view.paused, false, () -> {
             direction = TaskPlanner.Direction.values()[(direction.ordinal() + 1) % TaskPlanner.Direction.values().length]; reviewed = null; showReviewed = true;
         });
-        String explanation = view.baritoneAvailable ? "Existing inventory counts toward goals. Vanilla enchanting needs table access, lapis, XP and suitable books for upgrades."
-                : "Install Baritone for Fabric 1.21.4 in this Prism instance, then restart Minecraft. Plans can be reviewed now; execution needs Baritone.";
-        wrapped(context, explanation, 22, 433, 386, .9f, view.baritoneAvailable ? StudioAuxiliary.SUBTLE : Palette.GOLD, 15, 3);
+        String explanation = view.executionAvailable ? "Turn speed, acceleration and break/place pacing are in Automation settings. Existing inventory counts toward goals."
+                : "Join a world to start. Automation runs inside Analyzer and needs no secondary automation mod.";
+        wrapped(context, explanation, 22, 433, 386, .9f, view.executionAvailable ? StudioAuxiliary.SUBTLE : Palette.GOLD, 15, 3);
         button(context, "review", 22, 483, 386, 28, "Review plan", !view.running && !view.paused, true, this::review);
     }
 
@@ -162,13 +176,13 @@ public final class AutomationScreen extends Screen {
         wrapped(context, prerequisites.get(prerequisiteScroll), 451, 444, 450, .88f, StudioAuxiliary.MUTED, 14, 2);
         button(context, "requirements-next", 914, 438, 19, 27, "›", prerequisites.size() > 1, false, () -> prerequisiteScroll = (prerequisiteScroll + 1) % prerequisites.size());
         if (view.running || view.paused) {
-            button(context, "pause", 449, 483, 230, 28, view.paused && !view.baritoneAvailable ? "Resume needs Baritone" : view.paused ? "Resume task" : "Pause task", !view.paused || view.baritoneAvailable, true, () -> {
+            button(context, "pause", 449, 483, 230, 28, view.paused && !view.executionAvailable ? "Join world to resume" : view.paused ? "Resume task" : "Pause task", !view.paused || view.executionAvailable, true, () -> {
                 if (view.paused) { controller.resume(); if (client != null) client.setScreen(null); }
                 else controller.pause();
             });
             button(context, "stop", 694, 483, 238, 28, "Stop task", true, false, () -> { controller.stop(); message = "Task stopped. Review a plan before starting again."; });
         } else {
-            button(context, "start", 449, 483, 483, 28, "Start reviewed plan", reviewed != null && view.baritoneAvailable, true, () -> {
+            button(context, "start", 449, 483, 483, 28, "Start reviewed plan", reviewed != null && view.executionAvailable, true, () -> {
                 try { controller.submit(reviewed); showReviewed = false; error = false; message = "Task started."; if (client != null) client.setScreen(null); }
                 catch (RuntimeException e) { error = true; message = Objects.requireNonNullElse(e.getMessage(), "Could not start this task."); }
             });
@@ -182,9 +196,10 @@ public final class AutomationScreen extends Screen {
             if (client != null && client.player != null) {
                 originX = client.player.getBlockX(); originY = client.player.getBlockY(); originZ = client.player.getBlockZ();
             }
-            reviewed = TaskPlanner.plan(fields[0], new TaskPlanner.Options(originX, originY, originZ,
+            TaskPlanner.Options options = new TaskPlanner.Options(originX, originY, originZ,
                     Integer.parseInt(fields[1].trim()), Integer.parseInt(fields[2].trim()), Integer.parseInt(fields[3].trim()),
-                    Integer.parseInt(fields[4].trim()), direction));
+                    Integer.parseInt(fields[4].trim()), direction);
+            reviewed = schematicMode ? controller.schematicPlan(Path.of(fields[0].trim().replaceAll("^\"|\"$", "")),options,autoSite) : TaskPlanner.plan(fields[0],options);
             showReviewed = true; error = false; message = "Reviewed " + reviewed.steps().size() + " stages. Starting is a separate action."; stepScroll = 0; prerequisiteScroll = 0;
         } catch (RuntimeException e) { reviewed = null; error = true; message = e instanceof NumberFormatException ? "Coordinates and distance must be whole numbers." : Objects.requireNonNullElse(e.getMessage(), "This task is not supported."); }
     }
@@ -231,6 +246,12 @@ public final class AutomationScreen extends Screen {
     public TaskPlanner.Plan reviewedPlan() { return reviewed; }
     public boolean isReviewError() { return error; }
     public String errorText() { return error ? message : ""; }
+    @Override public void onFilesDropped(List<Path> files) {
+        if(files.size()!=1) { error=true;message="Drop one schematic at a time.";return; }
+        if(controller.snapshot().running() || controller.snapshot().paused()) { error=true;message="Stop the current task before importing a schematic.";return; }
+        if(!schematicMode)taskText=fields[0];
+        schematicMode=true;fields[0]=files.getFirst().toAbsolutePath().normalize().toString();schematicPath=fields[0];review();
+    }
     @Override public boolean mouseClicked(double x, double y, int button) {
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return false;
         double px = (x - canvasX) / canvasScale, py = (y - canvasY) / canvasScale;
@@ -267,7 +288,7 @@ public final class AutomationScreen extends Screen {
     private void append(String text) {
         if (focus < 0) return;
         String base = selectAll ? "" : fields[focus], next = base + text;
-        int limit = focus == 0 ? 512 : 12;
+        int limit = focus == 0 ? schematicMode ? 2048 : 512 : 12;
         if (next.length() <= limit) { fields[focus] = next; reviewed = null; showReviewed = true; }
         selectAll = false;
     }

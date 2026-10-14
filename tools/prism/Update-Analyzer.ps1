@@ -134,6 +134,71 @@ function New-Result([string] $Status, [string] $Message, [string] $Version = '',
     return [ordered] @{ status = $Status; message = $Message; version = $Version; backupDir = $BackupDir }
 }
 
+function Retire-LegacyBaritone([string] $Instance, [string] $ModsDir, [string] $StateDir) {
+    # This independent, one-file operation runs only after a verified Analyzer install commits.
+    # A move failure does not roll back the already committed Analyzer transaction.
+    $knownHash = 'bfb79c3cdb8fe1f7697999b1f9c7f08ea29775f3b69d48ad90c387690ee67b05'
+    $retired = @()
+    $skipped = @()
+    if (-not [IO.Directory]::Exists($ModsDir)) { return @{ retired = $retired; skipped = $skipped } }
+    foreach ($file in @(Get-ChildItem -LiteralPath $ModsDir -File -Filter '*.jar' | Sort-Object FullName)) {
+        $metadata = $null
+        try {
+            Assert-Within $file.FullName $Instance
+            Assert-NoReparse $file.FullName
+            $metadata = Read-ModMetadata $file.FullName
+            $id = Get-Property $metadata 'id'
+            if ($id -isnot [string] -or $id -cne 'baritone') { continue }
+            $legacyVersion = Get-Property $metadata 'version'
+            if ($legacyVersion -isnot [string] -or $legacyVersion -cne '1.13.1') {
+                $skipped += @{ name = $file.Name; reason = 'Different Baritone version; only the previously bundled 1.13.1 is retired.' }
+                continue
+            }
+            if ((Get-Sha256 $file.FullName) -cne $knownHash) {
+                $skipped += @{ name = $file.Name; reason = 'Baritone bytes do not match the previously bundled official JAR; preserved unchanged.' }
+                continue
+            }
+            if (-not (Test-OriginalJarName $file.Name)) { throw 'The original mod filename could not be safely preserved.' }
+            $backupRoot = [IO.Path]::Combine($StateDir, 'retired-mods')
+            $operationId = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ') + '-' + [Guid]::NewGuid().ToString('N').Substring(0, 8) + '-' + $knownHash.Substring(0, 12)
+            $backupDir = [IO.Path]::Combine($backupRoot, $operationId)
+            $backup = [IO.Path]::Combine($backupDir, $file.Name)
+            foreach ($path in @($backupRoot, $backupDir, $backup)) { Assert-Within $path $Instance; Assert-NoReparse $path }
+            [IO.Directory]::CreateDirectory($backupDir) | Out-Null
+            # Recheck immediately before the atomic same-instance move; no file is deleted or overwritten.
+            if ((Get-Sha256 $file.FullName) -cne $knownHash) { throw 'The legacy JAR changed while the updater inspected it.' }
+            [IO.File]::Move($file.FullName, $backup)
+            $retired += @{ modId = 'baritone'; version = '1.13.1'; name = $file.Name; sha256 = $knownHash; backupPath = $backup }
+        }
+        catch {
+            # Only identifiable legacy files are relevant; unrelated unreadable JARs remain untouched.
+            if ($file.Name -match 'baritone' -or $null -ne $metadata -and (Get-Property $metadata 'id') -ceq 'baritone') {
+                $skipped += @{ name = $file.Name; reason = 'Retirement skipped; the original file remains active: ' + $_.Exception.Message }
+            }
+        }
+    }
+    return @{ retired = $retired; skipped = $skipped }
+}
+
+function Add-RetirementReport($Result, $Report) {
+    $Result['retiredMods'] = @($Report.retired)
+    $Result['skippedRetirements'] = @($Report.skipped)
+    if ($Report.retired.Count -gt 0) { $Result['message'] += ' The previously bundled Baritone was moved to a recoverable backup outside active mods.' }
+    if ($Report.skipped.Count -gt 0) { $Result['message'] += ' Some legacy retirement candidates were preserved; inspect skippedRetirements.' }
+    return $Result
+}
+
+function Complete-WithLegacyRetirement($Result, [string] $Instance, [string] $ModsDir, [string] $StateDir) {
+    try { return (Add-RetirementReport $Result (Retire-LegacyBaritone $Instance $ModsDir $StateDir)) }
+    catch {
+        # Post-commit maintenance never enters the Analyzer transaction's rollback path.
+        $Result['retiredMods'] = @()
+        $Result['skippedRetirements'] = @(@{ name = ''; reason = 'Legacy retirement could not complete safely: ' + $_.Exception.Message })
+        $Result['message'] += ' Analyzer remains verified; legacy retirement needs review and no candidate was deleted.'
+        return $Result
+    }
+}
+
 function Test-JarName($Name) {
     return ($Name -is [string] -and $Name -match '^[A-Za-z0-9][A-Za-z0-9._+-]{0,159}\.jar$' -and
         $Name -notmatch '^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)')
@@ -296,6 +361,12 @@ function Invoke-AnalyzerUpdate {
         $checksum -isnot [string] -or $checksum -notmatch '^[A-Fa-f0-9]{64}$') {
         throw 'Release manifest schema, mod ID, Minecraft version, version, artifact filename or SHA-256 is invalid.'
     }
+    $retireLegacy = $false
+    if ($null -ne $manifest.PSObject.Properties['retireLegacyBaritone']) {
+        $retirementFlag = Get-Property $manifest 'retireLegacyBaritone'
+        if ($retirementFlag -isnot [bool]) { throw 'Release retireLegacyBaritone must be a JSON boolean when present.' }
+        $retireLegacy = $retirementFlag
+    }
     $feedDir = [IO.Path]::GetDirectoryName($manifestPath)
     $artifact = Get-LocalPath $artifactName $feedDir
     Assert-Within $artifact $feedDir
@@ -346,7 +417,9 @@ function Invoke-AnalyzerUpdate {
             throw 'The target filename belongs to another mod; refusing to overwrite it.'
         }
         if ($installed.Count -eq 1 -and (Get-Sha256 $installed[0]) -ceq $checksum.ToLowerInvariant()) {
-            return (New-Result 'up-to-date' 'The installed Analyzer already matches the local release.' $version)
+            $result = New-Result 'up-to-date' 'The installed Analyzer already matches the local release.' $version
+            if ($retireLegacy -and -not $CheckOnly) { return (Complete-WithLegacyRetirement $result $instance $modsDir $stateDir) }
+            return $result
         }
         if ($CheckOnly) { return (New-Result 'update-available' 'The verified local release is ready to install.' $version) }
 
@@ -385,7 +458,9 @@ function Invoke-AnalyzerUpdate {
         $newInstalled = $true
         [IO.File]::Delete($journalPath)
         $journalOwned = $false
-        return (New-Result 'installed' 'Analyzer was installed from the verified local release feed.' $version $backupDir)
+        $result = New-Result 'installed' 'Analyzer was installed from the verified local release feed.' $version $backupDir
+        if ($retireLegacy) { return (Complete-WithLegacyRetirement $result $instance $modsDir $stateDir) }
+        return $result
     }
     catch {
         $failure = $_.Exception.Message

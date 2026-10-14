@@ -1,5 +1,7 @@
 # GitHub backup — October 13, 2026
 
+This records the original 15-tag transfer through 0.9.0. The October 14 native automation update is preserved separately as **v0.10.0**, with complete source/tests and a Prism package containing Analyzer and Fabric API. Main now follows that native release; the historical tags and assets below remain unchanged. Current installation and acceptance details are in [PRISM.md](PRISM.md) and [VALIDATION.md](VALIDATION.md).
+
 Repository: **[XonistReal/Analyzer](https://github.com/XonistReal/Analyzer)**, retained as private. The authenticated account is XonistReal. Main/v0.9.0 preserve the complete current working project. Existing historical commits and eight tags remain unchanged; seven additional tags identify the later native UI update and releases through 0.9.0.
 
 The current source transfer includes Java/resources/tests, Gradle wrapper and pinned dependencies, GLSL, supplied transparent logos, build/export/updater tools, design references, screenshots and documentation. It excludes Minecraft runtime data, account files/tokens, saved worlds, user config/profiles, local feed files, caches and raw logs. The two supplied logo files retain their original bytes. Individual tracked files remain below GitHub's normal large-file limit; Prism/source distribution ZIPs are release assets.
