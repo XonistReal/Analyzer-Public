@@ -29,12 +29,15 @@ public final class NativeMiner {
     public record Result(boolean done, boolean blocked, String detail, double progress) { }
     private static final MinecraftClient MC = MinecraftClient.getInstance();
     private static final int RADIUS = 24, VERTICAL = 20, SCAN_BUDGET = 4096;
+    private static final MiningSurveyPolicy SURVEY = new MiningSurveyPolicy(RADIUS, VERTICAL);
+    private record ResourceCandidate(BlockPos position, int distance) { }
     private final Set<Block> targets = new HashSet<>();
     private final Set<Item> drops = new HashSet<>();
     private final Set<BlockPos> rejected = new HashSet<>();
     private final Set<BlockPos> failedStands = new HashSet<>(), failedExcavations = new HashSet<>();
     private final Set<BlockPos> workSupports = new HashSet<>();
-    private final List<BlockPos> candidates = new ArrayList<>();
+    private final PriorityQueue<ResourceCandidate> candidates = new PriorityQueue<>(Comparator.comparingInt(ResourceCandidate::distance).reversed());
+    private BlockPos oreStand, cachedAccess, cachedAccessFrom, cachedAccessOre;
     private BlockPos scanOrigin, ore, goal, breaking, tunnelStep, pickup, aimedBlock, occluder;
     private Object world;
     private int quantity, scanIndex, minY, maxY, selected = -1, cooldown, breakingTicks, pickupTicks, preferredY, actionDelay = 3;
@@ -182,11 +185,11 @@ public final class NativeMiner {
                 }
             }
             if (ore != null) {
-                BlockPos stand = forceAccess ? null : standingPosition(ore);
+                BlockPos stand = forceAccess ? null : committedStandingPosition();
                 if (stand == null) {
                     if (branchMining) {
                         if (requestGroundRecovery()) return result(false, false, "Descending from the tree before excavating a resource approach");
-                        BlockPos access = accessStep(ore);
+                        BlockPos access = takeAccessStep(ore);
                         if (access != null && ++accessSteps <= 96) { tunnelStep = access; return tunnel(); }
                     }
                     rejected.add(ore); retarget();
@@ -194,7 +197,10 @@ public final class NativeMiner {
                 else {
                     goal = stand;
                     if (stand.equals(MC.player.getBlockPos()) && !failedStands.contains(stand)
-                            && dropReachable(ore) && inWorkingReach(ore) && MC.player.isOnGround() && MC.player.getVelocity().horizontalLength() <= .035) {
+                            && dropReachable(ore) && inWorkingReach(ore)) {
+                        goal = null; // Releasing the existing child brakes; centering this cell would turn us backward.
+                        if (!MC.player.isOnGround() || MC.player.getVelocity().horizontalLength() > .035)
+                            return result(false, false, "Braking at the already reachable mining face");
                         Result clearance = preparePickupClearance(ore);
                         return clearance == null ? breakBlock(ore, true) : clearance;
                     }
@@ -203,7 +209,9 @@ public final class NativeMiner {
             }
         }
         if (scanning) {
-            scan();
+            ore = chooseImmediateResource();
+            if (ore == null) {scan(); ore = chooseImmediateResource();}
+            if (ore != null) {oreStartCount = count; return result(false, false, "Found a nearby reachable resource without waiting for the distant survey");}
             if (scanning) return result(false, false, "Searching loaded terrain for mining targets · " + (100L * scanIndex / scanTotal()) + "%");
         }
         ore = chooseOre();
@@ -211,7 +219,7 @@ public final class NativeMiner {
         if (!candidates.isEmpty() && refreshedEmptyAtCount != count) {
             // The nearest cache may now consist of preserved route floors or inaccessible faces.
             // Survey beyond that batch once per real inventory advance before declaring excavation blocked.
-            refreshedEmptyAtCount = count; rejected.addAll(candidates); startScan();
+            refreshedEmptyAtCount = count; candidates.forEach(candidate -> rejected.add(candidate.position())); startScan();
             return result(false, false, "Refreshing loaded resources beyond the preserved work floor and obstructed faces");
         }
         if (branchMining && wrongNaturalDimension()) return result(false, true, "No loaded requested vein was reachable here, and these ores do not naturally generate in this dimension. Use the reviewed portal stage instead of digging indefinitely.");
@@ -220,9 +228,10 @@ public final class NativeMiner {
         return beginTunnel();
     }
     private void retarget() {
+        oreStand = cachedAccess = cachedAccessFrom = cachedAccessOre = null;
         cancelBreaking(); ore = null; goal = null; occluder = null; aimedBlock = null; aimReadyAge = -1; miningAim = null; aimFailures = aimAttempt = 0; accessSteps = 0; forceAccess = false;
         int before = candidates.size();
-        candidates.removeIf(position -> !currentTarget(position) || !safeToBreak(position));
+        candidates.removeIf(candidate -> !currentTarget(candidate.position()) || !safeToBreak(candidate.position()));
         // The full survey observes buried blocks too. Empty surveyed terrain can
         // remain cached while a short branch advances; a depleted vein or eight
         // blocks of movement refreshes that bounded observation window.
@@ -234,33 +243,58 @@ public final class NativeMiner {
         minY = Math.max(MC.world.getBottomY(), scanOrigin.getY() - VERTICAL);
         maxY = Math.min(MC.world.getTopYInclusive(), scanOrigin.getY() + VERTICAL);
     }
-    private int scanTotal() { return (RADIUS * 2 + 1) * (RADIUS * 2 + 1) * Math.max(1, maxY - minY + 1); }
+    private int scanTotal() { return SURVEY.size(); }
     private void scan() {
-        int width = RADIUS * 2 + 1, layers = Math.max(1, maxY - minY + 1);
         int limit = Math.min(scanTotal(), scanIndex + SCAN_BUDGET);
         var position = new BlockPos.Mutable();
         for (; scanIndex < limit; scanIndex++) {
-            int index = scanIndex, y = minY + index % layers; index /= layers;
-            position.set(scanOrigin.getX() - RADIUS + index % width, y, scanOrigin.getZ() - RADIUS + index / width);
+            var offset = SURVEY.offset(scanIndex);
+            if (candidates.size() >= 64 && offset.distanceSquared() >= candidates.peek().distance()) {scanning = false; return;}
+            position.set(scanOrigin.getX() + offset.x(), scanOrigin.getY() + offset.y(), scanOrigin.getZ() + offset.z());
+            if (position.getY() < minY || position.getY() > maxY) continue;
             if (!MC.world.isChunkLoaded(position) || excluded(position) || !targets.contains(MC.world.getBlockState(position).getBlock()) || rejected.contains(position) || !safeToBreak(position)) continue;
             // Keep only the nearest bounded candidates; underground veins can contain thousands of blocks.
-            if (candidates.size() < 64) candidates.add(position.toImmutable());
-            else {
-                int farthest = 0; double farthestDistance = -1;
-                for (int i = 0; i < candidates.size(); i++) { double distance = candidates.get(i).getSquaredDistance(scanOrigin); if (distance > farthestDistance) { farthest = i; farthestDistance = distance; } }
-                if (position.getSquaredDistance(scanOrigin) < farthestDistance) candidates.set(farthest, position.toImmutable());
-            }
+            if (candidates.size() >= 64) candidates.remove();
+            candidates.add(new ResourceCandidate(position.toImmutable(), offset.distanceSquared()));
         }
         scanning = scanIndex < scanTotal();
     }
     private BlockPos chooseOre() {
-        var nearby = candidates.stream().filter(position -> currentTarget(position) && !rejected.contains(position) && safeToBreak(position))
+        var nearby = candidates.stream().map(ResourceCandidate::position).filter(position -> currentTarget(position) && !rejected.contains(position) && safeToBreak(position))
                 .sorted(Comparator.comparingDouble(position -> position.getSquaredDistance(MC.player.getBlockPos()))).toList();
         for (int index = 0; index < nearby.size(); index++) {
             BlockPos candidate = nearby.get(index);
-            if (standingPosition(candidate) != null || branchMining && index < 8 && accessStep(candidate) != null) return candidate;
+            BlockPos stand = standingPosition(candidate);
+            if (stand != null) {oreStand = stand; return candidate;}
+            if (branchMining && index < 8) {
+                BlockPos access = accessStep(candidate);
+                if (access != null) {cachedAccess = access; cachedAccessOre = candidate; cachedAccessFrom = MC.player.getBlockPos(); return candidate;}
+            }
         }
         return null;
+    }
+    private BlockPos chooseImmediateResource() {
+        if (!stablePlayerStand()) return null;
+        var nearby = candidates.stream().map(ResourceCandidate::position).sorted(Comparator.comparingDouble(pos -> pos.getSquaredDistance(MC.player.getBlockPos()))).limit(8).toList();
+        for (BlockPos candidate : nearby) if (currentTarget(candidate) && !rejected.contains(candidate) && safeToBreak(candidate)
+                && dropReachable(candidate) && inWorkingReach(candidate) && visibleResource(MC.player.getEyePos(), candidate)) {
+            oreStand = MC.player.getBlockPos(); return candidate;
+        }
+        return null;
+    }
+    private BlockPos committedStandingPosition() {
+        if (dropReachable(ore) && inWorkingReach(ore) && stablePlayerStand() && !failedStands.contains(MC.player.getBlockPos()) && visibleResource(MC.player.getEyePos(), ore))
+            return oreStand = MC.player.getBlockPos();
+        if (oreStand != null && !failedStands.contains(oreStand) && walkable(oreStand)
+                && visibleResource(Vec3d.ofBottomCenter(oreStand).add(0, MC.player.getStandingEyeHeight(), 0), ore)) return oreStand;
+        return oreStand = standingPosition(ore);
+    }
+    private BlockPos takeAccessStep(BlockPos resource) {
+        BlockPos cached = cachedAccess;
+        cachedAccess = null;
+        if (cached != null && resource.equals(cachedAccessOre) && MC.player.getBlockPos().equals(cachedAccessFrom)
+                && MC.player.isOnGround() && walkable(MC.player.getBlockPos()) && accessEdgeCost(MC.player.getBlockPos(), cached) >= 0) return cached;
+        return accessStep(resource);
     }
     private boolean currentTarget(BlockPos position) {
         return MC.world.isChunkLoaded(position) && !excluded(position) && targets.contains(MC.world.getBlockState(position).getBlock());
@@ -303,12 +337,10 @@ public final class NativeMiner {
             for (Direction direction : Direction.Type.HORIZONTAL) for (int dy = -1; dy <= 1; dy++) {
                 BlockPos next = current.position().offset(direction).add(0, dy, 0);
                 if (Math.abs(next.getX() - start.getX()) > 8 || Math.abs(next.getZ() - start.getZ()) > 8 || Math.abs(next.getY() - start.getY()) > 6
-                        || failedExcavations.contains(next) || failedExcavations.contains(next.up())
-                        || !solidSafeFloor(next.down())) continue;
-                int feet = excavationCost(next), head = excavationCost(next.up());
-                int transitionHead = dy < 0 ? excavationCost(next.up(2)) : dy > 0 ? excavationCost(current.position().up(2)) : 0;
-                if (feet < 0 || head < 0 || transitionHead < 0) continue;
-                int work = current.work() + 10 + feet + head + transitionHead + Math.abs(dy) * 3;
+                        ) continue;
+                int edgeCost = accessEdgeCost(current.position(), next);
+                if (edgeCost < 0) continue;
+                int work = current.work() + edgeCost;
                 if (work >= costs.getOrDefault(next, Integer.MAX_VALUE)) continue;
                 costs.put(next, work);
                 double heuristic = Math.abs(resource.getX() - next.getX()) + Math.abs(resource.getY() - next.getY()) + Math.abs(resource.getZ() - next.getZ());
@@ -316,6 +348,12 @@ public final class NativeMiner {
             }
         }
         return best != null && bestDistance < initial - .5 ? best.first() : null;
+    }
+    private int accessEdgeCost(BlockPos from, BlockPos next) {
+        if (failedExcavations.contains(next) || failedExcavations.contains(next.up()) || !solidSafeFloor(next.down())) return -1;
+        int dy = next.getY() - from.getY(), feet = excavationCost(next), head = excavationCost(next.up());
+        int transitionHead = dy < 0 ? excavationCost(next.up(2)) : dy > 0 ? excavationCost(from.up(2)) : 0;
+        return feet < 0 || head < 0 || transitionHead < 0 ? -1 : 10 + feet + head + transitionHead + Math.abs(dy) * 3;
     }
     private int excavationCost(BlockPos position) {
         if (!excavatable(position)) return -1;
@@ -399,7 +437,7 @@ public final class NativeMiner {
             return result(false, false, "Walking along the checked mining staircase toward Y " + preferredY);
         }
         if (!MC.player.isOnGround()) { cancelBreaking(); goal = null; return result(false, false, "Settling on the current supported mining step before breaking"); }
-        if (MC.player.getVelocity().horizontalLength() > .035) { cancelBreaking(); goal = MC.player.getBlockPos(); return result(false, false, "Centering and settling before the next excavation break"); }
+        if (MC.player.getVelocity().horizontalLength() > .035) { cancelBreaking(); goal = null; return result(false, false, "Braking before the next excavation break"); }
         if (upperHeadroom) {
             BlockPos headroom = transitionHeadroom;
             if (!MC.world.getBlockState(headroom).isReplaceable()) {
@@ -642,6 +680,7 @@ public final class NativeMiner {
     private Result result(boolean done, boolean blocked, String message) { return new Result(done, blocked, message, Math.clamp(inventoryCount() / (double) Math.max(1, quantity), 0, 1)); }
     private void cancelBreaking() { if (breaking != null && MC.interactionManager != null) MC.interactionManager.cancelBlockBreaking(); breaking = null; breakingTicks = 0; }
     public void stop() {
+        oreStand = cachedAccess = cachedAccessFrom = cachedAccessOre = null;
         cancelBreaking();
         if (selected >= 0 && MC.player != null && MC.world == world && MC.player.getInventory().selectedSlot == lastOwnedSlot) MC.player.getInventory().selectedSlot = selected;
         selected = -1; lastOwnedSlot = -1; active = false; flintGoal = false; awaitingGravel = false; gravelPlacementWait = 0; gravelRetries = 0; targets.clear(); drops.clear(); rejected.clear(); candidates.clear(); failedStands.clear(); failedExcavations.clear(); workSupports.clear();

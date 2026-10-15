@@ -1,4 +1,4 @@
-# Native Analyzer Automation — 0.10.2
+# Native Analyzer Automation — 0.10.3
 
 Automation now runs entirely in Analyzer against Minecraft/Fabric APIs. Baritone and its native helper are removed from the current build, mod metadata and Prism package. Historical sources/notices remain for earlier releases and research. The new navigation, motion, mining, building and safety code is original; no external bot or AI service is required.
 
@@ -11,6 +11,8 @@ Requests such as `could you get me exactly 600 sand`, `get just 37 diamonds`, `s
 Examples: `go to 1500 64 -2200`, `escape spawn 25000 blocks east`, `mine 32 diamonds`, `mine 16 ancient debris`, `get diamond armor`, `get fully enchanted diamond armor`, `get netherite armor`, `go to the nether`, `return to the overworld`, `go to the end`, or combined escape/base/gear goals. These are supported local intents, not arbitrary language or executable commands.
 
 ## Original navigation and pacing
+
+The [0.10.3 motion/planning update](AUTOMATION-MOTION.md) adds anticipatory camera braking, stable mining approaches, view-preserving descent corrections and nearer-first observations without changing saved pacing controls.
 
 An incremental A* search surveys loaded collision shapes, support, one-block jumps, configured drops and surface water. Longer routes are divided into observed segments as chunks load. Costs prefer cautious ground and penalize nearby hostiles. Every movement segment is checked again against current terrain. Unsupported gaps, blocked exits, unloaded terrain and repeated lack of movement are reported. This is ground navigation; it does not fly, teleport or navigate arbitrary vehicles/deep-water routes.
 

@@ -11,6 +11,8 @@ public final class NativePathfinder {
     public interface Grid {
         List<Edge> neighbors(Point point);
         default boolean frontier(Point point) { return false; }
+        /** Only a window that excludes the actual X/Z goal may deliberately finish at a useful frontier. */
+        default boolean goalOutsideWindow(Target target) { return false; }
     }
     public record Target(int x, Integer y, int z) {
         public boolean reached(Point point) { return point.x() == x && point.z() == z && (y == null || Math.floor(point.y() + .001) == y); }
@@ -55,6 +57,8 @@ public final class NativePathfinder {
                 if (grid.frontier(point) && (frontier == null || target.heuristic(point) + entry.cost() * .05
                         < target.heuristic(frontier) + costs.get(frontier) * .05)) frontier = point;
                 if (target.reached(point)) return result = finish(point, true, "Route reaches the target");
+                if (grid.goalOutsideWindow(target) && grid.frontier(point) && target.heuristic(point) < target.heuristic(start) - .000001)
+                    return result = finish(point, false, "Reached the next checked loaded-terrain frontier");
                 if (expanded >= maximum) return result = partial("Loaded-terrain segment reached the search budget");
                 for (Edge edge : grid.neighbors(point)) {
                     if (closed.contains(edge.destination())) continue;

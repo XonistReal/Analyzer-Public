@@ -29,6 +29,8 @@ public final class NativeTerrain implements NativePathfinder.Grid {
     private final Map<BlockPos, BlockState> states = new HashMap<>();
     private final Map<BlockPos, List<Box>> shapes = new HashMap<>();
     private final Map<NativePathfinder.Point, List<NativePathfinder.Edge>> edges = new HashMap<>();
+    private record LandingKey(int x, int z, long fromY) { }
+    private final Map<LandingKey, Optional<NativePathfinder.Point>> landings = new HashMap<>();
     private static final double EPS = .001;
 
     public NativeTerrain(MinecraftClient mc, NativePathfinder.Point origin, int radius, int drop, boolean avoid, double threatRadius) {
@@ -52,6 +54,20 @@ public final class NativeTerrain implements NativePathfinder.Grid {
     }
     @Override public boolean frontier(NativePathfinder.Point point) {
         return Math.abs((long)point.x() - origin.x()) >= radius - 1 || Math.abs((long)point.z() - origin.z()) >= radius - 1;
+    }
+    @Override public boolean goalOutsideWindow(NativePathfinder.Target target) {
+        return Math.abs((long)target.x() - origin.x()) > radius || Math.abs((long)target.z() - origin.z()) > radius;
+    }
+    /** A one-edge route is already optimal only when it carries no water or threat penalty. */
+    public NativePathfinder.Point directNeighbor(NativePathfinder.Point start, NativePathfinder.Target target) {
+        if (Math.abs((long)target.x() - start.x()) > 1 || Math.abs((long)target.z() - start.z()) > 1) return null;
+        for (var edge : neighbors(start)) {
+            var next = edge.destination();
+            double rise = next.y() - start.y();
+            double base = Math.hypot(next.x() - start.x(), next.z() - start.z()) + Math.max(0, rise) * 2 + Math.max(0, -rise) * .35;
+            if (target.reached(next) && edge.cost() <= base + .000001) return next;
+        }
+        return null;
     }
     private List<NativePathfinder.Edge> surveyNeighbors(NativePathfinder.Point point) {
         List<NativePathfinder.Edge> result = new ArrayList<>(8);
@@ -81,6 +97,10 @@ public final class NativeTerrain implements NativePathfinder.Grid {
     }
     /** Chooses a real support height, including slabs, snow and stairs. Unknown chunks have no landing. */
     public NativePathfinder.Point landing(int x, int z, double fromY) {
+        return landings.computeIfAbsent(new LandingKey(x, z, Double.doubleToLongBits(fromY)),
+                key -> Optional.ofNullable(surveyLanding(x, z, fromY))).orElse(null);
+    }
+    private NativePathfinder.Point surveyLanding(int x, int z, double fromY) {
         List<Double> surfaces = new ArrayList<>();
         for (int y = MathHelper.floor(fromY + 1.03); y >= MathHelper.floor(fromY - drop) - 1; y--) {
             BlockPos pos = new BlockPos(x, y, z); BlockState state = state(pos);
@@ -113,6 +133,20 @@ public final class NativeTerrain implements NativePathfinder.Grid {
         Box travel = body(new Vec3d(from.x, lift, from.z)).union(body(new Vec3d(to.x, lift, to.z)));
         Box land = body(to).union(body(new Vec3d(to.x, lift, to.z)));
         return clear(rise) && clear(travel) && clear(land);
+    }
+    /** Fresh short-horizon input check, including the support under the actual body footprint. */
+    public boolean correctionCorridor(Vec3d from, double dx, double dz) {
+        double distance = Math.hypot(dx, dz);
+        if (!Double.isFinite(distance) || distance > 1.5) return false;
+        int samples = Math.max(1, (int)Math.ceil(distance / .1));
+        for (int step = 0; step <= samples; step++) {
+            Vec3d sample = from.add(dx * step / samples, 0, dz * step / samples);
+            if (!sweep(from, sample)) return false;
+            for (int ix = -1; ix <= 1; ix += 2) for (int iz = -1; iz <= 1; iz += 2) {
+                if (landing(MathHelper.floor(sample.x + ix * halfWidth), MathHelper.floor(sample.z + iz * halfWidth), from.y) == null) return false;
+            }
+        }
+        return true;
     }
     private Box body(Vec3d point) { return new Box(point.x - halfWidth, point.y + EPS, point.z - halfWidth, point.x + halfWidth, point.y + height, point.z + halfWidth); }
     private boolean clear(Box box) {

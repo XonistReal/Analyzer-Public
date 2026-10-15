@@ -1,0 +1,45 @@
+{
+  "release": "0.10.3",
+  "date": "2026-10-15",
+  "status": "build_verified_remaining_gameplay_checks_delegated_to_user",
+  "policyAssertions": 69006,
+  "policySuites": 22,
+  "modules": 125,
+  "controls": 1140,
+  "focusedPolicies": {
+    "motion": 65165,
+    "pathfinding": 75,
+    "routeFollowing": 70,
+    "mining": 50
+  },
+  "deterministicObservations": {
+    "camera": "Fixed-target convergence, wrapped angles, reversals, near-target changes, speed and acceleration bounds, stale-owner disturbances and same-frame preview budget.",
+    "miningSurvey": "Exact 98441-cell bounded nearest-first coverage, all adjacent cells observed early, nearest64 batch bounds and allocation rejection.",
+    "frontierFixture": {
+      "oldExhaustiveExpansions": 81,
+      "checkedFrontierExpansions": 5,
+      "scope": "Synthetic deterministic fixture with the same node budget; not a Minecraft FPS, travel-time or public-server measurement."
+    },
+    "routeFollowing": "View-preserving landing/centering input, momentum-aware braking and unsafe-direction rejection."
+  },
+  "skipped": "Optional Windows schematic-library symlink creation unavailable.",
+  "nativeGameplayRun": false,
+  "newCaptures": {},
+  "earlierEvidence": "production-validation/native-0.10.2/acceptance.json describes the prior version only; no prior native run is attributed to 0.10.3.",
+  "pendingUserChecks": [
+    "camera feel and fixed/changing target convergence with saved turn settings",
+    "mining faces and cover, standing approach reuse, collection and descent in actual terrain",
+    "short routes, out-of-window routes, landing/centering corrections and hazard replanning in game",
+    "remaining previous-version Auto Eat and X-ray utility/entity gameplay checks"
+  ],
+  "scope": "No new native client or long gameplay sweep, following the user request to do remaining checks manually. Configured pacing remains; original native controllers retain loaded-terrain safety and actual server-backed interaction requirements. No universal unattended-success or measured server-speed claim.",
+  "logs": {
+    "motion-0.10.3-build.log": "d68eb93b06330f3a144cb664cc8bad73f83093a62a4f5047b9d1c5721a9eadd5",
+    "motion-0.10.3-publish.log": "37b10cdfd61c144c6bf21ee9d0eb203e054c0f27bf343825425c9c0fb610a211"
+  },
+  "artifact": {
+    "version": "0.10.3",
+    "sha256": "3a58543049ab2fb58bb3c63165af0f280d93f8c145e5b846d5e38a1aca0ab798",
+    "feedArtifact": "analyzer-0.10.3-3a58543049ab.jar"
+  }
+}

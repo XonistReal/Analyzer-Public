@@ -41,10 +41,27 @@ public final class NativePathfinderSelfTest {
             final NativePathfinder.Grid open = rectangle(-4, 4, -4, 4, Set.of(), Map.of());
             public List<NativePathfinder.Edge> neighbors(NativePathfinder.Point point) { return open.neighbors(point); }
             public boolean frontier(NativePathfinder.Point point) { return Math.abs(point.x()) == 4 || Math.abs(point.z()) == 4; }
+            public boolean goalOutsideWindow(NativePathfinder.Target target) { return Math.abs(target.x()) > 4 || Math.abs(target.z()) > 4; }
         };
         var segment = complete(new NativePathfinder.Search(frontier, point(0, 0), new NativePathfinder.Target(200, null, 0), 4096));
         check(!segment.reached() && segment.path().getLast().equals(point(4, 0)), "long travel ends at a legal segment frontier");
         check(segment.path().size() == 5, "segment has actual intermediate cells");
+        NativePathfinder.Grid exhaustiveWindow = new NativePathfinder.Grid() {
+            public List<NativePathfinder.Edge> neighbors(NativePathfinder.Point point) { return frontier.neighbors(point); }
+            public boolean frontier(NativePathfinder.Point point) { return frontier.frontier(point); }
+        };
+        var exhaustive = complete(new NativePathfinder.Search(exhaustiveWindow, point(0, 0), new NativePathfinder.Target(200, null, 0), 4096));
+        check(segment.path().equals(exhaustive.path()), "early segmentation keeps the same checked route to its frontier");
+        check(segment.expanded() == 5 && exhaustive.expanded() == 81, "a useful long-distance frontier needs five expansions instead of exhausting all 81 cells");
+        check(segment.expanded() * 8 < exhaustive.expanded(), "segment latency improves without increasing the per-tick node budget");
+        NativePathfinder.Grid threatenedFrontier = new NativePathfinder.Grid() {
+            final NativePathfinder.Grid observed = rectangle(-4, 4, -4, 4, Set.of(), Map.of(point(1, 0), 30D, point(2, 0), 30D));
+            public List<NativePathfinder.Edge> neighbors(NativePathfinder.Point point) { return observed.neighbors(point); }
+            public boolean frontier(NativePathfinder.Point point) { return frontier.frontier(point); }
+            public boolean goalOutsideWindow(NativePathfinder.Target target) { return true; }
+        };
+        var safeSegment = complete(new NativePathfinder.Search(threatenedFrontier, point(0, 0), new NativePathfinder.Target(200, null, 0), 4096));
+        check(safeSegment.path().stream().noneMatch(p -> p.equals(point(1, 0)) || p.equals(point(2, 0))), "early segment completion retains weighted threat avoidance");
 
         var isolatedPost = complete(new NativePathfinder.Search(frontier, point(0, 0), new NativePathfinder.Target(0, 2, 0), 4096));
         check(!isolatedPost.reached() && isolatedPost.path().equals(List.of(point(0, 0))),
@@ -60,6 +77,7 @@ public final class NativePathfinderSelfTest {
         boolean rejected = false;
         try { new NativePathfinder.Edge(start, Double.NaN); } catch (IllegalArgumentException expected) { rejected = true; }
         check(rejected, "nonfinite edge costs cannot corrupt the search queue");
+        System.out.println("Checked frontier comparison: " + exhaustive.expanded() + " → " + segment.expanded() + " expanded cells at the same node budget");
         System.out.println("Native pathfinder passed " + assertions + " assertions");
     }
     private static NativePathfinder.Result complete(NativePathfinder.Search search) {

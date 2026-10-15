@@ -1,18 +1,20 @@
+> **0.10.3 motion/planning fixes:** Camera braking, stable mining approaches, view-preserving descent corrections and nearest-first resource/route planning. [Details and validation scope](AUTOMATION-MOTION.md).
+
 > **0.10.2 Local requests, recovery and X-ray:** Review requests such as “get me 600 sand” or “get just 37 diamonds”, or build one actual selected/named schematic. Native mining clears checked natural cover, tree recovery uses verified descents, and task-owned crafting tables are collected. Render → X-ray provides 15% terrain, terrain outlines and ores-only styles, with visible workstations/storage and entity highlights. Auto Eat now refills to full hunger after triggering. See [Automation](AUTOMATION.md), [X-ray](XRAY.md) and [observed validation](VALIDATION.md).
 
 # Analyzer
 
-An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.10.2** has **125 registered modules**: server privacy, world visuals, editable HUD widgets, a custom Home screen, two native shader module menus, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
+An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.10.3** has **125 registered modules**: server privacy, world visuals, editable HUD widgets, a custom Home screen, two native shader module menus, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
 
 ![Studio with the supplied transparent wordmark](screenshots/analyzer-liquid-studio-glass.png)
 
 ## Install and start
 
-**Prism Launcher:** drag `Analyzer-0.10.2-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; native Automation is included in Analyzer.
+**Prism Launcher:** drag `Analyzer-0.10.3-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; native Automation is included in Analyzer.
 
 Project updates also rebuild the Prism ZIP and update the user's local Analyzer instance. The standing delivery workflow is recorded in [AGENTS.md](AGENTS.md).
 
-For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.10.2.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
+For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.10.3.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
 
 The custom Home screen opens by default over Minecraft's panorama. Use its top-right button to switch to Orbit; **Vanilla menu** saves the original title preference. [Home controls](HOME-SCREEN.md) describes the real world/server and options pages. Click **Modules** on Home or **Analyzer** on the vanilla title screen or press **Right Shift** in game. Fresh installs open **Studio** with the **Rose** accent; choose **HUD Studio → Menu layout → Studio** to switch an existing preference. **Profiles → studio → Load** adds selected cosmetics and Studio appearance; **cinematic**, **classic** and **neon** also open Studio while retaining their distinct visual settings and HUD themes. These four visual profiles leave gameplay automation off. Loading **hvh** explicitly enables Kill Aura, Crystal Aura, Surround, Auto Weapon, Auto Totem, Auto Armor and Keep Sprint, with combat HUD widgets. Earlier **showcase**, **arctic**, **cinder**, **aurora**, **ember** and **minimal** profiles remain available. Profiles opens from every menu; Back restores the parent catalogue context.
 
@@ -99,7 +101,7 @@ Select a Java 21 JDK with `JAVA_HOME`, then run:
 .\gradlew.bat publishLocal   # publish to the Prism local update feed
 ```
 
-On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.10.2.jar`.
+On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.10.3.jar`.
 
 `runSmoke` uses the project-local `run/` directory, creates/updates only `run/saves/Analyzer-Smoke`, captures screenshots, and exits. Installed release builds never activate the development harness. See VALIDATION for assertions and results. Optional pixel checks use `python tools/verify_render.py` and `python tools/verify_visuals.py` with Pillow.
 

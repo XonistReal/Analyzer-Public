@@ -22,6 +22,10 @@ Auto Eat's hunger setting triggers a refill cycle: keep consuming available hotb
 
 Keep **Render → X-ray** opt-in with **Fade terrain / Terrain outlines / Ores only**. Fade uses approximately 15% opaque terrain with fully opaque selected ores; the other styles use thin terrain edges or hide ordinary terrain. Workstations and all vanilla storage models remain visible by default, including special block-entity models. Entity highlights are enabled by default and bounded to nearby received entities. Preserve ore, workstation, storage and entity controls, native textures, live chunk/resource restoration and saved profiles. This renders loaded client data; do not claim server-data bypass, replacement-renderer compatibility or undetectability.
 
+## Motion and planning in 0.10.3
+
+Preserve bounded camera acceleration with braking before fixed targets, per-tick angular budgets and stable yaw-only pitch. Mining brakes by releasing its movement child rather than recentering its current cell, commits freshly valid standing approaches and revalidates cached excavation edges. Resource surveys run nearest first with a bounded 64-candidate batch and early nearby selection. Checked adjacent routes, useful out-of-window frontiers and same-tick waypoint advancement reduce redundant planning. Local landing/centering corrections must preserve view direction and freshly validate requested input, momentum, body clearance and footprint support. Keep user pacing/settings; do not replace safety checks with blind speed increases. The user elected to perform remaining in-game checks for these deliveries; record deterministic observations separately from native gameplay. See `AUTOMATION-MOTION.md`.
+
 ## Standing user preference: Prism delivery
 
 The user explicitly requested on October 11, 2026 that every Analyzer update also update their Prism Launcher instance. Treat publishing, packaging and installing as part of completing future project updates. This is already authorized; do not ask for the same permission again.

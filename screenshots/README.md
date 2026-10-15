@@ -1,5 +1,7 @@
 # Current native captures
 
+Analyzer **0.10.3** has no new native captures: the user is performing its gameplay checks. These images document earlier releases; see [current validation](../VALIDATION.md) for the distinction.
+
 Analyzer **0.10.2** adds 24 recorded images under `analyzer-native-0.10.2-*`. [Validation](../VALIDATION.md) distinguishes completed mining/core stages, earlier `base-*` component runs and remaining manual gameplay checks.
 
 - [600 sand](analyzer-native-0.10.2-automation-600-sand.png), [96 cobblestone](analyzer-native-0.10.2-automation-grass-covered-96-stone.png)

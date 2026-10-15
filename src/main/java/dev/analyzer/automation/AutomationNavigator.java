@@ -36,6 +36,7 @@ public final class AutomationNavigator {
     public record RouteDiagnostics(String state, int expanded, int pathNodes, int nextNode, int replans) { }
     public record InputStatus(boolean active, String description) { }
     public record GroundDiagnostics(String mode, int climbs, int cuts, double startY, double lowestY) { }
+    public record PlanningDiagnostics(int searches, int directRoutes, int expandedNodes, int planningTicks, double planningMillis) { }
     public static final int SHELTER_MATERIAL_COUNT = ShelterSchematic.MATERIAL_COUNT;
     private enum Kind { TRAVEL, MINE, BUILD, GROUND }
     private final MinecraftClient mc = MinecraftClient.getInstance();
@@ -66,6 +67,8 @@ public final class AutomationNavigator {
     private BlockPos approachGoal;
     private String diagnosticState = "";
     private int lastDiagnostic;
+    private int searches, directRoutes, expandedNodes, planningTicks;
+    private long planningNanos;
 
     public AutomationNavigator() { this(new Object(), true); }
     AutomationNavigator(Object group, boolean workers) {
@@ -115,6 +118,10 @@ public final class AutomationNavigator {
                 && mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().contract(.001));
     }
     public GroundDiagnostics groundDiagnostics() { return groundRecovery == null ? groundDiagnostics : groundStatus(); }
+    public PlanningDiagnostics planningDiagnostics() {
+        if (approach != null && approach.status.active()) return approach.planningDiagnostics();
+        return new PlanningDiagnostics(searches, directRoutes, expandedNodes + (search == null ? 0 : search.expanded()), planningTicks, planningNanos / 1_000_000.0);
+    }
     public boolean recoverWorkGround() {
         if (kind == Kind.GROUND && status.owned()) return true;
         if (!canStart()) return false;
@@ -191,6 +198,7 @@ public final class AutomationNavigator {
         world = mc.world; ticks = replans = stuckTicks = bestNodeTicks = 0; bestDistance = Double.MAX_VALUE;
         lastPosition = mc.player.getPos(); path = List.of(); node = 0; search = null;
         movementAnchor = lastPosition; lastMovementTick = 0;
+        searches = directRoutes = expandedNodes = planningTicks = 0; planningNanos = 0;
         status = new Status(State.RUNNING, title, "Reviewing observed terrain", 0, true);
     }
     private boolean fail(String detail) {
@@ -219,9 +227,11 @@ public final class AutomationNavigator {
         release(); status = new Status(State.IDLE, "", "Native task canceled", 0, false); return true;
     }
     private void release() {
-        clearSafetyInputs(); inputs.close(); search = null; path = List.of();
+        clearSafetyInputs(); inputs.close(); if (search != null) expandedNodes += search.expanded(); search = null; path = List.of();
         if (approach != null) approach.cancel(); if (miner != null) miner.stop(); if (builder != null) builder.stop();
-        approachGoal = null; miner = null; builder = null; kind = null; AutomationMotion.reset();
+        approachGoal = null; miner = null; builder = null; kind = null;
+        // A movement child must not erase a parent worker's just-applied camera acceleration.
+        if (workers) AutomationMotion.reset();
         clearGroundRecovery();
         if (reserved) inputs.releaseReservation(); reserved = false;
     }
@@ -309,15 +319,23 @@ public final class AutomationNavigator {
                 + ", " + player;
     }
     private void planRoute() {
+        long planningStarted = System.nanoTime();
+        if (search != null) expandedNodes += search.expanded();
         inputs.close(); path = List.of(); node = 0;
         var start = NativeTerrain.playerPoint(mc);
         if (preciseArrival && goal.reached(start)) {
             // A block-level graph cannot center the player within a cell; steer this actual last half-step directly.
             path = List.of(new NativePathfinder.Point(goal.x(), (int)Math.round(mc.player.getY() * 16), goal.z()));
-            search = null; replans++; stuckTicks = 0; bestDistance = Double.MAX_VALUE; return;
+            search = null; replans++; directRoutes++; stuckTicks = 0; bestDistance = Double.MAX_VALUE;
+            planningNanos += System.nanoTime() - planningStarted; return;
         }
         var terrain = new NativeTerrain(mc, start, integer("path-radius", 24), integer("max-drop", 1), safeRouting || bool("proactive-avoidance", true), number("avoid-range", 16), goal);
-        search = new NativePathfinder.Search(terrain, start, goal, 8192); replans++; stuckTicks = 0; bestDistance = Double.MAX_VALUE;
+        var adjacent = terrain.directNeighbor(start, goal);
+        if (adjacent != null) {
+            path = List.of(start, adjacent); node = 1; search = null; directRoutes++;
+        } else { search = new NativePathfinder.Search(terrain, start, goal, 8192); searches++; }
+        replans++; stuckTicks = 0; bestDistance = Double.MAX_VALUE; bestNodeTicks = ticks;
+        planningNanos += System.nanoTime() - planningStarted;
     }
     private void tickTravel() {
         if (goal.reached(NativeTerrain.playerPoint(mc))) {
@@ -340,14 +358,16 @@ public final class AutomationNavigator {
             finish(State.FAILED, "Native route made no physical movement within its planning and turning budget. Check the approach and resume explicitly.", progress()); return;
         }
         if (search != null) {
+            long planningStarted = System.nanoTime(); planningTicks++;
             var result = search.advance(integer("path-budget", 256));
+            planningNanos += System.nanoTime() - planningStarted;
             status = new Status(State.RUNNING, status.process(), "Planning loaded terrain: " + search.expanded() + " nodes", progress(), true);
             inputs.close();
             if (result == null) return;
             if (FabricLoader.getInstance().isDevelopmentEnvironment() && Boolean.getBoolean("analyzer.nativeAutomationSmoke"))
-                AnalyzerClient.LOGGER.info("ANALYZER_NATIVE_ROUTE: target={}, from={}, reached={}, detail={}, path={}",
-                        goal, NativeTerrain.playerPoint(mc), result.reached(), result.detail(), result.path());
-            search = null; path = result.path(); node = 1;
+                AnalyzerClient.LOGGER.info("ANALYZER_NATIVE_ROUTE: target={}, from={}, reached={}, detail={}, path={}, planning={}",
+                        goal, NativeTerrain.playerPoint(mc), result.reached(), result.detail(), result.path(), planningDiagnostics());
+            expandedNodes += search.expanded(); search = null; path = result.path(); node = 1;
             if (path.size() < 2) {
                 if (workers && !groundAttempted && goal.y() != null && goal.y() < mc.player.getY() - 2 && needsWorkGroundRecovery()) {
                     startGroundRecovery(); status = new Status(State.RUNNING, status.process(), "Finding a safe descent before continuing the intended route", progress(), true); return;
@@ -356,13 +376,21 @@ public final class AutomationNavigator {
             }
         }
         if (node >= path.size()) { planRoute(); return; }
+        boolean grounded = mc.player.isOnGround() || mc.player.isTouchingWater();
+        // Consuming a reached intermediate point is bookkeeping, not a reason to stop for another tick.
+        while (node < path.size()) {
+            Vec3d waypoint = NativeTerrain.center(path.get(node));
+            boolean last = preciseArrival && node == path.size() - 1;
+            boolean down = node > 0 && path.get(node - 1).y() > waypoint.y + .25;
+            if (!RouteFollowingPolicy.reached(Math.hypot(mc.player.getX() - waypoint.x, mc.player.getZ() - waypoint.z),
+                    mc.player.getY() - waypoint.y, last ? .15 : .28, down, grounded)) break;
+            node++; bestDistance = Double.MAX_VALUE; bestNodeTicks = ticks;
+        }
+        if (node >= path.size()) { planRoute(); return; }
         Vec3d target = NativeTerrain.center(path.get(node));
         double separation = mc.player.getPos().distanceTo(target);
         boolean finalApproach = preciseArrival && node == path.size() - 1;
-        double tolerance = finalApproach ? .15 : .28;
-        if (Math.hypot(mc.player.getX() - target.x, mc.player.getZ() - target.z) < tolerance && Math.abs(mc.player.getY() - target.y) < .45) {
-            node++; bestDistance = Double.MAX_VALUE; bestNodeTicks = ticks; inputs.close(); return;
-        }
+        boolean descending = node > 0 && path.get(node - 1).y() > target.y + .25;
         if (separation < bestDistance - .04) { bestDistance = separation; stuckTicks = 0; } else if (!headingHold) stuckTicks++;
         if (stuckTicks > 60) {
             if (replans >= 6 && mc.player.getPos().squaredDistanceTo(lastPosition) < 1) { finish(State.FAILED, "Repeated native routes made no movement progress", progress()); return; }
@@ -370,7 +398,6 @@ public final class AutomationNavigator {
         }
         // Recheck terrain through a new survey. Servers, falling blocks and explosions can invalidate the planned path.
         var observed = new NativeTerrain(mc, NativeTerrain.playerPoint(mc), 8, integer("max-drop", 1), false, 4, goal);
-        boolean grounded = mc.player.isOnGround() || mc.player.isTouchingWater();
         boolean recentering = false;
         if (grounded && !observed.sweep(mc.player.getPos(), target)) {
             Vec3d cellCenter = NativeTerrain.center(NativeTerrain.playerPoint(mc));
@@ -385,6 +412,30 @@ public final class AutomationNavigator {
             }
         }
         Vec3d delta = target.subtract(mc.player.getPos());
+        double horizontal = Math.hypot(delta.x, delta.z);
+        boolean rising = target.y > mc.player.getY() + .4 || mc.player.isTouchingWater();
+        if (!rising && RouteFollowingPolicy.localCorrection(recentering, finalApproach, descending, horizontal)) {
+            if (!grounded) {
+                var landing = observed.landing(path.get(node).x(), path.get(node).z(), mc.player.getY());
+                if (landing == null || Math.abs(landing.y() - target.y) > .06) {
+                    inputs.close(); status = new Status(State.RUNNING, status.process(), "The checked landing changed; waiting for support before replanning", progress(), true); return;
+                }
+            }
+            var velocity = mc.player.getVelocity();
+            var correction = RouteFollowingPolicy.correct(delta.x, delta.z, velocity.x, velocity.z, mc.player.getYaw());
+            Vec3d correctionStart = mc.player.getPos();
+            if (!RouteFollowingPolicy.safeCorrection(correction, velocity.x, velocity.z, mc.player.getYaw(),
+                    (dx, dz) -> observed.correctionCorridor(correctionStart, dx, dz))) {
+                inputs.close(); lastYawStep = lastPitchStep = 0; headingHold = false;
+                status = new Status(State.RUNNING, status.process(), "Holding until the local correction has checked support and clearance", progress(), true); return;
+            }
+            if (!inputs.steer(correction.forward(), correction.backward(), correction.left(), correction.right(), false)) {
+                finish(State.INTERRUPTED, "Another task owns keyboard movement", progress()); return;
+            }
+            lastYawStep = lastPitchStep = 0; headingHold = false;
+            status = new Status(State.RUNNING, status.process(), descending && !grounded ? "Holding the checked landing while descending"
+                    : "Centering on the checked approach without changing view", progress(), true); return;
+        }
         float yaw = (float)(Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90);
         double beforeYaw = mc.player.getYaw(), beforePitch = mc.player.getPitch();
         boolean aligned = AutomationMotion.alignYaw(yaw, motion);
