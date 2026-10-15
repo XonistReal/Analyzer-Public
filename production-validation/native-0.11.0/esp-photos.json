@@ -1,0 +1,43 @@
+{
+  "release": "0.11.0",
+  "date": "2026-10-15",
+  "type": "focused_native_esp_framebuffer_photos",
+  "runtimeCommand": "Java 21 gradlew.bat -I build/reports/esp-photo.init.gradle runClient",
+  "gameVersion": "1.21.4",
+  "developmentWorld": "Analyzer-Esp-Photos",
+  "developmentDirectory": "run-esp-photos",
+  "captureCount": 4,
+  "nativeChecks": 9,
+  "glErrorChecks": 4,
+  "sourceHashes": {
+    "src/main/java/dev/analyzer/AnalyzerClient.java": "53837bdc13f5364265429b20106312f84181afcd18ad094b7ef1b5b29ebb5ff9",
+    "src/main/java/dev/analyzer/render/AnalyzerRenderer.java": "583ce10b5344b49a366ac2d10b5baaa9115961644fb986500b0cf2a1b27b6301",
+    "src/main/java/dev/analyzer/render/StorageCache.java": "a63c11904835abc7176edd94f4b59fe2066759803435816a56e6e4a23f974d05",
+    "src/main/java/dev/analyzer/core/EspSettings.java": "e9eabe527b339def7073a33f3b52bfdb9e9c59fa107f63ec507e0f0b7201c16a"
+  },
+  "runtimeLogSha256": "920f394b0dc02c1e177aaec0ef3b301fe7fbafc19ad51d61d8af5aaffa5a5786",
+  "captures": {
+    "analyzer-0.11.0-esp-entities.png": {
+      "sha256": "edbb040352623aef229a305b61754f77821573603e67f023b595bc47620f4fd2",
+      "width": 1920,
+      "height": 1080
+    },
+    "analyzer-0.11.0-esp-storage.png": {
+      "sha256": "c656be0759b1aa581e5edbc97c5ed4d0c6c7b73f6743ef4787b3740563b06658",
+      "width": 1920,
+      "height": 1080
+    },
+    "analyzer-0.11.0-esp-through-walls.png": {
+      "sha256": "2b67e49587c9169d6cb64682b4ffbd31c1318e5ef23a55d822608296d69da0cf",
+      "width": 1920,
+      "height": 1080
+    },
+    "analyzer-0.11.0-esp-tracers.png": {
+      "sha256": "9f789287e9e19727c84ac1ca3eed34d93656c29990cc331cf75968cf2a8a9186",
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "fixture": "Real integrated-server husk, creeper, cow, pig, storage blocks/cart and stone wall. Scout is explicitly a client-local player rendering fixture. Native unedited framebuffer screenshots.",
+  "scope": "Focused visual/selection/GL checks only; not combat gameplay, schematic construction or a full module acceptance run. Temporary development hook restored byte-for-byte; production renderer, installed JAR and user settings unchanged."
+}

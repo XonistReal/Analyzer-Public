@@ -1,3 +1,11 @@
+# Later focused ESP photo pass — October 15, 2026
+
+At the user's request, Analyzer **0.11.0** subsequently ran in an isolated Minecraft 1.21.4 development world and produced **four original 1920 × 1080 framebuffer photos**: entity groups, storage colors, matching tracers and through-wall boxes. **Nine focused checks**, including clean OpenGL errors before all four captures, passed. The images were visually inspected. Mobs/storage/cart/wall are real integrated-server objects; the cyan Scout player is an explicit client-local rendering fixture.
+
+The [photo index](screenshots/README.md) and [separate photo evidence](production-validation/native-0.11.0/esp-photos.json) record scope/hashes. Production renderer sources and the installed JAR are unchanged; the temporary development capture hook was restored byte-for-byte. This establishes the photographed ESP behavior, not combat acceptance or completion of either farm. The original delivery evidence below remains historical to that delivery.
+
+## Original 0.11.0 delivery
+
 # Combat, debug ESP and schematic construction — October 15, 2026
 
 Analyzer **0.11.0** coordinates combat camera/hotbar/action ownership and adds opt-in **Auto Block / Double Hand / Hover Totem**. Entity/storage/tracer ESP uses clean debug geometry and broad category colors; remaining target/item/hole ESP paths follow the same presentation. Local requests recognize running vanilla item names and stack sizes, including **Could you get me 512 ice?**, and distinguish real acquisition requirements. Schematic review retains a read-only ghost and uses ordinary reusable buckets for source fluids/waterlogging. Details: [Combat and ESP](COMBAT-ESP.md), [construction and limits](SCHEMATIC-CONSTRUCTION.md).

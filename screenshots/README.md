@@ -1,6 +1,19 @@
+# Native ESP photos — October 15, 2026
+
+Four original 1920 × 1080 in-game screenshots from Analyzer 0.11.0 in an isolated development world:
+
+- [Entity boxes](analyzer-0.11.0-esp-entities.png): red hostile mobs, mint non-hostile mobs and cyan local player demo.
+- [Storage colors](analyzer-0.11.0-esp-storage.png): double/trapped/ender chests, barrel, shulker, furnace, hopper, brewing stand, dispenser, crafter, pot and storage cart.
+- [Matching tracers](analyzer-0.11.0-esp-tracers.png): entity/storage colors with their configured lines.
+- [Through-wall boxes](analyzer-0.11.0-esp-through-walls.png): actual stone wall hiding the selected scene.
+
+Mobs, containers and wall are integrated-server objects; Scout is an explicit client-local player rendering fixture. Images are unedited native framebuffer captures. All four passed their OpenGL error checks; nine focused checks completed. [Evidence](../production-validation/native-0.11.0/esp-photos.json). No personal world or settings were changed.
+
+## Earlier captures
+
 # Current native captures
 
-Analyzer **0.11.0** has no new native captures: the user is performing its gameplay checks. These images document earlier releases; see [current validation](../VALIDATION.md) for the distinction.
+The earlier captures below document their original releases. The original delivery left gameplay checks to the user; this later focused photo session is recorded separately.
 
 Analyzer **0.10.2** adds 24 recorded images under `analyzer-native-0.10.2-*`. [Validation](../VALIDATION.md) distinguishes completed mining/core stages, earlier `base-*` component runs and remaining manual gameplay checks.
 
