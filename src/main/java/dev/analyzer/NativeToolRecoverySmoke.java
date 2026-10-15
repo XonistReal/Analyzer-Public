@@ -30,7 +30,7 @@ final class NativeToolRecoverySmoke {
     private enum Stage { SETUP, FIRST_RECOVERY, FIRST_VERIFY, FIRST_BREAK_SETUP, FIRST_BREAK, FIRST_BROKEN_VERIFY,
         SECOND_RECOVERY, SECOND_VERIFY, SECOND_BREAK_SETUP, SECOND_BREAK, SECOND_BROKEN_VERIFY, THIRD_RECOVERY, THIRD_VERIFY, CAPTURE, FINISHED }
     private record Tool(Item item, int slot, int remaining) { }
-    private record Snapshot(int requestedTick, boolean survival, List<Tool> tools, boolean table, boolean furnace,
+    private record Snapshot(int requestedTick, boolean survival, List<Tool> tools, boolean table, int tableItems, boolean furnace,
                             int naturalLogs, int sourceStone, boolean markerStone, boolean markerAir, boolean cursorEmpty) { }
     private static final BlockPos MIN = new BlockPos(102, 160, 102), MAX = new BlockPos(126, 168, 126);
     private static final List<BlockPos> LOGS = logs();
@@ -77,7 +77,7 @@ final class NativeToolRecoverySmoke {
                 verifyReplacement("Initial missing-tool recovery");
                 require(observed.naturalLogs <= 8, "The production miner actually harvests at least eight nearby logs");
                 require(observed.sourceStone <= 16, "The production miner actually gathers the stone prerequisite from the world");
-                require(observed.table && observed.furnace, "Recovery crafts and places a real crafting table and crafts a real furnace");
+                require(!observed.table && observed.tableItems == 1 && observed.furnace, "Recovery returns its actual crafting table to inventory and crafts a real furnace");
                 require(inventory.clicks() > firstClicks + 20, "Wooden prerequisites and the stone pickaxe use normal recipe slot clicks");
                 beginBreak(mc, Stage.FIRST_BREAK_SETUP);
             }
@@ -143,18 +143,16 @@ final class NativeToolRecoverySmoke {
                 int slot = -1;
                 for (int i = 0; i < 36; i++) if (player.getInventory().getStack(i).isOf(Items.STONE_PICKAXE)) { slot = i; break; }
                 if (slot < 0) throw new IllegalStateException("The crafted server replacement is missing before the wear-out fixture");
-                BlockPos table = null;
-                for (BlockPos pos : BlockPos.iterate(MIN.up(), MAX)) if (world.getBlockState(pos).isOf(Blocks.CRAFTING_TABLE)) { table = pos.toImmutable(); break; }
-                if (table == null) throw new IllegalStateException("The recovery-created crafting table is missing");
+                BlockPos anchor = player.getBlockPos();
                 for (int dz = -3; dz <= 3 && breakStand == null; dz++) for (int dx = -3; dx <= 3; dx++) {
-                    BlockPos stand = table.add(dx, 0, dz), target = stand.east(2);
+                    BlockPos stand = anchor.add(dx, 0, dz), target = stand.east(2);
                     if (stand.getX() < 103 || stand.getX() > 123 || stand.getZ() < 103 || stand.getZ() > 125 || target.getX() > 125) continue;
                     if (!world.getBlockState(stand).isAir() || !world.getBlockState(stand.up()).isAir()
                             || !world.getBlockState(stand.east()).isAir() || !world.getBlockState(stand.east().up()).isAir() || !world.getBlockState(target).isAir()
                             || !world.getBlockState(stand.down()).isOf(Blocks.BEDROCK) || !world.getBlockState(target.down()).isOf(Blocks.BEDROCK)) continue;
                     breakStand = stand; marker = target; break;
                 }
-                if (breakStand == null) throw new IllegalStateException("No empty isolated wear-out surface exists near the actual table");
+                if (breakStand == null) throw new IllegalStateException("No empty isolated wear-out surface exists near the player carrying the recovered table");
                 String itemSlot = slot < 9 ? "hotbar." + slot : "inventory." + (slot - 9);
                 // Only the isolated wear-out precondition uses a command; the item must break through a normal action.
                 command(mc, "item replace entity AnalyzerDev " + itemSlot + " with minecraft:stone_pickaxe[minecraft:damage=130]");
@@ -235,16 +233,17 @@ final class NativeToolRecoverySmoke {
         mc.getServer().execute(() -> {
             try {
                 ServerPlayerEntity player = mc.getServer().getPlayerManager().getPlayer(playerId); var world = player.getServerWorld();
-                List<Tool> tools = new ArrayList<>(); boolean furnace = false;
+                List<Tool> tools = new ArrayList<>(); boolean furnace = false; int tableItems = 0;
                 for (int i = 0; i < player.getInventory().size(); i++) {
                     ItemStack stack = player.getInventory().getStack(i); if (stack.isOf(Items.FURNACE)) furnace = true;
+                    if (stack.isOf(Items.CRAFTING_TABLE)) tableItems += stack.getCount();
                     if (stack.isOf(Items.STONE_PICKAXE) || stack.isOf(Items.WOODEN_PICKAXE) || stack.isOf(Items.IRON_PICKAXE) || stack.isOf(Items.DIAMOND_PICKAXE) || stack.isOf(Items.NETHERITE_PICKAXE)) tools.add(new Tool(stack.getItem(), i, stack.getMaxDamage() - stack.getDamage()));
                 }
                 boolean table = false; for (BlockPos pos : BlockPos.iterate(MIN.up(), MAX)) { table |= world.getBlockState(pos).isOf(Blocks.CRAFTING_TABLE); furnace |= world.getBlockState(pos).isOf(Blocks.FURNACE); }
                 int natural = 0; for (BlockPos pos : LOGS) if (world.getBlockState(pos).isOf(Blocks.OAK_LOG)) natural++;
                 int stone = 0; for (BlockPos pos : BlockPos.iterate(new BlockPos(118, 161, 105), new BlockPos(119, 161, 120))) if (world.getBlockState(pos).isOf(Blocks.STONE)) stone++;
                 BlockPos target = marker;
-                observed = new Snapshot(requested, player.interactionManager.getGameMode() == GameMode.SURVIVAL, List.copyOf(tools), table, furnace, natural, stone,
+                observed = new Snapshot(requested, player.interactionManager.getGameMode() == GameMode.SURVIVAL, List.copyOf(tools), table, tableItems, furnace, natural, stone,
                         target != null && world.getBlockState(target).isOf(Blocks.STONE), target != null && world.getBlockState(target).isAir(), player.currentScreenHandler.getCursorStack().isEmpty());
             } catch (RuntimeException error) { serverFailure = error.toString(); }
             finally { snapshotPending = false; }

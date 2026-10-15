@@ -55,6 +55,7 @@ public final class AnalyzerClient implements ClientModInitializer {
         VisualEffects.register(CORE);
         dev.analyzer.render.CosmeticRenderer.register(CORE);
         dev.analyzer.render.HvhPreview.register(CORE);
+        dev.analyzer.render.XrayRenderer.register(CORE);
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
             if (screen instanceof TitleScreen) {

@@ -1,3 +1,13 @@
+# Current native captures
+
+Analyzer **0.10.2** adds 24 recorded images under `analyzer-native-0.10.2-*`. [Validation](../VALIDATION.md) distinguishes completed mining/core stages, earlier `base-*` component runs and remaining manual gameplay checks.
+
+- [600 sand](analyzer-native-0.10.2-automation-600-sand.png), [96 cobblestone](analyzer-native-0.10.2-automation-grass-covered-96-stone.png)
+- [Earlier X-ray fade](analyzer-native-0.10.2-base-xray-fade-terrain.png), [outlines](analyzer-native-0.10.2-base-xray-terrain-outlines.png), [ores only](analyzer-native-0.10.2-base-xray-ores-only.png)
+- [Vine descent](analyzer-native-0.10.2-base-recovery-vine-descent.png), [recovered workstation](analyzer-native-0.10.2-base-workstations-owned-workstation-recovered.png)
+
+## Historical captures
+
 # Native captures
 
 Analyzer **0.10.1** adds eight current `analyzer-native-ui-*` captures from focused native startup/browser and protection regressions. The [validation record](../VALIDATION.md) distinguishes simulated physical-input snapshots from real rendered screen input, authoritative player travel and normal Survival interactions.

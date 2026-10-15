@@ -3,7 +3,7 @@
   "package": "dev.analyzer.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": ["GameRendererMixin", "SkyRenderingMixin", "LightmapMixin", "InGameHudMixin",
-    "InteractionCooldownAccessor", "UtilityInteractionMixin", "FishingBobberAccessor", "SafeWalkMixin",
+    "InteractionCooldownAccessor", "WorkstationWorldAccessor", "WorkstationPendingAccessor", "WorkstationOwnershipMixin", "XrayBlockRenderMixin", "XrayLayersMixin", "XrayBlockFacesMixin", "XrayOcclusionMixin", "XrayBlockEntityMixin", "UtilityInteractionMixin", "FishingBobberAccessor", "SafeWalkMixin",
     "VisualInteractionMixin", "VisualNetworkMixin", "ItemPhysicsStateMixin", "ItemPhysicsRendererMixin",
     "HandTweaksMixin", "CrystalCosmeticsMixin", "PlayerCosmeticsMixin", "PlayerPoseMixin", "AnalyzerFontMixin",
     "HomeTitleMixin", "HomeListMixin", "HomeListWidthMixin", "HomeWidgetMixin", "HomeSliderMixin", "HomeScanningMixin",

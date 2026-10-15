@@ -32,6 +32,7 @@ final class AutomationInventorySmoke {
     private static final Item[] ARMOR = {Items.DIAMOND_HELMET, Items.DIAMOND_CHESTPLATE, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS};
     private static final EquipmentSlot[] EQUIPMENT = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     private static InventoryAutomation worker;
+    private static AutomationNavigator navigator;
     private static Stage stage = Stage.SETUP;
     private static int entered, tick, assertions, captures;
     private static long clicksBefore;
@@ -91,7 +92,7 @@ final class AutomationInventorySmoke {
             case BOOTSTRAP_VERIFY -> {
                 if (age() < 20) return;
                 require(countServer(mc, Items.WOODEN_PICKAXE) == 1, "Bootstrap crafts an authoritative wooden pickaxe");
-                require(nearServerBlock(mc, Blocks.CRAFTING_TABLE) && worker.clicks() > clicksBefore + 10, "Bootstrap places an authoritative crafting table through normal interactions");
+                require(!nearServerBlock(mc, Blocks.CRAFTING_TABLE) && countServer(mc, Items.CRAFTING_TABLE) == 1 && !worker.hasOwnedWorkstations() && worker.clicks() > clicksBefore + 10, "Bootstrap uses a real table for its recipe and recovers the acknowledged owned table into server inventory");
                 require(countServer(mc, Items.STICK) >= 2, "Bootstrap leaves real crafting sticks");
                 enter(Stage.STONE);
             }
@@ -229,7 +230,7 @@ final class AutomationInventorySmoke {
         command(mc, "time set 1000"); command(mc, "weather clear"); command(mc, "tp AnalyzerDev 40.5 161 40.5 180 15");
         command(mc, "give AnalyzerDev minecraft:oak_log 16"); command(mc, "give AnalyzerDev minecraft:raw_iron 8");
         command(mc, "give AnalyzerDev minecraft:coal 16"); command(mc, "give AnalyzerDev minecraft:cobblestone 32"); command(mc, "give AnalyzerDev minecraft:diamond 29");
-        worker = new InventoryAutomation(new AutomationNavigator()); entered = tick;
+        navigator = new AutomationNavigator(); worker = new InventoryAutomation(navigator); entered = tick;
     }
     private static void setupTable(MinecraftClient mc) {
         worker.stop(); command(mc, "clear AnalyzerDev"); command(mc, "fill 38 161 36 46 166 46 minecraft:air");
@@ -251,7 +252,7 @@ final class AutomationInventorySmoke {
         command(mc, "give AnalyzerDev minecraft:enchanted_book[minecraft:stored_enchantments={levels:{\"minecraft:unbreaking\":3}}]");
     }
     private static String enchantments(int protection, int unbreaking) { return "[minecraft:enchantments={levels:{\"minecraft:protection\":" + protection + ",\"minecraft:unbreaking\":" + unbreaking + "}}]"; }
-    private static InventoryAutomation.Result run(String job) { InventoryAutomation.Result result = worker.tickTransfer(); return result == null ? worker.tick(job, 30) : result; }
+    private static InventoryAutomation.Result run(String job) { navigator.tick(); InventoryAutomation.Result result = worker.tickTransfer(); return result == null ? worker.tick(job, 30) : result; }
     private static void runUntilDone(String job, Stage next) {
         InventoryAutomation.Result result = run(job); requireNotBlocked(result);
         if (result.done()) { AnalyzerClient.LOGGER.info("Inventory smoke stage completed: {} / {} / {} clicks", job, result.detail(), worker.clicks()); enter(next); }

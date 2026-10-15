@@ -12,7 +12,7 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 124, "Release catalogue includes 124 registered modules");
+            check(core.modules().size() == 125, "Release catalogue includes 125 registered modules");
             check(core.modules().stream().map(ModuleDefinition::id).distinct().count() == core.modules().size(), "Unique module IDs");
             for (Category category : Category.values())
                 check(core.modules().stream().anyMatch(module -> module.category() == category), "Populated category " + category);
@@ -366,6 +366,12 @@ public final class CoreSelfTest {
                     "An actual premade HVH snapshot with the retired layout loads as Studio");
             for (ModuleDefinition module : core.modules()) {
                 var entry = profile.getAsJsonObject("modules").getAsJsonObject(module.id());
+                if (entry == null) {
+                    check(core.isEnabled(module.id()) == module.defaultEnabled(), "A module added after the legacy profile keeps its safe default: " + module.id());
+                    for (Setting<?> setting : module.settings())
+                        check(core.getValue(module.id(), setting.id()).equals(setting.defaultValue()), "Missing legacy-profile setting keeps its default: " + module.id() + "/" + setting.id());
+                    continue;
+                }
                 check(core.isEnabled(module.id()) == entry.get("enabled").getAsBoolean()
                                 && core.keybind(module.id()) == entry.get("keybind").getAsInt(),
                         "Legacy HVH profile preserves real flags and bindings: " + module.id());

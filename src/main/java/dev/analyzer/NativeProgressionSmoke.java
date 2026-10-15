@@ -84,8 +84,8 @@ final class NativeProgressionSmoke {
                 ServerSnapshot snapshot = observed;
                 verifySmithing(snapshot);
                 require(mc.player.currentScreenHandler.getCursorStack().isEmpty() && snapshot.cursorEmpty, "Smithing returns both client and server inventory cursors empty");
-                require(snapshot.craftingTable && snapshot.smithingTable, "Both workstations were actually placed in the server world");
-                require(count(snapshot, Items.CRAFTING_TABLE) == 0 && count(snapshot, Items.SMITHING_TABLE) == 0, "Workstation placement consumes the supplied item rather than creating a fake block");
+                require(!snapshot.craftingTable && snapshot.smithingTable && !worker.hasOwnedWorkstations(), "The actual owned crafting table is recovered while the real smithing workstation remains in the server world");
+                require(count(snapshot, Items.CRAFTING_TABLE) == 1 && count(snapshot, Items.SMITHING_TABLE) == 0, "The supplied crafting table returns to authoritative inventory after recipe use; smithing placement still consumes its supplied item");
                 require(snapshot.itemDrops == 0, "Template crafting and smithing drop no ingredients or armor");
                 enter(Stage.EQUIP);
             }

@@ -45,10 +45,10 @@ def main() -> None:
         "README.md", "PRISM.md", "AGENTS.md", "AUTOMATION.md", "SAFETY.md", "UI-OVERHAUL-PLAN.md", "UI-OVERHAUL.md",
         "UI-REFERENCES.md", "HOME-SCREEN.md", "HOME-REFERENCES.md", "MODULE-TESTS.md", "STUDIO-COMPLETE.md",
         "SERVER-PRIVACY.md", "LIQUID-GLASS.md", "MOVING-PCS.md", "VERSION-HISTORY.md", "GITHUB-BACKUP.md",
-        "ESP-READABILITY.md", "GAMEPLAY-SETTINGS.md", "MODULES.md",
+        "ESP-READABILITY.md", "GAMEPLAY-SETTINGS.md", "XRAY.md", "MODULES.md",
         "MODULES.json", "ROADMAP.md", "RESEARCH.md", "RESEARCH-VISUALS.md",
         "RESEARCH-COSMETICS.md", "VALIDATION.md", "LICENSE", "FONT-LICENSE.txt",
-        "THIRD-PARTY.md", "LATO-OFL.txt",
+        "THIRD-PARTY.md", "DEPENDENCY-SOURCES.md", "LATO-OFL.txt",
     )
     optional_logs = ("VALIDATION.log", "PIXEL-VALIDATION.log")
     updater = repo / "tools/prism/Update-Analyzer.ps1"
@@ -65,6 +65,8 @@ def main() -> None:
         "reference-4-worlds.jpg", "reference-5-servers.jpg",
     )
     required_files = [repo / doc for doc in required_docs] + [updater, repo / native_evidence]
+    dependency_source = repo / "dependencies/fabric-api-0.119.4+1.21.4-source.zip"
+    required_files.append(dependency_source)
     required_files.extend(repo / reference_dir / name for name in reference_images)
     required_files.extend(repo / home_reference_dir / name for name in home_reference_images)
     missing = [str(path.relative_to(repo)) for path in required_files
@@ -76,6 +78,11 @@ def main() -> None:
         fabric_license = archive.read("LICENSE-fabric-api")
     if not fabric_license:
         raise ValueError("Fabric API license is empty")
+    if hashlib.sha256(dependency_source.read_bytes()).hexdigest() != "4bacc01e2d54d026ac6e5de1ed4802166ca6f032ac888ca126ee22c0f7407c30":
+        raise ValueError("Pinned Fabric API source archive checksum mismatch")
+    with zipfile.ZipFile(dependency_source) as archive:
+        if archive.testzip() is not None:
+            raise ValueError("Fabric API source archive integrity check failed")
 
     # Preflight redistribution inputs before creating any staging instance files.
     instance = args.instance_folder.resolve()
@@ -140,11 +147,13 @@ WrapperCommand=
     screenshots.mkdir()
     shutil.copyfile(repo / "screenshots/README.md", screenshots / "README.md")
     for capture in sorted((repo / "screenshots").glob("*.png")):
-        if capture.name in {"analyzer-ui.png", "analyzer-gui-classic.png"} or capture.name.startswith(("analyzer-esp-", "analyzer-bot-", "analyzer-automation-", "analyzer-native-automation-", "analyzer-native-ui-", "analyzer-safety-", "analyzer-gameplay-settings-", "analyzer-ui-overhaul-", "analyzer-studio-", "analyzer-home-", "analyzer-module-sweep-", "analyzer-refresh-", "analyzer-watermark-", "analyzer-liquid-", "analyzer-privacy-")):
+        if capture.name in {"analyzer-ui.png", "analyzer-gui-classic.png"} or capture.name.startswith(("analyzer-esp-", "analyzer-bot-", "analyzer-automation-", "analyzer-native-", "analyzer-safety-", "analyzer-gameplay-settings-", "analyzer-ui-overhaul-", "analyzer-studio-", "analyzer-home-", "analyzer-module-sweep-", "analyzer-refresh-", "analyzer-watermark-", "analyzer-liquid-", "analyzer-privacy-")):
             shutil.copyfile(capture, screenshots / capture.name)
     licenses = instance / "licenses"
     licenses.mkdir()
     (licenses / "FABRIC-API-LICENSE.txt").write_bytes(fabric_license)
+    (instance / "dependencies").mkdir()
+    shutil.copyfile(dependency_source, instance / "dependencies" / dependency_source.name)
     output = (args.output or repo.parent / f"Analyzer-{manifest['version']}-Prism-1.21.4.zip").resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     pending = output.with_suffix(".zip.pending")

@@ -55,6 +55,11 @@ public final class TaskPlannerSelfTest {
                     && gather.steps().getLast().count() == 12, "Bounded resource intent: " + resource);
         }
         check(TaskPlanner.plan("collect diamonds", OPTIONS).steps().getLast().count() == 32, "Resource default count");
+        var preciseSand = TaskPlanner.plan("could you get me 600 sand please", OPTIONS);
+        check(preciseSand.steps().size() == 1 && preciseSand.steps().getFirst().count() == 600 && preciseSand.steps().getFirst().resource().equals("sand"), "Polite arbitrary sand quantities remain a single concrete inventory goal");
+        var preciseDiamonds = TaskPlanner.plan("get just 37 diamonds", OPTIONS);
+        check(preciseDiamonds.steps().getLast().count() == 37 && preciseDiamonds.steps().stream().noneMatch(step -> step.action() == TaskPlanner.Action.CRAFT || step.action() == TaskPlanner.Action.EQUIP), "Specific diamond requests never expand into an unsolicited armor kit");
+        check(TaskPlanner.plan("get 64 sand and 24 dirt", OPTIONS).steps().stream().filter(step -> step.action() == TaskPlanner.Action.MINE).count() == 2, "Several local material requests keep every reviewed goal");
         check(TaskPlanner.plan("collect diamonds", OPTIONS).steps().getFirst().action() == TaskPlanner.Action.DIMENSION
                 && TaskPlanner.plan("collect diamonds", OPTIONS).steps().getFirst().resource().equals("overworld"), "Overworld ores explicitly review their dimension before resource collection");
         for (String[] resource : List.of(new String[]{"copper ore", "raw_copper"}, new String[]{"raw gold", "raw_gold"}, new String[]{"emeralds", "emerald"}, new String[]{"lapis", "lapis_lazuli"}, new String[]{"redstone ore", "redstone"}, new String[]{"obsidian", "obsidian"})) {
@@ -116,6 +121,7 @@ public final class TaskPlannerSelfTest {
                 && combined.steps().get(1).action() == TaskPlanner.Action.DIMENSION && combined.steps().get(2).action() == TaskPlanner.Action.MINE, "Travel and gather retain an explicit ore dimension stage");
         rejects(() -> TaskPlanner.plan("", OPTIONS), "Empty task rejected");
         rejects(() -> TaskPlanner.plan("farm villagers forever", OPTIONS), "Unsupported automation rejected");
+        rejects(() -> TaskPlanner.plan("get 600 sand and build a bridge", OPTIONS), "An unsupported extra action is explained instead of silently dropped");
         rejects(() -> TaskPlanner.plan("#goto spawn; /op me", OPTIONS), "Command strings do not become executable tasks");
         rejects(() -> TaskPlanner.plan("mine 0 diamonds", OPTIONS), "Zero resource count rejected");
         rejects(() -> TaskPlanner.plan("mine 4097 diamonds", OPTIONS), "Unbounded gather rejected");

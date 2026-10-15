@@ -68,6 +68,7 @@ public final class GameplayEngine {
     static Double stepOriginal, stepWritten;
     static PlayerEntity stepPlayer;
     static boolean consuming;
+    static boolean autoEatRefilling;
     static String consumeModule;
     static long consumeStart;
     static long fishingAwaitUntil;
@@ -118,7 +119,7 @@ public final class GameplayEngine {
             return;
         }
         if (slotPlayer != null && slotPlayer != p) restoreSlot();
-        if (ownedSlot >= 0 && p.getInventory().selectedSlot != ownedSlot) { savedSlot = ownedSlot = -1; slotPlayer = null; consuming = false; fishingAwaitUntil = 0; }
+        if (ownedSlot >= 0 && p.getInventory().selectedSlot != ownedSlot) { savedSlot = ownedSlot = -1; slotPlayer = null; consuming = false; autoEatRefilling = false; fishingAwaitUntil = 0; }
         slotRequested = false; target = null; interactionAims.clear(); attackBudget = interactionBudget = 8; inventoryBudget = 1;
         for (String id : IDS) if (on(id)) note(id, "Ready");
         try {
@@ -191,16 +192,18 @@ public final class GameplayEngine {
 
     static boolean food() {
         var p = mc.player;
+        if (!on("auto-eat") || p.getHungerManager().getFoodLevel() >= 20) autoEatRefilling = false;
+        else if (p.getHungerManager().getFoodLevel() < num("auto-eat", "hunger")) autoEatRefilling = true;
         if (consuming && (!on(consumeModule) || ticks - consumeStart > 80)) {
             mc.interactionManager.stopUsingItem(p); consuming = false; restoreSlot();
         }
         if (consuming) {
-            if (!p.isUsingItem()) { consuming = false; restoreSlot(); return false; }
-            slotRequested = true; force(mc.options.useKey); note(consumeModule, "Eating; use input and hotbar slot owned temporarily"); return true;
+            if (!p.isUsingItem()) { consuming = false; restoreSlot(); }
+            else { slotRequested = true; force(mc.options.useKey); note(consumeModule, "Eating; use input and hotbar slot owned temporarily"); return true; }
         }
         if (p.isUsingItem() || interactionBudget == 0) return false;
         String id = on("auto-gapple") && p.getHealth() <= num("auto-gapple", "health") ? "auto-gapple"
-                : on("auto-eat") && p.getHungerManager().getFoodLevel() < num("auto-eat", "hunger") ? "auto-eat" : null;
+                : autoEatRefilling ? "auto-eat" : null;
         if (id == null) return false;
         int slot = hotbar(stack -> !stack.isEmpty() && (id.equals("auto-gapple")
                 ? stack.isOf(Items.GOLDEN_APPLE) || stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)
@@ -285,6 +288,7 @@ public final class GameplayEngine {
     static void restoreStep() { MovementController.restoreStep(); }
     static String choice(String id, String setting) { return core.getChoice(id, setting); }
     static void resetControllers() {
+        autoEatRefilling = false;
         interactionAims.clear();
         CombatController.reset(); HvhController.reset(); MovementController.reset();
     }

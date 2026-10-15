@@ -1,4 +1,4 @@
-# Native automation safety — 0.10.1
+# Native automation safety — 0.10.2
 
 After explicit Start/Resume, a pending task waits for the menu click and other held movement/action controls to release in focused gameplay. It then starts automatically; Stop cancels that pending authorization. The wait performs no task actions. Fresh manual input while a task executes still pauses it until explicit Resume.
 
@@ -11,5 +11,7 @@ The guard chooses between ordinary cooldown/reach-limited melee defense, checked
 The HUD reports PROTECTING or SAFETY_HOLD. A hold continues reevaluating threats, terrain and food; it does not silently restart a blocked prerequisite. After the default three-second quiet delay, health/hunger checks gate resumption. A previously blocked stage returns to its blocked reason. User Pause/Stop, death, disconnect, unexpected world change, resource reload and manual input release owned controls.
 
 Settings cover defense, proactive avoidance, avoidance/threat range, retreat health (10 HP), quiet delay, food consumption below hunger 14, minimum health 6 HP, minimum hunger 6, escape-search radius, cover preference, path/drop limits, menu pausing and manual-input pausing. HUD/menu appearance remains independent of automation behavior.
+
+Mining recovery can clear safe natural cover and preserve supported return stairs. Tree descent uses checked walking routes, continuous vines/ladders or one-block cuts in a verified rooted natural trunk; it does not authorize a long drop or general scaffold construction. Task-owned crafting tables require observed placement acknowledgement and actual returned drops; existing tables are preserved.
 
 This is bounded PvE protection. It does not fight players, guarantee survival, plan every projectile impact or solve every terrain trap. Equipment, food, loaded paths, vanilla reach/cooldowns and server behavior still matter. Deep/enclosed water, vehicles, flight, inaccessible exits or exhausted supplies can require manual recovery. Native evidence is in [VALIDATION.md](VALIDATION.md); historical fixtures describe their older versions only.

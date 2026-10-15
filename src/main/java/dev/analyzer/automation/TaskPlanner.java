@@ -37,7 +37,6 @@ public final class TaskPlanner {
         }
     }
     private static final Pattern COORDINATES = Pattern.compile("(?:to|at|coordinates?)\\s+(-?\\d+)\\s*[, ]\\s*(-?\\d+)(?:\\s*[, ]\\s*(-?\\d+))?", Pattern.CASE_INSENSITIVE);
-    private static final Pattern RESOURCE = Pattern.compile("(?:mine|gather|collect|get)\\s+(?:(\\d+)\\s+)?(ancient[ _-]?debris|lapis[ _-]?lazuli|lapis|raw[ _-]?(?:iron|copper|gold)|(?:iron|copper|gold|diamond|emerald|coal|redstone|quartz)(?:[ _-]?ores?)?|diamonds|emeralds|logs?|wood|cobblestone|stone|obsidian|gravel|flint|netherrack)\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern ESCAPE_DISTANCE = Pattern.compile("escape\\s+(?:spawn\\s+)?(?:by\\s+)?(\\d+)\\s*(?:blocks?|m)\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern ESCAPE_DIRECTION = Pattern.compile("\\b(north|east|south|west)\\b", Pattern.CASE_INSENSITIVE);
     private TaskPlanner() { }
@@ -46,7 +45,12 @@ public final class TaskPlanner {
         Objects.requireNonNull(options);
         if (input == null || input.isBlank()) throw new IllegalArgumentException("Describe a task or choose a preset.");
         if (input.length() > 512) throw new IllegalArgumentException("Keep the task under 512 characters.");
+        if (LocalTaskIntent.schematic(input).isPresent()) throw new IllegalArgumentException("Choose the actual schematic from Automation → Schematics → Browse, then review its materials and site. One selected file is built once.");
+        if (Pattern.compile("(?:^|\\s)[/#]|\\b(?:don't|do not|without|except)\\b", Pattern.CASE_INSENSITIVE).matcher(input).find())
+            throw new IllegalArgumentException("Use a positive task request such as ‘get just 37 diamonds’. Commands and exclusions are not executed as task instructions.");
         String text = input.toLowerCase(Locale.ROOT).replace('\n', ' ').trim();
+        var parsed = LocalTaskIntent.parse(text);
+        text = parsed.actionText();
         boolean escape = text.contains("escape") || text.contains("leave spawn") || text.contains("get out of spawn");
         boolean shelter = text.contains("base") || text.contains("shelter") || text.contains("house");
         boolean netherite = text.contains("netherite armor") || text.contains("netherite armour") || text.contains("netherite kit");
@@ -83,6 +87,8 @@ public final class TaskPlanner {
         Matcher coordinates = COORDINATES.matcher(text);
         String dimension = requestedDimension(text);
         boolean travel = !escape && dimension.isEmpty() && (text.contains("travel") || text.contains("go to") || text.contains("walk to") || text.contains("move to"));
+        if (!text.isBlank() && !escape && !shelter && !kit && !enchant && !travel && dimension.isEmpty())
+            throw new IllegalArgumentException("I cannot turn ‘" + text + "’ into a supported local action yet. Review a material target, travel, an armor goal, or choose an actual schematic from Browse.");
         if (travel || (!escape && shelter && coordinates.find())) {
             coordinates.reset();
             if (coordinates.find()) {
@@ -141,22 +147,23 @@ public final class TaskPlanner {
             prerequisites.add("Portal construction uses 10 owned obsidian, 13 cobblestone corner/stair supports and flint and steel, or crafts the igniter from an owned flint and iron ingot. Nether navigation, debris mining and portal use need reachable loaded terrain.");
             prerequisites.add("Four armor upgrades cost 16 scrap, 16 gold and four templates. Missing templates are duplicated with 7 diamonds + 1 netherrack each; real smithing output must be verified.");
         }
-        if (!kit && !shelter) {
-            Matcher resource = RESOURCE.matcher(text);
-            if (resource.find()) {
-                int count;
-                try { count = resource.group(1) == null ? 32 : Integer.parseInt(resource.group(1)); }
-                catch (NumberFormatException error) { throw new IllegalArgumentException("Gather between 1 and 4096 items per task."); }
-                if (count < 1 || count > 4096) throw new IllegalArgumentException("Gather between 1 and 4096 items per task.");
-                String key = ResourceCatalog.canonical(resource.group(2));
+        List<LocalTaskIntent.Gather> requestedGathers = parsed.gathers();
+        String gatheredDimension = "";
+        for (int gatherIndex = 0; gatherIndex < requestedGathers.size(); gatherIndex++) {
+                var resource = requestedGathers.get(gatherIndex); int count = resource.count(); String key = resource.resource();
                 var spec = ResourceCatalog.get(key);
-                if (!spec.dimension().isEmpty()) {
-                    steps.add(step("resource-dimension", Action.DIMENSION, "Use " + dimensionLabel(spec.dimension()) + " for natural " + key.replace('_', ' ') + " deposits", spec.dimension(), 1, homeX, homeY, homeZ));
+                String suffix = gatherIndex == 0 ? "" : "-" + gatherIndex;
+                if (!spec.dimension().isEmpty() && !spec.dimension().equals(gatheredDimension)) {
+                    steps.add(step("resource-dimension" + suffix, Action.DIMENSION, "Use " + dimensionLabel(spec.dimension()) + " for natural " + key.replace('_', ' ') + " deposits", spec.dimension(), 1, homeX, homeY, homeZ));
                     portalPrerequisites(prerequisites, spec.dimension());
+                    gatheredDimension = spec.dimension();
                 }
-                steps.add(step("resource", Action.MINE, "Gather " + count + " " + key.replace('_', ' '), key, count, homeX, homeY, homeZ));
-                prerequisites.add("Missing or worn pickaxes trigger ordinary wood, stone, iron and diamond tool recovery. Inaccessible materials can pause this prerequisite queue; existing usable tools are credited.");
-            }
+                steps.add(step("resource" + suffix, Action.MINE, "Have " + count + " " + key.replace('_', ' ') + " in inventory", key, count, homeX, homeY, homeZ));
+        }
+        if (!requestedGathers.isEmpty()) {
+            prerequisites.add("Gather quantities are total inventory targets, not extra items: existing stock counts toward at least the reviewed amount. Extra owned items are kept, and real loot can exceed a target.");
+            prerequisites.add("Missing or worn pickaxes trigger ordinary wood, stone, iron and diamond tool recovery. Inaccessible materials can pause this prerequisite queue; existing usable tools are credited.");
+            prerequisites.add("Enough free inventory space and safe reachable sources are required. Sand and gravel are harvested only where falling blocks cannot create an unsafe ceiling collapse.");
         }
         if (!dimension.isEmpty() && !netherite) {
             if (dimension.equals("the_nether") && !kit && !shelter) {

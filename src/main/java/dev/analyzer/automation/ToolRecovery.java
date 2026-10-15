@@ -32,10 +32,20 @@ public final class ToolRecovery {
     }
     public boolean active() { return targetTier > 0; }
     public boolean ownsRoute() { return dispatched && navigator.status().owned(); }
+    /** A newly crafted tool must not skip pickup of the task's own table. */
+    public InventoryAutomation.Result finishIfUsable() {
+        return active() && hasTier(targetTier, ordinaryDrops) ? tick(targetTier, ordinaryDrops) : null;
+    }
     public InventoryAutomation.Result tick(int tier) { return tick(tier, false); }
     public InventoryAutomation.Result tick(int tier, boolean requiredOrdinaryDrops) {
         if(tier<1 || tier>4)return new InventoryAutomation.Result(false,true,"Cannot craft this tool tier automatically.");
-        if(hasTier(tier,requiredOrdinaryDrops)) { reset();return new InventoryAutomation.Result(true,false,"Usable mining tool verified"); }
+        if(hasTier(tier,requiredOrdinaryDrops)) {
+            if(active()) {
+                var cleanup=inventory.finishWorkstations();
+                if(!cleanup.done())return cleanup;
+            }
+            reset();return new InventoryAutomation.Result(true,false,"Usable mining tool verified");
+        }
         if(targetTier!=tier || ordinaryDrops!=requiredOrdinaryDrops || stages.isEmpty()) {
             reset();navigator.cancel();inventory.stop();targetTier=tier;ordinaryDrops=requiredOrdinaryDrops;index=0;dispatched=false;
             var queue=new ArrayList<Stage>();

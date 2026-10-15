@@ -24,6 +24,10 @@ final class NativeInputLease {
         return direction(forward, false, sprint, jump, false);
     }
     boolean backward(boolean jump) { return direction(false, true, false, jump, false); }
+    boolean steer(boolean forward, boolean backward, boolean left, boolean right, boolean sneak) {
+        if (!direction(forward, backward, false, false, sneak)) return false;
+        write(mc.options.leftKey, left); write(mc.options.rightKey, right); return true;
+    }
     boolean applySneaking(boolean forward, boolean jump) { return direction(forward, false, false, jump, true); }
     private boolean direction(boolean forward, boolean backward, boolean sprint, boolean jump, boolean sneak) {
         if (reservedGroup != null && reservedGroup != group) return false;

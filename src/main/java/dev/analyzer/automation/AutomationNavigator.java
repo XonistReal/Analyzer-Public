@@ -35,8 +35,9 @@ public final class AutomationNavigator {
     public record SafetyProfileStatus(boolean enabled, boolean applied, int changedSettings) { }
     public record RouteDiagnostics(String state, int expanded, int pathNodes, int nextNode, int replans) { }
     public record InputStatus(boolean active, String description) { }
+    public record GroundDiagnostics(String mode, int climbs, int cuts, double startY, double lowestY) { }
     public static final int SHELTER_MATERIAL_COUNT = ShelterSchematic.MATERIAL_COUNT;
-    private enum Kind { TRAVEL, MINE, BUILD }
+    private enum Kind { TRAVEL, MINE, BUILD, GROUND }
     private final MinecraftClient mc = MinecraftClient.getInstance();
     private final Object group;
     private final NativeInputLease inputs;
@@ -44,6 +45,9 @@ public final class AutomationNavigator {
     private boolean preciseArrival;
     private NativeMiner miner;
     private NativeBuilder builder;
+    private NativeGroundRecovery groundRecovery;
+    private GroundDiagnostics groundDiagnostics = new GroundDiagnostics("IDLE", 0, 0, 0, 0);
+    private boolean groundAttempted;
     private AutomationNavigator approach;
     private MotionProfile motion = MotionProfile.defaults();
     private Status status = new Status(State.IDLE, "", "Native automation ready", 0, false);
@@ -64,7 +68,7 @@ public final class AutomationNavigator {
     private int lastDiagnostic;
 
     public AutomationNavigator() { this(new Object(), true); }
-    private AutomationNavigator(Object group, boolean workers) {
+    AutomationNavigator(Object group, boolean workers) {
         this.group = group; this.workers = workers; preciseArrival = !workers; inputs = new NativeInputLease(group);
     }
     public boolean available() { return mc.world != null && mc.player != null && mc.interactionManager != null; }
@@ -73,6 +77,7 @@ public final class AutomationNavigator {
         motion = Objects.requireNonNull(profile); if (approach != null) approach.configureMotion(profile);
         if (miner != null) miner.configureMotion(profile);
         if (builder != null) builder.configureMotion(profile);
+        if (groundRecovery != null) groundRecovery.configureMotion(profile);
     }
     /** Protect the selected build volume from material gathering; null clears this mission constraint. */
     public void setMiningExclusion(Box bounds) {
@@ -98,6 +103,34 @@ public final class AutomationNavigator {
     public boolean travelForInteraction(BlockPos stand) {
         if (stand == null) return fail("Choose a checked interaction approach");
         return travel(stand.getX(), stand.getY(), stand.getZ(), true);
+    }
+    /** Canopy work first returns to verified dry ground; ordinary stone/soil/slab work remains available. */
+    public boolean needsWorkGroundRecovery() { return available() && NativeGroundRecovery.needsRecovery(mc); }
+    public boolean stableInteractionGround() {
+        if (!available() || !mc.player.isOnGround() || mc.player.getVelocity().horizontalLength() > .035) return false;
+        BlockPos support = BlockPos.ofFloored(mc.player.getX(), mc.player.getY() - .01, mc.player.getZ());
+        var state = mc.world.getBlockState(support);
+        return !state.isIn(net.minecraft.registry.tag.BlockTags.LEAVES) && !state.isIn(net.minecraft.registry.tag.BlockTags.LOGS)
+                && state.getFluidState().isEmpty() && !NativeTerrain.hazard(state)
+                && mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().contract(.001));
+    }
+    public GroundDiagnostics groundDiagnostics() { return groundRecovery == null ? groundDiagnostics : groundStatus(); }
+    public boolean recoverWorkGround() {
+        if (kind == Kind.GROUND && status.owned()) return true;
+        if (!canStart()) return false;
+        if (!needsWorkGroundRecovery()) { status = new Status(State.COMPLETE, "Ground recovery", "Already on usable work ground", 1, false); return true; }
+        kind = Kind.GROUND; begin("Ground recovery"); startGroundRecovery(); return true;
+    }
+    private void startGroundRecovery() {
+        if (approach != null) approach.cancel(); approachGoal = null; inputs.close();
+        groundRecovery = new NativeGroundRecovery(group, motion, miningExclusion); groundAttempted = true;
+    }
+    private GroundDiagnostics groundStatus() {
+        var observed = groundRecovery.diagnostics();
+        return new GroundDiagnostics(observed.mode(), observed.climbs(), observed.cuts(), observed.startY(), observed.lowestY());
+    }
+    private void clearGroundRecovery() {
+        if (groundRecovery != null) { groundDiagnostics = groundStatus(); groundRecovery.stop(); groundRecovery = null; }
     }
     private boolean travel(int x, Integer y, int z) {
         return travel(x, y, z, !workers);
@@ -154,6 +187,7 @@ public final class AutomationNavigator {
     private void begin(String title) {
         if (!inputs.reserve()) throw new IllegalStateException("Another native task owns control");
         reserved = true;
+        groundAttempted = false;
         world = mc.world; ticks = replans = stuckTicks = bestNodeTicks = 0; bestDistance = Double.MAX_VALUE;
         lastPosition = mc.player.getPos(); path = List.of(); node = 0; search = null;
         movementAnchor = lastPosition; lastMovementTick = 0;
@@ -167,6 +201,7 @@ public final class AutomationNavigator {
         if (!status.owned()) return false;
         inputs.close(); if (approach != null) approach.pause(); if (builder != null) builder.pause();
         if (miner != null) miner.pause();
+        if (groundRecovery != null) groundRecovery.pause();
         AutomationMotion.reset();
         status = new Status(State.PAUSED, status.process(), "Paused; Resume rechecks actual terrain", status.progress(), true); return true;
     }
@@ -176,6 +211,7 @@ public final class AutomationNavigator {
         if (kind == Kind.TRAVEL) planRoute();
         if (approach != null && approach.status.paused()) approach.resume();
         if (builder != null) builder.resume(); if (miner != null) miner.resume();
+        if (groundRecovery != null) groundRecovery.resume();
         status = new Status(State.RUNNING, status.process(), "Resuming native task", status.progress(), true); return true;
     }
     public boolean cancel() {
@@ -186,6 +222,7 @@ public final class AutomationNavigator {
         clearSafetyInputs(); inputs.close(); search = null; path = List.of();
         if (approach != null) approach.cancel(); if (miner != null) miner.stop(); if (builder != null) builder.stop();
         approachGoal = null; miner = null; builder = null; kind = null; AutomationMotion.reset();
+        clearGroundRecovery();
         if (reserved) inputs.releaseReservation(); reserved = false;
     }
     public void clearStatus() { if (!status.owned()) status = new Status(State.IDLE, "", "Native automation ready", 0, false); }
@@ -201,9 +238,22 @@ public final class AutomationNavigator {
         if (manualTaskActive()) { finish(State.INTERRUPTED, "Manual input or another native task took control", status.progress()); return; }
         ticks++;
         try {
+          if (groundRecovery != null) {
+            var recovery = groundRecovery.tick();
+            status = new Status(State.RUNNING, status.process(), recovery.detail(), recovery.progress(), true);
+            if (recovery.blocked()) { clearGroundRecovery(); finish(State.FAILED, recovery.detail(), recovery.progress()); return; }
+            if (recovery.done()) {
+                clearGroundRecovery();
+                if (kind == Kind.GROUND) { finish(State.COMPLETE, recovery.detail(), 1); return; }
+                if (kind == Kind.MINE) miner.groundRecoveryFinished(true, recovery.detail());
+                else if (kind == Kind.TRAVEL) planRoute();
+            }
+            return;
+          }
           if (kind == Kind.TRAVEL) tickTravel();
           else if (kind == Kind.MINE) {
             var result = miner.tick();
+            if (miner.groundRecoveryRequested()) { startGroundRecovery(); return; }
             if (result.done()) { finish(State.COMPLETE, result.detail(), 1); return; }
             if (result.blocked()) { finish(State.FAILED, result.detail(), result.progress()); return; }
             status = new Status(State.RUNNING, status.process(), result.detail(), result.progress(), true);
@@ -235,7 +285,12 @@ public final class AutomationNavigator {
         approach.tick();
         if (kind == Kind.BUILD && builder != null && approach.status.complete()) builder.approachArrived(approachGoal);
         diagnosticApproach();
-        if (approach.status.failed()) finish(State.FAILED, "Approach blocked: " + approach.status.message(), status.progress());
+        if (approach.status.failed()) {
+            if (kind == Kind.MINE && miner != null && miner.rejectApproach(approachGoal)) {
+                approach.cancel(); approach.clearStatus(); approachGoal = null;
+                status = new Status(State.RUNNING, status.process(), "Checking another supported mining approach", status.progress(), true);
+            } else finish(State.FAILED, "Approach blocked: " + approach.status.message(), status.progress());
+        }
     }
     private void diagnosticApproach() {
         if (!FabricLoader.getInstance().isDevelopmentEnvironment() || !Boolean.getBoolean("analyzer.nativeAutomationSmoke")) return;
@@ -247,7 +302,8 @@ public final class AutomationNavigator {
     /** Explicit diagnostics contain positions and input states only; never account data or server addresses. */
     public String diagnostics() {
         String player = mc.player == null ? "unavailable" : "position=" + mc.player.getPos() + ", velocity=" + mc.player.getVelocity()
-                + ", onGround=" + mc.player.isOnGround() + ", pose=" + mc.player.getPose() + ", input=" + mc.player.input.playerInput;
+                + ", onGround=" + mc.player.isOnGround() + ", pose=" + mc.player.getPose() + ", input=" + mc.player.input.playerInput
+                + ", miner=" + (miner == null ? "none" : miner.diagnostics());
         return "mode=" + kind + ", state=" + status.state() + ", target=" + goal + ", route=" + routeDiagnostics()
                 + ", approachGoal=" + approachGoal + ", child=" + (approach == null ? "none" : approach.status)
                 + ", " + player;
@@ -292,7 +348,12 @@ public final class AutomationNavigator {
                 AnalyzerClient.LOGGER.info("ANALYZER_NATIVE_ROUTE: target={}, from={}, reached={}, detail={}, path={}",
                         goal, NativeTerrain.playerPoint(mc), result.reached(), result.detail(), result.path());
             search = null; path = result.path(); node = 1;
-            if (path.size() < 2) { finish(State.FAILED, "No loaded, supported walking route. Clear access or load nearby chunks and retry.", progress()); return; }
+            if (path.size() < 2) {
+                if (workers && !groundAttempted && goal.y() != null && goal.y() < mc.player.getY() - 2 && needsWorkGroundRecovery()) {
+                    startGroundRecovery(); status = new Status(State.RUNNING, status.process(), "Finding a safe descent before continuing the intended route", progress(), true); return;
+                }
+                finish(State.FAILED, "No loaded, supported walking route. Clear access or load nearby chunks and retry.", progress()); return;
+            }
         }
         if (node >= path.size()) { planRoute(); return; }
         Vec3d target = NativeTerrain.center(path.get(node));

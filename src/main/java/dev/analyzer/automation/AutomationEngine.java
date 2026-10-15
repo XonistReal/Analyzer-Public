@@ -42,6 +42,7 @@ public final class AutomationEngine implements AutomationScreen.Controller {
     private int bestCount=-1,arrivalY=Integer.MIN_VALUE;
     private long lastClicks;
     private boolean dispatched, activeTask;
+    private String finishingEvidence="";
     private boolean returnBlocked;
     private String blockedDetail="";
     private BlockPos shelterOrigin;
@@ -153,7 +154,7 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         protectBuild(selected);
         activeTask=true;core.setEnabled("expedition",true);beginInputHandoff();
     }
-    @Override public void pause(){if(activeTask && !state.equals("PAUSED")){inputHandoff.cancel();guard.cleanup();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="PAUSED";detail="Paused. Open Automation and press Resume to continue the current stage.";persist();}}
+    @Override public void pause(){if(activeTask && !state.equals("PAUSED")){inputHandoff.cancel();guard.cleanup();inventory.pauseActions();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="PAUSED";detail="Paused. Open Automation and press Resume to continue the current stage.";persist();}}
     @Override public void resume() {
         if(plan==null||current>=plan.steps().size()){detail="Choose and start a new task.";return;}
         if(mc.world==null||mc.player==null){detail="Join the original world before resuming.";return;}
@@ -165,9 +166,9 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         world=mc.world;suspendConflicts();core.setEnabled("expedition",true);activeTask=true;beginInputHandoff();
     }
     @Override public void stop(){stopOwned();state="STOPPED";detail=inventory.recovery().isBlank()?"Stopped. Owned pathing and inventory actions have been released.":inventory.recovery();if(core!=null)core.setEnabled("expedition",false);persist();}
-    private void stopOwned(){activeTask=false;inputHandoff.cancel();guard.cleanup();dimensions.stop();tools.reset();AutomationMotion.reset();bridge.endSafetyProfile();bridge.cancel();bridge.setMiningExclusion(null);inventory.setPlacementExclusion(null);inventory.stop();dispatched=false;supplyResource="";supplyGoal=0;materialCrafting=false;portalScreenGrace=portalLoadingTicks=transitionTicks=0;returnBlocked=false;blockedDetail="";restoreConflicts();}
+    private void stopOwned(){activeTask=false;finishingEvidence="";inputHandoff.cancel();guard.cleanup();dimensions.stop();tools.reset();AutomationMotion.reset();bridge.endSafetyProfile();bridge.cancel();bridge.setMiningExclusion(null);inventory.setPlacementExclusion(null);inventory.stop();dispatched=false;supplyResource="";supplyGoal=0;materialCrafting=false;portalScreenGrace=portalLoadingTicks=transitionTicks=0;returnBlocked=false;blockedDetail="";restoreConflicts();}
     private void beginInputHandoff(){
-        guard.cleanup();bridge.endSafetyProfile();bridge.pause();inputHandoff.request();state="WAITING_INPUT";
+        guard.cleanup();inventory.pauseActions();bridge.endSafetyProfile();bridge.pause();inputHandoff.request();state="WAITING_INPUT";
         detail="Close the menu and release its button. The task will start automatically.";resetProgress();persist();
     }
     private boolean awaitInputHandoff(){
@@ -199,7 +200,7 @@ public final class AutomationEngine implements AutomationScreen.Controller {
     }
     private void restoreConflicts(){if(core!=null){for(var entry:suspended.entrySet())if(hasModule(entry.getKey())&&!core.isEnabled(entry.getKey()))core.setEnabled(entry.getKey(),entry.getValue());}suspended.clear();}
 
-    private void block(String reason){inputHandoff.cancel();guard.cleanup();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="BLOCKED";detail=reason;if(current<stepDetails.length)stepDetails[current]=reason;persist();}
+    private void block(String reason){inputHandoff.cancel();guard.cleanup();inventory.pauseActions();bridge.endSafetyProfile();bridge.pause();returnBlocked=false;blockedDetail="";state="BLOCKED";detail=reason;if(current<stepDetails.length)stepDetails[current]=reason;persist();}
     private void resetProgress(){lastProgress=ticks;bestCount=-1;bestDistance=Double.MAX_VALUE;lastBridgeProgress=-1;lastClicks=inventory.clicks();dispatched=bridge.status().active();}
     private void progress(){lastProgress=ticks;}
     private void tick() {
@@ -266,6 +267,14 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         if(mc.player.getHealth()<core.getNumber("expedition","min-health")){block("Low health: " + Math.round(mc.player.getHealth()) + " HP. Recover, then resume.");return;}
         if(!mc.player.getAbilities().creativeMode && mc.player.getHungerManager().getFoodLevel()<core.getNumber("expedition","min-hunger")){block("Low hunger. Eat, then resume.");return;}
         if(ticks-lastProgress>core.getNumber("expedition","stuck-timeout")*20){block("No measurable progress for " + (int)core.getNumber("expedition","stuck-timeout") + " seconds. Check the route, tools or workstation, then resume.");return;}
+        if(!finishingEvidence.isEmpty()){advance(finishingEvidence);return;}
+        var recoveredTool=tools.finishIfUsable();
+        if(recoveredTool!=null){
+            detail=recoveredTool.detail();observeActionProgress();
+            if(recoveredTool.blocked()){block(detail);return;}
+            if(!recoveredTool.done())return;
+            dispatched=false;
+        }
         if(current>=plan.steps().size()){completePlan();return;}
         TaskPlanner.Step step=plan.steps().get(current);
         try {
@@ -318,12 +327,13 @@ public final class AutomationEngine implements AutomationScreen.Controller {
             bridge.clearStatus();boolean accepted=step.resource().equals("logs")?bridge.mineByName(step.count(),blocks(step.resource())):bridge.mineForItem(step.count(),"minecraft:"+step.resource(),blocks(step.resource()));
             if(!accepted){block(bridge.status().message());return;}dispatched=true;
         }
-        var path=bridge.status();detail=step.label()+" · " + count+"/"+step.count()+" in inventory";
+        var path=bridge.status();detail=step.label()+" · " + count+"/"+step.count()+" in inventory · "+path.message();
         if(path.failed()||path.complete()){dispatched=false;if(count>=step.count())advance("Required items received");else block(path.message()+". Inventory is " + count+"/"+step.count());}
     }
     private String[] blocks(String resource){return ResourceCatalog.get(resource).blockIds();}
     private boolean portalStockReady(){return InventoryAutomation.count(Items.OBSIDIAN)>=10&&InventoryAutomation.count(Items.COBBLESTONE)>=13&&InventoryAutomation.count(stack->stack.isOf(Items.FLINT_AND_STEEL)&&InventoryAutomation.durableTool(stack.getItem()))>0;}
     private void inventory(TaskPlanner.Step step) {
+        observeActionProgress();
         String task=switch(step.action()){case EQUIP->step.resource().equals("netherite-armor")?"netherite-equip":"equip";case ENCHANT->"diamond-armor";default->step.resource();};
         var result=inventory.tickTransfer();if(result==null)result=inventory.tick(task,30);
         detail=result.detail();
@@ -472,7 +482,20 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         detail="Building shelter · " + observed.placed()+"/"+observed.required()+" blocks verified";
         if(bridge.status().failed()){dispatched=false;block(bridge.status().message());}
     }
-    private void advance(String evidence){if(current<stepDetails.length)stepDetails[current]=evidence;bridge.cancel();bridge.clearStatus();inventory.stop();tools.reset();supplyResource="";supplyGoal=0;materialCrafting=false;current++;dispatched=false;resetProgress();detail=evidence;if(current>=plan.steps().size())completePlan();persist();}
+    private void advance(String evidence){
+        if(finishingEvidence.isEmpty()){
+            finishingEvidence=evidence;bridge.cancel();bridge.clearStatus();dispatched=false;progress();
+        }
+        var cleanup=inventory.finishWorkstations();
+        if(!cleanup.done()){
+            detail=cleanup.detail();observeActionProgress();
+            if(cleanup.blocked())block(detail);
+            return;
+        }
+        if(current<stepDetails.length)stepDetails[current]=evidence;
+        finishingEvidence="";bridge.cancel();bridge.clearStatus();inventory.stop();tools.reset();supplyResource="";supplyGoal=0;materialCrafting=false;
+        current++;dispatched=false;resetProgress();detail=evidence;if(current>=plan.steps().size())completePlan();persist();
+    }
     private void completePlan(){stopOwned();state="COMPLETED";detail="Every stage completed and its game state was verified.";core.setEnabled("expedition",false);persist();}
     private String worldKey(){if(mc.world==null)return "";String server=mc.getCurrentServerEntry()!=null?"server:"+mc.getCurrentServerEntry().address:mc.getServer()!=null?"local:"+mc.getServer().getSavePath(WorldSavePath.ROOT).toAbsolutePath():"unknown";return server+"|"+mc.world.getRegistryKey().getValue();}
     private void validate(TaskPlanner.Plan candidate){Objects.requireNonNull(candidate);if(candidate.steps()==null||candidate.steps().isEmpty()||candidate.steps().size()>64)throw new IllegalArgumentException("A plan needs between 1 and 64 stages.");for(var step:candidate.steps()){Objects.requireNonNull(step.action());if(step.id()==null||step.resource()==null||Math.abs((long)step.x())>29_999_000||Math.abs((long)step.z())>29_999_000||step.y() < -2048||step.y()>2048||step.count()<0||step.count()>4096)throw new IllegalArgumentException("A task has invalid coordinates or count.");}}

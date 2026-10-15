@@ -1,8 +1,10 @@
 package dev.analyzer.automation;
 
+import dev.analyzer.AnalyzerClient;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
+import net.minecraft.state.property.Properties;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
@@ -30,15 +32,22 @@ public final class NativeMiner {
     private final Set<Block> targets = new HashSet<>();
     private final Set<Item> drops = new HashSet<>();
     private final Set<BlockPos> rejected = new HashSet<>();
+    private final Set<BlockPos> failedStands = new HashSet<>(), failedExcavations = new HashSet<>();
+    private final Set<BlockPos> workSupports = new HashSet<>();
     private final List<BlockPos> candidates = new ArrayList<>();
     private BlockPos scanOrigin, ore, goal, breaking, tunnelStep, pickup, aimedBlock, occluder;
     private Object world;
     private int quantity, scanIndex, minY, maxY, selected = -1, cooldown, breakingTicks, pickupTicks, preferredY, actionDelay = 3;
-    private int previousCount, directionOffset;
+    private int previousCount, directionOffset, oreStartCount;
+    private int refreshedEmptyAtCount = -1;
     private int lastOwnedSlot = -1;
     private int gravelRetries, placeDelay = 4;
     private int maxGravelRetries = 128;
     private int aimReadyAge = -1;
+    private int aimFailures, aimAttempt, approachFailures, accessSteps;
+    private Vec3d miningAim;
+    private boolean groundRecovery, forceAccess;
+    private String groundFailure = "";
     private Direction heading = Direction.NORTH;
     private boolean scanning, active, branchMining, paused;
     private boolean flintGoal;
@@ -95,21 +104,49 @@ public final class NativeMiner {
         return true;
     }
     public BlockPos targetGoal() { return goal; }
+    public boolean groundRecoveryRequested() { return groundRecovery; }
+    public void groundRecoveryFinished(boolean recovered, String detail) {
+        groundRecovery = false;
+        if (!recovered) { groundFailure = Objects.requireNonNullElse(detail, "No safe ground recovery was found."); return; }
+        tunnelStep = null; failedStands.clear(); failedExcavations.clear(); retarget();
+    }
+    /** A failed walking approach rejects that stand, rather than immediately abandoning all mining. */
+    public boolean rejectApproach(BlockPos failedGoal) {
+        if (!active || ++approachFailures > 12) return false;
+        if (requestGroundRecovery()) return true;
+        if (failedGoal != null) failedStands.add(failedGoal.toImmutable());
+        if (branchMining && ore != null) forceAccess = true;
+        cancelBreaking(); goal = null; miningAim = null; aimedBlock = null; aimReadyAge = -1;
+        if (tunnelStep != null) { failedExcavations.add(tunnelStep); tunnelStep = null; directionOffset++; }
+        if (pickup != null) { pickup = null; pickupTicks = 0; retarget(); }
+        return true;
+    }
     public String error() { return error; }
+    public String diagnostics() { return "ore=" + ore + ", tunnel=" + tunnelStep + ", goal=" + goal + ", obstruction=" + occluder
+            + ", breaking=" + breaking + ", forceAccess=" + forceAccess + ", approachFailures=" + approachFailures
+            + ", accessSteps=" + accessSteps + ", ownedSupports=" + workSupports.size() + ", inventory=" + inventoryCount() + "/" + quantity; }
     public void pause() { paused = true; cancelBreaking(); goal = null; aimedBlock = null; aimReadyAge = -1; }
     public void resume() { paused = false; cooldown = Math.max(cooldown, actionDelay); aimedBlock = null; aimReadyAge = -1; }
     public int inventoryCount() { return InventoryAutomation.count(stack -> drops.contains(stack.getItem())); }
     public Result tick() {
         if (!active) return result(false, true, error.isEmpty() ? "No active mining goal" : error);
         if (paused) return result(false, false, "Mining paused; ownership and resource target are preserved");
+        if (!groundFailure.isBlank()) return result(false, true, groundFailure);
+        if (groundRecovery) return result(false, false, "Finding a safe route from the tree to stable mining ground");
         if (MC.player == null || MC.world != world || MC.interactionManager == null || !MC.player.isAlive()) return result(false, true, "The world changed or the player cannot mine.");
         int count = inventoryCount();
         if (count >= quantity) { cancelBreaking(); goal = null; return result(true, false, "Inventory verified: " + count + "/" + quantity + " requested items"); }
+        BlockPos support = playerSupport();
+        if (branchMining && MC.player.isOnGround() && solidSafeFloor(support)) {
+            if (workSupports.size() >= 8192 && !workSupports.contains(support))
+                return result(false, true, "This mining area reached its 8192 supported work cells. Return through the preserved staircase and review a smaller resource goal.");
+            workSupports.add(support);
+        }
         if (!(MC.player.currentScreenHandler instanceof PlayerScreenHandler)) { cancelBreaking(); return result(false, true, "Close the workstation before mining."); }
         if (MC.currentScreen != null) { cancelBreaking(); aimedBlock = null; aimReadyAge = -1; return result(false, false, "Waiting for the menu to close"); }
         boolean receivedItems = count > previousCount;
         if (receivedItems) {
-            previousCount = count; rejected.clear();
+            previousCount = count; rejected.clear(); approachFailures = 0;
             if (pickup != null) { pickup = null; pickupTicks = 0; retarget(); }
         }
         if (cooldown > 0) { cooldown--; return result(false, false, "Waiting between mining actions"); }
@@ -125,50 +162,67 @@ public final class NativeMiner {
                 if (walkable(at)) goal = at;
                 else if (walkable(at.up())) goal = at.up();
             }
-            if (++pickupTicks < 30) return result(false, false, "Collecting the actual mined drops · " + count + "/" + quantity);
+            // A real drop several blocks away needs time for the ordinary walking route, not a fixed 1.5-second grace.
+            if (++pickupTicks < (item == null ? 40 : 400)) return result(false, false, "Collecting the actual mined drops · " + count + "/" + quantity);
             pickup = null; pickupTicks = 0; retarget();
         }
         if (freeSlots() < 2) { cancelBreaking(); return result(false, true, "Free two inventory slots before collecting more mined items."); }
+        if (occluder != null) {
+            if (MC.world.getBlockState(occluder).isAir() || !canClearObstruction(occluder, ore != null ? ore : tunnelStep)) { occluder = null; cancelBreaking(); miningAim = null; }
+            else return breakBlock(occluder, false);
+        }
+        if (tunnelStep != null) return tunnel();
         if (ore != null) {
             if (!targets.contains(MC.world.getBlockState(ore).getBlock())) {
                 cancelBreaking();
-                if (receivedItems) retarget();
+                if (count > oreStartCount) retarget();
                 else {
                     pickup = ore; pickupTicks = 0; if (walkable(ore)) goal = ore;
                     return result(false, false, "Waiting for the server's item drops");
                 }
             }
-            if (ore != null && occluder != null) {
-                if (!isTreeObstruction(MC.world.getBlockState(occluder).getBlock())) { occluder = null; cancelBreaking(); }
-                else return breakBlock(occluder, false);
-            }
             if (ore != null) {
-                BlockPos stand = standingPosition(ore);
-                if (stand == null) { rejected.add(ore); retarget(); }
+                BlockPos stand = forceAccess ? null : standingPosition(ore);
+                if (stand == null) {
+                    if (branchMining) {
+                        if (requestGroundRecovery()) return result(false, false, "Descending from the tree before excavating a resource approach");
+                        BlockPos access = accessStep(ore);
+                        if (access != null && ++accessSteps <= 96) { tunnelStep = access; return tunnel(); }
+                    }
+                    rejected.add(ore); retarget();
+                }
                 else {
                     goal = stand;
-                    if (inReach(ore.toCenterPos()))
-                        return breakBlock(ore, true);
+                    if (stand.equals(MC.player.getBlockPos()) && !failedStands.contains(stand)
+                            && dropReachable(ore) && inWorkingReach(ore) && MC.player.isOnGround() && MC.player.getVelocity().horizontalLength() <= .035) {
+                        Result clearance = preparePickupClearance(ore);
+                        return clearance == null ? breakBlock(ore, true) : clearance;
+                    }
                     return result(false, false, "Walking to loaded " + MC.world.getBlockState(ore).getBlock().getName().getString());
                 }
             }
         }
-        if (tunnelStep != null) return tunnel();
         if (scanning) {
             scan();
             if (scanning) return result(false, false, "Searching loaded terrain for mining targets · " + (100L * scanIndex / scanTotal()) + "%");
         }
         ore = chooseOre();
-        if (ore != null) return result(false, false, "Found a freshly checked loaded ore or resource");
+        if (ore != null) { oreStartCount = count; return result(false, false, "Found a freshly checked loaded ore or resource"); }
+        if (!candidates.isEmpty() && refreshedEmptyAtCount != count) {
+            // The nearest cache may now consist of preserved route floors or inaccessible faces.
+            // Survey beyond that batch once per real inventory advance before declaring excavation blocked.
+            refreshedEmptyAtCount = count; rejected.addAll(candidates); startScan();
+            return result(false, false, "Refreshing loaded resources beyond the preserved work floor and obstructed faces");
+        }
         if (branchMining && wrongNaturalDimension()) return result(false, true, "No loaded requested vein was reachable here, and these ores do not naturally generate in this dimension. Use the reviewed portal stage instead of digging indefinitely.");
         if (flintGoal && InventoryAutomation.count(Items.GRAVEL) > 0) return recycleGravel();
         if (!branchMining) return result(false, true, "No reachable requested blocks were found in loaded terrain within " + RADIUS + " blocks. Move to a source area and resume.");
         return beginTunnel();
     }
     private void retarget() {
-        cancelBreaking(); ore = null; goal = null; occluder = null; aimedBlock = null; aimReadyAge = -1;
+        cancelBreaking(); ore = null; goal = null; occluder = null; aimedBlock = null; aimReadyAge = -1; miningAim = null; aimFailures = aimAttempt = 0; accessSteps = 0; forceAccess = false;
         int before = candidates.size();
-        candidates.removeIf(position -> !currentTarget(position));
+        candidates.removeIf(position -> !currentTarget(position) || !safeToBreak(position));
         // The full survey observes buried blocks too. Empty surveyed terrain can
         // remain cached while a short branch advances; a depleted vein or eight
         // blocks of movement refreshes that bounded observation window.
@@ -188,7 +242,7 @@ public final class NativeMiner {
         for (; scanIndex < limit; scanIndex++) {
             int index = scanIndex, y = minY + index % layers; index /= layers;
             position.set(scanOrigin.getX() - RADIUS + index % width, y, scanOrigin.getZ() - RADIUS + index / width);
-            if (!MC.world.isChunkLoaded(position) || excluded(position) || !targets.contains(MC.world.getBlockState(position).getBlock()) || rejected.contains(position)) continue;
+            if (!MC.world.isChunkLoaded(position) || excluded(position) || !targets.contains(MC.world.getBlockState(position).getBlock()) || rejected.contains(position) || !safeToBreak(position)) continue;
             // Keep only the nearest bounded candidates; underground veins can contain thousands of blocks.
             if (candidates.size() < 64) candidates.add(position.toImmutable());
             else {
@@ -200,62 +254,188 @@ public final class NativeMiner {
         scanning = scanIndex < scanTotal();
     }
     private BlockPos chooseOre() {
-        return candidates.stream().filter(position -> currentTarget(position) && !rejected.contains(position) && safeToBreak(position) && standingPosition(position) != null)
-                .min(Comparator.comparingDouble(position -> position.getSquaredDistance(MC.player.getBlockPos()))).orElse(null);
+        var nearby = candidates.stream().filter(position -> currentTarget(position) && !rejected.contains(position) && safeToBreak(position))
+                .sorted(Comparator.comparingDouble(position -> position.getSquaredDistance(MC.player.getBlockPos()))).toList();
+        for (int index = 0; index < nearby.size(); index++) {
+            BlockPos candidate = nearby.get(index);
+            if (standingPosition(candidate) != null || branchMining && index < 8 && accessStep(candidate) != null) return candidate;
+        }
+        return null;
     }
     private boolean currentTarget(BlockPos position) {
         return MC.world.isChunkLoaded(position) && !excluded(position) && targets.contains(MC.world.getBlockState(position).getBlock());
     }
     private BlockPos standingPosition(BlockPos block) {
-        if (inReach(block.toCenterPos()) && walkable(MC.player.getBlockPos()) && visibleResource(MC.player.getEyePos(), block)) return MC.player.getBlockPos();
+        if (dropReachable(block) && inWorkingReach(block) && stablePlayerStand() && !failedStands.contains(MC.player.getBlockPos()) && visibleResource(MC.player.getEyePos(), block)) return MC.player.getBlockPos();
         BlockPos best = null; double distance = Double.MAX_VALUE;
         for (Direction direction : Direction.Type.HORIZONTAL) for (int dy = -1; dy <= 1; dy++) {
             BlockPos position = block.offset(direction).add(0, dy, 0);
-            if (!walkable(position) || !visibleResource(Vec3d.ofBottomCenter(position).add(0, MC.player.getStandingEyeHeight(), 0), block)) continue;
+            if (failedStands.contains(position) || !walkable(position) || !visibleResource(Vec3d.ofBottomCenter(position).add(0, MC.player.getStandingEyeHeight(), 0), block)) continue;
             double d = position.getSquaredDistance(MC.player.getBlockPos()); if (d < distance) { best = position; distance = d; }
         }
         return best;
     }
     private boolean visibleResource(Vec3d eye, BlockPos block) {
+        if (NativeMiningRay.visibleAim(MC, eye, block) != null) return true;
         var hit = MC.world.raycast(new RaycastContext(eye, block.toCenterPos(), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, MC.player));
-        if (hit.getBlockPos().equals(block)) return true;
-        String id = Registries.BLOCK.getId(MC.world.getBlockState(block).getBlock()).getPath();
-        return (id.endsWith("_log") || id.endsWith("_stem")) && isTreeObstruction(MC.world.getBlockState(hit.getBlockPos()).getBlock());
+        return canClearObstruction(hit.getBlockPos(), block);
+    }
+    private boolean requestGroundRecovery() {
+        if (!NativeGroundRecovery.needsRecovery(MC)) return false;
+        cancelBreaking(); goal = null; miningAim = null; groundRecovery = true; return true;
+    }
+    /** Bounded weighted search through supported natural excavation cells; execute only its first checked step. */
+    private BlockPos accessStep(BlockPos resource) {
+        BlockPos start = MC.player.getBlockPos();
+        if (!walkable(start) || !MC.player.isOnGround()) return null;
+        record Node(BlockPos position, BlockPos first, int work, double score) { }
+        var open = new PriorityQueue<Node>(Comparator.comparingDouble(Node::score));
+        var costs = new HashMap<BlockPos, Integer>();
+        open.add(new Node(start, null, 0, 0)); costs.put(start, 0);
+        Node best = null; double initial = start.getSquaredDistance(resource), bestDistance = initial;
+        int expanded = 0;
+        while (!open.isEmpty() && expanded++ < 768) {
+            Node current = open.remove();
+            if (current.work() > costs.getOrDefault(current.position(), Integer.MAX_VALUE)) continue;
+            double distance = current.position().getSquaredDistance(resource);
+            if (current.first() != null && distance < bestDistance) { best = current; bestDistance = distance; }
+            if (current.first() != null && distance <= 9 && visibleResource(Vec3d.ofBottomCenter(current.position()).add(0, MC.player.getStandingEyeHeight(), 0), resource)) return current.first();
+            for (Direction direction : Direction.Type.HORIZONTAL) for (int dy = -1; dy <= 1; dy++) {
+                BlockPos next = current.position().offset(direction).add(0, dy, 0);
+                if (Math.abs(next.getX() - start.getX()) > 8 || Math.abs(next.getZ() - start.getZ()) > 8 || Math.abs(next.getY() - start.getY()) > 6
+                        || failedExcavations.contains(next) || failedExcavations.contains(next.up())
+                        || !solidSafeFloor(next.down())) continue;
+                int feet = excavationCost(next), head = excavationCost(next.up());
+                int transitionHead = dy < 0 ? excavationCost(next.up(2)) : dy > 0 ? excavationCost(current.position().up(2)) : 0;
+                if (feet < 0 || head < 0 || transitionHead < 0) continue;
+                int work = current.work() + 10 + feet + head + transitionHead + Math.abs(dy) * 3;
+                if (work >= costs.getOrDefault(next, Integer.MAX_VALUE)) continue;
+                costs.put(next, work);
+                double heuristic = Math.abs(resource.getX() - next.getX()) + Math.abs(resource.getY() - next.getY()) + Math.abs(resource.getZ() - next.getZ());
+                open.add(new Node(next, current.first() == null ? next : current.first(), work, work + heuristic * 12));
+            }
+        }
+        return best != null && bestDistance < initial - .5 ? best.first() : null;
+    }
+    private int excavationCost(BlockPos position) {
+        if (!excavatable(position)) return -1;
+        return MC.world.getBlockState(position).isReplaceable() ? 0 : safeToBreak(position) ? 8 : -1;
+    }
+    private boolean canClearObstruction(BlockPos position, BlockPos intended) {
+        if (intended == null || position.equals(intended) || !safeToBreak(position) || failedExcavations.contains(position)) return false;
+        var state = MC.world.getBlockState(position); String id = Registries.BLOCK.getId(state.getBlock()).getPath();
+        if (MiningPolicy.softObstruction(id)) return true;
+        String targetId = Registries.BLOCK.getId(MC.world.getBlockState(intended).getBlock()).getPath();
+        String resourceId = ore == null ? "" : Registries.BLOCK.getId(MC.world.getBlockState(ore).getBlock()).getPath();
+        boolean timber = targetId.endsWith("_log") || targetId.endsWith("_stem") || resourceId.endsWith("_log") || resourceId.endsWith("_stem");
+        if (timber && id.endsWith("_leaves") && (!state.contains(Properties.PERSISTENT) || !state.get(Properties.PERSISTENT))) return true;
+        return branchMining && excavatable(position) && !state.isReplaceable();
+    }
+    private Result retryAim(BlockPos position, boolean requestedBlock) {
+        cancelBreaking(); miningAim = null; aimReadyAge = -1; aimFailures = 0;
+        if (++aimAttempt < 4) return result(false, false, "Checking another visible mining face before changing the approach");
+        aimedBlock = null; aimAttempt = 0;
+        if (requestedBlock || branchMining && ore != null) {
+            failedStands.add(MC.player.getBlockPos()); goal = null;
+            if (branchMining) forceAccess = true;
+            return result(false, false, "That mining face stayed obstructed; choosing another supported approach");
+        }
+        failedExcavations.add(position.toImmutable()); occluder = null; goal = null;
+        if (tunnelStep != null) { failedExcavations.add(tunnelStep); tunnelStep = null; directionOffset++; }
+        if (ore != null) { rejected.add(ore); retarget(); }
+        return result(false, false, "That excavation face stayed obstructed; checking another safe resource or staircase");
+    }
+    private boolean dropReachable(BlockPos resource) {
+        int drop = AnalyzerClient.CORE == null ? 1 : Math.clamp((int)AnalyzerClient.CORE.getNumber("expedition", "max-drop"), 1, 3);
+        return MC.player.getBlockY() - resource.getY() <= drop;
+    }
+    /** Before removing a low resource, make room for the actual body sweep and its drop pickup. */
+    private Result preparePickupClearance(BlockPos resource) {
+        if (!branchMining || resource.getY() > MC.player.getBlockY() + 1) return null;
+        int top = Math.max(resource.getY() + 1, MC.player.getBlockY() + 1);
+        for (int y = top; y > resource.getY(); y--) {
+            BlockPos clearance = new BlockPos(resource.getX(), y, resource.getZ());
+            if (MC.world.getBlockState(clearance).isReplaceable()) continue;
+            if (!excavatable(clearance) || !safeToBreak(clearance)) {
+                rejected.add(resource.toImmutable()); retarget();
+                return result(false, false, "Preserving an unsafe or protected pickup ceiling; choosing another loaded resource");
+            }
+            return breakBlock(clearance, false);
+        }
+        return null;
     }
     private Result beginTunnel() {
+        if (requestGroundRecovery()) return result(false, false, "Descending from the tree before starting the checked mining staircase");
         BlockPos player = MC.player.getBlockPos();
         for (int offset = 0; offset < 4; offset++) {
             Direction direction = rotate(heading, directionOffset + offset);
             int dy = player.getY() > preferredY ? -1 : player.getY() < preferredY ? 1 : 0;
             BlockPos next = player.offset(direction).add(0, dy, 0);
             if (next.getY() <= MC.world.getBottomY() + 1 || next.getY() >= MC.world.getTopYInclusive() - 2) continue;
-            if (!solidSafeFloor(next.down()) || !excavatable(next) || !excavatable(next.up())) continue;
+            if (failedStands.contains(next) || failedExcavations.contains(next) || failedExcavations.contains(next.up()) || !solidSafeFloor(next.down()) || !excavatable(next) || !excavatable(next.up())
+                    || dy < 0 && !excavatable(next.up(2))) continue;
             tunnelStep = next; directionOffset += offset; goal = null; return tunnel();
         }
         cancelBreaking(); return result(false, true, "No dry, supported staircase or branch-mining step is safe. Fluids, loose ceilings, protected blocks or a void stopped excavation.");
     }
     private Result tunnel() {
-        if (MC.player.getPos().squaredDistanceTo(Vec3d.ofBottomCenter(tunnelStep)) < 0.45) {
-            tunnelStep = null; retarget();
+        if (MC.player.getPos().squaredDistanceTo(Vec3d.ofBottomCenter(tunnelStep)) < .025
+                && MC.player.isOnGround() && MC.player.getVelocity().horizontalLength() <= .035) {
+            tunnelStep = null;
+            if (ore == null) retarget(); else { cancelBreaking(); goal = null; miningAim = null; aimedBlock = null; aimReadyAge = -1; forceAccess = false; }
             return result(false, false, "Staircase or branch step reached; checking loaded ores again");
         }
-        if (!solidSafeFloor(tunnelStep.down())) return result(false, true, "The next mining step lost its solid floor. Movement stopped.");
-        if (tunnelStep.getY() > MC.player.getBlockY()) {
-            BlockPos headroom = MC.player.getBlockPos().up(2);
+        if (!solidSafeFloor(tunnelStep.down())) { failedExcavations.add(tunnelStep); tunnelStep = null; goal = null; directionOffset++; return result(false, false, "The step lost its safe support; checking another excavation approach"); }
+        BlockPos transitionHeadroom = tunnelStep.getY() < MC.player.getBlockY() ? tunnelStep.up(2)
+                : tunnelStep.getY() > MC.player.getBlockY() ? MC.player.getBlockPos().up(2) : null;
+        boolean upperHeadroom = transitionHeadroom != null && !MC.world.getBlockState(transitionHeadroom).isReplaceable();
+        boolean headBlocked = !MC.world.getBlockState(tunnelStep.up()).isReplaceable();
+        boolean feetBlocked = !MC.world.getBlockState(tunnelStep).isReplaceable();
+        // Settling is required for interaction, not during an already cleared step's ordinary walking/drop.
+        // Canceling its route merely because movement succeeded would stop every staircase after its first stride.
+        if (!upperHeadroom && !headBlocked && !feetBlocked) {
+            if (!walkable(tunnelStep)) return result(false, true, "The excavated route is blocked or hazardous.");
+            cancelBreaking(); goal = tunnelStep;
+            return result(false, false, "Walking along the checked mining staircase toward Y " + preferredY);
+        }
+        if (!MC.player.isOnGround()) { cancelBreaking(); goal = null; return result(false, false, "Settling on the current supported mining step before breaking"); }
+        if (MC.player.getVelocity().horizontalLength() > .035) { cancelBreaking(); goal = MC.player.getBlockPos(); return result(false, false, "Centering and settling before the next excavation break"); }
+        if (upperHeadroom) {
+            BlockPos headroom = transitionHeadroom;
             if (!MC.world.getBlockState(headroom).isReplaceable()) {
-                if (!excavatable(headroom)) return result(false, true, "The upward staircase needs clear natural headroom above the player; this ceiling was not removed.");
+                if (!excavatable(headroom)) return result(false, true, "The mining transition needs clear natural body headroom; this unsafe or built ceiling was not removed.");
                 return breakBlock(headroom, false);
             }
         }
-        if (!MC.world.getBlockState(tunnelStep.up()).isReplaceable()) return breakBlock(tunnelStep.up(), false);
-        if (!MC.world.getBlockState(tunnelStep).isReplaceable()) return breakBlock(tunnelStep, false);
-        if (!walkable(tunnelStep)) return result(false, true, "The excavated route is blocked or hazardous.");
-        cancelBreaking(); goal = tunnelStep;
-        return result(false, false, "Walking along the checked mining staircase toward Y " + preferredY);
+        if (headBlocked) return breakBlock(tunnelStep.up(), false);
+        return breakBlock(tunnelStep, false);
     }
     private Result breakBlock(BlockPos position, boolean requestedBlock) {
         goal = null;
-        if (!safeToBreak(position)) { cancelBreaking(); return result(false, true, "Breaking here could release fluid, a falling ceiling or an unsafe floor. Mining stopped."); }
+        if (!safeToBreak(position)) {
+            cancelBreaking();
+            // Walking to a face can turn a former resource into our return-path support.
+            // Preserve it and choose another resource rather than stopping a healthy mining task.
+            if (ore != null) {rejected.add(ore); retarget(); return result(false, false, "Preserving the newly protected support or unsafe face; choosing another loaded resource");}
+            if (tunnelStep != null) {failedExcavations.add(tunnelStep); tunnelStep = null; goal = null; directionOffset++; return result(false, false, "Rechecking another safe mining branch after its support changed");}
+            return result(false, true, "Breaking here could release fluid, a falling ceiling or an unsafe floor. Mining stopped.");
+        }
+        // Obstruction/ceiling changes are not progress: preserve the bounded face retry budget across them.
+        if (!position.equals(aimedBlock)) { miningAim = null; aimFailures = 0; aimReadyAge = -1; aimedBlock = position.toImmutable(); }
+        if (miningAim == null || !NativeMiningRay.reaches(MC, MC.player.getEyePos(), miningAim, position)) {
+            var aim = NativeMiningRay.visibleAim(MC, MC.player.getEyePos(), position, aimAttempt * 7);
+            if (aim == null) {
+                cancelBreaking(); miningAim = null; aimReadyAge = -1;
+                var obstruction = NativeMiningRay.obstructions(MC, position).stream().filter(hit -> canClearObstruction(hit.getBlockPos(), position))
+                        .min(Comparator.comparingInt(hit -> MiningPolicy.softObstruction(Registries.BLOCK.getId(MC.world.getBlockState(hit.getBlockPos()).getBlock()).getPath()) ? 0 : 1)).orElse(null);
+                if (obstruction != null) {
+                    occluder = obstruction.getBlockPos().toImmutable();
+                    return result(false, false, "Clearing a safe reachable natural obstruction before continuing mining");
+                }
+                return retryAim(position, requestedBlock);
+            }
+            miningAim = aim.point(); aimReadyAge = -1;
+        }
         int tier = minimumTier(MC.world.getBlockState(position).getBlock());
         int tool = findTool(tier, requestedBlock, MC.world.getBlockState(position).getBlock());
         if (tool < 0 && tier > 0) { cancelBreaking(); return result(false, true, "Need a durable " + tierName(tier) + " pickaxe without Silk Touch for the requested drops."); }
@@ -266,27 +446,24 @@ public final class NativeMiner {
         }
         if (tool >= 0) { MC.player.getInventory().selectedSlot = tool; lastOwnedSlot = tool; }
         else for (int slot = 0; slot < 9; slot++) if (MC.player.getInventory().getStack(slot).isEmpty()) { MC.player.getInventory().selectedSlot = slot; lastOwnedSlot = slot; break; }
-        if (!AutomationMotion.align(position.toCenterPos(), motion)) { cancelBreaking(); aimedBlock = null; aimReadyAge = -1; return result(false, false, "Turning toward the mining block"); }
-        if (!position.equals(aimedBlock)) { aimedBlock = position.toImmutable(); aimReadyAge = MC.player.age; return result(false, false, "Waiting for normal camera rotation to reach the server"); }
+        if (!AutomationMotion.align(miningAim, motion)) { cancelBreaking(); aimReadyAge = -1; return result(false, false, "Turning toward a visible face of the mining block"); }
+        if (aimReadyAge < 0) { aimReadyAge = MC.player.age; return result(false, false, "Waiting for normal camera rotation to reach the server"); }
         if (MC.player.age <= aimReadyAge) return result(false, false, "Waiting for the next player tick before mining");
         var hit = MC.player.raycast(MC.player.getBlockInteractionRange(), 1, false);
         if (!(hit instanceof BlockHitResult blockHit) || !blockHit.getBlockPos().equals(position)) {
-            cancelBreaking();
-            if (requestedBlock && hit instanceof BlockHitResult obstacle && isTreeObstruction(MC.world.getBlockState(obstacle.getBlockPos()).getBlock())
-                    && Registries.BLOCK.getId(MC.world.getBlockState(position).getBlock()).getPath().matches(".*_(?:log|stem)") && safeToBreak(obstacle.getBlockPos())) {
-                occluder = obstacle.getBlockPos().toImmutable(); goal = null;
-                return result(false, false, "Clearing a reachable leaf or vine before gathering the trunk");
-            }
-            if (requestedBlock) { rejected.add(position); retarget(); return result(false, false, "The ore is occluded; selecting a freshly checked vein or tunnel"); }
-            return result(false, true, "The next excavation block is outside the real crosshair's reachable line of sight.");
+            cancelBreaking(); aimReadyAge = -1;
+            // The smooth turn may be within three degrees yet miss a thin vine/grass shape.
+            // Continue the same visible aim until the real crosshair arrives, then retry other faces/stands.
+            if (++aimFailures < 30) return result(false, false, "Fine aiming at the actual reachable mining face");
+            return retryAim(position, requestedBlock);
         }
         if (!position.equals(breaking)) {
             cancelBreaking(); breaking = position.toImmutable(); breakingTicks = 0;
-            if (!MC.interactionManager.attackBlock(position, blockHit.getSide())) return result(false, true, "The server did not accept starting this block break.");
+            if (!MC.interactionManager.attackBlock(position, blockHit.getSide())) { cancelBreaking(); return retryAim(position, requestedBlock); }
         } else MC.interactionManager.updateBlockBreakingProgress(position, blockHit.getSide());
         MC.player.swingHand(Hand.MAIN_HAND); breakingTicks++;
         if (MC.world.getBlockState(position).isAir()) {
-            cancelBreaking(); cooldown = actionDelay;
+            cancelBreaking(); cooldown = actionDelay; miningAim = null; aimedBlock = null; aimFailures = aimAttempt = 0;
             if (requestedBlock) { pickup = position; pickupTicks = 0; if (walkable(position)) goal = position; }
             return result(false, false, "Block break observed; waiting for actual server drops");
         }
@@ -299,14 +476,11 @@ public final class NativeMiner {
         if (state.isReplaceable()) return true;
         Block block = state.getBlock(); String id = Registries.BLOCK.getId(block).getPath();
         return !state.hasBlockEntity() && !(block instanceof FallingBlock) && state.getHardness(MC.world, position) >= 0
-                && (id.equals("stone") || id.equals("deepslate") || id.equals("netherrack") || id.equals("dirt") || id.equals("grass_block")
-                || id.equals("coarse_dirt") || id.equals("rooted_dirt") || id.equals("podzol") || id.equals("mycelium")
-                || id.equals("granite") || id.equals("diorite") || id.equals("andesite") || id.equals("tuff")
-                || id.endsWith("_ore") || block == Blocks.ANCIENT_DEBRIS);
+                && MiningPolicy.naturalExcavation(id);
     }
     private boolean safeToBreak(BlockPos position) {
         if (!MC.world.isChunkLoaded(position) || excluded(position) || danger(position) || MC.world.getBlockState(position).hasBlockEntity()) return false;
-        if (position.equals(MC.player.getBlockPos().down())) return false;
+        if (position.equals(playerSupport()) || workSupports.contains(position)) return false;
         for (Direction direction : Direction.values()) if (danger(position.offset(direction))) return false;
         return !(MC.world.getBlockState(position.up()).getBlock() instanceof FallingBlock)
                 && MC.world.getBlockState(position).getHardness(MC.world, position) >= 0;
@@ -320,6 +494,12 @@ public final class NativeMiner {
     private boolean solidSafeFloor(BlockPos position) {
         return !danger(position) && MC.world.getBlockState(position).isSideSolidFullSquare(MC.world, position, Direction.UP);
     }
+    private BlockPos playerSupport() { return BlockPos.ofFloored(MC.player.getX(), MC.player.getY() - .02, MC.player.getZ()); }
+    private boolean stablePlayerStand() {
+        return MC.player.isOnGround() && !excluded(playerSupport()) && !excluded(MC.player.getBlockPos())
+                && !excluded(MC.player.getBlockPos().up()) && !danger(playerSupport()) && !danger(MC.player.getBlockPos())
+                && !danger(MC.player.getBlockPos().up()) && MC.world.isSpaceEmpty(MC.player, MC.player.getBoundingBox().contract(.001));
+    }
     private boolean walkable(BlockPos position) {
         return !excluded(position) && !excluded(position.up()) && solidSafeFloor(position.down()) && !danger(position) && !danger(position.up())
                 && MC.world.getBlockState(position).getCollisionShape(MC.world, position).isEmpty()
@@ -330,9 +510,10 @@ public final class NativeMiner {
         double range = Math.max(0.1, MC.player.getBlockInteractionRange() - 0.15);
         return MC.player.getEyePos().squaredDistanceTo(position) <= range * range;
     }
+    private boolean inWorkingReach(BlockPos position) { return inReach(position.toCenterPos()) || NativeMiningRay.visibleAim(MC, position) != null; }
     private int findTool(int tier, boolean requestedBlock, Block block) {
         int best = -1, bestTier = -1;
-        boolean actualDrops = requestedBlock && ore != null && dropFor(MC.world.getBlockState(ore).getBlock()) != MC.world.getBlockState(ore).getBlock().asItem();
+        boolean actualDrops = drops.contains(dropFor(block)) && dropFor(block) != block.asItem();
         if (tier == 0) {
             String blockId = Registries.BLOCK.getId(block).getPath();
             String suffix = blockId.endsWith("_log") || blockId.endsWith("_stem") ? "_axe" : "_shovel";
@@ -371,7 +552,9 @@ public final class NativeMiner {
         if (block == Blocks.OBSIDIAN || block == Blocks.ANCIENT_DEBRIS) return 4;
         if (id.contains("diamond_ore") || id.contains("emerald_ore") || id.contains("gold_ore") && !id.equals("nether_gold_ore") || id.contains("redstone_ore")) return 3;
         if (id.contains("iron_ore") || id.contains("copper_ore") || id.contains("lapis_ore")) return 2;
-        if (id.endsWith("_log") || id.endsWith("_stem") || id.endsWith("_leaves") || id.contains("vine") || id.equals("gravel") || id.equals("dirt") || id.equals("grass_block") || id.equals("sand") || id.equals("red_sand") || id.equals("clay")) return 0;
+        if (id.endsWith("_log") || id.endsWith("_stem") || id.endsWith("_leaves") || MiningPolicy.softObstruction(id) || id.equals("gravel")
+                || id.equals("dirt") || id.equals("grass_block") || id.equals("coarse_dirt") || id.equals("rooted_dirt") || id.equals("podzol") || id.equals("mycelium")
+                || id.equals("sand") || id.equals("red_sand") || id.equals("soul_sand") || id.equals("soul_soil") || id.equals("clay")) return 0;
         return 1;
     }
     private static String tierName(int tier) { return switch (tier) { case 4 -> "diamond-tier"; case 3 -> "iron-tier"; case 2 -> "stone-tier"; default -> "wooden-tier"; }; }
@@ -403,7 +586,7 @@ public final class NativeMiner {
         String id = Registries.BLOCK.getId(block).getPath();
         if (id.equals("stone")) return Items.COBBLESTONE;
         if (id.equals("deepslate")) return Items.COBBLED_DEEPSLATE;
-        if (id.equals("grass_block")) return Items.DIRT;
+        if (id.equals("grass_block") || id.equals("podzol") || id.equals("mycelium")) return Items.DIRT;
         if (id.equals("clay")) return Items.CLAY_BALL;
         if (id.contains("iron_ore")) return Items.RAW_IRON;
         if (id.contains("copper_ore")) return Items.RAW_COPPER;
@@ -449,13 +632,9 @@ public final class NativeMiner {
         if (!(observed instanceof BlockHitResult hit) || !hit.getBlockPos().equals(support) || hit.getSide() != Direction.UP)
             return result(false, true, "The actual crosshair cannot reach a safe gravel placement face.");
         MC.interactionManager.interactBlock(MC.player, Hand.MAIN_HAND, hit); MC.player.swingHand(Hand.MAIN_HAND);
-        ore = placing; pickup = null; goal = null; aimedBlock = null; aimReadyAge = -1; gravelRetries++;
+        ore = placing; oreStartCount = inventoryCount(); pickup = null; goal = null; aimedBlock = null; aimReadyAge = -1; gravelRetries++;
         awaitingGravel = true; gravelPlacementWait = 0;
         cooldown = Math.max(8, placeDelay); return result(false, false, "Placed owned gravel; the next break must produce a real flint item");
-    }
-    private static boolean isTreeObstruction(Block block) {
-        String id = Registries.BLOCK.getId(block).getPath();
-        return id.endsWith("_leaves") || id.equals("vine") || id.equals("weeping_vines") || id.equals("weeping_vines_plant") || id.equals("twisting_vines") || id.equals("twisting_vines_plant");
     }
     private static Direction rotate(Direction direction, int times) { for (int i = 0; i < Math.floorMod(times, 4); i++) direction = direction.rotateYClockwise(); return direction; }
     private int freeSlots() { int total = 0; for (int i = 0; i < 36; i++) if (MC.player.getInventory().getStack(i).isEmpty()) total++; return total; }
@@ -465,7 +644,8 @@ public final class NativeMiner {
     public void stop() {
         cancelBreaking();
         if (selected >= 0 && MC.player != null && MC.world == world && MC.player.getInventory().selectedSlot == lastOwnedSlot) MC.player.getInventory().selectedSlot = selected;
-        selected = -1; lastOwnedSlot = -1; active = false; flintGoal = false; awaitingGravel = false; gravelPlacementWait = 0; gravelRetries = 0; targets.clear(); drops.clear(); rejected.clear(); candidates.clear();
-        ore = null; goal = null; tunnelStep = null; pickup = null; occluder = null; aimedBlock = null; aimReadyAge = -1; scanning = false; paused = false; cooldown = 0; pickupTicks = 0; directionOffset = 0;
+        selected = -1; lastOwnedSlot = -1; active = false; flintGoal = false; awaitingGravel = false; gravelPlacementWait = 0; gravelRetries = 0; targets.clear(); drops.clear(); rejected.clear(); candidates.clear(); failedStands.clear(); failedExcavations.clear(); workSupports.clear();
+        ore = null; goal = null; tunnelStep = null; pickup = null; occluder = null; aimedBlock = null; aimReadyAge = -1; miningAim = null; scanning = false; paused = false; cooldown = 0; pickupTicks = 0; directionOffset = 0;
+        groundRecovery = forceAccess = false; groundFailure = ""; aimFailures = aimAttempt = approachFailures = accessSteps = 0; refreshedEmptyAtCount = -1;
     }
 }

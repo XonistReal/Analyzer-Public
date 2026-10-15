@@ -23,11 +23,11 @@ import java.util.Set;
 
 /** Real integrated-server Survival actions in an isolated development run without an external bot. */
 final class NativeAutomationSmoke {
-    private enum Phase { SETUP, TRAVEL, PAUSE, RESUME, MINE_SETUP, MINE, BUILD_SETUP, BUILD, IMPORT, IMPORTED_BUILD, PORTAL_SETUP, PORTAL, RETURN, PROGRESSION, INVENTORY, TOOL_RECOVERY, GUARD, TASK_UI, FINISH }
+    private enum Phase { SETUP, TRAVEL, PAUSE, RESUME, MINE_SETUP, MINE, BUILD_SETUP, BUILD, IMPORT, IMPORTED_BUILD, PORTAL_SETUP, PORTAL, RETURN, PROGRESSION, INVENTORY, TOOL_RECOVERY, GUARD, TASK_UI, FIELD_DESCENT, FIELD_MINING, FIELD_WORKSTATIONS, AUTOEAT, XRAY, FINISH }
     private static final AutomationNavigator NAV = new AutomationNavigator();
     private static final BlockPos ORE = new BlockPos(66,161,51), BUILD = new BlockPos(70,161,60);
     private static Phase phase=Phase.SETUP;
-    private static int entered, checks, captures, inventoryStart, guardStart, progressionStart, recoveryStart, taskUiStart;
+    private static int entered, checks, captures, inventoryStart, guardStart, progressionStart, recoveryStart, taskUiStart, fieldStart;
     private static Vec3d paused;
     private static float lastYaw;
     private static long supplyBefore;
@@ -81,6 +81,11 @@ final class NativeAutomationSmoke {
                     if(scenario.equals("tool-recovery")){recoveryStart=tick+1;next(Phase.TOOL_RECOVERY,tick);return;}
                     if(scenario.equals("guard")){guardStart=tick+1;next(Phase.GUARD,tick);return;}
                     if(scenario.equals("task-ui")){taskUiStart=tick+1;next(Phase.TASK_UI,tick);return;}
+                    if(scenario.equals("field-recovery") || scenario.equals("descent")){fieldStart=tick+1;next(Phase.FIELD_DESCENT,tick);return;}
+                    if(scenario.equals("mining-recovery") || scenario.equals("mining-terrain") || scenario.equals("sand-recovery")){fieldStart=tick+1;next(Phase.FIELD_MINING,tick);return;}
+                    if(scenario.equals("workstations")){fieldStart=tick+1;next(Phase.FIELD_WORKSTATIONS,tick);return;}
+                    if(scenario.equals("xray")){fieldStart=tick+1;next(Phase.XRAY,tick);return;}
+                    if(scenario.equals("autoeat")){fieldStart=tick+1;next(Phase.AUTOEAT,tick);return;}
                     NAV.configureMotion(new AutomationNavigator.MotionProfile(true,120,360,25,5,4));
                     NAV.beginSafetyProfile();require(NAV.travelXYZ(65,161,50),"Original pathfinder accepts a goal beyond a wall");lastYaw=mc.player.getYaw();next(Phase.TRAVEL,tick);
                 }
@@ -184,7 +189,27 @@ final class NativeAutomationSmoke {
             }
             case TASK_UI -> {
                 NativeTaskUiSmoke.tick(mc,tick-taskUiStart);
-                if(NativeTaskUiSmoke.done())next(Phase.FINISH,tick);
+                if(NativeTaskUiSmoke.done()){fieldStart=tick+1;next(focused("task-ui")?Phase.FINISH:Phase.FIELD_DESCENT,tick);}
+            }
+            case FIELD_DESCENT -> {
+                NativeDescentSmoke.tick(mc,tick-fieldStart);
+                if(NativeDescentSmoke.done()){fieldStart=tick+1;next(focused("descent")?Phase.FINISH:focused("release-regression")?Phase.FIELD_WORKSTATIONS:Phase.FIELD_MINING,tick);}
+            }
+            case FIELD_MINING -> {
+                NativeMiningRecoverySmoke.tick(mc,tick-fieldStart);
+                if(NativeMiningRecoverySmoke.done()){fieldStart=tick+1;next(focused("mining-recovery") || focused("mining-terrain") || focused("sand-recovery")?Phase.FINISH:Phase.FIELD_WORKSTATIONS,tick);}
+            }
+            case FIELD_WORKSTATIONS -> {
+                NativeWorkstationRecoverySmoke.tick(mc,tick-fieldStart);
+                if(NativeWorkstationRecoverySmoke.done()){fieldStart=tick+1;next(focused("workstations") || focused("field-recovery")?Phase.FINISH:Phase.AUTOEAT,tick);}
+            }
+            case AUTOEAT -> {
+                NativeAutoEatSmoke.tick(mc,tick-fieldStart);
+                if(NativeAutoEatSmoke.done()){fieldStart=tick+1;next(focused("autoeat")?Phase.FINISH:Phase.XRAY,tick);}
+            }
+            case XRAY -> {
+                NativeXraySmoke.tick(mc,tick-fieldStart);
+                if(NativeXraySmoke.done())next(Phase.FINISH,tick);
             }
             case FINISH -> {
                 AutomationEngine.INSTANCE.stop();NAV.cancel();require(!mc.options.forwardKey.isPressed()&&!mc.options.backKey.isPressed()&&!mc.options.sprintKey.isPressed()&&!mc.options.jumpKey.isPressed()&&!mc.options.sneakKey.isPressed()&&!mc.options.useKey.isPressed(),"Stop releases every owned movement and item-use key");

@@ -16,8 +16,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -34,10 +32,11 @@ public final class InventoryAutomation {
     private static final Item[] NETHERITE_ARMOR = {Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS};
     private static final EquipmentSlot[] EQUIPMENT = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     private final AutomationNavigator bridge;
+    private final WorkstationController workstations;
     private String job = "";
     private Recipe recipe;
     private int cell, source = -1, phase, wait, ownedSync = -1, transactionSync = -1;
-    private int swapSource = -1, swapHotbar = -1, oldSelected = -1;
+    private int swapSource = -1, swapHotbar = -1;
     private long clickCount;
     private boolean ownedScreen;
     private Class<? extends ScreenHandler> expectedHandler;
@@ -47,17 +46,33 @@ public final class InventoryAutomation {
     private int cursorSource=-1,cursorSync=-1;
     private Object cursorWorld;
     private String recovery="";
+    private String finishingText="";
     private int buildAmount=ShelterSchematic.MATERIAL_COUNT;
     private int actionDelayTicks = 5;
     private Item materialItem = Items.AIR;
     private int materialTarget;
     private boolean ordinaryMiningDrops;
     private Box placementExclusion;
-    public InventoryAutomation(AutomationNavigator bridge) { this.bridge = bridge; }
+    public InventoryAutomation(AutomationNavigator bridge) { this.bridge = bridge; this.workstations = new WorkstationController(bridge, this); }
     public long clicks() { return clickCount; }
     public boolean ownsScreen() { return ownedScreen && MC.player != null && MC.player.currentScreenHandler.syncId == ownedSync || ownedScreen && MC.player != null && ownedSync < 0 && expectedHandler != null && expectedHandler.isInstance(MC.player.currentScreenHandler); }
     public String currentJob() { return job; }
     public String recovery() { return recovery; }
+    public boolean hasOwnedWorkstations() { return workstations.hasOwnedTables(); }
+    public boolean workstationRecoveryActive() { return workstations.recoveryActive(); }
+    /** Only explicit running-stage completion invokes recovery; Pause/Stop never start block actions. */
+    public Result finishWorkstations() {
+        if (MC.player == null || MC.world == null || MC.interactionManager == null) return Result.need("Join the task's world to recover its crafting table.");
+        if (wait > 0) { wait--; return Result.waitFor("Waiting for the workstation inventory update"); }
+        if (!hasOwnedWorkstations()) return Result.finished("No task-owned crafting table remains");
+        if (!MC.player.currentScreenHandler.getCursorStack().isEmpty()) return returnCursor();
+        if (ownedScreen || MC.player.currentScreenHandler != MC.player.playerScreenHandler) {
+            if (!ownsScreen()) return Result.need("Close your inventory screen before recovering the task-owned crafting table.");
+            closeOwned(); resetTransaction(); return Result.waitFor("Closing the crafting grid before recovering the task-owned table");
+        }
+        return workstations.finish();
+    }
+    public void pauseActions() { workstations.pauseActions(); }
     /** Recovery alone can require a replacement that yields ordinary ore/stone drops. */
     public void requireOrdinaryMiningDrops(boolean required) { ordinaryMiningDrops = required; }
     /** Keep prerequisite workstations out of the reviewed construction footprint. */
@@ -125,6 +140,11 @@ public final class InventoryAutomation {
         if (MC.player == null || MC.world == null || MC.interactionManager == null) return Result.need("Join a world to continue.");
         if (!job.equals(requested)) { resetTransaction(); job = requested; }
         if (wait > 0) { wait--; return Result.waitFor("Waiting for the server inventory update"); }
+        Result placement = workstations.observePlacement(); if (placement != null) return placement;
+        if (!finishingText.isEmpty()) return finish(finishingText);
+        if (workstations.recoveryActive()) {
+            Result cleanup = finishWorkstations(); if (!cleanup.done()) return cleanup;
+        }
         if (transactionSync >= 0 && MC.player.currentScreenHandler.syncId != transactionSync) { resetTransaction(); return Result.need("The inventory window changed; resume after closing it."); }
         if (swapSource >= 0) return restoreSwap();
         if (recipe != null) return craftTick();
@@ -189,8 +209,8 @@ public final class InventoryAutomation {
             if (planks() < 4) return makePlanks();
             return begin(new Recipe(Items.CRAFTING_TABLE, 2, plankIngredients(4)));
         }
-        if (count(Items.STICK) < 4) return sticks();
         if (hasPick(Items.WOODEN_PICKAXE) || hasPick(Items.STONE_PICKAXE) || hasPick(Items.IRON_PICKAXE) || hasPick(Items.DIAMOND_PICKAXE) || hasPick(Items.NETHERITE_PICKAXE)) return finish("Crafting table and mining tools ready");
+        if (count(Items.STICK) < 2) return sticks();
         if (planks() < 3) return makePlanks();
         Item[] heads = plankIngredients(3);
         return begin(new Recipe(Items.WOODEN_PICKAXE, 3, new Item[]{heads[0], heads[1], heads[2], null, Items.STICK, null, null, Items.STICK, null}));
@@ -562,17 +582,11 @@ public final class InventoryAutomation {
         if(station==null || !MC.world.getBlockState(station).isOf(block))station=findStation(block);
         if(station==null) {
             if(count(item)<1)return Result.need("Need a nearby " + block.getName().getString() + " or one in inventory.");
-            return placeStation(item);
+            return workstations.place(block, item, placementExclusion);
         }
-        if(MC.player.getEyePos().squaredDistanceTo(station.toCenterPos())>16) {
-            var status=bridge.status();
-            if(!status.owned() && !bridge.travelXZ(station.getX()+1,station.getZ()+1))return Result.need(bridge.status().message());
-            return Result.waitFor("Walking to " + block.getName().getString());
-        }
-        if(bridge.status().owned())bridge.cancel();
-        if (!AutomationMotion.align(station.toCenterPos())) return Result.waitFor("Turning toward " + block.getName().getString());
-        var hit = MC.player.raycast(4.5, 1, false);
-        if (!(hit instanceof BlockHitResult observed) || !observed.getBlockPos().equals(station)) return Result.need("The workstation is occluded. Reach a clear view of it, then resume.");
+        Result approach = workstations.approach(station); if (approach != null) return approach;
+        BlockHitResult observed = workstations.interactionHit(station);
+        if (observed == null) return Result.waitFor("Turning toward a visible face of " + block.getName().getString());
         MC.interactionManager.interactBlock(MC.player,Hand.MAIN_HAND,observed);
         ownedScreen=true;ownedSync=-1;expectedHandler=type;wait=8;observationWait=0;
         return Result.waitFor("Opening " + block.getName().getString());
@@ -585,30 +599,6 @@ public final class InventoryAutomation {
             double d=test.getSquaredDistance(p);if(d<distance){distance=d;best=test.toImmutable();}
         }
         return best;
-    }
-    private Result placeStation(Item item) {
-        BlockPos p=MC.player.getBlockPos(),target=null;
-        for(BlockPos test:BlockPos.iterate(p.add(-3,-1,-3),p.add(3,0,3))) {
-            if(placementExclusion!=null && placementExclusion.intersects(new Box(test)))continue;
-            if(test.getSquaredDistance(p)<4 || !MC.world.getBlockState(test).isReplaceable() || !MC.world.getBlockState(test.down()).isSideSolidFullSquare(MC.world, test.down(), Direction.UP)
-                    || MC.world.getBlockState(test.down()).hasBlockEntity() || !MC.world.getFluidState(test.down()).isEmpty() || !MC.world.getFluidState(test).isEmpty())continue;
-            if(MC.player.getEyePos().squaredDistanceTo(test.down().toCenterPos())<=16){target=test.toImmutable();break;}
-        }
-        if(target==null)return Result.need("Need a clear, reachable solid surface to place a workstation.");
-        Result preparation = prepareHotbar(item, 1); if (!preparation.done()) return preparation;
-        int inv=-1;for(int i=0;i<9;i++)if(MC.player.getInventory().getStack(i).isOf(item)){inv=i;break;}
-        if(inv<0)return Result.need("Workstation item is missing.");
-        if (!AutomationMotion.align(Vec3d.ofCenter(target.down()).add(0, 0.5, 0))) return Result.waitFor("Turning toward the workstation surface");
-        var observedHit = MC.player.raycast(4.5, 1, false);
-        if (!(observedHit instanceof BlockHitResult actualHit) || !actualHit.getBlockPos().equals(target.down()) || actualHit.getSide() != Direction.UP)
-            return Result.need("The real crosshair cannot reach a clear workstation placement surface.");
-        oldSelected=MC.player.getInventory().selectedSlot;
-        MC.player.getInventory().selectedSlot=inv;
-        BlockPos ground=target.down();
-        MC.interactionManager.interactBlock(MC.player,Hand.MAIN_HAND,actualHit);
-        MC.player.getInventory().selectedSlot=oldSelected;
-        station=target;throttle();
-        return Result.waitFor("Placing the workstation through normal block interaction");
     }
     private Result restoreSwap() {
         if(!(MC.player.currentScreenHandler instanceof PlayerScreenHandler)) {closeOwned();return Result.waitFor("Restoring the previous hotbar item");}
@@ -637,15 +627,16 @@ public final class InventoryAutomation {
         if(slot<0){recovery="Make an empty inventory slot and put the held crafting item back; Stop preserved it on the cursor.";return Result.need(recovery);}
         click(slot,0,SlotActionType.PICKUP);return Result.waitFor("Returning owned cursor item to inventory");
     }
-    private Result finish(String text){closeOwned();resetTransaction();return Result.finished(text);}
+    private Result finish(String text){finishingText=text;Result cleanup=finishWorkstations();if(!cleanup.done())return cleanup;finishingText="";closeOwned();resetTransaction();return Result.finished(text);}
     private void closeOwned(){if(ownedScreen && MC.player!=null && MC.player.currentScreenHandler!=MC.player.playerScreenHandler && MC.player.currentScreenHandler.getCursorStack().isEmpty()){MC.player.closeHandledScreen();throttle();}ownedScreen=false;ownedSync=-1;expectedHandler=null;station=null;}
     private void resetTransaction(){recipe=null;cell=0;source=-1;phase=0;transactionSync=-1;observationWait=0;}
     public void stop(){
+        workstations.stop();
         if(MC.player!=null && MC.interactionManager!=null){
             if(cursorOwned && !MC.player.currentScreenHandler.getCursorStack().isEmpty()) {Result restored=returnCursor();if(restored.blocked())return;}
             if(swapSource>=0 && MC.player.currentScreenHandler instanceof PlayerScreenHandler)restoreSwap();
             closeOwned();
         }
-        resetTransaction();job="";
+        resetTransaction();job="";finishingText="";
     }
 }

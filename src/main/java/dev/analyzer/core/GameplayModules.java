@@ -11,7 +11,7 @@ public final class GameplayModules {
         out.addAll(CombatSettings.definitions());
         out.addAll(HvhSettings.definitions());
         out.addAll(MovementSettings.definitions());
-        add(out, "auto-eat", "Auto Eat", "Eat hotbar food below a hunger threshold; temporarily owns and restores use input/slot.", Category.PLAYER,
+        add(out, "auto-eat", "Auto Eat", "Begin eating below the hunger threshold and continue until full; temporarily owns and restores use input/slot.", Category.PLAYER,
                 Setting.number("hunger", "Eat below hunger", 16, 1, 20, 1));
         add(out, "auto-gapple", "Auto Gapple", "Use a hotbar golden apple below a health threshold.", Category.PLAYER,
                 Setting.number("health", "Eat below health", 12, 1, 20, 1));

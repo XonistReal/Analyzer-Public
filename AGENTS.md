@@ -12,6 +12,16 @@ Start/Resume must wait for the launching menu click and any held movement/action
 
 The user requested a folder-based schematic list instead of typing filenames. Keep **Automation → Schematics → Browse** with the active Minecraft game's `schematics` folder, subfolders, search, Refresh and Open folder. Selecting a supported file uses its actual absolute path and returns to material/site review before explicit Start. Preserve drag and drop and existing importer limits/source hashes. Folder listing must not parse every schematic or follow child links out of the library.
 
+## Local requests, field recovery and X-ray in 0.10.2
+
+The user requires ordinary local requests such as **get me 600 sand**, **get just 37 diamonds** and building one actual selected/named schematic without preset wording. Parse supported quantities/materials into a reviewable plan; do not silently add armor/building goals or execute commands. Quantities are final inventory targets, existing items count and actual drops may overshoot. Unsupported or ambiguous requests need a clear explanation. Schematic intent must resolve one real file from the existing selected path or bounded folder lookup, retain its hash/material/site review, and still require explicit Start. Keep planning local.
+
+Mining must clear checked harmless vegetation/natural cover, use actual visible crosshair faces, replan obstructed approaches and preserve supported return access. Actual item pickup needs time for its real walking route; counting attempted breaks is not completion. Workstation placement checks real nearby faces/heights, recovers only acknowledged worker-placed crafting tables and preserves existing/replaced tables. Tree recovery uses checked walking/vines/ladders or a verified rooted-trunk descent; unsupported canopy and hazard protections remain enforced. Recovery remains bounded and observed fixtures do not prove arbitrary unattended terrain success.
+
+Auto Eat's hunger setting triggers a refill cycle: keep consuming available hotbar food through normal item use until hunger is full, then release use input and restore the selected slot. Disabling, changing worlds, dying or opening menus cancels ownership cleanly.
+
+Keep **Render → X-ray** opt-in with **Fade terrain / Terrain outlines / Ores only**. Fade uses approximately 15% opaque terrain with fully opaque selected ores; the other styles use thin terrain edges or hide ordinary terrain. Workstations and all vanilla storage models remain visible by default, including special block-entity models. Entity highlights are enabled by default and bounded to nearby received entities. Preserve ore, workstation, storage and entity controls, native textures, live chunk/resource restoration and saved profiles. This renders loaded client data; do not claim server-data bypass, replacement-renderer compatibility or undetectability.
+
 ## Standing user preference: Prism delivery
 
 The user explicitly requested on October 11, 2026 that every Analyzer update also update their Prism Launcher instance. Treat publishing, packaging and installing as part of completing future project updates. This is already authorized; do not ask for the same permission again.

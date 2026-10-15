@@ -1,6 +1,6 @@
 # Analyzer module catalogue
 
-124 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
+125 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
 
 ## Render
 
@@ -15,6 +15,7 @@
 | Trajectories | Predict a held bow, trident, snowball, egg or pearl path against loaded blocks. | Off |
 | Item ESP | Independent glowing rings and beams on loaded dropped items. | Off |
 | Nametags | Independent readable names, health and distances for loaded players and mobs. | Off |
+| X-ray | Real ore textures in loaded terrain: 15% terrain, fine terrain outlines, or ores only. Disabling restores ordinary chunks. | Off |
 
 ## World
 
@@ -108,7 +109,7 @@
 
 | Module | Behavior | Default |
 | --- | --- | --- |
-| Auto Eat | Eat hotbar food below a hunger threshold; temporarily owns and restores use input/slot. | Off |
+| Auto Eat | Begin eating below the hunger threshold and continue until full; temporarily owns and restores use input/slot. | Off |
 | Auto Gapple | Use a hotbar golden apple below a health threshold. | Off |
 | Auto Totem | Swap an inventory totem into the offhand through the normal player inventory handler. | Off |
 | Auto Armor | Equip stronger material-tier armor through guarded normal inventory quick moves. | Off |

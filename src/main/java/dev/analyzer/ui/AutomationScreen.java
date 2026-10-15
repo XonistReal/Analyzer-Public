@@ -1,6 +1,9 @@
 package dev.analyzer.ui;
 
 import dev.analyzer.automation.TaskPlanner;
+import dev.analyzer.automation.LocalTaskIntent;
+import dev.analyzer.automation.LocalSchematicLookup;
+import dev.analyzer.automation.SchematicLibrary;
 import dev.analyzer.core.AnalyzerCore;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -14,6 +17,8 @@ import java.util.Objects;
 import java.util.HashMap;
 import java.util.Map;
 import java.nio.file.Path;
+import java.nio.file.Files;
+import java.io.IOException;
 
 /** An explicit plan review and live task console, backed by a real automation controller. */
 public final class AutomationScreen extends Screen {
@@ -108,7 +113,7 @@ public final class AutomationScreen extends Screen {
             else { taskText=fields[0];fields[0]=schematicPath; }
             schematicMode=!schematicMode;focus=schematicMode?-1:0;reviewed=null;showReviewed=true;message=schematicMode?"Choose a schematic from your folder, or drop a file onto this screen.":"Type a goal or choose a preset.";
         });
-        GuiDraw.label(context, textRenderer, schematicMode?"Browse your schematics folder or drop a file here.":"Type a task or choose a preset.", 22, 111, .89f, StudioAuxiliary.MUTED);
+        GuiDraw.label(context, textRenderer, schematicMode?"Browse your schematics folder or drop a file here.":"Try get me 600 sand or get just 37 diamonds. Presets are optional.", 22, 111, .89f, StudioAuxiliary.MUTED);
         if (schematicMode) schematicField(context, !view.running && !view.paused);
         else field(context, 0, 22, 135, 386, 47, "TASK");
         if(schematicMode) {
@@ -200,10 +205,37 @@ public final class AutomationScreen extends Screen {
             TaskPlanner.Options options = new TaskPlanner.Options(originX, originY, originZ,
                     Integer.parseInt(fields[1].trim()), Integer.parseInt(fields[2].trim()), Integer.parseInt(fields[3].trim()),
                     Integer.parseInt(fields[4].trim()), direction);
+            if (!schematicMode) {
+                var request = LocalTaskIntent.schematic(fields[0]);
+                if (request.isPresent() && !selectRequestedSchematic(request.get())) return;
+            }
             if (schematicMode && fields[0].isBlank()) throw new IllegalArgumentException("Choose a schematic from your folder before reviewing.");
             reviewed = schematicMode ? controller.schematicPlan(Path.of(fields[0].trim().replaceAll("^\"|\"$", "")),options,autoSite) : TaskPlanner.plan(fields[0],options);
             showReviewed = true; error = false; message = "Reviewed " + reviewed.steps().size() + " stages. Starting is a separate action."; stepScroll = 0; prerequisiteScroll = 0;
         } catch (RuntimeException e) { reviewed = null; error = true; message = e instanceof NumberFormatException ? "Coordinates and distance must be whole numbers." : Objects.requireNonNullElse(e.getMessage(), "This task is not supported."); }
+    }
+    private boolean selectRequestedSchematic(LocalTaskIntent.Schematic request) {
+        if (client == null) throw new IllegalArgumentException("Open the local schematic browser before reviewing a build.");
+        Path selected = null; String chooseMessage = "Choose one schematic file. Its materials and site will be reviewed before Start.";
+        try {
+            if (request.name().isBlank() && !schematicPath.isBlank()) {
+                Path previous = Path.of(schematicPath);
+                if (Files.isRegularFile(previous) && SchematicLibrary.supported(previous)) selected = previous.toAbsolutePath().normalize();
+            } else if (!request.name().isBlank()) {
+                var found = LocalSchematicLookup.find(client.runDirectory.toPath(), request.name());
+                selected = found.unique().orElse(null);
+                if (found.limited()) chooseMessage = "The bounded folder search was incomplete. Browse to the actual file and choose it.";
+                else if (found.matches().size() > 1) chooseMessage = "Several local schematics match ‘" + request.name() + "’. Choose the correct file and folder.";
+                else if (selected == null) chooseMessage = "No exact local match for ‘" + request.name() + "’. Choose an existing file from your schematics folder.";
+            }
+        } catch (IOException failure) { throw new IllegalArgumentException("Cannot read the local schematic folder: " + failure.getMessage()); }
+        if (selected == null) {
+            reviewed = null; showReviewed = true; error = false; message = chooseMessage; browseSchematics();
+            if (client.currentScreen instanceof SchematicBrowserScreen browser) browser.status = chooseMessage;
+            return false;
+        }
+        taskText = fields[0]; schematicMode = true; focus = -1; selectAll = false;
+        fields[0] = selected.toString(); schematicPath = fields[0]; return true;
     }
     private void schematicField(DrawContext context, boolean enabled) {
         StudioAuxiliary.field(context, core, 22, 135, 386, 47, false);

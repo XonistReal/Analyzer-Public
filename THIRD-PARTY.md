@@ -32,7 +32,7 @@ The Studio menu uses unmodified Lato Regular and Bold fonts obtained from the of
 
 The release mod requires the game's existing runtime libraries, including Gson for JSON and LWJGL for OpenGL calls. Analyzer does not shade copies of those libraries or bundle Fabric Loader/API into its mod JAR. A source/build archive includes Gradle wrapper tooling; Gradle retrieves the build distribution and development dependencies separately.
 
-The ready-to-install ZIP includes Fabric API as a separate, unmodified mod JAR in `mods/`; the native Prism ZIP uses `minecraft/mods/`. Its upstream `LICENSE-fabric-api` notice is retained inside that JAR and reproduced in `licenses/FABRIC-API-LICENSE.txt` in both ZIP formats. The source archive includes the upstream Gradle license as `GRADLE-LICENSE.txt`.
+The ready-to-install ZIP includes Fabric API as a separate, unmodified mod JAR in `mods/`; the native Prism ZIP uses `minecraft/mods/`. Its upstream `LICENSE-fabric-api` notice is retained inside that JAR and reproduced in `licenses/FABRIC-API-LICENSE.txt` in both ZIP formats. Current native packages also include the matching pinned Fabric API source tree, recorded in [DEPENDENCY-SOURCES.md](DEPENDENCY-SOURCES.md). The source archive includes the upstream Gradle license as `GRADLE-LICENSE.txt`.
 
 ## Research references are not bundled dependencies
 

@@ -1,10 +1,10 @@
 # Analyzer in Prism Launcher
 
-Analyzer **0.10.1** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Native Automation needs no Baritone or other bot mod. Minecraft account credentials, user worlds/configuration and Minecraft itself are not included.
+Analyzer **0.10.2** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Native Automation needs no Baritone or other bot mod. Minecraft account credentials, user worlds/configuration and Minecraft itself are not included.
 
 ## Import or update
 
-Drag `Analyzer-0.10.1-Prism-1.21.4.zip` onto Prism or use **Add Instance → Import**. The archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root. Use your own Minecraft account and Java 21. The portable ZIP inherits Prism's Java preferences and has no fixed Java path.
+Drag `Analyzer-0.10.2-Prism-1.21.4.zip` onto Prism or use **Add Instance → Import**. The archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root. Use your own Minecraft account and Java 21. The portable ZIP inherits Prism's Java preferences and has no fixed Java path.
 
 On this computer, reuse `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4`. That folder is the current imported instance located on October 14; inspect the installed JAR/version/hash to identify the current build. Future updates preserve launcher Java preferences, worlds, configs, profiles, friends and unrelated mods.
 
@@ -15,6 +15,8 @@ With Minecraft closed, the verified updater installs the published Analyzer JAR.
 Press **Right Shift** for Studio or shader Click GUI. Keep **HUD Studio → Menu layout → Studio / Click GUI**, independent Glass/Classic/Minimal/Neon themes and Rose/Mint/Violet/Gold accents. Retired Workspace/Classic/Compact layout values migrate to Studio; Classic remains a theme. The supplied watermark shows exactly the selected A logo or Analyzer logo.
 
 Home defaults to Minecraft panorama, with Orbit and Vanilla menu alternatives. Profiles, HUD editing, Automation and numeric entry retain Studio shader surfaces and bundled Lato. Worlds, servers and native options retain actual Minecraft data/callbacks. Server Privacy keeps its eight default protections and preserves saved opt-outs. See [SERVER-PRIVACY.md](SERVER-PRIVACY.md).
+
+Enable **Render → X-ray** only when desired. Its World style chooses **Fade terrain / Terrain outlines / Ores only**, with separate ore-group filters and an outline/glow range. Disabling rebuilds ordinary terrain. Read [XRAY.md](XRAY.md) for the native render scope and compatibility limits.
 
 Open **Automation → Review plan → Start reviewed plan** for local native goals, the schematic folder browser and material checklists, adjustable turning and action pacing, tool recovery and mob protection. Saved tasks restore paused. Read [AUTOMATION.md](AUTOMATION.md) and [SAFETY.md](SAFETY.md) for implemented behavior and world prerequisites.
 

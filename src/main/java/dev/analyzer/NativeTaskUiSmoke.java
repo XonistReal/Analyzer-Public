@@ -9,10 +9,13 @@ import dev.analyzer.effects.UiShader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.ScreenshotRecorder;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -23,6 +26,8 @@ import java.util.Set;
 /** Actual native screen clicks, local file selection and Survival input handoffs in the isolated dev save. */
 final class NativeTaskUiSmoke {
     private enum Stage { SETUP, INPUT_MODE, OPEN_BROWSER, ROOT_LIST, FILE_LIST, SELECTED, REVIEW,
+        SELECTED_TASK, SELECTED_TEXT, SELECTED_REVIEW, NAMED_TASK, NAMED_TEXT, NAMED_REVIEW,
+        SAND_TASK, SAND_TEXT, SAND_REVIEW, DIAMONDS_TEXT, DIAMONDS_REVIEW,
         TASK_MODE, TASK_TEXT, TASK_REVIEW, START, START_HELD, START_RELEASED, MANUAL_INPUT,
         PAUSED, RESUME_SCREEN, RESUME_HELD, RESUME_RELEASED, COMPLETE, STOP_SCREEN,
         STOP_REVIEW, STOP_START, STOP_HELD, STOP_PENDING_SCREEN, STOPPED, FINISHED }
@@ -33,6 +38,7 @@ final class NativeTaskUiSmoke {
     private static AutomationScreen console;
     private static SchematicBrowserScreen browser;
     private static Path fixture;
+    private static TaskPlanner.Step selectedBuild;
     private static Vec3d heldPosition, pausedPosition, movingPosition;
 
     private NativeTaskUiSmoke() { }
@@ -48,17 +54,25 @@ final class NativeTaskUiSmoke {
             case SETUP -> {
                 ENGINE.stop(); mc.setScreen(null); AutomationInputDiagnostics.developmentOverride(Set.of());
                 command(mc, "kill @e[type=!minecraft:player]"); command(mc, "difficulty peaceful");
+                command(mc, "gamemode survival AnalyzerDev");
                 command(mc, "fill 40 160 40 100 160 90 minecraft:bedrock"); command(mc, "fill 40 161 40 100 168 90 minecraft:air");
                 command(mc, "tp AnalyzerDev 50.5 161 50.5 0 0"); command(mc, "effect give AnalyzerDev minecraft:instant_health 1 4 true");
                 command(mc, "effect give AnalyzerDev minecraft:saturation 120 4 true");
                 AnalyzerClient.CORE.setValue("expedition", "pause-on-input", true);
                 AnalyzerClient.CORE.setValue("expedition", "pause-on-menu", true);
-                AnalyzerClient.CORE.setValue("expedition", "auto-site", false);
+                AnalyzerClient.CORE.setValue("expedition", "auto-site", true);
                 try { fixture = writeFixture(mc); }
                 catch (Exception error) { throw new IllegalStateException("Cannot create isolated schematic browser fixture", error); }
                 console = new AutomationScreen(null, ENGINE, AnalyzerClient.CORE); mc.setScreen(console); enter(Stage.INPUT_MODE);
             }
-            case INPUT_MODE -> { if (age() >= 20) { clickConsole("input-mode"); enter(Stage.OPEN_BROWSER); } }
+            case INPUT_MODE -> {
+                if (age() < 20) return;
+                var serverPlayer = mc.getServer().getPlayerManager().getPlayer(mc.player.getUuid());
+                require(mc.interactionManager.getCurrentGameMode() == GameMode.SURVIVAL
+                        && serverPlayer != null && serverPlayer.interactionManager.getGameMode() == GameMode.SURVIVAL,
+                        "Task UI inputs and actual route execution begin in Survival on both client and server");
+                clickConsole("input-mode"); enter(Stage.OPEN_BROWSER);
+            }
             case OPEN_BROWSER -> {
                 if (age() < 6) return;
                 clickConsole("browse-schematics");
@@ -91,7 +105,41 @@ final class NativeTaskUiSmoke {
                 require(plan.steps().size() == 3 && plan.steps().getLast().action() == TaskPlanner.Action.BUILD_SCHEMATIC,
                         "The selected file produces both material stages and its actual schematic construction stage");
                 require(plan.steps().getFirst().action() == TaskPlanner.Action.SUPPLY_MATERIAL && !ENGINE.isRunning(), "File selection preserves material-first planning and explicit Start");
-                capture(mc, "schematic-selected-review"); clickConsole("input-mode"); enter(Stage.TASK_MODE);
+                selectedBuild = plan.steps().getLast();
+                require(selectedBuild.y() == 161, "Automatic site selection uses the observed loaded platform at Y161 rather than an absent client heightmap");
+                for (int x = 0; x < 2; x++) {
+                    BlockPos origin = new BlockPos(selectedBuild.x() + x, selectedBuild.y(), selectedBuild.z());
+                    require(mc.world.isChunkLoaded(origin) && mc.world.getBlockState(origin.down()).isOf(Blocks.BEDROCK)
+                            && mc.world.getBlockState(origin).isAir(), "Automatic selection preserves a real dry supported cell for every material in the actual file footprint");
+                }
+                capture(mc, "schematic-selected-review"); clickConsole("input-mode"); enter(Stage.SELECTED_TASK);
+            }
+            case SELECTED_TASK -> { if (age() >= 6) { replaceTask("only build one schematic"); enter(Stage.SELECTED_TEXT); } }
+            case SELECTED_TEXT -> { if (age() >= 6) { clickConsole("review"); enter(Stage.SELECTED_REVIEW); } }
+            case SELECTED_REVIEW -> {
+                if (age() < 8) return;
+                sameSchematicReview(mc, "A local selected-schematic request");
+                capture(mc, "schematic-selected-intent"); clickConsole("input-mode"); enter(Stage.NAMED_TASK);
+            }
+            case NAMED_TASK -> { if (age() >= 6) { replaceTask("build one schematic named fixture"); enter(Stage.NAMED_TEXT); } }
+            case NAMED_TEXT -> { if (age() >= 6) { clickConsole("review"); enter(Stage.NAMED_REVIEW); } }
+            case NAMED_REVIEW -> {
+                if (age() < 8) return;
+                sameSchematicReview(mc, "A locally named schematic request");
+                capture(mc, "schematic-named-intent"); clickConsole("input-mode"); enter(Stage.SAND_TASK);
+            }
+            case SAND_TASK -> { if (age() >= 6) { replaceTask("could you please get me exactly 600 sand"); enter(Stage.SAND_TEXT); } }
+            case SAND_TEXT -> { if (age() >= 6) { clickConsole("review"); enter(Stage.SAND_REVIEW); } }
+            case SAND_REVIEW -> {
+                if (age() < 8) return;
+                quantityReview(mc, "sand", 600);
+                capture(mc, "quantity-sand-review"); replaceTask("get just 37 diamonds"); enter(Stage.DIAMONDS_TEXT);
+            }
+            case DIAMONDS_TEXT -> { if (age() >= 6) { clickConsole("review"); enter(Stage.DIAMONDS_REVIEW); } }
+            case DIAMONDS_REVIEW -> {
+                if (age() < 8) return;
+                quantityReview(mc, "diamond", 37);
+                capture(mc, "quantity-diamonds-review"); enter(Stage.TASK_MODE);
             }
             case TASK_MODE -> { if (age() >= 6) { replaceTask("go to 54 161 65"); enter(Stage.TASK_TEXT); } }
             case TASK_TEXT -> { if (age() >= 6) { clickConsole("review"); enter(Stage.TASK_REVIEW); } }
@@ -172,7 +220,7 @@ final class NativeTaskUiSmoke {
                 if (age() < 25) return;
                 ENGINE.stop(); require(!mc.options.attackKey.isPressed() && !mc.options.useKey.isPressed(), "Task UI completion releases attack and use as well as movement");
                 require(UiShader.isHealthy() && GL11.glGetError() == GL11.GL_NO_ERROR, "Browser, review and handoff HUD leave healthy native shaders and clean GL state");
-                AnalyzerClient.LOGGER.info("ANALYZER_NATIVE_TASK_UI_COMPLETE: {} assertions, {} captures, {} elapsed ticks; selected local schematic review and held-click start/resume/manual pause/cancel passed", assertions, captures, tick);
+                AnalyzerClient.LOGGER.info("ANALYZER_NATIVE_TASK_UI_COMPLETE: {} assertions, {} captures, {} elapsed ticks; browser/selected/named local schematic and exact-quantity reviews plus held-click start/resume/manual pause/cancel passed", assertions, captures, tick);
                 enter(Stage.FINISHED);
             }
             case FINISHED -> { }
@@ -192,6 +240,23 @@ final class NativeTaskUiSmoke {
         Path path = folder.resolve("fixture.litematic"); NbtIo.writeCompressed(root, path); Files.writeString(folder.resolve("ignored.txt"), "Not a schematic"); return path;
     }
     private static Vec3d serverPosition(MinecraftClient mc) { return mc.getServer().getPlayerManager().getPlayer(mc.player.getUuid()).getPos(); }
+    private static void sameSchematicReview(MinecraftClient mc, String label) {
+        require(mc.currentScreen == console && console.reviewedPlan() != null && !console.isReviewError(), label + " resolves to an actual reviewed file: " + console.errorText());
+        var plan = console.reviewedPlan();
+        require(plan.steps().size() == 3 && plan.steps().getLast().action() == TaskPlanner.Action.BUILD_SCHEMATIC, label + " contains one construction after both material stages");
+        require(plan.steps().getLast().resource().equals(selectedBuild.resource()), label + " retains the same actual source-file path and SHA-256 reviewed by the browser");
+        require(plan.steps().stream().filter(step -> step.action() == TaskPlanner.Action.SUPPLY_MATERIAL).count() == 2
+                && plan.steps().getFirst().action() == TaskPlanner.Action.SUPPLY_MATERIAL, label + " preserves the all-materials-first plan");
+        require(!ENGINE.isRunning() && !ENGINE.pathStatus().owned() && !movementPressed(mc), label + " never starts movement or construction on Review");
+    }
+    private static void quantityReview(MinecraftClient mc, String resource, int count) {
+        require(mc.currentScreen == console && console.reviewedPlan() != null && !console.isReviewError(), "Normal composer input reviews the " + resource + " quantity: " + console.errorText());
+        var plan = console.reviewedPlan(); var mines = plan.steps().stream().filter(step -> step.action() == TaskPlanner.Action.MINE).toList();
+        require(mines.size() == 1 && mines.getFirst().resource().equals(resource) && mines.getFirst().count() == count, "The actual composer retains exactly one " + count + " " + resource + " inventory goal");
+        require(plan.steps().stream().allMatch(step -> step.action() == TaskPlanner.Action.MINE || step.action() == TaskPlanner.Action.DIMENSION), "A resource count never silently adds armor, enchanting, crafting or a base");
+        require(plan.prerequisites().stream().anyMatch(text -> text.contains("total inventory targets") && text.contains("existing stock")), "The visible review explains existing inventory credit and total-item targets");
+        require(!ENGINE.isRunning() && !ENGINE.pathStatus().owned() && !movementPressed(mc), "Reviewing the " + resource + " quantity cannot automatically start a task");
+    }
     private static void command(MinecraftClient mc, String command) { mc.getServer().execute(() -> mc.getServer().getCommandManager().executeWithPrefix(mc.getServer().getCommandSource().withSilent(), command)); }
     private static boolean movementPressed(MinecraftClient mc) { return mc.options.forwardKey.isPressed() || mc.options.backKey.isPressed() || mc.options.leftKey.isPressed() || mc.options.rightKey.isPressed() || mc.options.sprintKey.isPressed() || mc.options.jumpKey.isPressed() || mc.options.sneakKey.isPressed(); }
     private static void replaceTask(String task) {

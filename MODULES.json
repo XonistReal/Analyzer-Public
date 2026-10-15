@@ -5382,6 +5382,119 @@
     ]
   },
   {
+    "id": "xray",
+    "name": "X-ray",
+    "category": "Render",
+    "description": "Real ore textures in loaded terrain: 15% terrain, fine terrain outlines, or ores only. Disabling restores ordinary chunks.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "style",
+        "label": "World style",
+        "kind": "CHOICE",
+        "default": "Fade terrain",
+        "choices": [
+          "Fade terrain",
+          "Terrain outlines",
+          "Ores only"
+        ]
+      },
+      {
+        "id": "range",
+        "label": "Detail range",
+        "kind": "NUMBER",
+        "default": 24.0,
+        "min": 8.0,
+        "max": 48.0,
+        "step": 4.0
+      },
+      {
+        "id": "glow",
+        "label": "Subtle ore glow in Fade terrain",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "workstations",
+        "label": "Keep workstations visible",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "storage",
+        "label": "Keep storage containers visible",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "entities",
+        "label": "Entity highlights",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "diamond",
+        "label": "Diamond ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "emerald",
+        "label": "Emerald ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "gold",
+        "label": "Gold ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "iron",
+        "label": "Iron ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "copper",
+        "label": "Copper ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "lapis",
+        "label": "Lapis ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "redstone",
+        "label": "Redstone ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "coal",
+        "label": "Coal ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "quartz",
+        "label": "Nether quartz ores",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "debris",
+        "label": "Ancient debris ores",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
     "id": "item-physics",
     "name": "Item Physics",
     "category": "Cosmetics",
@@ -9943,7 +10056,7 @@
     "id": "auto-eat",
     "name": "Auto Eat",
     "category": "Player",
-    "description": "Eat hotbar food below a hunger threshold; temporarily owns and restores use input/slot.",
+    "description": "Begin eating below the hunger threshold and continue until full; temporarily owns and restores use input/slot.",
     "defaultEnabled": false,
     "settings": [
       {

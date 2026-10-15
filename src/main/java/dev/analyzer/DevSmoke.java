@@ -250,7 +250,7 @@ final class DevSmoke {
             }
             if (worldTicks >= 625) ExpansionSmoke.tick(client, worldTicks - 625);
         }
-        if (ticks > (Boolean.getBoolean("analyzer.nativeAutomationSmoke") ? 16000 : Boolean.getBoolean("analyzer.automationSmoke") ? 10000 : 4000)) throw new IllegalStateException("Smoke test timed out");
+        if (ticks > (Boolean.getBoolean("analyzer.nativeAutomationSmoke") ? 48000 : Boolean.getBoolean("analyzer.automationSmoke") ? 10000 : 4000)) throw new IllegalStateException("Smoke test timed out");
     }
 
     private static void loadProfile(String name) {

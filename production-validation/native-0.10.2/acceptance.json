@@ -1,0 +1,87 @@
+{
+  "release": "0.10.2",
+  "date": "2026-10-14",
+  "status": "build_verified_remaining_gameplay_checks_delegated_to_user",
+  "policyAssertions": 4455,
+  "policySuites": 21,
+  "modules": 125,
+  "controls": 1140,
+  "baritoneLoaded": false,
+  "completedCurrentNative": {
+    "miningRecovery": {
+      "assertions": 28195,
+      "pipelineChecks": 16541,
+      "captures": 3,
+      "actualCobblestone": 96,
+      "actualSand": 600
+    },
+    "progression": {
+      "assertions": 51,
+      "captures": 1
+    },
+    "inventory": {
+      "assertions": 60,
+      "captures": 3
+    }
+  },
+  "earlierComponentRuns": {
+    "descent": {
+      "assertions": 1724,
+      "captures": 4
+    },
+    "workstations": {
+      "assertions": 15,
+      "captures": 2
+    },
+    "xrayRenderer": {
+      "assertions": 41,
+      "captures": 6
+    }
+  },
+  "interruptedRegression": "User explicitly requested stopping the remaining in-game checks and building/installing now. The combined run completed travel, mining, building, material-first imported construction, portal return, progression and inventory, then was stopped during tool recovery. No completed full-regression claim.",
+  "pendingUserChecks": [
+    "remaining repeated-tool/safety/input/tree/workstation integration",
+    "Auto Eat refill and cancellation in game",
+    "new X-ray workstations/storage/entity filters, including special models, and their live toggles"
+  ],
+  "scope": "600-sand/96-stone completion is server-backed in an isolated development save, not a universal unattended-server guarantee. Earlier renderer-only captures show the three base styles before the latest utility/entity additions. Native defaults, actual interactions and saved data are retained.",
+  "captures": {
+    "analyzer-native-0.10.2-automation-600-sand.png": "51817fd12d6cd33dce3d2b023fbc7beaa2eaa1647a95dfa74d3eabf85d0db859",
+    "analyzer-native-0.10.2-automation-building.png": "fcd7b6149dd5e94d351fb5871064f86f389b43bdf08d4ffd1a9d04df97b45ad3",
+    "analyzer-native-0.10.2-automation-console.png": "07893c70ba8145fbe81885dc842c17d6be5af2dd4e6bb4b4f6cc8279dd54d9a4",
+    "analyzer-native-0.10.2-automation-covered-wood.png": "859543cb2e8d8368c423351d2431cac62491a6af9eb4967977243e1d35b29f6b",
+    "analyzer-native-0.10.2-automation-crafted-kit.png": "6dee94382f5ca94a6674376119202c1f80f8778474fca7109ebcc6d860948fd9",
+    "analyzer-native-0.10.2-automation-enchanted-kit.png": "9970742908468bca21abc6188001bf69e2a39ba929c97c2b7524166f23f9f766",
+    "analyzer-native-0.10.2-automation-expedition-plan.png": "bc6896e319379e8c71b2863ab089e821125a27e8976c60e16c97887e0d00ebbe",
+    "analyzer-native-0.10.2-automation-grass-covered-96-stone.png": "4bf406cb39317c83d0f4d7218eeb1fb1b128e46566de931af77115536d538f98",
+    "analyzer-native-0.10.2-automation-mining.png": "ae506b4336799f5c7ba688cc1ce446c5aa6dccbbfcb0f21700a50f04f06d8885",
+    "analyzer-native-0.10.2-automation-nether.png": "168f865890cf1dffbc44d7b1487ba9f9a281ba82490eb35e85ee6583bd2cdbf4",
+    "analyzer-native-0.10.2-automation-route.png": "df8006b4fa5f7382f8acb38ceadad603d59cbc3d7c22dbcb4b8434c85378ae62",
+    "analyzer-native-0.10.2-automation-smithing.png": "fea04458e9f053f8456d82e30c6cfb8f0793edefbc798d6e7ad0ba14c591ed19",
+    "analyzer-native-0.10.2-base-recovery-rooted-trunk-descent.png": "f0e0da6443fcbf4af0840a339b07782ada00856105fd026aadb283550ad802f3",
+    "analyzer-native-0.10.2-base-recovery-unsafe-descent-preserved.png": "560db3a1e938af719818f76e48b76c8413a153fd86cd598fa7c68f404644f844",
+    "analyzer-native-0.10.2-base-recovery-vine-descent.png": "83d1683602101eec3980483716b650fcc7298087efe547684a12662f4e7f7c73",
+    "analyzer-native-0.10.2-base-recovery-vine-resumed-mining.png": "41899da837dcaa789e79658d38b22e51652699c09d7b80099334728368d33658",
+    "analyzer-native-0.10.2-base-workstations-existing-workstation-preserved.png": "0c160b6fe6ea827e24be0f356cb8c3db5f108e213c0e32072167aa59942e90ea",
+    "analyzer-native-0.10.2-base-workstations-owned-workstation-recovered.png": "e5f5dbd6ac7c06de9ed0105531b221e58d2ce6df97700fe6f1614f8555412dfa",
+    "analyzer-native-0.10.2-base-xray-fade-terrain.png": "d2200e68f76ce0ca7f34e52eac07a23cc9dbac092a2ae6ce9bb372d6deb259eb",
+    "analyzer-native-0.10.2-base-xray-normal-before.png": "3d7530f771fa9f95b50eec4d02121094e3789dd9675897478af5086657612169",
+    "analyzer-native-0.10.2-base-xray-normal-restored.png": "ed51e81e83e1d010fbfd3b8cb63eb2687fe62ff5902f2d0318a26ece79a8f775",
+    "analyzer-native-0.10.2-base-xray-ores-only.png": "a5757615ff36949bc9124cb4b21accc5a6ee1e91ca5b4e989133c8a4c42f3d72",
+    "analyzer-native-0.10.2-base-xray-resource-reloaded.png": "0414c9dd4d62e78cfbcc41e5a7673c0ef38ddba1481c92d8d174640b752579a6",
+    "analyzer-native-0.10.2-base-xray-terrain-outlines.png": "e60abd8851db3a8438a119a58f333ac15541c705e8ec8bffc3f510a2500e64f9"
+  },
+  "logs": {
+    "field-recovery-publish.log": "37d1793210f798606a3600990c86aef517711e4792e40500d8655a7ad4c162a3",
+    "field-recovery-mining-sixth.log": "9dd42b7d6cb03f789df7c68fdead213e52810144308abde1ce712654769f5684",
+    "field-recovery-release-regression.log": "566d487faab767229ebd4a76d188f577d81d1ab144d8ca10d335edf4f7670f46",
+    "field-recovery-descent-second.log": "2d0328f3a67061f87eb08a6032bde4cfb9ff960c6c4c9dd70c9e0fe7dc1176f6",
+    "field-recovery-workstations-second.log": "1f12f407e8e9af80c59bad61581552e82bd8ea93ae4a8690d903c37c5fcc2458",
+    "field-recovery-xray-second.log": "fde4f9ed48b8c283409cadf632cbb6120f09c8e72a02cc4cb2e6fb54f512dcd7"
+  },
+  "artifact": {
+    "version": "0.10.2",
+    "sha256": "4e8e6b8fb34260d99653fa666b52d5583941bb7c5a3d57e2aaf9922f984cb00b",
+    "feedArtifact": "analyzer-0.10.2-4e8e6b8fb342.jar"
+  }
+}

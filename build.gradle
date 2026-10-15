@@ -31,6 +31,7 @@ jar {
     from('FONT-LICENSE.txt')
     from('LATO-OFL.txt')
     from('THIRD-PARTY.md')
+    from('DEPENDENCY-SOURCES.md')
 }
 
 tasks.register('coreCheck', JavaExec) {
@@ -81,7 +82,8 @@ tasks.register('packPrivacyCheck', JavaExec) {
     mainClass = 'dev.analyzer.privacy.PackPrivacySelfTest'
 }
 ['automationMotion': 'MotionPolicySelfTest', 'nativePathfinder': 'NativePathfinderSelfTest', 'schematic': 'SchematicSelfTest', 'retreat': 'RetreatPlannerSelfTest',
- 'automationInput': 'TaskInputHandoffSelfTest', 'schematicLibrary': 'SchematicLibrarySelfTest'].each { area, entry ->
+ 'automationInput': 'TaskInputHandoffSelfTest', 'schematicLibrary': 'SchematicLibrarySelfTest',
+ 'miningRecovery': 'MiningPolicySelfTest', 'groundRecovery': 'GroundRecoveryPolicySelfTest', 'localIntent': 'LocalTaskIntentSelfTest'].each { area, entry ->
     tasks.register("${area}Check", JavaExec) {
         dependsOn testClasses
         classpath = sourceSets.test.runtimeClasspath
@@ -91,7 +93,13 @@ tasks.register('packPrivacyCheck', JavaExec) {
 tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck'), tasks.named('safetyCheck'),
     tasks.named('combatCheck'), tasks.named('movementCheck'), tasks.named('hvhCheck'), tasks.named('gameplayConfigCheck'), tasks.named('privacyConfigCheck'), tasks.named('privacyCheck'), tasks.named('packPrivacyCheck'),
     tasks.named('automationMotionCheck'), tasks.named('nativePathfinderCheck'), tasks.named('schematicCheck'), tasks.named('retreatCheck'),
-    tasks.named('automationInputCheck'), tasks.named('schematicLibraryCheck') }
+    tasks.named('automationInputCheck'), tasks.named('schematicLibraryCheck'), tasks.named('miningRecoveryCheck'), tasks.named('groundRecoveryCheck'), tasks.named('localIntentCheck'), tasks.named('xrayCheck') }
+
+tasks.register('xrayCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.render.XrayPolicySelfTest'
+}
 tasks.register('moduleCatalog', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
