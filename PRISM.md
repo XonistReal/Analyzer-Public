@@ -1,10 +1,10 @@
 # Analyzer in Prism Launcher
 
-Analyzer **0.10.3** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Native Automation needs no Baritone or other bot mod. Minecraft account credentials, user worlds/configuration and Minecraft itself are not included.
+Analyzer **0.11.0** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Native Automation needs no Baritone or other bot mod. Minecraft account credentials, user worlds/configuration and Minecraft itself are not included.
 
 ## Import or update
 
-Drag `Analyzer-0.10.3-Prism-1.21.4.zip` onto Prism or use **Add Instance → Import**. The archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root. Use your own Minecraft account and Java 21. The portable ZIP inherits Prism's Java preferences and has no fixed Java path.
+Drag `Analyzer-0.11.0-Prism-1.21.4.zip` onto Prism or use **Add Instance → Import**. The archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root. Use your own Minecraft account and Java 21. The portable ZIP inherits Prism's Java preferences and has no fixed Java path.
 
 On this computer, reuse `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4`. That folder is the current imported instance located on October 14; inspect the installed JAR/version/hash to identify the current build. Future updates preserve launcher Java preferences, worlds, configs, profiles, friends and unrelated mods.
 

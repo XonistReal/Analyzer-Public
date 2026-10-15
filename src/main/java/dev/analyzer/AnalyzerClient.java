@@ -44,6 +44,8 @@ public final class AnalyzerClient implements ClientModInitializer {
         try { CORE.load(); for (String warning : CORE.loadWarnings()) LOGGER.warn(warning); }
         catch (IOException ex) { LOGGER.error("Could not load Analyzer configuration; using defaults", ex); }
         dev.analyzer.privacy.ServerPrivacy.initialize(CORE);
+        dev.analyzer.automation.RuntimeMaterialNames.refresh();
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> dev.analyzer.automation.RuntimeMaterialNames.refresh());
         ClientLifecycleEvents.CLIENT_STARTED.register(dev.analyzer.privacy.PrivacyTextProtection::initialize);
         try { PresetInstaller.install(FabricLoader.getInstance().getConfigDir().resolve("analyzer")); }
         catch (IOException ex) { LOGGER.warn("Could not install Analyzer starter profiles", ex); }
@@ -56,6 +58,7 @@ public final class AnalyzerClient implements ClientModInitializer {
         dev.analyzer.render.CosmeticRenderer.register(CORE);
         dev.analyzer.render.HvhPreview.register(CORE);
         dev.analyzer.render.XrayRenderer.register(CORE);
+        dev.analyzer.render.SchematicPreviewRenderer.register(CORE);
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
             if (screen instanceof TitleScreen) {

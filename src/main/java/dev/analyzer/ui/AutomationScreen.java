@@ -5,6 +5,8 @@ import dev.analyzer.automation.LocalTaskIntent;
 import dev.analyzer.automation.LocalSchematicLookup;
 import dev.analyzer.automation.SchematicLibrary;
 import dev.analyzer.core.AnalyzerCore;
+import dev.analyzer.render.SchematicPreviewRenderer;
+import dev.analyzer.AnalyzerClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -118,7 +120,12 @@ public final class AutomationScreen extends Screen {
         else field(context, 0, 22, 135, 386, 47, "TASK");
         if(schematicMode) {
             button(context,"auto-site",22,195,386,30,autoSite?"Site: choose a safe nearby location":"Site: use coordinates below",!view.running&&!view.paused,false,()->{autoSite=!autoSite;reviewed=null;showReviewed=true;});
-            wrapped(context,"Review shows the chosen footprint and material requirements. Existing builds, liquids and unsafe or unloaded ground are excluded.",22,235,386,.9f,StudioAuxiliary.MUTED,15,3);
+            button(context,"view-ghost",22,233,249,28,"View ghost in world",SchematicPreviewRenderer.available(),false,()->{
+                core.setValue("expedition","schematic-preview",true); AnalyzerClient.saveConfig();
+                if(client!=null)client.setScreen(null);
+            });
+            button(context,"clear-ghost",279,233,129,28,"Clear ghost",SchematicPreviewRenderer.available(),false,SchematicPreviewRenderer::clear);
+            GuiDraw.label(context,textRenderer,"Review approves the site. Viewing a ghost never starts it.",22,265,.84f,StudioAuxiliary.MUTED);
         } else {
         for (int i = 0; i < PRESETS.length; i++) {
             int index = i;
@@ -151,7 +158,12 @@ public final class AutomationScreen extends Screen {
         int visible = 6, maxScroll = Math.max(0, steps.size() - visible);
         stepScroll = Math.clamp(stepScroll, 0, maxScroll);
         clip(context, 447, 158, 489, 238);
-        if (steps.isEmpty()) {
+        if (steps.isEmpty() && schematicMode && error) {
+            GuiDraw.shaderCard(context,466,169,449,216,17,accent,false,theme(),0,false);
+            GuiDraw.heading(context,textRenderer,"Schematic needs review",483,184,1.2f,Palette.GOLD);
+            wrapped(context,message,483,216,411,.92f,StudioAuxiliary.TEXT,16,10);
+            GuiDraw.label(context,textRenderer,"The source file stays unchanged. Use View ghost to inspect it.",483,365,.82f,StudioAuxiliary.MUTED);
+        } else if (steps.isEmpty()) {
             GuiDraw.shaderCard(context, 466, 195, 449, 154, 17, accent, false, theme(), 0, false);
             GuiDraw.heading(context, textRenderer, "Review a task", 488, 230, 1.35f, StudioAuxiliary.TEXT);
             wrapped(context, "Its stages and requirements appear here before you start.", 488, 263, 400, 1.0f, StudioAuxiliary.MUTED, 18, 2);

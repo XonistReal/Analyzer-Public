@@ -183,6 +183,8 @@ public final class InventoryAutomation {
         var found = BuildingMaterialCatalog.find(id);
         if (found.isEmpty()) return Result.need("Supply owned " + item.getName().getString() + ". This palette material does not have an automated vanilla recipe.");
         var specification = found.get();
+        if (specification.job() == BuildingMaterialCatalog.Job.SUPPLIED)
+            return Result.need("Supply the actual " + item.getName().getString() + "; its acquisition is not implemented. Owned items are credited automatically.");
         if (specification.job() == BuildingMaterialCatalog.Job.DIRECT)
             return Result.need("Gather " + Math.max(1, target - count(item)) + " more " + item.getName().getString() + " before resuming material crafting.");
         if (specification.job() == BuildingMaterialCatalog.Job.SMELT) {

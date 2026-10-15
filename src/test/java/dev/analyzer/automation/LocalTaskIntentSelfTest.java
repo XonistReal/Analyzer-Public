@@ -35,10 +35,29 @@ public final class LocalTaskIntentSelfTest {
         check(TaskPlanner.plan("get 1,000 sand", OPTIONS).steps().getLast().count() == 1000, "Thousands separators are quantities, not extra clauses");
         check(TaskPlanner.plan("get one hundred and twenty five sand", OPTIONS).steps().getLast().count() == 125, "Common spelled-out quantities remain local and exact");
         check(TaskPlanner.plan("get four thousand ninety six sand", OPTIONS).steps().getLast().count() == 4096, "The maximum count works as number words");
+        for (String phrase : List.of("Could you get me 512 ice?", "would you mind getting me 512 blocks of ice?", "grab eight stacks of ice", "I need ice 512", "collect 512 minecraft:ice", "could you fetch five hundred and twelve ice for me?")) {
+            var plan = TaskPlanner.plan(phrase, OPTIONS);
+            check(plan.steps().size() == 1 && plan.steps().getLast().resource().equals("ice") && plan.steps().getLast().count() == 512, "Ice is understood through quantity and material rather than a preset phrase: " + phrase);
+            check(plan.prerequisites().stream().anyMatch(text -> text.contains("Silk Touch")), "Ice review identifies its real drop requirement");
+        }
+        check(TaskPlanner.plan("get half a stack of sand", OPTIONS).steps().getLast().count() == 32, "Half-stack quantities are interpreted");
+        check(TaskPlanner.plan("get a stack of ice", OPTIONS).steps().getLast().count() == 64, "One stack is 64 blocks");
+        check(TaskPlanner.plan("get two stacks of buckets", OPTIONS).steps().getLast().count() == 32, "Stack quantities respect the actual sixteen-bucket stack size");
+        rejects(() -> TaskPlanner.plan("get half a stack of bows", OPTIONS), "Unstackable items cannot silently produce fractional or zero targets");
+        rejects(() -> TaskPlanner.plan("get -1 stacks of ice", OPTIONS), "A negative stack quantity cannot become a positive request");
+        check(TaskPlanner.plan("get 64 minecraft:packed_ice", OPTIONS).steps().getLast().resource().equals("packed_ice"), "Qualified item IDs preserve compound material names");
+        var supplied = TaskPlanner.plan("fetch 16 hoppers and 8 buckets", OPTIONS).steps();
+        check(supplied.size() == 2 && supplied.stream().allMatch(step -> step.action() == TaskPlanner.Action.SUPPLY_MATERIAL), "Known crafted items use the material dependency planner");
+        check(BuildingMaterialCatalog.find("bucket").orElseThrow().ingredients().equals(List.of(new BuildingMaterialCatalog.Ingredient("iron_ingot", 3))), "One reusable bucket has a real three-iron recipe");
+        ResourceCatalog.registerItemNames(java.util.Map.of("potato", "Potato", "nether_star", "Nether Star"));
+        var registryItem = TaskPlanner.plan("could you bring me 12 potatoes", OPTIONS);
+        check(registryItem.steps().getLast().resource().equals("minecraft:potato") && registryItem.steps().getLast().count() == 12, "Registry names recognize real items independently of acquisition support");
+        check(registryItem.prerequisites().stream().anyMatch(text -> text.contains("not implemented")), "Recognized unavailable acquisition is explained as a capability requirement");
+        check(TaskPlanner.plan("obtain 2 nether stars", OPTIONS).steps().getLast().resource().equals("minecraft:nether_star"), "Several registry item words are consumed as one actual item");
         var commaRoute = TaskPlanner.plan("please go to -1500, 72, 2400 and collect 37 diamonds", OPTIONS);
         check(commaRoute.steps().getFirst().x() == -1500 && commaRoute.steps().getFirst().y() == 72 && commaRoute.steps().getFirst().z() == 2400,
                 "Comma-separated coordinates remain one travel clause before material-list parsing");
-        for (String phrase : List.of("get 0 sand", "get -1 sand", "get 4097 sand", "get 999999999999999999999 sand", "get 1.5 sand", "get lots of sand", "get a bunch of diamonds", "get 600 more sand", "get 10 sand and 20 sand", "get 10 potatoes", "get 10 sand and farm villagers forever", "get twenty thirty sand"))
+        for (String phrase : List.of("get 0 sand", "get -1 sand", "get 4097 sand", "get 999999999999999999999 sand", "get 1.5 sand", "get lots of sand", "get a bunch of diamonds", "get 600 more sand", "get 10 sand and 20 sand", "get 10 fictionaliums", "get 10 sand and farm villagers forever", "get twenty thirty sand", "get 65 stacks of ice"))
             rejects(() -> TaskPlanner.plan(phrase, OPTIONS), "Invalid, ambiguous or unsupported requests are rejected: " + phrase);
         check(LocalTaskIntent.schematic("only build one schematic").orElseThrow().name().isBlank(), "One schematic requests the actual selected file or chooser");
         check(LocalTaskIntent.schematic("please build the selected schematic").orElseThrow().name().isBlank(), "Selected schematic requests reuse an actual previous selection");

@@ -3,6 +3,7 @@ package dev.analyzer.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.core.ModuleDefinition;
+import dev.analyzer.core.EspSettings;
 import dev.analyzer.ui.GuiDraw;
 import dev.analyzer.ui.HudWidgets;
 import dev.analyzer.effects.UiShader;
@@ -35,6 +36,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.StorageMinecartEntity;
+import net.minecraft.entity.vehicle.AbstractChestBoatEntity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -66,7 +69,6 @@ public final class AnalyzerRenderer {
     private static final int ITEM_COLOR = 0xFFFFCF78;
     private static final Comparator<Target> BACK_TO_FRONT = Comparator.comparingDouble(Target::distanceSquared).reversed();
     private static final int[] BOX_EDGES = {0, 1, 1, 5, 5, 4, 4, 0, 2, 3, 3, 7, 7, 6, 6, 2, 0, 2, 1, 3, 5, 7, 4, 6};
-    private static final int[] BOX_FACES = {0, 1, 3, 2, 5, 4, 6, 7, 4, 0, 2, 6, 1, 5, 7, 3, 4, 5, 1, 0, 2, 3, 7, 6};
 
     private final AnalyzerCore core;
     private final MinecraftClient client = MinecraftClient.getInstance();
@@ -173,37 +175,45 @@ public final class AnalyzerRenderer {
         float tickDelta = context.tickCounter().getTickDelta(false);
         List<Target> entityTargets = new ArrayList<>();
         List<Target> tracerTargets = new ArrayList<>();
-        if (esp || tracers) {
+        List<Target> storageTargets = new ArrayList<>();
+        if (esp || tracers || containers) {
             EntityFilter espFilter = esp ? filter("entity-esp") : null;
             EntityFilter tracerFilter = tracers ? filter("tracers") : null;
             for (Entity entity : context.world().getEntities()) {
                 if (entity == client.player || entity == context.camera().getFocusedEntity()
                         || entity.isRemoved() || !entity.isAlive()) continue;
-                EntityKind kind = kind(entity);
-                if (kind == null) continue;
                 Vec3d interpolated = entity.getLerpedPos(tickDelta);
                 double distanceSquared = interpolated.squaredDistanceTo(camera);
+                Box bounds = entity.getBoundingBox().offset(interpolated.subtract(entity.getPos()));
+                if (containers && storageTargets.size() < MAX_ENTITY_TARGETS
+                        && core.getBoolean("storage-esp", "vehicles")
+                        && (entity instanceof StorageMinecartEntity || entity instanceof AbstractChestBoatEntity)
+                        && distanceSquared <= Math.pow(core.getNumber("storage-esp", "range"), 2)) {
+                    storageTargets.add(new Target(bounds.offset(camera.negate()), storageColor(EspSettings.StorageGroup.VEHICLES),
+                            distanceSquared, entity, entity.getType().getName().getString()));
+                }
+                EntityKind kind = kind(entity);
+                if (kind == null) continue;
                 boolean drawEsp = espFilter != null && espFilter.accepts(kind, distanceSquared)
                         && entityTargets.size() < MAX_ENTITY_TARGETS;
                 boolean drawTracer = tracerFilter != null && tracerFilter.accepts(kind, distanceSquared)
                         && tracerTargets.size() < MAX_ENTITY_TARGETS;
                 if (!drawEsp && !drawTracer) continue;
                 // Interpolate the bounding box's position, retaining its current pose and dimensions.
-                Box bounds = entity.getBoundingBox().offset(interpolated.subtract(entity.getPos())).expand(0.025);
-                if (drawEsp) entityTargets.add(new Target(bounds.offset(camera.negate()), kind.color, distanceSquared, entity, null));
-                if (drawTracer) tracerTargets.add(new Target(bounds.offset(camera.negate()), kind.color, distanceSquared, entity, null));
+                if (drawEsp) entityTargets.add(new Target(bounds.offset(camera.negate()), entityColor("entity-esp", kind), distanceSquared, entity, null));
+                if (drawTracer) tracerTargets.add(new Target(bounds.offset(camera.negate()), entityColor("tracers", kind), distanceSquared, entity, null));
             }
         }
 
-        List<Target> storageTargets = new ArrayList<>();
         if (containers) {
             double range = core.getNumber("storage-esp", "range");
             for (StorageCache.Container container : storage.containers()) {
-                if (!storage.isCurrent(client.world, container)) continue;
+                if (storageTargets.size() >= MAX_ENTITY_TARGETS) break;
+                if (!storage.isCurrent(client.world, container) || !core.getBoolean("storage-esp", container.group().id())) continue;
                 double distanceSquared = container.bounds().getCenter().squaredDistanceTo(camera);
                 if (distanceSquared <= range * range) {
                     storageTargets.add(new Target(container.bounds().offset(camera.negate()),
-                            container.color(), distanceSquared, null, container.name()));
+                            storageColor(container.group()), distanceSquared, null, container.name()));
                 }
             }
         }
@@ -239,8 +249,12 @@ public final class AnalyzerRenderer {
                 // A point just beyond the near plane anchors the lines at the center of view.
                 Vector3f start = new Vector3f(0, -0.025f, -0.25f).rotate(context.camera().getRotation());
                 float width = (float) core.getNumber("tracers", "line-width");
-                drawTracers(tracerTargets, start, width + 2, 28);
-                drawTracers(tracerTargets, start, width, 190);
+                drawTracers(tracerTargets, start, width, opacity("tracers"), core.getChoice("tracers", "anchor"));
+            }
+            if (containers && core.getBoolean("storage-esp", "tracers") && !storageTargets.isEmpty()) {
+                setDepth(core.getBoolean("storage-esp", "through-walls"));
+                Vector3f start = new Vector3f(0, -0.025f, -0.25f).rotate(context.camera().getRotation());
+                drawTracers(storageTargets, start, (float) core.getNumber("storage-esp", "tracer-width"), opacity("storage-esp"), "Center");
             }
             if (!entityScreen && !entityTargets.isEmpty()) drawLabels("entity-esp", entityTargets, context,
                     core.getBoolean("entity-esp", "labels"), core.getBoolean("entity-esp", "health"));
@@ -270,30 +284,42 @@ public final class AnalyzerRenderer {
         return null;
     }
 
+    private int entityColor(String module, EntityKind kind) {
+        String source = module.equals("tracers") && core.getBoolean("tracers", "match-esp-colors") ? "entity-esp" : module;
+        return selectedColor(source, kind.setting);
+    }
+
+    private int storageColor(EspSettings.StorageGroup group) { return selectedColor("storage-esp", group.id()); }
+
+    private int selectedColor(String module, String group) {
+        return EspSettings.color(core.getChoice(module, group + "-color"), core.getNumber(module, group + "-red"),
+                core.getNumber(module, group + "-green"), core.getNumber(module, group + "-blue"));
+    }
+
+    private int opacity(String module) { return (int) Math.round(core.getNumber(module, "opacity") / 100 * 255); }
+
     private void drawEsp(String module, List<Target> targets, WorldRenderContext context) {
         Matrix4f clipMatrix = new Matrix4f(context.projectionMatrix()).mul(context.positionMatrix());
-        List<Target> visible = new ArrayList<>(), glow = new ArrayList<>();
+        List<Target> visible = new ArrayList<>();
         for (Target target : targets) {
-            ScreenBounds projected = projectBox(target.bounds, clipMatrix);
-            if (projected == null) continue;
-            float pixelsWide = (projected.right - projected.left) * client.getWindow().getFramebufferWidth();
-            float pixelsHigh = (projected.bottom - projected.top) * client.getWindow().getFramebufferHeight();
-            if (!EspLayout.markerVisible(pixelsWide, pixelsHigh, core.getNumber(module, "min-marker-pixels"))) {
-                tinyMarkers++; continue;
+            if (context.frustum() != null && !context.frustum().isVisible(target.bounds.offset(context.camera().getPos()))) continue;
+            // Only the optional tiny-marker filter needs a screen projection. World line geometry retains its
+            // real box and is clipped by Minecraft's shader, including boxes crossing the near plane.
+            double minimum = core.getNumber(module, "min-marker-pixels");
+            if (minimum > 0 && !target.bounds.contains(Vec3d.ZERO)) {
+                ScreenBounds projected = projectBox(target.bounds, clipMatrix);
+                if (projected == null) continue;
+                float pixelsWide = (projected.right - projected.left) * client.getWindow().getFramebufferWidth();
+                float pixelsHigh = (projected.bottom - projected.top) * client.getWindow().getFramebufferHeight();
+                if (!EspLayout.markerVisible(pixelsWide, pixelsHigh, minimum)) { tinyMarkers++; continue; }
             }
             visible.add(target);
-            if (Math.min(pixelsWide, pixelsHigh) >= 12) glow.add(target);
         }
         if (visible.isEmpty()) return;
         setDepth(core.getBoolean(module, "through-walls"));
-        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-        BufferBuilder fill = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        for (Target target : visible) fillBox(fill, target.bounds, Palette.alpha(target.color, 22));
-        BufferRenderer.drawWithGlobalProgram(fill.end());
-        float width = (float) core.getNumber(module, "line-width");
-        boolean corners = core.getChoice(module, "style").equals("Corners");
-        if (!glow.isEmpty()) drawOutlines(glow, corners, width + 3, 34);
-        drawOutlines(visible, corners, width, 235);
+        // A single set of twelve edges: no filled faces, enlarged silhouette or glow pass.
+        drawOutlines(visible, core.getChoice(module, "style").equals("Corners"),
+                (float) core.getNumber(module, "line-width"), opacity(module));
     }
 
     private static void setDepth(boolean throughWalls) {
@@ -309,13 +335,14 @@ public final class AnalyzerRenderer {
         BufferRenderer.drawWithGlobalProgram(lines.end());
     }
 
-    private static void drawTracers(List<Target> targets, Vector3f start, float width, int alpha) {
+    private static void drawTracers(List<Target> targets, Vector3f start, float width, int alpha, String anchor) {
         RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
         RenderSystem.lineWidth(width);
         BufferBuilder lines = Tessellator.getInstance().begin(VertexFormat.DrawMode.LINES, VertexFormats.LINES);
         for (Target target : targets) {
             Vec3d center = target.bounds.getCenter();
-            line(lines, start.x, start.y, start.z, center.x, center.y, center.z,
+            double y = "Feet".equals(anchor) ? target.bounds.minY : "Head".equals(anchor) ? target.bounds.maxY : center.y;
+            line(lines, start.x, start.y, start.z, center.x, y, center.z,
                     Palette.alpha(target.color, alpha));
         }
         BufferRenderer.drawWithGlobalProgram(lines.end());
@@ -345,14 +372,6 @@ public final class AnalyzerRenderer {
         // avoids the one-pixel limit of native OpenGL lines on several Windows drivers.
         buffer.vertex((float) x1, (float) y1, (float) z1).color(color).normal(nx, ny, nz);
         buffer.vertex((float) x2, (float) y2, (float) z2).color(color).normal(nx, ny, nz);
-    }
-
-    private static void fillBox(BufferBuilder b, Box box, int color) {
-        for (int corner : BOX_FACES) {
-            b.vertex((float) ((corner & 1) == 0 ? box.minX : box.maxX),
-                    (float) ((corner & 2) == 0 ? box.minY : box.maxY),
-                    (float) ((corner & 4) == 0 ? box.minZ : box.maxZ)).color(color);
-        }
     }
 
     private void drawLabels(String module, List<Target> targets, WorldRenderContext context,
@@ -408,28 +427,28 @@ public final class AnalyzerRenderer {
         RenderSystem.disableCull();
         RenderSystem.depthMask(false);
         setDepth(throughWalls);
-        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-        BufferBuilder panels = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        for (Label label : labels) {
-            float left = -label.width / 2, right = label.width / 2;
-            panel(panels, label.matrix, left, -label.height, right, 0, faded(0xC20A141B, label.opacity));
-            panel(panels, label.matrix, left, -label.height, left + 1.3f, 0,
-                    faded(Palette.alpha(label.color, 235), label.opacity));
-            if (label.healthFraction >= 0) {
-                panel(panels, label.matrix, left + 5, -6, right - 5, -3, faded(0xFF243A42, label.opacity));
-                int healthColor = label.healthFraction > 0.6f ? Palette.MINT
-                        : label.healthFraction > 0.3f ? ITEM_COLOR : HOSTILE_COLOR;
-                panel(panels, label.matrix, left + 5, -6,
-                        left + 5 + (label.width - 10) * label.healthFraction, -3, faded(healthColor, label.opacity));
+        boolean healthBars = labels.stream().anyMatch(label -> label.healthFraction >= 0);
+        if (healthBars) {
+            RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+            BufferBuilder panels = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+            for (Label label : labels) {
+                float left = -label.width / 2, right = label.width / 2;
+                if (label.healthFraction >= 0) {
+                    panel(panels, label.matrix, left + 5, -6, right - 5, -3, faded(0xFF243A42, label.opacity));
+                    int healthColor = label.healthFraction > 0.6f ? Palette.MINT
+                            : label.healthFraction > 0.3f ? ITEM_COLOR : HOSTILE_COLOR;
+                    panel(panels, label.matrix, left + 5, -6,
+                            left + 5 + (label.width - 10) * label.healthFraction, -3, faded(healthColor, label.opacity));
+                }
             }
+            BufferRenderer.drawWithGlobalProgram(panels.end());
         }
-        BufferRenderer.drawWithGlobalProgram(panels.end());
         if (names) {
             TextRenderer.TextLayerType layer = throughWalls ? TextRenderer.TextLayerType.SEE_THROUGH
                     : TextRenderer.TextLayerType.NORMAL;
             for (Label label : labels) {
                 client.textRenderer.draw(GuiDraw.text(label.text), -label.textWidth / 2f,
-                        -label.height + 4, faded(Palette.TEXT, label.opacity), false, label.matrix, labelConsumers,
+                        -label.height + 4, faded(label.color, label.opacity), true, label.matrix, labelConsumers,
                         layer, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
             }
             labelConsumers.draw();
@@ -597,13 +616,7 @@ public final class AnalyzerRenderer {
             boxes.add(box);
             draw.getMatrices().push();
             draw.getMatrices().scale(1 / pixelsPerPoint, 1 / pixelsPerPoint, 1);
-            draw.fill(left, top, right, bottom, Palette.alpha(target.color, 12));
-            // Tiny markers have their real dimensions and no oversized surrounding glow.
-            if (Math.min(boxWidth, boxHeight) >= 12) {
-                screenCorners(draw, left - 1, top - 1, right + 1, bottom + 1,
-                        corner + 1, thickness + 2, 0xAA060D13);
-            }
-            screenCorners(draw, left, top, right, bottom, corner, thickness, Palette.alpha(target.color, 230));
+            screenCorners(draw, left, top, right, bottom, corner, thickness, Palette.alpha(target.color, opacity(module)));
             EspLayout.Appearance appearance = labelAppearance(module, Math.sqrt(target.distanceSquared));
             if (target.health >= 0 && boxHeight >= 12 && appearance.visible()) {
                 draw.fill(left - 4, top, left - 1, bottom, faded(0xD9060D13, (float) appearance.opacity()));
@@ -649,10 +662,6 @@ public final class AnalyzerRenderer {
                     panel.width * pixelsPerPoint, panel.height * pixelsPerPoint));
             // Tags remain near their actual projected targets. Dense targets are omitted instead of
             // shifting tags through six large rows across the sky.
-            int fill = faded(0xDD232326, request.opacity);
-            if (!UiShader.surface(draw, panel.x, panel.y, panel.width, panel.height, 4 / pixelsPerPoint,
-                    fill, faded(0xDD17171A, request.opacity), faded(0x40000000, request.opacity), 2 / pixelsPerPoint, 0, 0))
-                GuiDraw.rounded(draw, panel.x, panel.y, panel.width, panel.height, Math.max(1, Math.round(4 / pixelsPerPoint)), fill);
             float x = panel.x + 4 / pixelsPerPoint, y = panel.y + 2 / pixelsPerPoint;
             // Direct draw deliberately bypasses GuiDraw's HUD/menu font floor.
             draw.getMatrices().push();
@@ -660,7 +669,7 @@ public final class AnalyzerRenderer {
                     Math.round(y * pixelsPerPoint) / pixelsPerPoint, 0);
             draw.getMatrices().scale(request.scale, request.scale, 1);
             draw.drawText(client.textRenderer, GuiDraw.text(request.text), 0, 0,
-                    faded(Palette.TEXT, request.opacity), false);
+                    faded(request.color, request.opacity), true);
             draw.getMatrices().pop();
             recordLabel(request.module, request.textPixels);
         }
@@ -834,7 +843,8 @@ public final class AnalyzerRenderer {
         GuiDraw.line(draw, cx + dx * 5, cy + dz * 5, cx - dx * 3 + dz * 3, cy - dz * 3 - dx * 3, Palette.TEXT);
         GuiDraw.line(draw, cx + dx * 5, cy + dz * 5, cx - dx * 3 - dz * 3, cy - dz * 3 + dx * 3, Palette.TEXT);
         draw.fill(cx - 1, cy - 1, cx + 2, cy + 2, Palette.TEXT);
-        int[] colors = {PLAYER_COLOR, HOSTILE_COLOR, PASSIVE_COLOR, ITEM_COLOR};
+        int[] colors = {entityColor("entity-esp", EntityKind.PLAYER), entityColor("entity-esp", EntityKind.HOSTILE),
+                entityColor("entity-esp", EntityKind.PASSIVE), entityColor("entity-esp", EntityKind.ITEM)};
         String[] legend = {"P", "H", "M", "I"};
         for (int i = 0; i < colors.length; i++) {
             int x = 20 + i * 24;
@@ -876,9 +886,9 @@ public final class AnalyzerRenderer {
     private record Target(Box bounds, int color, double distanceSquared, Entity entity, String containerName) { }
 
     private enum EntityKind {
-        PLAYER(PLAYER_COLOR), HOSTILE(HOSTILE_COLOR), PASSIVE(PASSIVE_COLOR), ITEM(ITEM_COLOR);
-        private final int color;
-        EntityKind(int color) { this.color = color; }
+        PLAYER("players"), HOSTILE("hostiles"), PASSIVE("passives"), ITEM("items");
+        private final String setting;
+        EntityKind(String setting) { this.setting = setting; }
     }
 
     private record EntityFilter(boolean players, boolean hostiles, boolean passives, boolean items,

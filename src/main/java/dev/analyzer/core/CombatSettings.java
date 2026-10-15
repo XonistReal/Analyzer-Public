@@ -14,7 +14,9 @@ public final class CombatSettings {
             Setting.choice("mode", "Target mode", "Single", "Single", "Switch", "Multi"),
             Setting.number("switch-delay", "Switch delay (ms)", 250, 50, 1000, 50),
             Setting.number("max-targets", "Maximum targets per charged action", 3, 1, 8, 1),
-            Setting.number("aim-range", "Extra acquisition range", 0, 0, 4, 0.25)));
+            Setting.number("aim-range", "Extra acquisition range", 0, 0, 4, 0.25),
+            Setting.bool("only-click", "Only acquire while holding attack", false),
+            Setting.bool("prefer-reachable", "Prefer targets inside actual melee reach", true)));
         rotation(aura, 12); timing(aura, false);
         add(modules, "kill-aura", "Kill Aura", "Choose, rotate toward and attack filtered targets with normal reach and bounded charged actions.", aura);
 
@@ -22,6 +24,8 @@ public final class CombatSettings {
         aim.addAll(List.of(Setting.bool("legit", "Visible gradual assistance while clicking", false),
             Setting.bool("hold-attack", "Only while holding attack", true),
             Setting.bool("weapon-only", "Only while holding a melee weapon", false),
+            Setting.bool("pause-using", "Pause while using an item", true),
+            Setting.bool("pause-mining", "Pause while breaking a block", true),
             Setting.number("strength", "Aim strength (%)", 100, 1, 100, 1)));
         add(modules, "aim-assist", "Aim Assist", "Pull your actual camera toward a filtered target with configurable aim point, strength and smoothing.", aim);
 
@@ -43,13 +47,18 @@ public final class CombatSettings {
             Setting.bool("swords", "Allow swords", true), Setting.bool("axes", "Allow axes", true),
             Setting.bool("maces", "Allow maces", true), Setting.bool("tridents", "Allow tridents", true),
             Setting.choice("preference", "Weapon preference", "Damage estimate", "Damage estimate", "Sword first", "Axe first", "Durability"),
-            Setting.number("reaction-delay", "Weapon switch delay (ms)", 0, 0, 1000, 25))));
+            Setting.number("reaction-delay", "Weapon switch delay (ms)", 0, 0, 1000, 25),
+            Setting.number("settle-ticks", "Wait after switching weapon (ticks)", 1, 0, 10, 1))));
 
         add(modules, "shield-breaker", "Shield Breaker", "Hold a usable hotbar axe for a blocking crosshair target, with reaction and release delays.", new ArrayList<>(List.of(
             Setting.bool("legit", "Delayed axe switch before attacking", false),
             Setting.bool("ignore-friends", "Ignore saved friends", true),
             Setting.number("reaction-delay", "Blocking-target reaction delay (ms)", 0, 0, 1000, 25),
             Setting.number("release-delay", "Keep axe after blocking ends (ms)", 0, 0, 1000, 25),
+            Setting.number("settle-ticks", "Wait after switching axe (ticks)", 1, 0, 10, 1),
+            Setting.bool("only-click", "Only break shields while holding attack", false),
+            Setting.bool("pause-using", "Pause while using an item", true),
+            Setting.bool("pause-mining", "Pause while breaking a block", true),
             Setting.number("cooldown", "Required attack charge", 0.95, 0.2, 1, 0.05),
             Setting.choice("swing", "Swing animation", "Client", "Client", "Packet", "None"))));
 
@@ -77,6 +86,27 @@ public final class CombatSettings {
             Setting.bool("sprint-reset", "Release sprint normally while waiting for a crit", true),
             Setting.bool("crit-particles", "Show local critical cue on the falling attack", false)));
         add(modules, "criticals", "Criticals", "Use real jumps or your own falling motion to time ordinary charged attacks; no packet critical spoofing.", criticals);
+
+        List<Setting<?>> block = targets(4, 8); rotation(block, 18);
+        block.removeIf(setting -> List.of("wall-range", "through-walls", "hit-angle", "aim-point", "other-living", "passives").contains(setting.id()));
+        block.addAll(List.of(Setting.number("health", "Raise shield at or below health", 20, 1, 36, 1),
+            Setting.number("release-delay", "Keep shield after threat leaves (ticks)", 4, 0, 20, 1),
+            Setting.bool("face-threat", "Face the selected visible threat", true),
+            Setting.bool("yield-hvh", "Yield while combat placement modules are enabled", true),
+            Setting.bool("pause-mining", "Pause while breaking a block", true)));
+        add(modules, "auto-block", "Auto Block", "Raise an equipped offhand shield toward a visible threat between attacks; release it before ordinary melee attacks.", block);
+
+        List<Setting<?>> doubleHand = targets(6, 12);
+        doubleHand.removeIf(setting -> List.of("wall-range", "through-walls", "other-living", "passives").contains(setting.id()));
+        doubleHand.addAll(List.of(Setting.number("health", "Hold main-hand totem at or below health", 10, 1, 36, 1),
+            Setting.choice("mode", "Protect when", "Either", "Low health", "After totem pop", "Either"),
+            Setting.bool("without-offhand", "Only when offhand has no totem", true),
+            Setting.number("hold-ticks", "Keep totem after danger ends (ticks)", 10, 0, 60, 1)));
+        add(modules, "double-hand", "Double Hand", "Temporarily hold a hotbar totem after a real server-reported pop or at low health near a visible threat; yields to Auto Totem once the offhand is protected.", doubleHand);
+        add(modules, "hover-totem", "Hover Totem", "In your own inventory, hold the selected key over a totem to move it into the offhand through a normal guarded slot swap.", new ArrayList<>(List.of(
+            Setting.choice("hold-key", "Hold key while hovering", "Sneak", "Sneak", "Use", "None"),
+            Setting.number("hover-ticks", "Hover before swapping (ticks)", 3, 0, 20, 1),
+            Setting.number("delay", "Minimum interval between swaps (ticks)", 6, 1, 40, 1))));
         return List.copyOf(modules);
     }
     private static List<Setting<?>> targets(double range, double maximum) {
@@ -116,6 +146,10 @@ public final class CombatSettings {
             Setting.bool("wait-for-crit", "Wait for falling motion while airborne", false),
             Setting.bool("weapon-only", "Only attack with a melee weapon", false),
             Setting.bool("pause-using", "Pause attacks while using an item", true),
+            Setting.bool("pause-mining", "Pause while breaking a block", true),
+            Setting.bool("require-ray", "Require actual camera ray through target hitbox", true),
+            Setting.number("hurt-time", "Maximum target hurt time (ticks)", 10, 0, 10, 1),
+            Setting.number("settle-ticks", "Wait after changing held weapon (ticks)", 1, 0, 10, 1),
             Setting.choice("swing", "Swing animation", "Client", "Client", "Packet", "None")));
     }
     private static void add(List<ModuleDefinition> modules, String id, String name, String description, List<Setting<?>> settings) {

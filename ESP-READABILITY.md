@@ -1,3 +1,5 @@
+> **Current 0.11.0:** [Debug ESP](COMBAT-ESP.md) replaces forced fills/glow/panels with configurable debug boxes, storage colors and matching tracers. The tests/captures below document the earlier label-readability update.
+
 # ESP readability and distance controls
 
 Analyzer's Entity ESP and Storage ESP now give world overlays their own distance and label controls. The HUD stays readable at 60%; ESP text can shrink and fade as targets move away. Distances use Minecraft blocks. The `b` suffix on a tag means blocks.

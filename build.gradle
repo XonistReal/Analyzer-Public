@@ -49,6 +49,11 @@ tasks.register('plannerCheck', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.analyzer.automation.TaskPlannerSelfTest'
 }
+tasks.register('materialRecipesCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.automation.MaterialRecipesSelfTest'
+}
 tasks.register('safetyCheck', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -90,7 +95,7 @@ tasks.register('packPrivacyCheck', JavaExec) {
         mainClass = "dev.analyzer.automation.${entry}"
     }
 }
-tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck'), tasks.named('safetyCheck'),
+tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck'), tasks.named('materialRecipesCheck'), tasks.named('safetyCheck'),
     tasks.named('combatCheck'), tasks.named('movementCheck'), tasks.named('hvhCheck'), tasks.named('gameplayConfigCheck'), tasks.named('privacyConfigCheck'), tasks.named('privacyCheck'), tasks.named('packPrivacyCheck'),
     tasks.named('automationMotionCheck'), tasks.named('nativePathfinderCheck'), tasks.named('schematicCheck'), tasks.named('retreatCheck'),
     tasks.named('automationInputCheck'), tasks.named('schematicLibraryCheck'), tasks.named('miningRecoveryCheck'), tasks.named('groundRecoveryCheck'), tasks.named('localIntentCheck'), tasks.named('routeFollowingCheck'), tasks.named('xrayCheck') }

@@ -12,7 +12,7 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 125, "Release catalogue includes 125 registered modules");
+            check(core.modules().size() == 128, "Release catalogue includes 128 registered modules");
             check(core.modules().stream().map(ModuleDefinition::id).distinct().count() == core.modules().size(), "Unique module IDs");
             for (Category category : Category.values())
                 check(core.modules().stream().anyMatch(module -> module.category() == category), "Populated category " + category);
@@ -23,6 +23,8 @@ public final class CoreSelfTest {
             }
             check(!core.isEnabled("expedition"), "Automation never starts by default");
             check(core.getNumber("entity-esp", "label-range") < core.getNumber("entity-esp", "range"), "ESP labels have an independent nearer range");
+            check(core.getChoice("entity-esp", "style").equals("Boxes") && core.getChoice("storage-esp", "style").equals("Boxes"),
+                    "Fresh ESP uses complete debug boxes");
             check(core.getChoice("menu", "material").equals("Glass"), "Glass interface default");
             check(core.getChoice("menu", "layout").equals("Studio"), "New installs open the Studio menu");
             check(core.getChoice("menu", "accent").equals("Rose"), "Studio defaults to the Rose accent");
@@ -40,8 +42,10 @@ public final class CoreSelfTest {
             check(core.getChoice("shader", "preset").equals("Bloom"), "Neutral bloom preset");
             check(core.isEnabled("coordinates"), "Coordinate defaults");
             check(core.keybind("entity-esp") == -1, "Unbound key default");
-            check(core.getBoolean("entity-esp", "labels") && core.getBoolean("entity-esp", "health")
-                    && core.getBoolean("storage-esp", "labels"), "ESP information defaults");
+            check(!core.getBoolean("entity-esp", "labels") && !core.getBoolean("entity-esp", "health")
+                    && !core.getBoolean("entity-esp", "radar") && !core.getBoolean("storage-esp", "labels"),
+                    "Fresh debug ESP has no forced labels, health bars or radar");
+            check(core.getBoolean("tracers", "match-esp-colors"), "Tracers use the entity palette by default");
             core.setValue("entity-esp", "range", 999);
             equal(256, core.getNumber("entity-esp", "range"), "Upper clamping");
             core.setValue("entity-esp", "range", -100);
@@ -56,12 +60,27 @@ public final class CoreSelfTest {
             core.setKeybind("entity-esp", 71);
             core.setValue("entity-esp", "range", 96);
             core.setValue("shader", "preset", "Ember");
+            core.setValue("entity-esp", "players-color", "Custom");
+            core.setValue("entity-esp", "players-red", 17);
+            core.setValue("entity-esp", "players-green", 34);
+            core.setValue("entity-esp", "players-blue", 51);
+            core.setValue("entity-esp", "labels", true);
+            core.setValue("storage-esp", "barrels-color", "Blue");
+            core.setValue("storage-esp", "shulkers", false);
             core.save();
             AnalyzerCore restored = new AnalyzerCore(temporary);
             restored.load();
             check(restored.isEnabled("entity-esp"), "Enabled round trip");
             check(restored.keybind("entity-esp") == 71, "Keybind round trip");
             equal(96, restored.getNumber("entity-esp", "range"), "Numeric round trip");
+            check(restored.getChoice("entity-esp", "players-color").equals("Custom")
+                    && restored.getNumber("entity-esp", "players-red") == 17
+                    && restored.getNumber("entity-esp", "players-green") == 34
+                    && restored.getNumber("entity-esp", "players-blue") == 51, "Independent entity RGB round trip");
+            check(restored.getBoolean("entity-esp", "labels") && restored.getChoice("entity-esp", "style").equals("Screen"),
+                    "Explicit existing label and box preferences survive updated defaults");
+            check(restored.getChoice("storage-esp", "barrels-color").equals("Blue")
+                    && !restored.getBoolean("storage-esp", "shulkers"), "Storage group colors and filters round trip");
             check(restored.getChoice("shader", "preset").equals("Ember"), "Choice round trip");
             restored.saveProfile("Night Travel");
             check(restored.profiles().equals(java.util.List.of("night-travel")), "Normalized profile list");

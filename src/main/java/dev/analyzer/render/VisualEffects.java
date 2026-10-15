@@ -656,9 +656,12 @@ public final class VisualEffects {
             if (enabled("trajectories")) trajectory(scene);
         } else if (enabled("place-preview") && core.getBoolean("place-preview", "through-walls")) preview(scene);
         if (enabled("hole-esp") && core.getBoolean("hole-esp", "through-walls") == throughPass) {
-            for (BlockPos pos : holes) { Box box = new Box(pos.getX() + 0.03, pos.getY() + 0.015, pos.getZ() + 0.03,
-                    pos.getX() + 0.97, pos.getY() + 0.15, pos.getZ() + 0.97); int color = tint("hole-esp", MINT, time, 0);
-                scene.box(box, Palette.alpha(color, 207), 2); scene.boxes.add(new ColoredBox(box, Palette.alpha(color, 32))); }
+            boolean floor = core.getChoice("hole-esp", "style").equals("Floor outline");
+            for (BlockPos pos : holes) {
+                Box box = new Box(pos.getX() + 0.002, pos.getY() + 0.002, pos.getZ() + 0.002,
+                        pos.getX() + 0.998, pos.getY() + (floor ? 0.015 : 1.998), pos.getZ() + 0.998);
+                scene.box(box, tint("hole-esp", MINT, time, 0), (float) value("hole-esp", "line-width"));
+            }
         }
         if (enabled("target-esp") && core.getBoolean("target-esp", "through-walls") == throughPass) {
             Entity target = CLIENT.crosshairTarget instanceof EntityHitResult hit ? hit.getEntity()
@@ -667,11 +670,13 @@ public final class VisualEffects {
                 Vec3d pos = target.getLerpedPos(delta); double r = (target.getWidth() * 0.7 + 0.2) * value("target-esp", "size");
                 int color = tint("target-esp", PINK, time, 0); String style = core.getChoice("target-esp", "style");
                 if (style.equals("Box") || style.equals("Corners")) {
-                    Box box = target.getBoundingBox().offset(pos.subtract(target.getPos())).expand(0.06 * value("target-esp", "size"));
-                    if (style.equals("Corners")) scene.corners(box, Palette.alpha(color, 235), 2); else scene.box(box, Palette.alpha(color, 235), 2);
+                    Box box = target.getBoundingBox().offset(pos.subtract(target.getPos())).expand(0.06 * (value("target-esp", "size") - 1));
+                    float lineWidth = (float) value("target-esp", "line-width");
+                    if (style.equals("Corners")) scene.corners(box, color, lineWidth); else scene.box(box, color, lineWidth);
                 } else {
-                    scene.circle(pos.add(0, 0.06, 0), r, Palette.alpha(color, 229), 2);
-                    scene.circle(pos.add(0, target.getHeight() * (0.5 + Math.sin(clock * 2.5) * 0.45), 0), r, Palette.alpha(tint("target-esp", VIOLET, time, 0.25), 195), 2);
+                    float lineWidth = (float) value("target-esp", "line-width");
+                    scene.circle(pos.add(0, 0.06, 0), r, Palette.alpha(color, 229), lineWidth);
+                    scene.circle(pos.add(0, target.getHeight() * (0.5 + Math.sin(clock * 2.5) * 0.45), 0), r, Palette.alpha(tint("target-esp", VIOLET, time, 0.25), 195), lineWidth);
                 }
             }
         }
@@ -680,8 +685,14 @@ public final class VisualEffects {
             for (Entity entity : CLIENT.world.getEntities()) {
                 if (!(entity instanceof ItemEntity item) || item.isRemoved() || item.squaredDistanceTo(CLIENT.player) > range * range) continue;
                 Vec3d pos = item.getLerpedPos(delta); int color = tint("item-esp", GOLD, time, 0);
-                scene.circle(pos.add(0, 0.04, 0), 0.32, Palette.alpha(color, 232), 2);
-                scene.line(pos, pos.add(0, 0.7 + Math.sin(clock * 3) * 0.1, 0), Palette.alpha(color, 145), 1.5f);
+                String style = core.getChoice("item-esp", "style");
+                float lineWidth = (float) value("item-esp", "line-width");
+                if (style.equals("Rings")) {
+                    scene.circle(pos.add(0, 0.04, 0), 0.32, color, lineWidth);
+                } else {
+                    Box box = item.getBoundingBox().offset(pos.subtract(item.getPos()));
+                    if (style.equals("Corners")) scene.corners(box, color, lineWidth); else scene.box(box, color, lineWidth);
+                }
                 if (core.getBoolean("item-esp", "labels") && found < 48) scene.labels.add(new Tag(pos.add(0, 0.8, 0),
                         shortName(item.getStack().getName().getString()) + (item.getStack().getCount() > 1 ? " x" + item.getStack().getCount() : ""), color, 0.8f));
                 if (++found >= 256) break;

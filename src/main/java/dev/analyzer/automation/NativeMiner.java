@@ -476,6 +476,9 @@ public final class NativeMiner {
         }
         int tier = minimumTier(MC.world.getBlockState(position).getBlock());
         int tool = findTool(tier, requestedBlock, MC.world.getBlockState(position).getBlock());
+        if (tool < 0 && requestedBlock && ResourceCatalog.silkTouch(Registries.BLOCK.getId(MC.world.getBlockState(position).getBlock()).getPath())) {
+            cancelBreaking(); return result(false, true, "Move a durable Silk Touch tool into the main inventory or hotbar to collect this ice; ordinary breaking would destroy it.");
+        }
         if (tool < 0 && tier > 0) { cancelBreaking(); return result(false, true, "Need a durable " + tierName(tier) + " pickaxe without Silk Touch for the requested drops."); }
         if (tool >= 9) {
             if (!MC.player.currentScreenHandler.getCursorStack().isEmpty()) return result(false, true, "Return the cursor item before selecting a mining tool.");
@@ -519,7 +522,13 @@ public final class NativeMiner {
     private boolean safeToBreak(BlockPos position) {
         if (!MC.world.isChunkLoaded(position) || excluded(position) || danger(position) || MC.world.getBlockState(position).hasBlockEntity()) return false;
         if (position.equals(playerSupport()) || workSupports.contains(position)) return false;
-        for (Direction direction : Direction.values()) if (danger(position.offset(direction))) return false;
+        for (Direction direction : Direction.values()) if (danger(position.offset(direction))) {
+            var below = MC.world.getBlockState(position.down()).getFluidState();
+            boolean lakeIce = direction == Direction.DOWN && targets.contains(Blocks.ICE)
+                    && MC.world.getBlockState(position).isOf(Blocks.ICE) && hasSilkTouchTool()
+                    && below.isIn(net.minecraft.registry.tag.FluidTags.WATER) && below.isStill();
+            if (!lakeIce) return false;
+        }
         return !(MC.world.getBlockState(position.up()).getBlock() instanceof FallingBlock)
                 && MC.world.getBlockState(position).getHardness(MC.world, position) >= 0;
     }
@@ -551,6 +560,17 @@ public final class NativeMiner {
     private boolean inWorkingReach(BlockPos position) { return inReach(position.toCenterPos()) || NativeMiningRay.visibleAim(MC, position) != null; }
     private int findTool(int tier, boolean requestedBlock, Block block) {
         int best = -1, bestTier = -1;
+        if (requestedBlock && ResourceCatalog.silkTouch(Registries.BLOCK.getId(block).getPath())) {
+            double speed = -1;
+            for (int slot = 0; slot < 36; slot++) {
+                ItemStack stack = MC.player.getInventory().getStack(slot);
+                if (stack.isEmpty() || InventoryAutomation.level(stack, "silk_touch") < 1
+                        || stack.isDamageable() && stack.getMaxDamage() - stack.getDamage() < 16) continue;
+                double candidate = stack.getMiningSpeedMultiplier(block.getDefaultState());
+                if (candidate > speed || candidate == speed && slot < 9 && best >= 9) { best = slot; speed = candidate; }
+            }
+            return best;
+        }
         boolean actualDrops = drops.contains(dropFor(block)) && dropFor(block) != block.asItem();
         if (tier == 0) {
             String blockId = Registries.BLOCK.getId(block).getPath();
@@ -585,6 +605,15 @@ public final class NativeMiner {
         if (item == Items.WOODEN_PICKAXE || item == Items.GOLDEN_PICKAXE) return 1;
         return 0;
     }
+    public static boolean hasSilkTouchTool() {
+        if (MC.player == null) return false;
+        for (int slot = 0; slot < 36; slot++) {
+            ItemStack stack = MC.player.getInventory().getStack(slot);
+            if (!stack.isEmpty() && InventoryAutomation.level(stack, "silk_touch") > 0
+                    && (!stack.isDamageable() || stack.getMaxDamage() - stack.getDamage() >= 16)) return true;
+        }
+        return false;
+    }
     public static int minimumTier(Block block) {
         String id = Registries.BLOCK.getId(block).getPath();
         if (block == Blocks.OBSIDIAN || block == Blocks.ANCIENT_DEBRIS) return 4;
@@ -592,7 +621,8 @@ public final class NativeMiner {
         if (id.contains("iron_ore") || id.contains("copper_ore") || id.contains("lapis_ore")) return 2;
         if (id.endsWith("_log") || id.endsWith("_stem") || id.endsWith("_leaves") || MiningPolicy.softObstruction(id) || id.equals("gravel")
                 || id.equals("dirt") || id.equals("grass_block") || id.equals("coarse_dirt") || id.equals("rooted_dirt") || id.equals("podzol") || id.equals("mycelium")
-                || id.equals("sand") || id.equals("red_sand") || id.equals("soul_sand") || id.equals("soul_soil") || id.equals("clay")) return 0;
+                || id.equals("sand") || id.equals("red_sand") || id.equals("soul_sand") || id.equals("soul_soil") || id.equals("clay")
+                || ResourceCatalog.silkTouch(id) || id.equals("pumpkin") || id.equals("melon")) return 0;
         return 1;
     }
     private static String tierName(int tier) { return switch (tier) { case 4 -> "diamond-tier"; case 3 -> "iron-tier"; case 2 -> "stone-tier"; default -> "wooden-tier"; }; }
@@ -623,6 +653,8 @@ public final class NativeMiner {
     private static Item dropFor(Block block) {
         String id = Registries.BLOCK.getId(block).getPath();
         if (id.equals("stone")) return Items.COBBLESTONE;
+        if (id.equals("amethyst_cluster")) return Items.AMETHYST_SHARD;
+        if (id.equals("melon")) return Items.MELON_SLICE;
         if (id.equals("deepslate")) return Items.COBBLED_DEEPSLATE;
         if (id.equals("grass_block") || id.equals("podzol") || id.equals("mycelium")) return Items.DIRT;
         if (id.equals("clay")) return Items.CLAY_BALL;

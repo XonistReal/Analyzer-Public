@@ -218,11 +218,13 @@ final class MovementController {
     }
     private static void rocket(String id, int delay, double belowSpeed) {
         if (!mc.player.isGliding() || mc.player.isUsingItem() || interactionBudget == 0) return;
+        if (!combatControls.canAct(id)) { note(id, "Waiting for the current combat / protection action"); return; }
         if (mc.player.getVelocity().length() >= belowSpeed) { note(id, "Gliding above the rocket threshold"); return; }
         Hand hand = mc.player.getOffHandStack().isOf(Items.FIREWORK_ROCKET) ? Hand.OFF_HAND : Hand.MAIN_HAND;
         int slot = hand == Hand.OFF_HAND ? -1 : hotbar(s -> s.isOf(Items.FIREWORK_ROCKET));
         if (hand == Hand.MAIN_HAND && slot < 0) { note(id, "Need a hotbar or offhand firework rocket"); return; }
         if (!ready(id + "-rocket", delay)) return;
+        if (!combatControls.action(id)) return;
         if (hand == Hand.MAIN_HAND) selectSlot(slot);
         interactionBudget--;
         var result = mc.interactionManager.interactItem(mc.player, hand);
@@ -231,11 +233,13 @@ final class MovementController {
     }
     private static void pillar() {
         var p = mc.player;
+        if (!combatControls.canAct("high-jump")) { pillarPlayer = null; pillarPitch = null; return; }
         if (p.isUsingItem() || p.isClimbing() || p.isGliding()) return;
         int slot = hotbar(s -> s.getItem() instanceof BlockItem item && item.getBlock().getDefaultState().isFullCube(mc.world, p.getBlockPos())
                 && !(item.getBlock() instanceof net.minecraft.block.FallingBlock));
         if (slot < 0) { note("high-jump", "Legit pillar needs stable solid hotbar blocks"); return; }
         if (pillarPlayer != p || pillarPitch == null) { restorePillarLook(); pillarPitch = p.getPitch(); pillarPlayer = p; }
+        if (!combatControls.camera("high-jump")) return;
         p.setPitch(90);
         force(mc.options.jumpKey);
         BlockPos target = BlockPos.ofFloored(p.getX(), p.getY() - 1, p.getZ());
@@ -243,7 +247,7 @@ final class MovementController {
         if (place(target, slot, "high-jump")) note("high-jump", "Pillaring with an ordinary jump and placed block");
     }
     private static void restorePillarLook() {
-        if (pillarPlayer != null && pillarPitch != null && Math.abs(pillarPlayer.getPitch() - 90) < .1) pillarPlayer.setPitch(pillarPitch);
+        if (pillarPlayer != null && pillarPitch != null && !combatControls.occupiedByOther("high-jump") && Math.abs(pillarPlayer.getPitch() - 90) < .1) pillarPlayer.setPitch(pillarPitch);
         pillarPlayer = null; pillarPitch = null;
     }
     static void restoreStep() {

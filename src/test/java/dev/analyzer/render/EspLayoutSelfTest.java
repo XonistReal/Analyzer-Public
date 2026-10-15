@@ -1,6 +1,9 @@
 package dev.analyzer.render;
 
+import dev.analyzer.core.EspSettings;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /** Behaviour checks for dense ESP scenes, distance cutoffs and projected subpixel boxes. */
@@ -49,7 +52,52 @@ public final class EspLayoutSelfTest {
         check(new EspLayout.Rect(0, 0, 1920, 1080).inside(1920, 1080), "Viewport edges are valid");
         check(!new EspLayout.Rect(-1, 0, 20, 20).inside(1920, 1080), "Offscreen label omitted");
         check(!new EspLayout.Rect(1910, 1070, 20, 20).inside(1920, 1080), "Overflow label omitted");
+        storageAndColors();
         System.out.println("Analyzer ESP layout checks passed: " + assertions + " assertions");
+    }
+    private static void storageAndColors() {
+        // These were previously omitted, or inherited an incorrect parent-class color.
+        check(EspSettings.storageGroup("minecraft:trapped_chest") == EspSettings.StorageGroup.TRAPPED_CHESTS,
+                "Trapped chests have an independent group instead of normal chest inheritance");
+        check(EspSettings.storageGroup("minecraft:dropper") == EspSettings.StorageGroup.DROPPERS,
+                "Droppers are independent of dispensers");
+        check(EspSettings.storageGroup("minecraft:crafter") == EspSettings.StorageGroup.CRAFTERS, "Crafters included");
+        check(EspSettings.storageGroup("minecraft:decorated_pot") == EspSettings.StorageGroup.POTS, "Decorated pot storage included");
+        check(EspSettings.storageGroup("minecraft:chiseled_bookshelf") == EspSettings.StorageGroup.BOOKSHELVES, "Bookshelf storage included");
+        check(EspSettings.storageGroup("minecraft:lectern") == EspSettings.StorageGroup.LECTERNS, "Lectern books included");
+        check(EspSettings.storageGroup("minecraft:beehive") == EspSettings.StorageGroup.HIVES, "Beehives included");
+        check(EspSettings.storageGroup("minecraft:bee_nest") == EspSettings.StorageGroup.HIVES, "Bee nests share their storage group");
+        check(EspSettings.storageGroup("minecraft:campfire") == EspSettings.StorageGroup.CAMPFIRES, "Campfire item slots included");
+        check(EspSettings.storageGroup("minecraft:soul_campfire") == EspSettings.StorageGroup.CAMPFIRES, "Soul campfire slots included");
+        check(EspSettings.storageGroup("minecraft:jukebox") == EspSettings.StorageGroup.JUKEBOXES, "Jukebox record included");
+        for (String name : List.of("furnace", "blast_furnace", "smoker"))
+            check(EspSettings.storageGroup("minecraft:" + name) == EspSettings.StorageGroup.FURNACES, "Furnace inventory " + name);
+        for (String color : List.of("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+                "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"))
+            check(EspSettings.storageGroup("minecraft:" + color + "_shulker_box") == EspSettings.StorageGroup.SHULKERS,
+                    "Dyed special storage model " + color);
+        check(EspSettings.storageGroup("minecraft:shulker_box") == EspSettings.StorageGroup.SHULKERS, "Undyed shulker included");
+        for (String id : List.of("mod:chest", "minecraft:fake_shulker_box", "minecraft:stone", "minecraft:crafting_table", "chest"))
+            check(EspSettings.storageGroup(id) == null, "No false storage match " + id);
+        check(EspSettings.storageGroup(null) == null, "Missing block ID ignored");
+        check(EspSettings.color("Custom", 17, 34, 51) == 0xFF112233, "Custom RGB channels retain their independent values");
+        check(EspSettings.color("Custom", -20, 999, Double.NaN) == 0xFF00FF00, "Custom RGB rejects invalid/out-of-bounds channels");
+        check(EspSettings.color("Pink", 0, 0, 0) == EspSettings.palette("Pink"), "Preset colors ignore retained custom channels");
+        var colors = EspSettings.colors("players", "Players", "Cyan");
+        check(colors.getFirst().choices().contains("Custom"), "Palette exposes custom RGB");
+        HashSet<Integer> swatches = new HashSet<>();
+        for (String name : colors.getFirst().choices()) if (!name.equals("Custom")) {
+            int color = EspSettings.palette(name);
+            check((color >>> 24) == 255, "Every preset has a fully opaque line base " + name);
+            check(swatches.add(color), "Every named swatch is visually distinct " + name);
+        }
+        HashSet<String> groups = new HashSet<>();
+        for (EspSettings.StorageGroup group : EspSettings.StorageGroup.values()) {
+            check(groups.add(group.id()), "Unique saved storage filter " + group.id());
+            check(colors.getFirst().choices().contains(group.defaultColor()), "Valid default storage palette " + group.id());
+            check(EspSettings.colors(group.id(), group.label(), group.defaultColor()).size() == 4,
+                    "Every storage group has a palette and retained custom RGB " + group.id());
+        }
     }
     private static EspLayout.Appearance appearance(double distance) {
         return EspLayout.appearance(distance, 8, 48, .45, true, true);

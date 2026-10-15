@@ -3,7 +3,9 @@ package dev.analyzer.gameplay;
 import dev.analyzer.AnalyzerClient;
 import dev.analyzer.core.AnalyzerCore;
 import dev.analyzer.core.GameplayModules;
+import dev.analyzer.automation.AutomationEngine;
 import dev.analyzer.mixin.FishingBobberAccessor;
+import dev.analyzer.mixin.HandledScreenAccessor;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -11,6 +13,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.RespawnAnchorBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.DataComponentTypes;
@@ -59,6 +62,7 @@ public final class GameplayEngine {
     static final Map<String, Long> actionCounts = new HashMap<>();
     static final Map<String, Vec3d> interactionAims = new HashMap<>();
     static final Map<KeyBinding, Boolean> forcedKeys = new IdentityHashMap<>();
+    static final CombatPolicy.Controls combatControls = new CombatPolicy.Controls();
     static final List<String> IDS = GameplayModules.definitions().stream().map(m -> m.id()).toList();
     static long ticks, attacks, placements, inventoryClicks, movementChanges;
     static long lastFailure = -1000;
@@ -72,6 +76,8 @@ public final class GameplayEngine {
     static String consumeModule;
     static long consumeStart;
     static long fishingAwaitUntil;
+    static int hoveredTotemSlot = -1;
+    static long hoveredTotemSince, nextHoveredTotem;
     private GameplayEngine() { }
 
     public static void register(AnalyzerCore analyzer) {
@@ -90,6 +96,7 @@ public final class GameplayEngine {
     public static Diagnostics diagnostics() { return new Diagnostics(ticks, attacks, placements, inventoryClicks, movementChanges); }
     /** Cumulative real accepted interactions/input or motion changes, useful to HUD and smoke checks. */
     public static long actions(String id) { return actionCounts.getOrDefault(id, 0L); }
+    public static void localTotemPopped() { CombatController.totemPopped(); }
     static void acted(String id) { actionCounts.merge(id, 1L, Long::sum); }
     public static boolean safeWalkActive() {
         return MovementController.safeWalkActive();
@@ -111,26 +118,39 @@ public final class GameplayEngine {
             return;
         }
         deathTicks = 0;
+        hoverTotem();
         if (client.currentScreen != null || p.isSpectator() || p.hasVehicle()
                 || p.currentScreenHandler != p.playerScreenHandler || !p.currentScreenHandler.getCursorStack().isEmpty()) {
             if (consuming) client.interactionManager.stopUsingItem(p);
             consuming = false; fishingAwaitUntil = 0; restoreSlot(); resetControllers(); target = null;
-            for (String id : IDS) if (on(id)) note(id, "Paused while a menu, vehicle or inventory transaction is active");
+            for (String id : IDS) if (on(id) && (!id.equals("hover-totem") || !(client.currentScreen instanceof InventoryScreen))) note(id, "Paused while a menu, vehicle or inventory transaction is active");
             return;
         }
         if (slotPlayer != null && slotPlayer != p) restoreSlot();
         if (ownedSlot >= 0 && p.getInventory().selectedSlot != ownedSlot) { savedSlot = ownedSlot = -1; slotPlayer = null; consuming = false; autoEatRefilling = false; fishingAwaitUntil = 0; }
-        slotRequested = false; target = null; interactionAims.clear(); attackBudget = interactionBudget = 8; inventoryBudget = 1;
+        slotRequested = false; target = null; interactionAims.clear(); combatControls.reset(); attackBudget = interactionBudget = 8; inventoryBudget = 1;
         for (String id : IDS) if (on(id)) note(id, "Ready");
         try {
+            CombatController.yieldForFood();
             boolean eating = food();
+            if (eating) CombatController.suspend();
             if (!eating && !p.isUsingItem()) { inventory(); tools(); }
             // Each controller applies its own pause-while-using setting. Manual food
             // and Analyzer-owned food both use the actual active-item state.
-            if (!eating) { combat(); hvh(); }
+            if (!eating) {
+                if (AutomationEngine.INSTANCE.isRunning()) {
+                    CombatController.suspend();
+                    for (var module : dev.analyzer.core.CombatSettings.definitions()) if (on(module.id())) note(module.id(), "Native task owns movement, aim and interactions");
+                } else if (!CombatController.prepare()) {
+                    // Actual explosive/build actions get first refusal. An idle enabled module
+                    // owns nothing, so ordinary melee can still proceed in the same tick.
+                    hvh(); combat();
+                }
+            }
             if (!eating && !p.isUsingItem()) fishing();
             movement(); playerUtilities();
         } catch (RuntimeException ex) {
+            CombatController.suspend(); releaseKeys();
             if (ticks - lastFailure >= 100) { lastFailure = ticks; AnalyzerClient.LOGGER.warn("Gameplay automation paused after a guarded tick failure", ex); }
             for (String id : IDS) if (on(id)) note(id, "Paused: " + ex.getClass().getSimpleName());
         } finally {
@@ -153,14 +173,16 @@ public final class GameplayEngine {
         next.put(id, ticks + delay); return true;
     }
     static void force(KeyBinding key) { forcedKeys.putIfAbsent(key, key.isPressed()); key.setPressed(true); }
+    static boolean physical(KeyBinding binding) {
+        InputUtil.Key key = KeyBindingHelper.getBoundKeyOf(binding);
+        return key.getCode() >= 0 && (key.getCategory() == InputUtil.Type.MOUSE
+            ? GLFW.glfwGetMouseButton(mc.getWindow().getHandle(), key.getCode()) == GLFW.GLFW_PRESS
+            : InputUtil.isKeyPressed(mc.getWindow().getHandle(), key.getCode()));
+    }
     static void releaseKeys() {
         if (mc == null) return;
         for (var entry : forcedKeys.entrySet()) {
-            InputUtil.Key key = KeyBindingHelper.getBoundKeyOf(entry.getKey());
-            boolean pressed = key.getCode() >= 0 && (key.getCategory() == InputUtil.Type.MOUSE
-                    ? GLFW.glfwGetMouseButton(mc.getWindow().getHandle(), key.getCode()) == GLFW.GLFW_PRESS
-                    : InputUtil.isKeyPressed(mc.getWindow().getHandle(), key.getCode()));
-            entry.getKey().setPressed(pressed);
+            entry.getKey().setPressed(physical(entry.getKey()));
         }
         forcedKeys.clear();
     }
@@ -183,6 +205,24 @@ public final class GameplayEngine {
         return -1;
     }
     static int screenSlot(int inventorySlot) { return inventorySlot < 9 ? 36 + inventorySlot : inventorySlot; }
+    private static void hoverTotem() {
+        String id = "hover-totem"; var p = mc.player;
+        if (!on(id) || AutomationEngine.INSTANCE.isRunning() || p.isSpectator() || !(mc.currentScreen instanceof InventoryScreen screen)
+                || p.currentScreenHandler != p.playerScreenHandler || !p.currentScreenHandler.getCursorStack().isEmpty()
+                || p.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING)) { hoveredTotemSlot = -1; return; }
+        String key = choice(id, "hold-key");
+        if (key.equals("Sneak") && !physical(mc.options.sneakKey) || key.equals("Use") && !physical(mc.options.useKey)) {
+            hoveredTotemSlot = -1; note(id, "Hold the configured key over an inventory totem"); return;
+        }
+        var slot = ((HandledScreenAccessor) screen).analyzer$focusedSlot();
+        if (slot == null || slot.inventory != p.getInventory() || slot.getIndex() < 0 || slot.getIndex() >= 36
+                || !slot.getStack().isOf(Items.TOTEM_OF_UNDYING) || !slot.canTakeItems(p)) { hoveredTotemSlot = -1; return; }
+        if (hoveredTotemSlot != slot.id) { hoveredTotemSlot = slot.id; hoveredTotemSince = ticks; }
+        if (ticks - hoveredTotemSince < num(id, "hover-ticks") || ticks < nextHoveredTotem) return;
+        mc.interactionManager.clickSlot(p.playerScreenHandler.syncId, slot.id, 40, SlotActionType.SWAP, p);
+        inventoryClicks++; acted(id); nextHoveredTotem = ticks + (long) num(id, "delay"); hoveredTotemSlot = -1;
+        note(id, "Hovered totem swapped into the offhand");
+    }
     static boolean click(int slot, int button, SlotActionType action, String module) {
         if (inventoryBudget < 1 || mc.player.currentScreenHandler != mc.player.playerScreenHandler
                 || !mc.player.currentScreenHandler.getCursorStack().isEmpty()) return false;
@@ -289,7 +329,7 @@ public final class GameplayEngine {
     static String choice(String id, String setting) { return core.getChoice(id, setting); }
     static void resetControllers() {
         autoEatRefilling = false;
-        interactionAims.clear();
+        interactionAims.clear(); combatControls.reset();
         CombatController.reset(); HvhController.reset(); MovementController.reset();
     }
 
@@ -305,14 +345,15 @@ public final class GameplayEngine {
     }
     /** Several candidates may be checked, but a module turns toward one stable point per tick. */
     static boolean aimInteraction(String id, Vec3d point) {
+        if (!combatControls.canAct(id)) { note(id, "Waiting for the current combat aim/action owner"); return false; }
         Vec3d first = interactionAims.putIfAbsent(id, point);
         if (first != null && first.squaredDistanceTo(point) > .0001) return false;
-        if (first == null) aim(point, numOr(id, "aim-speed", 35) * (1 - numOr(id, "aim-smoothing", 0) / 200));
+        if (first == null) CombatController.aim(id, point, numOr(id, "aim-speed", 35) * (1 - numOr(id, "aim-smoothing", 0) / 200));
         return mc.player.getRotationVec(1).dotProduct(point.subtract(mc.player.getEyePos()).normalize()) >= Math.cos(Math.toRadians(5));
     }
 
     static boolean attack(Entity entity, String id) {
-        if (attackBudget <= 0 || !mc.player.canInteractWithEntity(entity, 0)
+        if (!combatControls.canAct(id) || attackBudget <= 0 || !mc.player.canInteractWithEntity(entity, 0)
                 || (!mc.player.canSee(entity) && !allowsObstructed(id))) return false;
         if (!mc.player.canSee(entity) && numOr(id, "wall-range", 0) > 0
                 && entity.getBoundingBox().squaredMagnitude(mc.player.getEyePos()) > Math.pow(num(id, "wall-range"), 2)) return false;
@@ -325,13 +366,14 @@ public final class GameplayEngine {
                 note(id, "Waiting for crosshair on crystal"); return false;
             }
         }
+        if (!combatControls.action(id)) return false;
         attackBudget--; mc.interactionManager.attackEntity(mc.player, entity); swing(id); attacks++; acted(id);
         note(id, "Attacked " + entity.getName().getString()); return true;
     }
 
     static boolean interact(BlockHitResult hit, int slot, String id) {
         if (slot < 0) { note(id, "Required item is missing from the hotbar"); return false; }
-        if (interactionBudget <= 0 || !mc.player.canInteractWithBlockAt(hit.getBlockPos(), 0)
+        if (!combatControls.canAct(id) || interactionBudget <= 0 || !mc.player.canInteractWithBlockAt(hit.getBlockPos(), 0)
                 || mc.player.getEyePos().squaredDistanceTo(hit.getPos()) > Math.pow(numOr(id, "place-range", 6), 2)) return false;
         var ray = mc.world.raycast(new RaycastContext(mc.player.getEyePos(), hit.getPos(), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
         if (ray.getType() == HitResult.Type.BLOCK && !ray.getBlockPos().equals(hit.getBlockPos()) && !allowsObstructed(id)) { note(id, "Support is obstructed"); return false; }
@@ -344,6 +386,7 @@ public final class GameplayEngine {
         if (switching.equals("None") && mc.player.getInventory().selectedSlot != slot) { note(id, "Hold the required hotbar item"); return false; }
         int original = mc.player.getInventory().selectedSlot;
         try {
+            if (!combatControls.action(id)) return false;
             if (switching.equals("Normal")) restoreSlot();
             mc.player.getInventory().selectedSlot = slot;
             interactionBudget--;
@@ -373,7 +416,8 @@ public final class GameplayEngine {
     static BlockHitResult upperFace(BlockPos pos) { return new BlockHitResult(Vec3d.ofCenter(pos).add(0, 0.499, 0), Direction.UP, pos, false); }
     static void playerUtilities() {
         var p = mc.player;
-        if (on("anti-afk") && ready("anti-afk", (int) (num("anti-afk", "interval") * 20))) {
+        if (on("anti-afk") && !AutomationEngine.INSTANCE.isRunning() && combatControls.canAct("anti-afk")
+                && ready("anti-afk", (int) (num("anti-afk", "interval") * 20)) && combatControls.camera("anti-afk")) {
             p.setYaw(p.getYaw() + (ticks % 2 == 0 ? 15 : -15)); if (p.isOnGround()) force(mc.options.jumpKey);
             acted("anti-afk"); note("anti-afk", "Ordinary turn/jump input");
         }

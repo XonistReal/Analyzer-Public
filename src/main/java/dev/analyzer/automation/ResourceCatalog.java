@@ -38,6 +38,16 @@ public final class ResourceCatalog {
             resource("coarse_dirt", 0, "", "coarse_dirt"),
             resource("rooted_dirt", 0, "", "rooted_dirt"),
             resource("clay_ball", 0, "", "clay"),
+            resource("ice", 0, "", "ice"),
+            resource("packed_ice", 0, "", "packed_ice"),
+            resource("blue_ice", 0, "", "blue_ice"),
+            resource("calcite", 1, "overworld", "calcite"),
+            resource("blackstone", 1, "the_nether", "blackstone"),
+            resource("basalt", 1, "the_nether", "basalt"),
+            resource("end_stone", 1, "the_end", "end_stone"),
+            resource("amethyst_shard", 1, "overworld", "amethyst_cluster"),
+            resource("pumpkin", 0, "", "pumpkin"),
+            resource("melon_slice", 0, "", "melon"),
             resource("cobbled_deepslate", 1, "overworld", "deepslate", "cobbled_deepslate"),
             resource("granite", 1, "overworld", "granite"),
             resource("diorite", 1, "overworld", "diorite"),
@@ -51,11 +61,13 @@ public final class ResourceCatalog {
         return List.copyOf(resources);
     }
     private static final Map<String, String> ALIASES = aliasesByName();
+    private static final Map<String, Integer> STACK_SIZES = new LinkedHashMap<>(Map.of("bucket", 16, "bow", 1));
     private static Map<String, String> aliasesByName() {
         var names = new LinkedHashMap<String, String>();
         for (Resource resource : RESOURCES) {
             String name = resource.key().replace('_', ' '); names.put(name, resource.key());
             if (name.endsWith(" log") || name.endsWith(" stem") || name.endsWith("ball")) names.put(name + "s", resource.key());
+            addItemNames(names, resource.key());
         }
         aliases(names, "logs", "log", "wood", "timber");
         aliases(names, "cobblestone", "stone", "cobble", "cobblestones");
@@ -72,7 +84,11 @@ public final class ResourceCatalog {
         aliases(names, "dirt", "soil", "earth");
         aliases(names, "clay_ball", "clay", "clay balls");
         aliases(names, "cobbled_deepslate", "deepslate");
-        return Collections.unmodifiableMap(names);
+        aliases(names, "melon_slice", "melon slices", "melon", "melons");
+        aliases(names, "amethyst_shard", "amethyst", "amethyst shards");
+        for (BuildingMaterialCatalog.Material material : BuildingMaterialCatalog.all())
+            addItemNames(names, material.itemId());
+        return names;
     }
     private static void aliases(Map<String, String> names, String key, String... aliases) { for (String alias : aliases) names.put(alias, key); }
     private ResourceCatalog() { }
@@ -80,15 +96,41 @@ public final class ResourceCatalog {
         return new Resource(key, List.of(blocks), tier, dimension);
     }
     public static List<Resource> all() { return RESOURCES; }
-    public static Map<String, String> aliases() { return ALIASES; }
+    public static synchronized Map<String, String> aliases() { return Collections.unmodifiableMap(new LinkedHashMap<>(ALIASES)); }
+    /** Registry names expand recognition, not acquisition claims. Unsupported jobs remain explicit in review. */
+    public static synchronized void registerItemNames(Map<String, String> names) {
+        for (var entry : names.entrySet()) {
+            String key = entry.getKey();
+            if (!key.matches("[a-z0-9_]+")) continue;
+            addItemNames(ALIASES, key);
+            String display = entry.getValue().toLowerCase(Locale.ROOT).strip();
+            if (!display.isBlank() && display.length() <= 100) ALIASES.putIfAbsent(display, key);
+        }
+    }
+    public static synchronized void registerStackSizes(Map<String, Integer> sizes) {
+        sizes.forEach((key, count) -> { if (key.matches("[a-z0-9_]+") && count != null && count >= 1 && count <= 99) STACK_SIZES.put(key, count); });
+    }
+    public static synchronized int stackSize(String key) { return STACK_SIZES.getOrDefault(key, 64); }
+    private static void addItemNames(Map<String, String> names, String key) {
+        String label = key.replace('_', ' ');
+        names.putIfAbsent(label, key);
+        names.putIfAbsent("minecraft:" + key, key);
+        if (label.endsWith("o") || label.endsWith("ch") || label.endsWith("sh") || label.endsWith("x"))
+            names.putIfAbsent(label + "es", key);
+        else if (label.endsWith("y") && label.length() > 1 && "aeiou".indexOf(label.charAt(label.length() - 2)) < 0)
+            names.putIfAbsent(label.substring(0, label.length() - 1) + "ies", key);
+        else if (!label.endsWith("s")) names.putIfAbsent(label + "s", key);
+    }
+    public static boolean silkTouch(String key) { return List.of("ice", "packed_ice", "blue_ice").contains(key); }
+    public static java.util.Optional<Resource> mining(String key) { return RESOURCES.stream().filter(resource -> resource.key().equals(key)).findFirst(); }
     public static Resource get(String key) {
-        return RESOURCES.stream().filter(r -> r.key().equals(key)).findFirst()
+        return mining(key)
                 .orElseThrow(() -> new IllegalArgumentException("Unsupported resource: " + key));
     }
     public static String canonical(String name) {
         if (name == null) throw new IllegalArgumentException("Choose a resource name.");
         String value = name.toLowerCase(Locale.ROOT).replaceAll("[ _-]", "");
-        return ALIASES.entrySet().stream().filter(entry -> entry.getKey().replace(" ", "").equals(value)).map(Map.Entry::getValue).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported resource: " + name + ". Examples: sand, dirt, gravel, diamonds or oak logs."));
+        return aliases().entrySet().stream().filter(entry -> entry.getKey().replaceAll("[ _-]", "").equals(value)).map(Map.Entry::getValue).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("I could not identify the item ‘" + name + "’. Use its displayed vanilla name or minecraft:item_id; no preset sentence is required."));
     }
 }

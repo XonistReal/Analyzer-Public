@@ -151,8 +151,17 @@ public final class TaskPlanner {
         String gatheredDimension = "";
         for (int gatherIndex = 0; gatherIndex < requestedGathers.size(); gatherIndex++) {
                 var resource = requestedGathers.get(gatherIndex); int count = resource.count(); String key = resource.resource();
-                var spec = ResourceCatalog.get(key);
+                var spec = ResourceCatalog.mining(key).orElse(null);
                 String suffix = gatherIndex == 0 ? "" : "-" + gatherIndex;
+                if (spec == null) {
+                    steps.add(step("resource" + suffix, Action.SUPPLY_MATERIAL, "Have " + count + " " + key.replace('_', ' ') + " in inventory", "minecraft:" + key, count, homeX, homeY, homeZ));
+                    var manual = BuildingMaterialCatalog.manualInputs(key);
+                    if (!manual.isEmpty())
+                        prerequisites.add("Recognized " + key.replace('_', ' ') + ", but automatic acquisition for these required inputs is not implemented: " + manual + ". Existing inventory counts; supply missing inputs before this stage can finish.");
+                    continue;
+                }
+                if (ResourceCatalog.silkTouch(key))
+                    prerequisites.add(key.replace('_', ' ') + " must be harvested with a durable Silk Touch tool. Ordinary breaking destroys this item; the task waits for that actual tool if missing, rather than breaking it for no drops.");
                 if (!spec.dimension().isEmpty() && !spec.dimension().equals(gatheredDimension)) {
                     steps.add(step("resource-dimension" + suffix, Action.DIMENSION, "Use " + dimensionLabel(spec.dimension()) + " for natural " + key.replace('_', ' ') + " deposits", spec.dimension(), 1, homeX, homeY, homeZ));
                     portalPrerequisites(prerequisites, spec.dimension());

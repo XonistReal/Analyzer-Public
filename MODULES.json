@@ -3,7 +3,7 @@
     "id": "entity-esp",
     "name": "Entity ESP",
     "category": "Render",
-    "description": "Highlight nearby players, creatures and items.",
+    "description": "Clean debug boxes for players, hostile mobs and non-hostile mobs.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "id": "passives",
-        "label": "Passive mobs",
+        "label": "Non-hostile mobs",
         "kind": "BOOLEAN",
         "default": false
       },
@@ -34,19 +34,19 @@
         "id": "labels",
         "label": "Name and distance",
         "kind": "BOOLEAN",
-        "default": true
+        "default": false
       },
       {
         "id": "health",
         "label": "Health",
         "kind": "BOOLEAN",
-        "default": true
+        "default": false
       },
       {
         "id": "radar",
         "label": "Nearby target radar",
         "kind": "BOOLEAN",
-        "default": true
+        "default": false
       },
       {
         "id": "range",
@@ -56,6 +56,238 @@
         "min": 16.0,
         "max": 256.0,
         "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Line opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "style",
+        "label": "Box style",
+        "kind": "CHOICE",
+        "default": "Boxes",
+        "choices": [
+          "Boxes",
+          "Corners",
+          "Screen"
+        ]
+      },
+      {
+        "id": "min-marker-pixels",
+        "label": "Minimum marker size (pixels)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 12.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-color",
+        "label": "Players color",
+        "kind": "CHOICE",
+        "default": "Cyan",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "players-red",
+        "label": "Players red",
+        "kind": "NUMBER",
+        "default": 102.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-green",
+        "label": "Players green",
+        "kind": "NUMBER",
+        "default": 223.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-blue",
+        "label": "Players blue",
+        "kind": "NUMBER",
+        "default": 247.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-color",
+        "label": "Hostile mobs color",
+        "kind": "CHOICE",
+        "default": "Red",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "hostiles-red",
+        "label": "Hostile mobs red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-green",
+        "label": "Hostile mobs green",
+        "kind": "NUMBER",
+        "default": 113.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-blue",
+        "label": "Hostile mobs blue",
+        "kind": "NUMBER",
+        "default": 136.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-color",
+        "label": "Non-hostile mobs color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "passives-red",
+        "label": "Non-hostile mobs red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-green",
+        "label": "Non-hostile mobs green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-blue",
+        "label": "Non-hostile mobs blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "items-color",
+        "label": "Dropped items color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "items-red",
+        "label": "Dropped items red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "items-green",
+        "label": "Dropped items green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "items-blue",
+        "label": "Dropped items blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
       },
       {
         "id": "label-range",
@@ -119,15 +351,45 @@
         "label": "Hide overlapping labels",
         "kind": "BOOLEAN",
         "default": true
+      }
+    ]
+  },
+  {
+    "id": "storage-esp",
+    "name": "Storage ESP",
+    "category": "World",
+    "description": "Debug boxes around loaded containers, with colors for each storage group.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "labels",
+        "label": "Container labels",
+        "kind": "BOOLEAN",
+        "default": false
       },
       {
-        "id": "min-marker-pixels",
-        "label": "Minimum marker size (pixels)",
+        "id": "tracers",
+        "label": "Storage tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "tracer-width",
+        "label": "Tracer width",
         "kind": "NUMBER",
-        "default": 3.0,
-        "min": 0.0,
-        "max": 12.0,
-        "step": 1.0
+        "default": 1.0,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": 16.0,
+        "max": 128.0,
+        "step": 8.0
       },
       {
         "id": "through-walls",
@@ -139,45 +401,993 @@
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
-        "default": 1.5,
+        "default": 1.0,
         "min": 0.5,
         "max": 4.0,
         "step": 0.25
       },
       {
+        "id": "opacity",
+        "label": "Line opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
         "id": "style",
         "label": "Box style",
         "kind": "CHOICE",
-        "default": "Corners",
+        "default": "Boxes",
         "choices": [
           "Boxes",
           "Corners",
           "Screen"
         ]
-      }
-    ]
-  },
-  {
-    "id": "storage-esp",
-    "name": "Storage ESP",
-    "category": "World",
-    "description": "Highlight nearby containers.",
-    "defaultEnabled": false,
-    "settings": [
+      },
       {
-        "id": "labels",
-        "label": "Container labels",
+        "id": "min-marker-pixels",
+        "label": "Minimum marker size (pixels)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 12.0,
+        "step": 1.0
+      },
+      {
+        "id": "chests",
+        "label": "Chests",
         "kind": "BOOLEAN",
         "default": true
       },
       {
-        "id": "range",
-        "label": "Range (blocks)",
+        "id": "chests-color",
+        "label": "Chests color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "chests-red",
+        "label": "Chests red",
         "kind": "NUMBER",
-        "default": 64.0,
-        "min": 16.0,
-        "max": 128.0,
-        "step": 8.0
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "chests-green",
+        "label": "Chests green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "chests-blue",
+        "label": "Chests blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "trapped-chests",
+        "label": "Trapped chests",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "trapped-chests-color",
+        "label": "Trapped chests color",
+        "kind": "CHOICE",
+        "default": "Red",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "trapped-chests-red",
+        "label": "Trapped chests red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "trapped-chests-green",
+        "label": "Trapped chests green",
+        "kind": "NUMBER",
+        "default": 113.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "trapped-chests-blue",
+        "label": "Trapped chests blue",
+        "kind": "NUMBER",
+        "default": 136.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "ender-chests",
+        "label": "Ender chests",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ender-chests-color",
+        "label": "Ender chests color",
+        "kind": "CHOICE",
+        "default": "Violet",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "ender-chests-red",
+        "label": "Ender chests red",
+        "kind": "NUMBER",
+        "default": 181.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "ender-chests-green",
+        "label": "Ender chests green",
+        "kind": "NUMBER",
+        "default": 155.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "ender-chests-blue",
+        "label": "Ender chests blue",
+        "kind": "NUMBER",
+        "default": 250.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "barrels",
+        "label": "Barrels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "barrels-color",
+        "label": "Barrels color",
+        "kind": "CHOICE",
+        "default": "Orange",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "barrels-red",
+        "label": "Barrels red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "barrels-green",
+        "label": "Barrels green",
+        "kind": "NUMBER",
+        "default": 165.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "barrels-blue",
+        "label": "Barrels blue",
+        "kind": "NUMBER",
+        "default": 99.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "shulkers",
+        "label": "Shulker boxes",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "shulkers-color",
+        "label": "Shulker boxes color",
+        "kind": "CHOICE",
+        "default": "Pink",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "shulkers-red",
+        "label": "Shulker boxes red",
+        "kind": "NUMBER",
+        "default": 244.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "shulkers-green",
+        "label": "Shulker boxes green",
+        "kind": "NUMBER",
+        "default": 140.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "shulkers-blue",
+        "label": "Shulker boxes blue",
+        "kind": "NUMBER",
+        "default": 220.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hoppers",
+        "label": "Hoppers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hoppers-color",
+        "label": "Hoppers color",
+        "kind": "CHOICE",
+        "default": "Cyan",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "hoppers-red",
+        "label": "Hoppers red",
+        "kind": "NUMBER",
+        "default": 102.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hoppers-green",
+        "label": "Hoppers green",
+        "kind": "NUMBER",
+        "default": 223.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hoppers-blue",
+        "label": "Hoppers blue",
+        "kind": "NUMBER",
+        "default": 247.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "furnaces",
+        "label": "Furnaces and smokers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "furnaces-color",
+        "label": "Furnaces and smokers color",
+        "kind": "CHOICE",
+        "default": "Orange",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "furnaces-red",
+        "label": "Furnaces and smokers red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "furnaces-green",
+        "label": "Furnaces and smokers green",
+        "kind": "NUMBER",
+        "default": 165.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "furnaces-blue",
+        "label": "Furnaces and smokers blue",
+        "kind": "NUMBER",
+        "default": 99.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "dispensers",
+        "label": "Dispensers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "dispensers-color",
+        "label": "Dispensers color",
+        "kind": "CHOICE",
+        "default": "Gray",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "dispensers-red",
+        "label": "Dispensers red",
+        "kind": "NUMBER",
+        "default": 190.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "dispensers-green",
+        "label": "Dispensers green",
+        "kind": "NUMBER",
+        "default": 197.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "dispensers-blue",
+        "label": "Dispensers blue",
+        "kind": "NUMBER",
+        "default": 206.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "droppers",
+        "label": "Droppers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "droppers-color",
+        "label": "Droppers color",
+        "kind": "CHOICE",
+        "default": "White",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "droppers-red",
+        "label": "Droppers red",
+        "kind": "NUMBER",
+        "default": 241.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "droppers-green",
+        "label": "Droppers green",
+        "kind": "NUMBER",
+        "default": 243.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "droppers-blue",
+        "label": "Droppers blue",
+        "kind": "NUMBER",
+        "default": 246.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brewing",
+        "label": "Brewing stands",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "brewing-color",
+        "label": "Brewing stands color",
+        "kind": "CHOICE",
+        "default": "Blue",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "brewing-red",
+        "label": "Brewing stands red",
+        "kind": "NUMBER",
+        "default": 131.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brewing-green",
+        "label": "Brewing stands green",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "brewing-blue",
+        "label": "Brewing stands blue",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "crafters",
+        "label": "Crafters",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "crafters-color",
+        "label": "Crafters color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "crafters-red",
+        "label": "Crafters red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "crafters-green",
+        "label": "Crafters green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "crafters-blue",
+        "label": "Crafters blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "bookshelves",
+        "label": "Chiseled bookshelves",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "bookshelves-color",
+        "label": "Chiseled bookshelves color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "bookshelves-red",
+        "label": "Chiseled bookshelves red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "bookshelves-green",
+        "label": "Chiseled bookshelves green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "bookshelves-blue",
+        "label": "Chiseled bookshelves blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "pots",
+        "label": "Decorated pots",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pots-color",
+        "label": "Decorated pots color",
+        "kind": "CHOICE",
+        "default": "Orange",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "pots-red",
+        "label": "Decorated pots red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "pots-green",
+        "label": "Decorated pots green",
+        "kind": "NUMBER",
+        "default": 165.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "pots-blue",
+        "label": "Decorated pots blue",
+        "kind": "NUMBER",
+        "default": 99.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "lecterns",
+        "label": "Lecterns",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "lecterns-color",
+        "label": "Lecterns color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "lecterns-red",
+        "label": "Lecterns red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "lecterns-green",
+        "label": "Lecterns green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "lecterns-blue",
+        "label": "Lecterns blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hives",
+        "label": "Beehives and nests",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hives-color",
+        "label": "Beehives and nests color",
+        "kind": "CHOICE",
+        "default": "Lime",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "hives-red",
+        "label": "Beehives and nests red",
+        "kind": "NUMBER",
+        "default": 185.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hives-green",
+        "label": "Beehives and nests green",
+        "kind": "NUMBER",
+        "default": 235.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hives-blue",
+        "label": "Beehives and nests blue",
+        "kind": "NUMBER",
+        "default": 114.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "campfires",
+        "label": "Campfires",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "campfires-color",
+        "label": "Campfires color",
+        "kind": "CHOICE",
+        "default": "Orange",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "campfires-red",
+        "label": "Campfires red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "campfires-green",
+        "label": "Campfires green",
+        "kind": "NUMBER",
+        "default": 165.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "campfires-blue",
+        "label": "Campfires blue",
+        "kind": "NUMBER",
+        "default": 99.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "jukeboxes",
+        "label": "Jukeboxes",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "jukeboxes-color",
+        "label": "Jukeboxes color",
+        "kind": "CHOICE",
+        "default": "Pink",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "jukeboxes-red",
+        "label": "Jukeboxes red",
+        "kind": "NUMBER",
+        "default": 244.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "jukeboxes-green",
+        "label": "Jukeboxes green",
+        "kind": "NUMBER",
+        "default": 140.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "jukeboxes-blue",
+        "label": "Jukeboxes blue",
+        "kind": "NUMBER",
+        "default": 220.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "vehicles",
+        "label": "Storage minecarts and boats",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "vehicles-color",
+        "label": "Storage minecarts and boats color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "vehicles-red",
+        "label": "Storage minecarts and boats red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "vehicles-green",
+        "label": "Storage minecarts and boats green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "vehicles-blue",
+        "label": "Storage minecarts and boats blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
       },
       {
         "id": "label-range",
@@ -241,41 +1451,6 @@
         "label": "Hide overlapping labels",
         "kind": "BOOLEAN",
         "default": true
-      },
-      {
-        "id": "min-marker-pixels",
-        "label": "Minimum marker size (pixels)",
-        "kind": "NUMBER",
-        "default": 3.0,
-        "min": 0.0,
-        "max": 12.0,
-        "step": 1.0
-      },
-      {
-        "id": "through-walls",
-        "label": "Through walls",
-        "kind": "BOOLEAN",
-        "default": true
-      },
-      {
-        "id": "line-width",
-        "label": "Line width",
-        "kind": "NUMBER",
-        "default": 1.5,
-        "min": 0.5,
-        "max": 4.0,
-        "step": 0.25
-      },
-      {
-        "id": "style",
-        "label": "Box style",
-        "kind": "CHOICE",
-        "default": "Boxes",
-        "choices": [
-          "Boxes",
-          "Corners",
-          "Screen"
-        ]
       }
     ]
   },
@@ -283,7 +1458,7 @@
     "id": "tracers",
     "name": "Tracers",
     "category": "Render",
-    "description": "Draw lines from your view to nearby entities.",
+    "description": "Single clean lines to selected entities, using the same colors as Entity ESP.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -300,7 +1475,7 @@
       },
       {
         "id": "passives",
-        "label": "Passive mobs",
+        "label": "Non-hostile mobs",
         "kind": "BOOLEAN",
         "default": false
       },
@@ -333,6 +1508,220 @@
         "min": 0.5,
         "max": 4.0,
         "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Line opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "anchor",
+        "label": "Line anchor",
+        "kind": "CHOICE",
+        "default": "Center",
+        "choices": [
+          "Center",
+          "Feet",
+          "Head"
+        ]
+      },
+      {
+        "id": "match-esp-colors",
+        "label": "Use Entity ESP colors",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "players-color",
+        "label": "Players color",
+        "kind": "CHOICE",
+        "default": "Cyan",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "players-red",
+        "label": "Players red",
+        "kind": "NUMBER",
+        "default": 102.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-green",
+        "label": "Players green",
+        "kind": "NUMBER",
+        "default": 223.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-blue",
+        "label": "Players blue",
+        "kind": "NUMBER",
+        "default": 247.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-color",
+        "label": "Hostile mobs color",
+        "kind": "CHOICE",
+        "default": "Red",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "hostiles-red",
+        "label": "Hostile mobs red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-green",
+        "label": "Hostile mobs green",
+        "kind": "NUMBER",
+        "default": 113.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-blue",
+        "label": "Hostile mobs blue",
+        "kind": "NUMBER",
+        "default": 136.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-color",
+        "label": "Non-hostile mobs color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "passives-red",
+        "label": "Non-hostile mobs red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-green",
+        "label": "Non-hostile mobs green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-blue",
+        "label": "Non-hostile mobs blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "items-color",
+        "label": "Dropped items color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "items-red",
+        "label": "Dropped items red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "items-green",
+        "label": "Dropped items green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "items-blue",
+        "label": "Dropped items blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
       }
     ]
   },
@@ -3475,7 +4864,7 @@
     "id": "target-esp",
     "name": "Target ESP",
     "category": "Render",
-    "description": "Orbiting target rings on your crosshair target or recently attacked entity.",
+    "description": "A clean debug box on your crosshair target or recently attacked entity, with optional orbit rings.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -3497,7 +4886,7 @@
         "id": "style",
         "label": "Target shape",
         "kind": "CHOICE",
-        "default": "Orbit",
+        "default": "Box",
         "choices": [
           "Orbit",
           "Box",
@@ -3512,6 +4901,15 @@
         "min": 0.5,
         "max": 2.0,
         "step": 0.1
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
       },
       {
         "id": "color-mode",
@@ -3599,6 +4997,25 @@
         "label": "Through walls",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "style",
+        "label": "Hole shape",
+        "kind": "CHOICE",
+        "default": "Box",
+        "choices": [
+          "Box",
+          "Floor outline"
+        ]
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
       },
       {
         "id": "color-mode",
@@ -3759,7 +5176,7 @@
     "id": "item-esp",
     "name": "Item ESP",
     "category": "Render",
-    "description": "Independent glowing rings and beams on loaded dropped items.",
+    "description": "Clean debug boxes around loaded dropped items, with optional labels and ring markers.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -3781,7 +5198,27 @@
         "id": "labels",
         "label": "Item labels",
         "kind": "BOOLEAN",
-        "default": true
+        "default": false
+      },
+      {
+        "id": "style",
+        "label": "Item shape",
+        "kind": "CHOICE",
+        "default": "Box",
+        "choices": [
+          "Box",
+          "Corners",
+          "Rings"
+        ]
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 4.0,
+        "step": 0.25
       },
       {
         "id": "color-mode",
@@ -6413,6 +7850,18 @@
         "step": 0.25
       },
       {
+        "id": "only-click",
+        "label": "Only acquire while holding attack",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "prefer-reachable",
+        "label": "Prefer targets inside actual melee reach",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
         "id": "rotation",
         "label": "Rotation",
         "kind": "CHOICE",
@@ -6532,6 +7981,36 @@
         "label": "Pause attacks while using an item",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "pause-mining",
+        "label": "Pause while breaking a block",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "require-ray",
+        "label": "Require actual camera ray through target hitbox",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hurt-time",
+        "label": "Maximum target hurt time (ticks)",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "settle-ticks",
+        "label": "Wait after changing held weapon (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
       },
       {
         "id": "swing",
@@ -6706,6 +8185,18 @@
         "label": "Only while holding a melee weapon",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "pause-using",
+        "label": "Pause while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-mining",
+        "label": "Pause while breaking a block",
+        "kind": "BOOLEAN",
+        "default": true
       },
       {
         "id": "strength",
@@ -6914,6 +8405,36 @@
         "label": "Pause attacks while using an item",
         "kind": "BOOLEAN",
         "default": true
+      },
+      {
+        "id": "pause-mining",
+        "label": "Pause while breaking a block",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "require-ray",
+        "label": "Require actual camera ray through target hitbox",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hurt-time",
+        "label": "Maximum target hurt time (ticks)",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "settle-ticks",
+        "label": "Wait after changing held weapon (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
       },
       {
         "id": "swing",
@@ -7141,6 +8662,36 @@
         "default": true
       },
       {
+        "id": "pause-mining",
+        "label": "Pause while breaking a block",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "require-ray",
+        "label": "Require actual camera ray through target hitbox",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hurt-time",
+        "label": "Maximum target hurt time (ticks)",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "settle-ticks",
+        "label": "Wait after changing held weapon (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
         "id": "swing",
         "label": "Swing animation",
         "kind": "CHOICE",
@@ -7253,6 +8804,15 @@
         "min": 0.0,
         "max": 1000.0,
         "step": 25.0
+      },
+      {
+        "id": "settle-ticks",
+        "label": "Wait after switching weapon (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
       }
     ]
   },
@@ -7292,6 +8852,33 @@
         "min": 0.0,
         "max": 1000.0,
         "step": 25.0
+      },
+      {
+        "id": "settle-ticks",
+        "label": "Wait after switching axe (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "only-click",
+        "label": "Only break shields while holding attack",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "pause-using",
+        "label": "Pause while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-mining",
+        "label": "Pause while breaking a block",
+        "kind": "BOOLEAN",
+        "default": true
       },
       {
         "id": "cooldown",
@@ -7705,6 +9292,36 @@
         "default": true
       },
       {
+        "id": "pause-mining",
+        "label": "Pause while breaking a block",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "require-ray",
+        "label": "Require actual camera ray through target hitbox",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hurt-time",
+        "label": "Maximum target hurt time (ticks)",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "settle-ticks",
+        "label": "Wait after changing held weapon (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
         "id": "swing",
         "label": "Swing animation",
         "kind": "CHOICE",
@@ -7802,6 +9419,301 @@
         "label": "Show local critical cue on the falling attack",
         "kind": "BOOLEAN",
         "default": false
+      }
+    ]
+  },
+  {
+    "id": "auto-block",
+    "name": "Auto Block",
+    "category": "Combat",
+    "description": "Raise an equipped offhand shield toward a visible threat between attacks; release it before ordinary melee attacks.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Target range from eyes to hitbox",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Target field of view (degrees)",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 10.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Angle",
+          "Armor",
+          "Hurt time"
+        ]
+      },
+      {
+        "id": "rotation",
+        "label": "Rotation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "None"
+        ]
+      },
+      {
+        "id": "turn-speed",
+        "label": "Maximum turn (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 18.0,
+        "min": 1.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "smoothing",
+        "label": "Slow down near aim point (%)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "health",
+        "label": "Raise shield at or below health",
+        "kind": "NUMBER",
+        "default": 20.0,
+        "min": 1.0,
+        "max": 36.0,
+        "step": 1.0
+      },
+      {
+        "id": "release-delay",
+        "label": "Keep shield after threat leaves (ticks)",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "face-threat",
+        "label": "Face the selected visible threat",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "yield-hvh",
+        "label": "Yield while combat placement modules are enabled",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-mining",
+        "label": "Pause while breaking a block",
+        "kind": "BOOLEAN",
+        "default": true
+      }
+    ]
+  },
+  {
+    "id": "double-hand",
+    "name": "Double Hand",
+    "category": "Combat",
+    "description": "Temporarily hold a hotbar totem after a real server-reported pop or at low health near a visible threat; yields to Auto Totem once the offhand is protected.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Target range from eyes to hitbox",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 12.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Target field of view (degrees)",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 10.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Angle",
+          "Armor",
+          "Hurt time"
+        ]
+      },
+      {
+        "id": "health",
+        "label": "Hold main-hand totem at or below health",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 1.0,
+        "max": 36.0,
+        "step": 1.0
+      },
+      {
+        "id": "mode",
+        "label": "Protect when",
+        "kind": "CHOICE",
+        "default": "Either",
+        "choices": [
+          "Low health",
+          "After totem pop",
+          "Either"
+        ]
+      },
+      {
+        "id": "without-offhand",
+        "label": "Only when offhand has no totem",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hold-ticks",
+        "label": "Keep totem after danger ends (ticks)",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 0.0,
+        "max": 60.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "hover-totem",
+    "name": "Hover Totem",
+    "category": "Combat",
+    "description": "In your own inventory, hold the selected key over a totem to move it into the offhand through a normal guarded slot swap.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "hold-key",
+        "label": "Hold key while hovering",
+        "kind": "CHOICE",
+        "default": "Sneak",
+        "choices": [
+          "Sneak",
+          "Use",
+          "None"
+        ]
+      },
+      {
+        "id": "hover-ticks",
+        "label": "Hover before swapping (ticks)",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 0.0,
+        "max": 20.0,
+        "step": 1.0
+      },
+      {
+        "id": "delay",
+        "label": "Minimum interval between swaps (ticks)",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 1.0,
+        "max": 40.0,
+        "step": 1.0
       }
     ]
   },
@@ -10567,6 +12479,31 @@
         "min": 8.0,
         "max": 64.0,
         "step": 4.0
+      },
+      {
+        "id": "schematic-preview",
+        "label": "Show selected schematic ghost",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "preview-opacity",
+        "label": "Schematic ghost opacity",
+        "kind": "NUMBER",
+        "default": 0.3,
+        "min": 0.1,
+        "max": 0.8,
+        "step": 0.05
+      },
+      {
+        "id": "preview-style",
+        "label": "Schematic preview style",
+        "kind": "CHOICE",
+        "default": "Ghost",
+        "choices": [
+          "Ghost",
+          "Outline"
+        ]
       },
       {
         "id": "defense",

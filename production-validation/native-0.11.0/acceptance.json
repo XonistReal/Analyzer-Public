@@ -1,0 +1,82 @@
+{
+  "release": "0.11.0",
+  "date": "2026-10-15",
+  "status": "build_and_registry_verified_gameplay_checks_delegated_to_user",
+  "policyAssertions": 69882,
+  "policySuites": 23,
+  "modules": 128,
+  "controls": 1335,
+  "focusedPolicies": {
+    "combat": 157,
+    "esp": 155,
+    "intent": 102,
+    "schematic": 133,
+    "vanillaMaterialRecipes": 425,
+    "recipesComparedToPinnedData": 141
+  },
+  "actualSchematicRegistryChecks": {
+    "method": "Bounded source parsing and headless Minecraft 1.21.4 registry Bootstrap, using an isolated test-only access shim. Original cached JAR/source files unchanged. No Minecraft client/world/placement run.",
+    "Bonemeal Farm": {
+      "bounds": [
+        13,
+        7,
+        12
+      ],
+      "sha256": "bb0d97c325465d4d0771c5ab76a2debd818a985855ab010ab4d81983a50965b1",
+      "snapshotBlocks": 353,
+      "constructionBlocks": 346,
+      "materials": 22,
+      "reusableBucketCapacity": 1,
+      "lavaSources": 1,
+      "waterloggedBlocks": 7,
+      "flowCells": 6
+    },
+    "Kelp Farm": {
+      "bounds": [
+        4,
+        7,
+        5
+      ],
+      "sha256": "04be9e19f894a4be6dd563333ba4c1b589b5f1ab878d9d4739f2acba081b38d4",
+      "snapshotBlocks": 64,
+      "constructionBlocks": 64,
+      "materials": 16,
+      "reusableBucketCapacity": 1,
+      "waterSources": 3,
+      "flowCells": 2
+    }
+  },
+  "nativeGameplayRun": false,
+  "newCaptures": {},
+  "skipped": "Optional schematic-library symlink cases where Windows denies link creation.",
+  "pendingUserChecks": [
+    "Combat action/camera/input arbitration, shield/totem/hover behavior and projectile estimates in game",
+    "Debug ESP colors, ranges, widths, storage vehicles and render state on the actual GPU/client",
+    "Schematic ghost alignment and native model visibility",
+    "Actual bucket refill, waterlogging, flow containment, orientation and complete physical farm construction",
+    "Remaining older Auto Eat/X-ray integration checks"
+  ],
+  "limits": [
+    "Original feature equivalents for selected Glazed behavior, not all Glazed modules or copied source.",
+    "Local registry-backed item interpretation and bounded acquisition jobs, not unrestricted language intelligence.",
+    "Ice requires actual Silk Touch; unsupported acquisition inputs must be supplied.",
+    "Physical construction properties are verified; server-driven power/growth/flow can differ from the captured instant.",
+    "Container contents, crafter configuration, sign text and scheduled ticks are not restored.",
+    "Real supported/reachable placement surfaces, actual external fluid sources and loaded safe terrain remain required."
+  ],
+  "references": {
+    "meteorCommit": "2385f7b4bb9de1a698b4503254bd32f30fd7a87d",
+    "glazed1214Commit": "1d33d14fdafd26100aa7bf616758786d79ac7b96",
+    "implementation": "Original Analyzer code; reference implementations are not bundled."
+  },
+  "logs": {
+    "combat-esp-0.11.0-build.log": "d85267d5c004be38657285b920e9a43902f20b04d741d0b7fa6de8ad895ce907",
+    "combat-esp-0.11.0-publish.log": "0c90402c1eb3ad2b9d7d040b2097f3070924ca21e38e08c36b44ba052e291b15",
+    "schematic-new-compile/actual-widened-registry-probe.log": "f9b2ee10ed0e0ea15239d83a47eb2cc65aa4f6c88ddbe27b93d6bdff66ed9f12"
+  },
+  "artifact": {
+    "version": "0.11.0",
+    "sha256": "91a47440ea57575f17d6af45bb4a9cb468742e963feb4994220c6334f6b935c4",
+    "feedArtifact": "analyzer-0.11.0-91a47440ea57.jar"
+  }
+}

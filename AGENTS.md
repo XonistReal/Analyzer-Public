@@ -26,6 +26,16 @@ Keep **Render → X-ray** opt-in with **Fade terrain / Terrain outlines / Ores o
 
 Preserve bounded camera acceleration with braking before fixed targets, per-tick angular budgets and stable yaw-only pitch. Mining brakes by releasing its movement child rather than recentering its current cell, commits freshly valid standing approaches and revalidates cached excavation edges. Resource surveys run nearest first with a bounded 64-candidate batch and early nearby selection. Checked adjacent routes, useful out-of-window frontiers and same-tick waypoint advancement reduce redundant planning. Local landing/centering corrections must preserve view direction and freshly validate requested input, momentum, body clearance and footprint support. Keep user pacing/settings; do not replace safety checks with blind speed increases. The user elected to perform remaining in-game checks for these deliveries; record deterministic observations separately from native gameplay. See `AUTOMATION-MOTION.md`.
 
+## Combat, debug ESP and construction in 0.11.0
+
+Coordinate camera, hotbar and action ownership across combat/HVH, defense, projectiles and native tasks. Keep Auto Block, Double Hand and Hover Totem opt-in, using actual equipped items, server pop events and guarded normal slot clicks. Glazed/Meteor are behavioral references only; no external code or runtime dependency is bundled.
+
+Use clean debug boxes for ESP with players/hostile mobs/non-hostile mobs colors, storage group colors and matching tracers. Retain saved explicit filters/styles; new defaults avoid forced fill/glow/label panels. The complete scope is in COMBAT-ESP.md.
+
+Local requests recognize running vanilla registry item names, quantities and actual stack sizes. Distinguish automatic gathering/crafting from unsupported acquisition during review; ice requires a real Silk Touch tool. Do not require preset sentence wording or claim unrestricted interpretation.
+
+Keep selected schematic ghosts read-only and available despite review blockers. Preserve source bytes/hash/palettes. Construction review separates live snapshot simulation from persistent facing/axis/half/rotation/connections/waterlogging. Source fluids use one reusable bucket with real external refills; flowing cells arise from actual simulation. Fresh containment, player clearance, actual crosshair/placement cell, source hash and observed-state completion remain required. Block-entity contents, crafter configuration/sign text and scheduled ticks are explicitly outside current restoration; no functioning-farm guarantee. See SCHEMATIC-CONSTRUCTION.md.
+
 ## Standing user preference: Prism delivery
 
 The user explicitly requested on October 11, 2026 that every Analyzer update also update their Prism Launcher instance. Treat publishing, packaging and installing as part of completing future project updates. This is already authorized; do not ask for the same permission again.

@@ -24,6 +24,7 @@ final class EspSmoke {
                 mc.options.setPerspective(Perspective.FIRST_PERSON); mc.options.hudHidden = false;
                 viewport(mc, 1920, 1080, 2);
                 core.setEnabled("entity-esp", true); core.setValue("entity-esp", "items", true);
+                core.setValue("entity-esp", "labels", true);
                 core.setValue("entity-esp", "style", "Corners"); core.setValue("entity-esp", "health", false);
                 core.setValue("entity-esp", "max-labels", 128); core.setValue("entity-esp", "declutter", false);
                 command(mc, "gamemode creative AnalyzerDev"); command(mc, "kill @e[type=!minecraft:player]");
@@ -109,6 +110,7 @@ final class EspSmoke {
                 require(AnalyzerRenderer.labelCounts().entities() == 0 && AnalyzerRenderer.screenCounts().entities() == 0,
                         "Disabling ESP clears label and projection caches");
                 core.setEnabled("storage-esp", true); core.setValue("storage-esp", "style", "Screen");
+                core.setValue("storage-esp", "labels", true);
                 core.setValue("storage-esp", "label-range", 48); core.setValue("storage-esp", "max-labels", 2);
                 command(mc, "setblock 7 161 14 minecraft:chest"); command(mc, "setblock 15 161 14 minecraft:barrel");
                 command(mc, "setblock 2 161 -5 minecraft:chest"); command(mc, "setblock 20 161 -5 minecraft:barrel");

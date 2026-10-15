@@ -9,53 +9,12 @@ public final class BuiltinModules {
 
     public static List<ModuleDefinition> definitions() {
         List<ModuleDefinition> modules = new ArrayList<>(List.of(
-                new ModuleDefinition("entity-esp", "Entity ESP", "Highlight nearby players, creatures and items.",
-                        Category.VISUAL, false, List.of(
-                        Setting.bool("players", "Players", true),
-                        Setting.bool("hostiles", "Hostile mobs", true),
-                        Setting.bool("passives", "Passive mobs", false),
-                        Setting.bool("items", "Dropped items", false),
-                        Setting.bool("labels", "Name and distance", true),
-                        Setting.bool("health", "Health", true),
-                        Setting.bool("radar", "Nearby target radar", true),
-                        Setting.number("range", "Range (blocks)", 128, 16, 256, 8),
-                        Setting.number("label-range", "Label range (blocks)", 48, 8, 256, 4),
-                        Setting.number("label-scale", "Label scale", 1, 0.5, 2, 0.05),
-                        Setting.bool("distance-scale", "Shrink distant labels", true),
-                        Setting.number("label-near", "Full-size distance (blocks)", 8, 2, 64, 2),
-                        Setting.number("label-far-scale", "Distant label size", 0.45, 0.2, 1, 0.05),
-                        Setting.bool("fade-labels", "Fade distant labels", true),
-                        Setting.number("max-labels", "Maximum labels", 16, 0, 128, 1),
-                        Setting.bool("declutter", "Hide overlapping labels", true),
-                        Setting.number("min-marker-pixels", "Minimum marker size (pixels)", 3, 0, 12, 1),
-                        Setting.bool("through-walls", "Through walls", true),
-                        Setting.number("line-width", "Line width", 1.5, 0.5, 4, 0.25),
-                        Setting.choice("style", "Box style", "Corners", "Boxes", "Corners", "Screen"))),
-                new ModuleDefinition("storage-esp", "Storage ESP", "Highlight nearby containers.",
-                        Category.WORLD, false, List.of(
-                        Setting.bool("labels", "Container labels", true),
-                        Setting.number("range", "Range (blocks)", 64, 16, 128, 8),
-                        Setting.number("label-range", "Label range (blocks)", 40, 8, 128, 4),
-                        Setting.number("label-scale", "Label scale", 1, 0.5, 2, 0.05),
-                        Setting.bool("distance-scale", "Shrink distant labels", true),
-                        Setting.number("label-near", "Full-size distance (blocks)", 8, 2, 64, 2),
-                        Setting.number("label-far-scale", "Distant label size", 0.45, 0.2, 1, 0.05),
-                        Setting.bool("fade-labels", "Fade distant labels", true),
-                        Setting.number("max-labels", "Maximum labels", 12, 0, 128, 1),
-                        Setting.bool("declutter", "Hide overlapping labels", true),
-                        Setting.number("min-marker-pixels", "Minimum marker size (pixels)", 3, 0, 12, 1),
-                        Setting.bool("through-walls", "Through walls", true),
-                        Setting.number("line-width", "Line width", 1.5, 0.5, 4, 0.25),
-                        Setting.choice("style", "Box style", "Boxes", "Boxes", "Corners", "Screen"))),
-                new ModuleDefinition("tracers", "Tracers", "Draw lines from your view to nearby entities.",
-                        Category.VISUAL, false, List.of(
-                        Setting.bool("players", "Players", true),
-                        Setting.bool("hostiles", "Hostile mobs", false),
-                        Setting.bool("passives", "Passive mobs", false),
-                        Setting.bool("items", "Dropped items", false),
-                        Setting.number("range", "Range (blocks)", 128, 16, 256, 8),
-                        Setting.bool("through-walls", "Through walls", true),
-                        Setting.number("line-width", "Line width", 1, 0.5, 4, 0.25))),
+                new ModuleDefinition("entity-esp", "Entity ESP", "Clean debug boxes for players, hostile mobs and non-hostile mobs.",
+                        Category.VISUAL, false, entityEspSettings()),
+                new ModuleDefinition("storage-esp", "Storage ESP", "Debug boxes around loaded containers, with colors for each storage group.",
+                        Category.WORLD, false, storageEspSettings()),
+                new ModuleDefinition("tracers", "Tracers", "Single clean lines to selected entities, using the same colors as Entity ESP.",
+                        Category.VISUAL, false, tracerSettings()),
                 new ModuleDefinition("fullbright", "Fullbright", "Lift world lighting for clearer exploration.",
                         Category.WORLD, false, List.of(
                         Setting.number("gamma", "Brightness", 16, 1, 16, 0.5))),
@@ -92,6 +51,66 @@ public final class BuiltinModules {
         modules.addAll(UtilityModules.definitions());
         modules.addAll(AutomationModules.definitions());
         return List.copyOf(modules);
+    }
+    private static List<Setting<?>> entityEspSettings() {
+        List<Setting<?>> settings = new ArrayList<>(List.of(
+                Setting.bool("players", "Players", true),
+                Setting.bool("hostiles", "Hostile mobs", true),
+                Setting.bool("passives", "Non-hostile mobs", false),
+                Setting.bool("items", "Dropped items", false),
+                Setting.bool("labels", "Name and distance", false),
+                Setting.bool("health", "Health", false),
+                Setting.bool("radar", "Nearby target radar", false)));
+        settings.addAll(espGeometrySettings(128, 256));
+        settings.addAll(EspSettings.entityColors());
+        settings.addAll(espLabelSettings(48, 256, 16));
+        return List.copyOf(settings);
+    }
+    private static List<Setting<?>> storageEspSettings() {
+        List<Setting<?>> settings = new ArrayList<>(List.of(
+                Setting.bool("labels", "Container labels", false),
+                Setting.bool("tracers", "Storage tracers", false),
+                Setting.number("tracer-width", "Tracer width", 1, .5, 4, .25)));
+        settings.addAll(espGeometrySettings(64, 128));
+        for (EspSettings.StorageGroup group : EspSettings.StorageGroup.values()) {
+            settings.add(Setting.bool(group.id(), group.label(), true));
+            settings.addAll(EspSettings.colors(group.id(), group.label(), group.defaultColor()));
+        }
+        settings.addAll(espLabelSettings(40, 128, 12));
+        return List.copyOf(settings);
+    }
+    private static List<Setting<?>> tracerSettings() {
+        List<Setting<?>> settings = new ArrayList<>(List.of(
+                Setting.bool("players", "Players", true),
+                Setting.bool("hostiles", "Hostile mobs", false),
+                Setting.bool("passives", "Non-hostile mobs", false),
+                Setting.bool("items", "Dropped items", false),
+                Setting.number("range", "Range (blocks)", 128, 16, 256, 8),
+                Setting.bool("through-walls", "Through walls", true),
+                Setting.number("line-width", "Line width", 1, .5, 4, .25),
+                Setting.number("opacity", "Line opacity (%)", 100, 10, 100, 5),
+                Setting.choice("anchor", "Line anchor", "Center", "Center", "Feet", "Head"),
+                Setting.bool("match-esp-colors", "Use Entity ESP colors", true)));
+        settings.addAll(EspSettings.entityColors());
+        return List.copyOf(settings);
+    }
+    private static List<Setting<?>> espGeometrySettings(int range, int maximum) {
+        return List.of(Setting.number("range", "Range (blocks)", range, 16, maximum, 8),
+                Setting.bool("through-walls", "Through walls", true),
+                Setting.number("line-width", "Line width", 1, .5, 4, .25),
+                Setting.number("opacity", "Line opacity (%)", 100, 10, 100, 5),
+                Setting.choice("style", "Box style", "Boxes", "Boxes", "Corners", "Screen"),
+                Setting.number("min-marker-pixels", "Minimum marker size (pixels)", 0, 0, 12, 1));
+    }
+    private static List<Setting<?>> espLabelSettings(int range, int maximum, int budget) {
+        return List.of(Setting.number("label-range", "Label range (blocks)", range, 8, maximum, 4),
+                Setting.number("label-scale", "Label scale", 1, .5, 2, .05),
+                Setting.bool("distance-scale", "Shrink distant labels", true),
+                Setting.number("label-near", "Full-size distance (blocks)", 8, 2, 64, 2),
+                Setting.number("label-far-scale", "Distant label size", .45, .2, 1, .05),
+                Setting.bool("fade-labels", "Fade distant labels", true),
+                Setting.number("max-labels", "Maximum labels", budget, 0, 128, 1),
+                Setting.bool("declutter", "Hide overlapping labels", true));
     }
     private static List<Setting<?>> menuSettings() {
         List<Setting<?>> settings = new ArrayList<>(List.of(

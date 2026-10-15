@@ -1,19 +1,19 @@
 # Analyzer module catalogue
 
-125 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
+128 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
 
 ## Render
 
 | Module | Behavior | Default |
 | --- | --- | --- |
-| Entity ESP | Highlight nearby players, creatures and items. | Off |
-| Tracers | Draw lines from your view to nearby entities. | Off |
+| Entity ESP | Clean debug boxes for players, hostile mobs and non-hostile mobs. | Off |
+| Tracers | Single clean lines to selected entities, using the same colors as Entity ESP. | Off |
 | Atmosphere | Cinematic bloom and color grading. Sky Aurora controls the sky. | Off |
 | Block Highlight | A pulsing outline of the block under your crosshair. | Off |
-| Target ESP | Orbiting target rings on your crosshair target or recently attacked entity. | Off |
+| Target ESP | A clean debug box on your crosshair target or recently attacked entity, with optional orbit rings. | Off |
 | Hole ESP | Outline loaded single-block holes with resistant floors and walls. | Off |
 | Trajectories | Predict a held bow, trident, snowball, egg or pearl path against loaded blocks. | Off |
-| Item ESP | Independent glowing rings and beams on loaded dropped items. | Off |
+| Item ESP | Clean debug boxes around loaded dropped items, with optional labels and ring markers. | Off |
 | Nametags | Independent readable names, health and distances for loaded players and mobs. | Off |
 | X-ray | Real ore textures in loaded terrain: 15% terrain, fine terrain outlines, or ores only. Disabling restores ordinary chunks. | Off |
 
@@ -21,7 +21,7 @@
 
 | Module | Behavior | Default |
 | --- | --- | --- |
-| Storage ESP | Highlight nearby containers. | Off |
+| Storage ESP | Debug boxes around loaded containers, with colors for each storage group. | Off |
 | Fullbright | Lift world lighting for clearer exploration. | Off |
 | Sky Aurora | Animated sky curtains, stars and cosmic color above your world. | On |
 | Scaffold | Place hotbar blocks underneath your feet using ordinary block interactions. | Off |
@@ -72,6 +72,9 @@
 | Shield Breaker | Hold a usable hotbar axe for a blocking crosshair target, with reaction and release delays. | Off |
 | Bow Aimbot | Aim the actual camera for selected drawn bows, charged crossbows or tridents using bounded lead/drop estimates. | Off |
 | Criticals | Use real jumps or your own falling motion to time ordinary charged attacks; no packet critical spoofing. | Off |
+| Auto Block | Raise an equipped offhand shield toward a visible threat between attacks; release it before ordinary melee attacks. | Off |
+| Double Hand | Temporarily hold a hotbar totem after a real server-reported pop or at low health near a visible threat; yields to Auto Totem once the offhand is protected. | Off |
+| Hover Totem | In your own inventory, hold the selected key over a totem to move it into the offhand through a normal guarded slot swap. | Off |
 
 ## Movement
 

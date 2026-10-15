@@ -24,7 +24,7 @@ import java.util.*;
 public final class AutomationEngine implements AutomationScreen.Controller {
     public static final AutomationEngine INSTANCE = new AutomationEngine();
     private static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final List<String> CONFLICTS = List.of("auto-walk","fly","speed","scaffold","tower","nuker","vein-miner","auto-tool","auto-armor","auto-weapon","auto-eat","auto-gapple","chest-stealer","refill","kill-aura","crystal-aura","anchor-aura","surround","auto-trap","auto-web","hole-filler","auto-fish","auto-clicker","trigger-bot","aim-assist");
+    private static final List<String> CONFLICTS = List.of("auto-walk","fly","speed","scaffold","tower","nuker","vein-miner","auto-tool","auto-armor","auto-weapon","auto-eat","auto-gapple","chest-stealer","refill","kill-aura","crystal-aura","anchor-aura","surround","auto-trap","auto-web","hole-filler","auto-fish","auto-clicker","trigger-bot","aim-assist","auto-block","double-hand","hover-totem","bow-aimbot","criticals");
     private final MinecraftClient mc = MinecraftClient.getInstance();
     private final AutomationNavigator bridge = new AutomationNavigator();
     private final InventoryAutomation inventory = new InventoryAutomation(bridge);
@@ -107,18 +107,27 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         if(mc.world==null || mc.player==null)throw new IllegalArgumentException("Join a world to review a build site.");
         try {
             SchematicData data=SchematicImporter.load(file);
-            ImportedSchematic schematic=ImportedSchematic.from(data);
             BlockPos origin=new BlockPos(options.travelX(),options.travelY(),options.travelZ());
+            ImportedSchematic snapshot=ImportedSchematic.preview(data);
+            dev.analyzer.render.SchematicPreviewRenderer.show(snapshot,null,origin,"Source loaded; site and construction are not approved yet",false);
+            ImportedSchematic schematic=ImportedSchematic.from(data);
+            dev.analyzer.render.SchematicPreviewRenderer.show(snapshot,schematic,origin,"Construction imported; reviewing site",false);
             if(autoSite) {
                 var site=AutoSiteSelector.choose(mc.world,mc.player.getBlockPos(),schematic,(int)core.getNumber("expedition","site-radius"),(int)core.getNumber("expedition","avoid-range"));
                 origin=site.origin().orElseThrow(()->new IllegalArgumentException(site.message()));
             }
+            dev.analyzer.render.SchematicPreviewRenderer.show(snapshot,schematic,origin,"Candidate anchor; validating the actual footprint and materials",false);
             String problem=schematic.siteProblem(mc.world,origin);
             if(!problem.isEmpty())throw new IllegalArgumentException(problem);
             String resource=Base64.getUrlEncoder().withoutPadding().encodeToString(JSON.toJson(new SchematicRequest(file.toAbsolutePath().normalize().toString(),data.sha256())).getBytes(StandardCharsets.UTF_8));
             var requirements=new ArrayList<String>();
             requirements.add("Reviewed site: "+origin.toShortString()+". The source file hash and actual footprint are checked again before building.");
-            for(var entry:schematic.requiredItems().entrySet())requirements.add(entry.getValue()+" × "+entry.getKey().getName().getString()+"; owned materials are credited, supported sources can be restocked in batches.");
+            requirements.addAll(SchematicStatePolicy.constructionNotes(data));
+            for(var entry:schematic.requiredItems().entrySet()) {
+                requirements.add(entry.getValue()+" × "+entry.getKey().getName().getString()+"; owned materials are credited, supported sources can be restocked in batches.");
+                var manual=BuildingMaterialCatalog.manualInputs(Registries.ITEM.getId(entry.getKey()).toString());
+                if(!manual.isEmpty())requirements.add("Supply any missing "+manual+" for "+entry.getKey().getName().getString()+"; automatic acquisition of those inputs is not implemented.");
+            }
             requirements.addAll(data.warnings());
             var stages=new ArrayList<TaskPlanner.Step>();
             int materialIndex=0;
@@ -132,8 +141,15 @@ public final class AutomationEngine implements AutomationScreen.Controller {
             stages.add(new TaskPlanner.Step("schematic",TaskPlanner.Action.BUILD_SCHEMATIC,"Build at "+origin.toShortString(),resource,1,origin.getX(),origin.getY(),origin.getZ()));
             if(stages.size()>64)throw new IllegalArgumentException("This palette needs more than 63 separate materials. Split it into smaller build regions.");
             requirements.add("All remaining materials are gathered before construction. They must fit in the player inventory; automatic supply-depot storage is not implemented.");
+            dev.analyzer.render.SchematicPreviewRenderer.show(snapshot,schematic,origin,"Source ghost: missing is pink, conflicts red, matching construction green",true);
             return new TaskPlanner.Plan("Build "+data.name(),data.width()+" × "+data.height()+" × "+data.length()+" · "+schematic.requiredBlocks()+" blocks · "+data.format(),stages,requirements);
-        } catch(java.io.IOException error) { throw new IllegalArgumentException("Cannot import schematic: "+error.getMessage()); }
+        } catch(java.io.IOException error) {
+            dev.analyzer.render.SchematicPreviewRenderer.clear();
+            throw new IllegalArgumentException("Cannot import schematic: "+error.getMessage());
+        } catch(RuntimeException error) {
+            dev.analyzer.render.SchematicPreviewRenderer.describe(Objects.requireNonNullElse(error.getMessage(),"Review failed"),false);
+            throw error;
+        }
     }
     @Override public AutomationScreen.View snapshot() {
         List<AutomationScreen.StepView> stages=new ArrayList<>();
@@ -314,6 +330,10 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         if(count>bestCount){bestCount=count;progress();}
         if(count>=step.count()){advance("Inventory verified: " + count + "/" + step.count());return;}
         ResourceCatalog.Resource resource=ResourceCatalog.get(step.resource());
+        if(ResourceCatalog.silkTouch(step.resource()) && !NativeMiner.hasSilkTouchTool()) {
+            if(dispatched)bridge.cancel();dispatched=false;
+            block("Need a durable Silk Touch tool to collect "+step.resource().replace('_',' ')+". The request and quantity were understood; ordinary breaking cannot produce this item. Supply the tool and Resume.");return;
+        }
         boolean ordinaryDrops=NativeMiner.requiresOrdinaryDrops(resource.blockIds());
         if(!ToolRecovery.hasTier(resource.pickaxeTier(),ordinaryDrops)){
             var recovery=tools.tick(resource.pickaxeTier(),ordinaryDrops);dispatched=false;detail=recovery.detail();
@@ -360,10 +380,18 @@ public final class AutomationEngine implements AutomationScreen.Controller {
     private static String session(String key){int at=key.lastIndexOf('|');return at<0?key:key.substring(0,at);}
     private static String dimension(String key){int at=key.lastIndexOf('|');return at<0?"":key.substring(at+1);}
     private record RawSupply(Item item,int target,String[] blocks) { }
+    private int materialCount(Item item) {
+        if(item==Items.BUCKET && plan!=null && plan.steps().stream().anyMatch(stage->stage.action()==TaskPlanner.Action.BUILD_SCHEMATIC))
+            return InventoryAutomation.count(stack->stack.isOf(Items.BUCKET)||stack.isOf(Items.WATER_BUCKET)||stack.isOf(Items.LAVA_BUCKET));
+        return InventoryAutomation.count(item);
+    }
     private RawSupply missingRaw(Item item,int target,int depth) {
-        if(depth>12 || InventoryAutomation.count(item)>=target)return null;
+        if(depth>12)throw new IllegalArgumentException("The material dependency chain exceeds 12 stages for "+item.getName().getString()+".");
+        if(materialCount(item)>=target)return null;
         var spec=BuildingMaterialCatalog.find(Registries.ITEM.getId(item).toString()).orElse(null);
         if(spec==null)throw new IllegalArgumentException("Supply "+target+" "+item.getName().getString()+". Its gathering or crafting recipe is not supported yet.");
+        if(spec.job()==BuildingMaterialCatalog.Job.SUPPLIED)
+            throw new IllegalArgumentException("Supply "+target+" "+item.getName().getString()+" in the inventory, then Resume. Its acquisition controller is not implemented; the material request itself was understood.");
         if(spec.job()==BuildingMaterialCatalog.Job.DIRECT)return new RawSupply(item,target,spec.blockIds());
         if(spec.job()==BuildingMaterialCatalog.Job.SMELT && !inventory.workstationAvailable(net.minecraft.block.Blocks.FURNACE,Items.FURNACE)) {
             RawSupply station=missingRaw(Items.FURNACE,1,depth+1);if(station!=null)return station;
@@ -372,7 +400,7 @@ public final class AutomationEngine implements AutomationScreen.Controller {
                 && !inventory.workstationAvailable(net.minecraft.block.Blocks.CRAFTING_TABLE,Items.CRAFTING_TABLE)) {
             RawSupply station=missingRaw(Items.CRAFTING_TABLE,1,depth+1);if(station!=null)return station;
         }
-        int batches=(target-InventoryAutomation.count(item)+spec.outputPerRecipe()-1)/spec.outputPerRecipe();
+        int batches=(target-materialCount(item)+spec.outputPerRecipe()-1)/spec.outputPerRecipe();
         for(var ingredient:spec.ingredients()) {
             Item input=Registries.ITEM.get(net.minecraft.util.Identifier.of("minecraft",ingredient.itemId()));
             int reserve=plan==null?0:plan.steps().stream().filter(stage->stage.action()==TaskPlanner.Action.SUPPLY_MATERIAL&&stage.resource().equals(Registries.ITEM.getId(input).toString())).mapToInt(TaskPlanner.Step::count).max().orElse(0);
@@ -387,7 +415,7 @@ public final class AutomationEngine implements AutomationScreen.Controller {
         observeActionProgress();
         Item wanted=Registries.ITEM.get(net.minecraft.util.Identifier.of(step.resource()));
         if(wanted==Items.AIR){block("Unsupported schematic material: "+step.resource());return;}
-        int count=InventoryAutomation.count(wanted);
+        int count=materialCount(wanted);
         if(count>bestCount){bestCount=count;progress();}
         if(materialCrafting){
             var result=inventory.tickTransfer();if(result==null)result=inventory.tickMaterial(wanted,step.count());
@@ -440,13 +468,13 @@ public final class AutomationEngine implements AutomationScreen.Controller {
                 imported=ImportedSchematic.from(data);importedOrigin=new BlockPos(step.x(),step.y(),step.z());
             }
             var observed=imported.progress(mc.world,importedOrigin);
-            if(observed.complete()){advance("Every selected schematic block state verified in the world");return;}
+            if(observed.complete()){advance("Every construction block's persistent state verified; live power, growth and flowing levels remain server-controlled");return;}
             if(observed.fraction()>lastBridgeProgress){lastBridgeProgress=observed.fraction();progress();}
             if(!dispatched) {
                 ReviewedBuild source=reviewedBuild(plan);
                 if(source==null||!source.schematic().data().sha256().equals(imported.data().sha256())){block("The reviewed schematic source changed before construction. Stop and review it again.");return;}
                 String problem=imported.siteProblem(mc.world,importedOrigin);if(!problem.isEmpty()){block(problem);return;}
-                for(var entry:imported.remainingItems(mc.world,importedOrigin).entrySet())if(InventoryAutomation.count(entry.getKey())<entry.getValue()){
+                for(var entry:imported.remainingItems(mc.world,importedOrigin).entrySet())if(materialCount(entry.getKey())<entry.getValue()){
                     int cursor=-1;String itemId=Registries.ITEM.getId(entry.getKey()).toString();
                     for(int index=0;index<current;index++)if(plan.steps().get(index).action()==TaskPlanner.Action.SUPPLY_MATERIAL&&plan.steps().get(index).resource().equals(itemId)){cursor=index;break;}
                     if(cursor<0){block("Need "+entry.getValue()+" "+entry.getKey().getName().getString()+" before construction. Review the changed supplies.");return;}

@@ -15,11 +15,11 @@ public final class LocalTaskIntent {
     public record Gather(String resource, int count, boolean explicitCount) { }
     public record Parsed(List<Gather> gathers, String actionText) { public Parsed { gathers = List.copyOf(gathers); } }
     public record Schematic(String name) { }
-    private static final Pattern VERB = Pattern.compile("\\b(?:get|gather|collect|mine|fetch|bring|obtain|dig|harvest|find|pick\\s+up|stock\\s+up|need|want|have)\\b");
-    private static final Pattern NOUN = Pattern.compile("(?<![a-z_])(?:" + ResourceCatalog.aliases().keySet().stream()
+    private static final Pattern VERB = Pattern.compile("\\b(?:get|gather|collect|mine|fetch|bring|obtain|dig|harvest|find|grab|acquire|retrieve|pick\\s+up|stock\\s+up|need|want|have)\\b");
+    private static Pattern nouns() { return Pattern.compile("(?<![a-z_])(?:" + ResourceCatalog.aliases().keySet().stream()
             .sorted(Comparator.comparingInt(String::length).reversed()).map(name -> Pattern.quote(name).replace(" ", "\\E[ _-]+\\Q"))
-            .collect(Collectors.joining("|")) + ")(?![a-z_])", Pattern.CASE_INSENSITIVE);
-    private static final Pattern FILLER = Pattern.compile("\\b(?:please|me|my|some|a|an|the|just|only|exactly|up|to|total|of|blocks?|items?|pieces?|can|could|would|you|kindly|for|inventory|in|thanks|thank|i|like|hey|also|as|well|x)\\b");
+            .collect(Collectors.joining("|")) + ")(?![a-z_])", Pattern.CASE_INSENSITIVE); }
+    private static final Pattern FILLER = Pattern.compile("\\b(?:please|me|my|some|a|an|the|just|only|exactly|up|to|total|of|blocks?|items?|pieces?|can|could|would|will|you|mind|kindly|for|inventory|in|thanks|thank|i|like|hey|also|as|well|x)\\b");
     private static final Map<String, Integer> SMALL = Map.ofEntries(Map.entry("zero", 0), Map.entry("one", 1), Map.entry("two", 2), Map.entry("three", 3), Map.entry("four", 4), Map.entry("five", 5), Map.entry("six", 6), Map.entry("seven", 7), Map.entry("eight", 8), Map.entry("nine", 9), Map.entry("ten", 10), Map.entry("eleven", 11), Map.entry("twelve", 12), Map.entry("thirteen", 13), Map.entry("fourteen", 14), Map.entry("fifteen", 15), Map.entry("sixteen", 16), Map.entry("seventeen", 17), Map.entry("eighteen", 18), Map.entry("nineteen", 19), Map.entry("twenty", 20), Map.entry("thirty", 30), Map.entry("forty", 40), Map.entry("fifty", 50), Map.entry("sixty", 60), Map.entry("seventy", 70), Map.entry("eighty", 80), Map.entry("ninety", 90));
     private LocalTaskIntent() { }
 
@@ -29,6 +29,7 @@ public final class LocalTaskIntent {
         text = Pattern.compile("\\b(?:to|at|coordinates?)\\s+-?\\d+\\s*,\\s*-?\\d+(?:\\s*,\\s*-?\\d+)?")
                 .matcher(text).replaceAll(match -> match.group().replace(',', ' '));
         var requests = new ArrayList<Gather>(); var resources = new HashSet<String>();
+        Pattern noun = nouns();
         var actions = new ArrayList<String>();
         boolean inherited = false;
         for (String raw : text.split("(?<!\\d),|,(?!\\d)|;|\\band(?:\\s+then)?\\b|\\bthen\\b|\\bplus\\b")) {
@@ -36,11 +37,11 @@ public final class LocalTaskIntent {
             if (FILLER.matcher(clause).replaceAll(" ").replaceAll("[.!?]", " ").isBlank()) continue;
             boolean verb = VERB.matcher(clause).find();
             boolean progression = Pattern.compile("\\b(?:armor|armour|kit|geared|kitted|enchant(?:ed|ing)?|shelter|base|house|expedition)\\b").matcher(clause).find();
-            var match = NOUN.matcher(clause);
+            var match = noun.matcher(clause);
             if (!match.find()) {
                 if (progression) { actions.add(clause); inherited = false; continue; }
                 if (verb && !clause.matches(".*\\b(?:spawn|nether|overworld|end|portal)\\b.*"))
-                    throw new IllegalArgumentException("I could not match the requested resource. Try ‘get me 600 sand’, ‘collect 37 diamonds’, or ‘gather 64 dirt and 32 gravel’.");
+                    throw new IllegalArgumentException("I understood a gathering request, but could not identify its item. Use the displayed vanilla item name or minecraft:item_id. You do not need a preset sentence.");
                 if (!verb && !otherAction(clause)) throw new IllegalArgumentException("I cannot turn ‘" + clause + "’ into a supported local task yet. Try a material and quantity, travel coordinates, an armor goal, or select a schematic.");
                 actions.add(clause); inherited = false; continue;
             }
@@ -62,8 +63,8 @@ public final class LocalTaskIntent {
             if (!beforeCount.isEmpty() && !afterCount.isEmpty())
                 throw new IllegalArgumentException("Give one total quantity for " + name + ", for example ‘get 600 " + name + "’.");
             String quantity = beforeCount.isEmpty() ? afterCount : beforeCount;
-            int count = quantity.isEmpty() ? 32 : quantity(quantity);
             String key = ResourceCatalog.canonical(name);
+            int count = quantity.isEmpty() ? 32 : quantity(quantity, ResourceCatalog.stackSize(key));
             if (!resources.add(key)) throw new IllegalArgumentException("Give one total inventory target for " + key.replace('_', ' ') + "; it appears more than once in this request.");
             requests.add(new Gather(key, count, !quantity.isEmpty())); inherited = true;
             if (requests.size() > 16) throw new IllegalArgumentException("Review at most 16 different material targets in one task.");
@@ -82,9 +83,26 @@ public final class LocalTaskIntent {
     }
     private static boolean quantityText(String text) { return text.matches("[-+]?\\d[\\d,.]*") || SMALL.containsKey(text.split(" ")[0]); }
     static int quantity(String input) {
-        String value = input.strip().toLowerCase(Locale.ROOT).replace('-', ' ');
-        // A negative sign is not a separator; distinguish it before parsing number words.
+        return quantity(input, 64);
+    }
+    private static int quantity(String input, int stackSize) {
+        // Reject a sign before treating hyphens as number-word separators or recursing on stacks.
         if (input.strip().startsWith("-")) throw countError();
+        String value = input.strip().toLowerCase(Locale.ROOT).replace('-', ' ');
+        if (value.equals("stack")) return stackSize;
+        var stacks = Pattern.compile("^(?:(half|quarter)(?:\\s+(?:a|of a))?|(.+?))\\s+stacks?$").matcher(value);
+        if (stacks.matches()) {
+            if (stacks.group(1) != null) {
+                int divisor = stacks.group(1).equals("half") ? 2 : 4;
+                if (stackSize % divisor != 0) throw new IllegalArgumentException("This item's stack size does not divide into a whole number of items. Give an item count.");
+                return bounded(stackSize / divisor);
+            }
+            String amount = stacks.group(2).strip();
+            int stackCount = amount.equals("a") || amount.equals("one") ? 1 : quantity(amount);
+            long result = (long) stackSize * stackCount;
+            if (result > 4096) throw countError();
+            return bounded((int) result);
+        }
         if (value.matches("[0-9]+(?:,[0-9]{3})*")) {
             try { return bounded(Integer.parseInt(value.replace(",", ""))); }
             catch (NumberFormatException failure) { throw countError(); }
@@ -122,6 +140,9 @@ public final class LocalTaskIntent {
     private static String normalized(String input) {
         if (input == null) return "";
         return input.toLowerCase(Locale.ROOT).replace('’', '\'').replace('\n', ' ').replace('\r', ' ').strip()
+                .replaceAll("\\bgetting\\b", "get").replaceAll("\\bgrabbing\\b", "grab")
+                .replaceAll("\\bcollecting\\b", "collect").replaceAll("\\bgathering\\b", "gather")
+                .replaceAll("\\bfetching\\b", "fetch").replaceAll("\\bmining\\b", "mine")
                 .replaceFirst("^(?:i'd|i would)\\s+like\\s+(?:you\\s+)?to\\s+", "")
                 .replaceFirst("^(?:(?:could|can|would)\\s+you\\s+)?(?:please\\s+)?go\\s+and\\s+(?=(?:get|gather|collect|mine|fetch|bring|obtain)\\b)", "");
     }

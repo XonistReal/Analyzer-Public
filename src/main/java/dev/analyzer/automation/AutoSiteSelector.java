@@ -115,12 +115,17 @@ public final class AutoSiteSelector {
                 if (!world.isInBuildLimit(pos) || !world.getWorldBorder().contains(pos)) { bounds = false; continue; }
                 if (!world.isChunkLoaded(pos)) { loaded = false; continue; }
                 BlockState state = world.getBlockState(pos);
-                if (hazard(state)) hazards++;
-                if (!state.getFluidState().isEmpty()) fluids++;
-                if (!schematic.inSchematic(x, y, z, state)) continue;
+                if (!schematic.inSchematic(x, y, z, state)) {
+                    if (hazard(state)) hazards++;
+                    if (!state.getFluidState().isEmpty()) fluids++;
+                    continue;
+                }
                 BlockState desired = schematic.desiredState(x, y, z, state, List.of());
+                boolean expectedFluid = NativeBuilder.fluidAllowed(state, desired);
+                if (!state.getFluidState().isEmpty() && !expectedFluid) fluids++;
                 // A resumed identical ordinary block is harmless; saved block entities are always preserved.
-                boolean preserved = state.equals(desired) || NativeBuilder.placementCompatible(state, desired);
+                boolean preserved = NativeBuilder.matches(state, desired) || NativeBuilder.placementCompatible(state, desired);
+                if (hazard(state) && !preserved && !expectedFluid) hazards++;
                 if (!preserved && (state.hasBlockEntity() || world.getBlockEntity(pos) != null || !state.isAir() && !state.isReplaceable())) occupied++;
             }
         }

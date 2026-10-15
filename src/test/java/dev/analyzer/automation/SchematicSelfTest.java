@@ -12,12 +12,62 @@ public final class SchematicSelfTest {
     public static void main(String[] args) throws Exception {
         directory = Files.createTempDirectory("analyzer-schematic-fixtures-");
         try {
-            litematic(); sponge(); legacy(); malformed(); sitePolicy();
+            litematic(); sponge(); legacy(); malformed(); sitePolicy(); constructionPolicy(); fluidPolicy();
             System.out.println("SchematicSelfTest: " + assertions + " assertions passed");
         } finally {
             try (var files = Files.list(directory)) { for (Path file : files.toList()) Files.delete(file); }
             Files.delete(directory);
         }
+    }
+    private static void constructionPolicy() {
+        var live = new SchematicData.State("minecraft:repeater", Map.of("facing", "east", "delay", "4", "powered", "true", "locked", "true"));
+        var construction = SchematicStatePolicy.construction(live);
+        check(construction.properties().equals(Map.of("facing", "east", "delay", "4")), "Power/locking snapshots do not replace facing or a user-selectable repeater delay");
+        check(live.properties().get("powered").equals("true"), "Construction conversion never changes the original ghost/source palette");
+        check(SchematicStatePolicy.persistentEqual(new SchematicData.State("minecraft:repeater", Map.of("facing","east","delay","4","powered","false","locked","false")), live), "Server-controlled redstone state is not a false construction mismatch");
+        check(!SchematicStatePolicy.persistentEqual(new SchematicData.State("minecraft:repeater", Map.of("facing","west","delay","4")), live), "Wrong facing never becomes a completed construction block");
+        check(!SchematicStatePolicy.persistentEqual(new SchematicData.State("minecraft:repeater", Map.of("facing","east","delay","1")), live), "Wrong repeater configuration never becomes completion");
+        var wet = new SchematicData.State("minecraft:oak_trapdoor", Map.of("facing","north","half","top","waterlogged","true","open","true"));
+        for (String key : List.of("facing", "half", "waterlogged", "open")) {
+            var wrong = new HashMap<>(wet.properties()); wrong.put(key, key.equals("facing") ? "south" : key.equals("half") ? "bottom" : "false");
+            check(!SchematicStatePolicy.persistentEqual(new SchematicData.State(wet.name(),wrong),wet), "Persistent trapdoor " + key + " must match exactly");
+        }
+        check(SchematicStatePolicy.construction(new SchematicData.State("minecraft:piston_head",Map.of("facing","up"))).air(), "Generated piston heads are not invented obtainable block items");
+        check(SchematicStatePolicy.construction(new SchematicData.State("minecraft:kelp",Map.of("age","16"))).properties().isEmpty(), "Captured kelp age is a growth state rather than a placement instruction");
+        check(SchematicStatePolicy.persistentEqual(new SchematicData.State("minecraft:water",Map.of("level","3")),new SchematicData.State("minecraft:water",Map.of("level","1"))), "Flowing levels can settle through real simulation");
+        check(!SchematicStatePolicy.persistentEqual(new SchematicData.State("minecraft:water",Map.of("level","3")),new SchematicData.State("minecraft:water",Map.of("level","0"))), "A flowing cell is never credited as a requested source");
+        check(!SchematicStatePolicy.persistentEqual(new SchematicData.State("minecraft:lava",Map.of("level","0")),new SchematicData.State("minecraft:water",Map.of("level","0"))), "Water and lava are never interchangeable");
+        check(SchematicStatePolicy.adjustable("minecraft:comparator","mode") && SchematicStatePolicy.adjustable("minecraft:note_block","note"), "Normal comparator and note interactions are explicit supported configuration");
+        check(!SchematicStatePolicy.adjustable("minecraft:stone_stairs","facing") && !SchematicStatePolicy.simulation("minecraft:stone_stairs","shape"), "Orientation and final stair geometry remain strict");
+    }
+    private static void fluidPolicy() {
+        var sources = new HashSet<SchematicFluidPolicy.Cell>();
+        for (int x=0;x<5;x++) sources.add(new SchematicFluidPolicy.Cell(x,0,0));
+        var unknown = new HashSet<SchematicFluidPolicy.Cell>();
+        var openings = new HashSet<SchematicFluidPolicy.Cell>();
+        var field = new SchematicFluidPolicy.Field() {
+            public boolean known(SchematicFluidPolicy.Cell c) { return !unknown.contains(c); }
+            public boolean intended(SchematicFluidPolicy.Cell c) { return sources.contains(c); }
+            public boolean closed(SchematicFluidPolicy.Cell c, SchematicFluidPolicy.Face f) { return !sources.contains(c) && !openings.contains(c); }
+        };
+        check(SchematicFluidPolicy.contained(new SchematicFluidPolicy.Cell(0,0,0),field), "Five connected intended fluid cells with actual floor/walls are contained");
+        openings.add(new SchematicFluidPolicy.Cell(5,0,0));
+        check(!SchematicFluidPolicy.contained(new SchematicFluidPolicy.Cell(0,0,0),field), "A side spill outside the blueprint is rejected");
+        openings.clear(); openings.add(new SchematicFluidPolicy.Cell(2,-1,0));
+        check(!SchematicFluidPolicy.contained(new SchematicFluidPolicy.Cell(0,0,0),field), "A missing floor under a later connected flow cell is rejected");
+        openings.clear(); unknown.add(new SchematicFluidPolicy.Cell(2,-1,0));
+        check(!SchematicFluidPolicy.contained(new SchematicFluidPolicy.Cell(0,0,0),field), "Unloaded/unknown containment never becomes a solid wall");
+        unknown.clear();
+        check(!SchematicFluidPolicy.contained(new SchematicFluidPolicy.Cell(8,0,0),field), "A bucket cannot be spent on an unselected fluid source");
+        check(!SchematicStatePolicy.placementPropertyCompatible("minecraft:stone_stairs","facing","north","west"), "Stackable/neighbor allowances never hide wrong stair facing");
+        check(!SchematicStatePolicy.placementPropertyCompatible("minecraft:stone_stairs","half","bottom","top"), "Intermediate slab/shape handling never hides wrong stair half");
+        check(!SchematicStatePolicy.placementPropertyCompatible("minecraft:oak_log","axis","x","z"), "An incorrect log axis cannot pass placement prediction");
+        check(SchematicStatePolicy.placementPropertyCompatible("minecraft:oak_slab","type","bottom","double"), "Two ordinary slabs can form one double slab");
+        check(SchematicStatePolicy.placementPropertyCompatible("minecraft:oak_trapdoor","waterlogged","false","true"), "A dry correct trapdoor can wait for its reusable water bucket");
+        check(!SchematicStatePolicy.placementPropertyCompatible("minecraft:oak_trapdoor","waterlogged","true","false"), "Unexpected waterlogging is not silently accepted as a dry block");
+        check(SchematicStatePolicy.placementPropertyCompatible("minecraft:redstone_wire","power","0","15"), "Placement does not invent captured server-controlled power");
+        check(SchematicStatePolicy.placementPropertyCompatible("minecraft:repeater","delay","1","4"), "A placed repeater can be configured through normal use");
+        check(!SchematicStatePolicy.persistentEqual(new SchematicData.State("minecraft:stone_stairs",Map.of("shape","straight")),new SchematicData.State("minecraft:stone_stairs",Map.of("shape","inner_left"))), "Neighbor-based construction geometry remains required for final completion");
     }
     private static void litematic() throws Exception {
         List<Object> palette = List.of(block("air"), block("stone"), Map.of("Name", "minecraft:oak_log", "Properties", Map.of("axis", "x")));

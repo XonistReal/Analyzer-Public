@@ -1,3 +1,17 @@
+# Combat, debug ESP and schematic construction — October 15, 2026
+
+Analyzer **0.11.0** coordinates combat camera/hotbar/action ownership and adds opt-in **Auto Block / Double Hand / Hover Totem**. Entity/storage/tracer ESP uses clean debug geometry and broad category colors; remaining target/item/hole ESP paths follow the same presentation. Local requests recognize running vanilla item names and stack sizes, including **Could you get me 512 ice?**, and distinguish real acquisition requirements. Schematic review retains a read-only ghost and uses ordinary reusable buckets for source fluids/waterlogging. Details: [Combat and ESP](COMBAT-ESP.md), [construction and limits](SCHEMATIC-CONSTRUCTION.md).
+
+Java 21 build/moduleCatalog/publishLocal pass **69,882 assertions across 23 suites**, with **128 modules / 1,335 exposed controls**. Focused results include **157 combat / 155 ESP / 102 intent / 133 schematic** checks and **425 recipe assertions comparing 141 real layouts/batch yields against pinned Minecraft data**. Windows optional symlink cases remain explicitly skipped where unavailable. Build/feed SHA-256: **91a47440ea57575f17d6af45bb4a9cb468742e963feb4994220c6334f6b935c4**.
+
+Both actual user files pass bounded parsing and resolution against Minecraft 1.21.4's real block registry: **Bonemeal Farm** resolves 353 snapshot blocks to 346 construction blocks (seven generated piston-head cells excluded), 22 material types and one reusable bucket; **Kelp Farm** resolves 64/64 blocks, 16 material types and one bucket. Their hashes/palettes are unchanged. This is a **headless registry check with an isolated test-only access shim**, not a game world, placement run or alteration of the runtime JAR.
+
+**No new native gameplay client or capture run was performed; remaining in-game checks are left to the user.** Combat outcomes, visual appearance, ghost alignment and complete farm placement/refills remain manual acceptance. Construction completion verifies persistent properties, not the instantaneous power/growth state of a running machine. **Container contents, crafter configuration, sign text and scheduled ticks are not restored**; actual supports, supplies and external water/lava sources remain necessary. Current evidence is in [the 0.11.0 record](production-validation/native-0.11.0/acceptance.json). Earlier native screenshots/tests below describe their recorded versions.
+
+Prism delivery verifies archive integrity and matching build/feed/package/install hashes while preserving existing user data, profiles, worlds, schematics, unrelated mods and launcher Java settings.
+
+## Earlier 0.10.3 evidence
+
 # Camera braking and faster local planning — October 15, 2026
 
 Analyzer **0.10.3** addresses camera hunting with acceleration-aware braking, keeps valid mining approaches, avoids turning around to recenter while stopping, and uses view-preserving local corrections for descending/final route steps. Nearest-first resource observations, checked adjacent routes, useful planning-window frontiers and same-tick waypoint advancement remove redundant work. Configured turn/break/place pacing and existing safety checks remain. [AUTOMATION-MOTION.md](AUTOMATION-MOTION.md) describes the implementation and limits.

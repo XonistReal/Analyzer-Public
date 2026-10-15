@@ -51,8 +51,13 @@ public final class VisualModules {
                 Setting.number("size", "Radius", 1.5, 0.5, 4, 0.1), Setting.bool("link", "Connect departure and arrival", false));
             case "player-aura" -> add(values, Setting.choice("style", "Ring arrangement", "Orbit", "Orbit", "Gyroscope", "Rune"),
                 Setting.bool("first-person", "Show own aura in first person", true));
-            case "target-esp" -> add(values, Setting.choice("style", "Target shape", "Orbit", "Orbit", "Box", "Corners"),
-                Setting.number("size", "Size multiplier", 1, 0.5, 2, 0.1));
+            case "target-esp" -> add(values, Setting.choice("style", "Target shape", "Box", "Orbit", "Box", "Corners"),
+                Setting.number("size", "Size multiplier", 1, 0.5, 2, 0.1),
+                Setting.number("line-width", "Line width", 1, 0.5, 4, 0.25));
+            case "hole-esp" -> add(values, Setting.choice("style", "Hole shape", "Box", "Box", "Floor outline"),
+                Setting.number("line-width", "Line width", 1, 0.5, 4, 0.25));
+            case "item-esp" -> add(values, Setting.choice("style", "Item shape", "Box", "Box", "Corners", "Rings"),
+                Setting.number("line-width", "Line width", 1, 0.5, 4, 0.25));
             case "explosion-effects" -> add(values, Setting.choice("style", "Blast shape", "Nova", "Nova", "Implosion", "Rings"),
                 Setting.number("count", "Spark count", 32, 0, 64, 4), Setting.bool("shockwave", "Shockwave", true), range(96));
             case "totem-pops" -> add(values, Setting.choice("style", "Pop shape", "Rings", "Rings", "Spiral", "Crown"),
@@ -102,14 +107,14 @@ public final class VisualModules {
                 duration(1.2), Setting.number("threshold", "Minimum distance", 8, 4, 32, 1)),
             visual("player-aura", "Player Aura", "Rotating rings around your actual player position.", false,
                 Setting.number("size", "Radius", 0.9, 0.4, 2, 0.1), Setting.number("speed", "Orbit speed", 1, 0.2, 3, 0.1)),
-            visual("target-esp", "Target ESP", "Orbiting target rings on your crosshair target or recently attacked entity.", false,
+            visual("target-esp", "Target ESP", "A clean debug box on your crosshair target or recently attacked entity, with optional orbit rings.", false,
                 Setting.number("linger", "Attack highlight (seconds)", 2, 0, 5, 0.5), Setting.bool("through-walls", "Through walls", false)),
             visual("hole-esp", "Hole ESP", "Outline loaded single-block holes with resistant floors and walls.", false,
                 Setting.number("radius", "Scan radius", 8, 3, 12, 1), Setting.bool("through-walls", "Through walls", true)),
             visual("trajectories", "Trajectories", "Predict a held bow, trident, snowball, egg or pearl path against loaded blocks.", false,
                 Setting.number("steps", "Prediction steps", 80, 20, 160, 10), Setting.number("line-width", "Line width", 1.5, 0.5, 4, 0.5)),
-            visual("item-esp", "Item ESP", "Independent glowing rings and beams on loaded dropped items.", false,
-                range(64), Setting.bool("through-walls", "Through walls", true), Setting.bool("labels", "Item labels", true)),
+            visual("item-esp", "Item ESP", "Clean debug boxes around loaded dropped items, with optional labels and ring markers.", false,
+                range(64), Setting.bool("through-walls", "Through walls", true), Setting.bool("labels", "Item labels", false)),
             visual("nametags", "Nametags", "Independent readable names, health and distances for loaded players and mobs.", false,
                 range(64), Setting.bool("players", "Players", true), Setting.bool("mobs", "Mobs", true),
                 Setting.bool("through-walls", "Through walls", true), Setting.number("scale", "Text size", 1, 0.5, 1.5, 0.1)),
