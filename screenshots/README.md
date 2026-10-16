@@ -1,3 +1,15 @@
+# Finder and specialized ESP screenshots - 0.13.0
+
+Five unedited 1920 x 1080 native Minecraft framebuffer captures from the completed isolated `runFindersSmoke`. Actual integrated-server mobs, equipment, blocks and chunk patterns are fixture preconditions; Scout is an explicitly client-local invisible player model. All five images were visually inspected. The run completes 99 checks and 25 detector positives, plus the actual map HUD/Findings screen; Bedrock Void is covered by pure policy fixtures only.
+
+- [Entity families, invisible player and actual equipment](analyzer-native-finders-entities.png)
+- [Actual posed skeleton limbs](analyzer-native-finders-skeleton.png)
+- [Block state and column detectors](analyzer-native-finders-blocks.png)
+- [Stash geometry and original coordinate map](analyzer-native-finders-stash-map.png)
+- [Native shader Findings history browser](analyzer-native-finders-history.png)
+
+[Controls and limits](../FINDERS.md) - [Current acceptance](../production-validation/native-0.13.0/acceptance.json). Historical screenshots and their scopes follow.
+
 # Shader entity materials - 0.12.0
 
 Nine unedited 1920 x 1080 native Minecraft framebuffer captures from `runChamsSmoke`. Actual integrated-server mobs demonstrate hostile/non-hostile groups; Scout is an explicit client-local player model fixture. Five posed meshes submit 840 vertices in the focused arena. A real received stone-brick wall tests occluded palettes and the depth-only opt-out. GL-state restoration and resource reload pass; the final capture combines independent debug boxes and metallic chams.

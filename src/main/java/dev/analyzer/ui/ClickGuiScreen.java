@@ -85,6 +85,7 @@ public final class ClickGuiScreen extends CatalogScreen {
         button(draw, "automation", "Automation", 755, 27, 106, 29, false, () -> client.setScreen(MenuScreens.automation(core, this)));
         button(draw, "appearance", "Style", 868, 27, 53, 29, false, () -> inspect("hud"));
         button(draw, "close", "×", 928, 27, 31, 29, false, this::close);
+        button(draw, "findings", "Findings", 868, 77, 91, 25, false, () -> client.setScreen(new FinderHistoryScreen(core, this)));
         int x = 38;
         for (Category category : CATEGORIES) {
             int w = Math.round(GuiDraw.width(textRenderer, category.label(), .94f)) + 28;

@@ -3481,6 +3481,3897 @@
     ]
   },
   {
+    "id": "amethyst-finder",
+    "name": "Amethyst Finder",
+    "category": "Render",
+    "description": "Marks received budding amethyst or geode blocks; chunk evidence is local to loaded data.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "target",
+        "label": "Amethyst blocks",
+        "kind": "CHOICE",
+        "default": "Budding amethyst",
+        "choices": [
+          "Budding amethyst",
+          "All amethyst"
+        ]
+      },
+      {
+        "id": "min-y",
+        "label": "Minimum Y",
+        "kind": "NUMBER",
+        "default": -64.0,
+        "min": -64.0,
+        "max": 320.0,
+        "step": 1.0
+      },
+      {
+        "id": "max-y",
+        "label": "Maximum Y",
+        "kind": "NUMBER",
+        "default": 64.0,
+        "min": -64.0,
+        "max": 320.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Violet",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 181.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 155.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 250.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "bedrock-void-esp",
+    "name": "Bedrock Void ESP",
+    "category": "Render",
+    "description": "Finds known air openings in the world\u0027s lowest layer beside received bedrock.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "minimum-size",
+        "label": "Minimum connected opening cells",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 1.0,
+        "max": 16.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Red",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 113.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 136.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "beehive-esp",
+    "name": "Beehive ESP",
+    "category": "Render",
+    "description": "Shows received beehives and bee nests at the selected honey level.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "minimum-honey",
+        "label": "Minimum honey level",
+        "kind": "NUMBER",
+        "default": 5.0,
+        "min": 0.0,
+        "max": 5.0,
+        "step": 1.0
+      },
+      {
+        "id": "beehives",
+        "label": "Crafted beehives",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "bee-nests",
+        "label": "Natural bee nests",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "block-notifier",
+    "name": "Block Notifier",
+    "category": "Render",
+    "description": "Highlights selected valuable blocks, workstations or storage in received chunks.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "target",
+        "label": "Block group",
+        "kind": "CHOICE",
+        "default": "Valuable blocks",
+        "choices": [
+          "Valuable blocks",
+          "Spawners",
+          "Workstations",
+          "Storage",
+          "Diamond ore",
+          "Ancient debris",
+          "Beacons",
+          "Nether portals"
+        ]
+      },
+      {
+        "id": "minimum-neighbors",
+        "label": "Minimum matching cells including target",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 7.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Cyan",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 102.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 223.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 247.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "covered-hole-esp",
+    "name": "Covered Hole ESP",
+    "category": "Render",
+    "description": "Finds a solid cover above a bounded, enclosed vertical shaft; natural formations can match.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "minimum-depth",
+        "label": "Minimum air depth",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 2.0,
+        "max": 16.0,
+        "step": 1.0
+      },
+      {
+        "id": "maximum-depth",
+        "label": "Maximum checked depth",
+        "kind": "NUMBER",
+        "default": 16.0,
+        "min": 2.0,
+        "max": 32.0,
+        "step": 1.0
+      },
+      {
+        "id": "manufactured-cover-only",
+        "label": "Only building-block covers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Orange",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 165.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 99.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "deepslate-esp",
+    "name": "Deepslate ESP",
+    "category": "Render",
+    "description": "Highlights deepslate by type and height; high blocks are a clue rather than placement proof.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "target",
+        "label": "Deepslate blocks",
+        "kind": "CHOICE",
+        "default": "Raw deepslate",
+        "choices": [
+          "Raw deepslate",
+          "Building variants",
+          "Both"
+        ]
+      },
+      {
+        "id": "min-y",
+        "label": "Minimum Y",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": -64.0,
+        "max": 320.0,
+        "step": 1.0
+      },
+      {
+        "id": "max-y",
+        "label": "Maximum Y",
+        "kind": "NUMBER",
+        "default": 320.0,
+        "min": -64.0,
+        "max": 320.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Blue",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 131.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "dripstone-esp",
+    "name": "Dripstone ESP",
+    "category": "Render",
+    "description": "Marks supported pointed-dripstone columns up to 32 blocks long.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "stalactites",
+        "label": "Hanging stalactites",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "stalagmites",
+        "label": "Rising stalagmites",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "minimum-length",
+        "label": "Minimum column length",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 32.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Orange",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 165.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 99.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "hole-tunnel-stairs-esp",
+    "name": "Hole / Tunnel / Stairs ESP",
+    "category": "Render",
+    "description": "Recognizes bounded shafts, enclosed corridors and rising passage patterns in loaded terrain.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "holes",
+        "label": "Vertical shafts",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tunnels",
+        "label": "Enclosed tunnels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "stairs",
+        "label": "Rising passages",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "minimum-depth",
+        "label": "Minimum shaft depth",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 2.0,
+        "max": 16.0,
+        "step": 1.0
+      },
+      {
+        "id": "maximum-depth",
+        "label": "Maximum checked shaft depth",
+        "kind": "NUMBER",
+        "default": 16.0,
+        "min": 2.0,
+        "max": 32.0,
+        "step": 1.0
+      },
+      {
+        "id": "minimum-length",
+        "label": "Minimum tunnel / stair length",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 3.0,
+        "max": 16.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Violet",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 181.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 155.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 250.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "light-esp",
+    "name": "Light ESP",
+    "category": "Render",
+    "description": "Highlights received emitted block light; sunlight is excluded and source mode avoids propagated-light clutter.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "minimum-light",
+        "label": "Minimum block light",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 1.0,
+        "max": 15.0,
+        "step": 1.0
+      },
+      {
+        "id": "source-only",
+        "label": "Only emitting blocks",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "include-natural",
+        "label": "Include natural light-source types",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "torches",
+        "label": "Torches and lanterns",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "glowstone",
+        "label": "Glowstone and sea lanterns",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "redstone",
+        "label": "Redstone light sources",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "beacons",
+        "label": "Beacons and conduits",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "thermal-colors",
+        "label": "Color by light strength",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "one-by-one-holes",
+    "name": "1 x 1 Holes",
+    "category": "Render",
+    "description": "Finds one-cell pockets with a solid floor and four walls; matching terrain may be natural.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "covered-only",
+        "label": "Require a solid ceiling",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Cyan",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 102.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 223.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 247.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "piston-esp",
+    "name": "Piston ESP",
+    "category": "Render",
+    "description": "Highlights received pistons and piston heads, optionally only extended mechanisms.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "regular",
+        "label": "Regular pistons",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "sticky",
+        "label": "Sticky pistons",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "heads",
+        "label": "Extended piston heads",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "extended-only",
+        "label": "Only extended pistons",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "rotated-deepslate-esp",
+    "name": "Rotated Deepslate ESP",
+    "category": "Render",
+    "description": "Shows raw deepslate with an actual horizontal axis; axisless decorative blocks are excluded.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "orientation",
+        "label": "Block axis",
+        "kind": "CHOICE",
+        "default": "Horizontal",
+        "choices": [
+          "Horizontal",
+          "X axis",
+          "Z axis"
+        ]
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Violet",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 181.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 155.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 250.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "spawner-notifier",
+    "name": "Spawner Notifier",
+    "category": "Render",
+    "description": "Marks received spawner blocks without claiming hidden contents, activation or server data access.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "trial-spawners",
+        "label": "Include trial spawners",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Red",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 113.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 136.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "sweet-berry-esp",
+    "name": "Sweet Berry ESP",
+    "category": "Render",
+    "description": "Shows berry bushes from their actual received growth age.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "minimum-age",
+        "label": "Minimum bush age",
+        "kind": "NUMBER",
+        "default": 2.0,
+        "min": 0.0,
+        "max": 3.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Pink",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 244.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 140.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 220.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "vine-esp",
+    "name": "Vine ESP",
+    "category": "Render",
+    "description": "Shows bounded vine columns, optionally requiring an observed solid block below their base.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "minimum-length",
+        "label": "Minimum column length",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 32.0,
+        "step": 1.0
+      },
+      {
+        "id": "grounded-only",
+        "label": "Require ground contact",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "collectible-esp",
+    "name": "Collectible ESP",
+    "category": "Render",
+    "description": "Mark loaded item frames, armor stands and placed banners; contents stay server-controlled.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "item-frames",
+        "label": "Item frames",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "glow-frames",
+        "label": "Glow item frames",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "armor-stands",
+        "label": "Armor stands",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "banners",
+        "label": "Placed banners",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "filled-frames-only",
+        "label": "Only frames displaying an item",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Pink",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 244.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 140.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 220.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "drowned-trident-esp",
+    "name": "Drowned Trident ESP",
+    "category": "Render",
+    "description": "Mark received drowned actually holding a trident in either hand; drops are not guaranteed.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Cyan",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 102.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 223.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 247.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "invisible-esp",
+    "name": "Invisible ESP",
+    "category": "Render",
+    "description": "Mark received invisible players and mobs without altering their visibility or inventory.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "passives",
+        "label": "Non-hostile mobs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Violet",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 181.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 155.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 250.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "llama-esp",
+    "name": "Llama ESP",
+    "category": "Render",
+    "description": "Mark loaded llamas, optionally including trader llamas.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "trader-llamas",
+        "label": "Trader llamas",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "pillager-esp",
+    "name": "Pillager ESP",
+    "category": "Render",
+    "description": "Mark loaded pillagers with independent debug outlines.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Red",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 113.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 136.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "skeleton-esp",
+    "name": "Skeleton ESP",
+    "category": "Render",
+    "description": "Draw animated bones from the real posed biped model for selected players and mobs.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs with biped models",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "passives",
+        "label": "Non-hostile mobs with biped models",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "invisibles",
+        "label": "Invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "self",
+        "label": "Own player in third person",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "head",
+        "label": "Head direction bone",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "White",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 241.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 243.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 246.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "villager-esp",
+    "name": "Villager ESP",
+    "category": "Render",
+    "description": "Mark loaded villagers, optionally including zombie villagers.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "zombie-villagers",
+        "label": "Zombie villagers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "adults-only",
+        "label": "Adults only",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "wandering-trader-esp",
+    "name": "Wandering Trader ESP",
+    "category": "Render",
+    "description": "Mark received wandering traders; no unreceived entities or trade data are inferred.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Blue",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 131.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "advanced-stash-finder",
+    "name": "Advanced Stash Finder",
+    "category": "Render",
+    "description": "Records received storage clusters by chunk, with actual counts and local history.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "min-storage",
+        "label": "Minimum storage blocks",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 128.0,
+        "step": 1.0
+      },
+      {
+        "id": "min-origin-distance",
+        "label": "Minimum distance from world origin",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 3.0E7,
+        "step": 100.0
+      },
+      {
+        "id": "critical-spawners",
+        "label": "Any spawner qualifies",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "chests",
+        "label": "Chests and trapped chests",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "barrels",
+        "label": "Barrels",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "shulkers",
+        "label": "Shulker boxes",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ender-chests",
+        "label": "Ender chests",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "furnaces",
+        "label": "Furnaces, smokers and blast furnaces",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "dispensers",
+        "label": "Dispensers and droppers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hoppers",
+        "label": "Hoppers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "other-storage",
+        "label": "Other storage containers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "spawners",
+        "label": "Include spawners in total",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "remember-stashes",
+        "label": "Keep local stash history",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Gold",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 207.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 120.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "chunk-finder",
+    "name": "Chunk Finder",
+    "category": "Render",
+    "description": "Shows explainable building and farm evidence in received chunks; candidates can be natural.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "min-evidence",
+        "label": "Minimum evidence score",
+        "kind": "NUMBER",
+        "default": 4.0,
+        "min": 1.0,
+        "max": 128.0,
+        "step": 1.0
+      },
+      {
+        "id": "storage",
+        "label": "Storage clusters",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "workstations",
+        "label": "Workstations",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "redstone",
+        "label": "Pistons and redstone components",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "building-blocks",
+        "label": "Crafted building blocks",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "unusual-blocks",
+        "label": "Unusual deepslate and end stone",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "farm-patterns",
+        "label": "Grouped crops and hives",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-trial-chambers",
+        "label": "Suppress tuff/copper chamber clusters",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "trial-chamber-threshold",
+        "label": "Chamber block threshold",
+        "kind": "NUMBER",
+        "default": 50.0,
+        "min": 8.0,
+        "max": 256.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Orange",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 165.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 99.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "kelp-esp",
+    "name": "Kelp ESP",
+    "category": "Render",
+    "description": "Marks tall kelp distributions near a selected top height; this is a pattern, not proof of a farm.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "min-columns",
+        "label": "Minimum kelp columns",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 1.0,
+        "max": 256.0,
+        "step": 1.0
+      },
+      {
+        "id": "min-tall-columns",
+        "label": "Minimum tall columns",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 1.0,
+        "max": 256.0,
+        "step": 1.0
+      },
+      {
+        "id": "min-length",
+        "label": "Minimum column length",
+        "kind": "NUMBER",
+        "default": 8.0,
+        "min": 1.0,
+        "max": 32.0,
+        "step": 1.0
+      },
+      {
+        "id": "top-y",
+        "label": "Matching top height",
+        "kind": "NUMBER",
+        "default": 62.0,
+        "min": -64.0,
+        "max": 320.0,
+        "step": 1.0
+      },
+      {
+        "id": "sea-level-ratio",
+        "label": "Matching tall tops (%)",
+        "kind": "NUMBER",
+        "default": 60.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "region-map",
+    "name": "Region Map",
+    "category": "Render",
+    "description": "Original coordinate grid of your position and locally recorded stashes; no assumed server region IDs.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "grid-size",
+        "label": "Blocks per grid cell",
+        "kind": "NUMBER",
+        "default": 512.0,
+        "min": 16.0,
+        "max": 65536.0,
+        "step": 16.0
+      },
+      {
+        "id": "position-x",
+        "label": "Horizontal position (%)",
+        "kind": "NUMBER",
+        "default": 98.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "position-y",
+        "label": "Vertical position (%)",
+        "kind": "NUMBER",
+        "default": 70.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "cells",
+        "label": "Visible cells",
+        "kind": "CHOICE",
+        "default": "5",
+        "choices": [
+          "3",
+          "5",
+          "7",
+          "9"
+        ]
+      },
+      {
+        "id": "show-coordinates",
+        "label": "Coordinates",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "show-labels",
+        "label": "Grid coordinates",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "show-player",
+        "label": "Player indicator",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "show-stashes",
+        "label": "Local stash markers",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 96.0,
+        "min": 16.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "scan-budget",
+        "label": "Scan work per tick",
+        "kind": "NUMBER",
+        "default": 4096.0,
+        "min": 512.0,
+        "max": 16384.0,
+        "step": 512.0
+      },
+      {
+        "id": "max-markers",
+        "label": "Maximum markers",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 512.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Through walls",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "tracers",
+        "label": "Tracers",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "line-width",
+        "label": "Line width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "opacity",
+        "label": "Opacity (%)",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 10.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "notify",
+        "label": "Local discovery messages",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "marker-color",
+        "label": "Marker color",
+        "kind": "CHOICE",
+        "default": "Cyan",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "marker-red",
+        "label": "Marker red",
+        "kind": "NUMBER",
+        "default": 102.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-green",
+        "label": "Marker green",
+        "kind": "NUMBER",
+        "default": 223.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "marker-blue",
+        "label": "Marker blue",
+        "kind": "NUMBER",
+        "default": 247.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
     "id": "place-animation",
     "name": "Place Animation",
     "category": "Cosmetics",

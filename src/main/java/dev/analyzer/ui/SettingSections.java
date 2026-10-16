@@ -14,6 +14,13 @@ final class SettingSections {
     private SettingSections() { }
     static String group(ModuleDefinition module, Setting<?> setting) {
         if (module.id().equals("hud")) return setting.id().startsWith("menu-") ? "Menu appearance" : setting.id().startsWith("home-") ? "Home screen" : "HUD appearance";
+        if (module.settings().stream().anyMatch(value -> value.id().equals("scan-budget"))) {
+            String id = setting.id();
+            if (id.startsWith("marker-")) return "Colors";
+            if (java.util.Set.of("through-walls", "tracers", "line-width", "opacity", "max-markers").contains(id)) return "Presentation";
+            if (java.util.Set.of("range", "scan-budget", "notify").contains(id)) return "Scanning and notices";
+            return module.id().equals("region-map") ? "Coordinate map" : "Detection";
+        }
         if (module.id().equals("chams")) {
             String id = setting.id();
             if (id.contains("-hidden-") || id.equals("hidden-opacity") || id.equals("through-walls")) return "Occluded models";
@@ -68,6 +75,10 @@ final class SettingSections {
     /** Hide values belonging to another mode while keeping their saved values intact. */
     static boolean visible(AnalyzerCore core, ModuleDefinition module, Setting<?> setting) {
         String id = setting.id(), name = module.id();
+        if (module.settings().stream().anyMatch(value -> value.id().equals("scan-budget"))) {
+            if (id.equals("marker-red") || id.equals("marker-green") || id.equals("marker-blue")) return choice(core,module,"marker-color").equals("Custom");
+            if (name.equals("region-map") && java.util.Set.of("range", "scan-budget", "max-markers", "through-walls", "tracers", "line-width", "notify").contains(id)) return false;
+        }
         if (name.equals("chams")) {
             if (id.equals("wire-width")) return choice(core, module, "style").equals("Wireframe");
             if (id.equals("hidden-opacity") || id.contains("-hidden-")) {

@@ -1,3 +1,17 @@
+# Loaded finders and specialized ESP - October 16, 2026
+
+Analyzer **0.13.0** adds **27 original module-family equivalents**, including Advanced Stash Finder, Amethyst Finder, exact entity/equipment/state detectors, posed Skeleton ESP, local Findings history and a coordinate Region Map. [Controls, source references and differences](FINDERS.md).
+
+Java 21 `build moduleCatalog publishLocal` passes **72,928 assertions across 29 suites**, with **156 modules / 1,791 controls**. Focused policy results include **657 block, 313 entity, 203 chunk/history, 159 update and 159 coordinate-grid assertions**. Optional Windows schematic-library symlink cases remain skipped where unavailable. Final build/feed SHA-256: **48367376e21d2f801a30aee1e54a85dfbe9fef4515e1491c0dbfef0ac9540fbd**.
+
+The isolated `runFindersSmoke` client completes **99 native checks**, with positive results from **25 detectors**, five unedited **1920 x 1080** framebuffer captures, native Findings UI and a Region Map HUD. Actual received equipment distinguishes trident-bearing/empty-handed drowned; entity family toggles and posed limbs work. Full chunk/kelp scans complete during **20 actual observer update requests / 36 received state transitions**. Removing real received budding amethyst removes its marker; disabling clears all overlays, and the normal connection-close/save/disconnect sequence clears world observations and pose segments. Native GL checks pass and the completed log has no ERROR/FATAL entries.
+
+Server commands build the isolated arena and remove only natural kelp beneath its test chunk before creating two controlled four-high columns. Scout is an explicit client-local invisible player model fixture; all other mobs, gear, blocks and state transitions come from the integrated server. **Bedrock Void has pure policy coverage, not native bottom-layer acceptance in this run.** Region Map is visually observed separately from the 25 detector positives. All five final captures are inspected. Earlier incomplete runs exposed fairness, stale-cache, natural-fixture and quit-sequence issues; only the completed final run establishes current native acceptance.
+
+Exact loaded-data predicates do not establish ownership or a confirmed base. Natural terrain and vegetation can match patterns; no base probability or server-data bypass is claimed. Current coverage deliberately differs from upstream settings/subheuristics, and the coordinate grid does not claim verified DonutSMP IDs. Other combat/automation outcomes and replacement renderers were not rerun. [Screenshots](screenshots/README.md) and [acceptance JSON](production-validation/native-0.13.0/acceptance.json) preserve hashes. Prism packaging/update verifies the same build/feed/package/installed JAR while preserving user worlds, settings, profiles, schematics, other mods and launcher Java selection.
+
+## Earlier 0.12.0 evidence
+
 # Shader entity chams - October 15, 2026
 
 Analyzer **0.12.0** adds opt-in **Render > Entity Chams** with **Flat / Metallic / Glass / Glow / Wireframe** on actual posed living models. Visible/occluded group colors and opacity are independent, with optional matching to Entity ESP. Debug boxes remain separate. [Material settings and scope](ENTITY-CHAMS.md).

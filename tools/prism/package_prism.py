@@ -42,7 +42,7 @@ def main() -> None:
         raise ValueError("Fabric API must be the verified 0.119.4+1.21.4 build")
 
     required_docs = (
-        "README.md", "PRISM.md", "AGENTS.md", "AUTOMATION.md", "AUTOMATION-MOTION.md", "COMBAT-ESP.md", "ENTITY-CHAMS.md", "SCHEMATIC-CONSTRUCTION.md", "SAFETY.md", "UI-OVERHAUL-PLAN.md", "UI-OVERHAUL.md",
+        "README.md", "PRISM.md", "AGENTS.md", "AUTOMATION.md", "AUTOMATION-MOTION.md", "COMBAT-ESP.md", "ENTITY-CHAMS.md", "FINDERS.md", "SCHEMATIC-CONSTRUCTION.md", "SAFETY.md", "UI-OVERHAUL-PLAN.md", "UI-OVERHAUL.md",
         "UI-REFERENCES.md", "HOME-SCREEN.md", "HOME-REFERENCES.md", "MODULE-TESTS.md", "STUDIO-COMPLETE.md",
         "SERVER-PRIVACY.md", "LIQUID-GLASS.md", "MOVING-PCS.md", "VERSION-HISTORY.md", "GITHUB-BACKUP.md",
         "ESP-READABILITY.md", "GAMEPLAY-SETTINGS.md", "XRAY.md", "MODULES.md",

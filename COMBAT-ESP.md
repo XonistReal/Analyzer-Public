@@ -1,3 +1,5 @@
+> **0.13.0:** [Finders](FINDERS.md) adds original equivalents for all 27 Glazed ESP module families, with local scoped history and native debug geometry.
+
 > **0.12.0 addition:** [Entity Chams](ENTITY-CHAMS.md) provides five GLSL materials on actual posed models, with independent visible/occluded colors. It can be used alongside the debug ESP below.
 
 # Combat and debug ESP — 0.11.0

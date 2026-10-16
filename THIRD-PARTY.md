@@ -1,3 +1,7 @@
+## Finder behavioral reference in 0.13.0
+
+The Glazed ESP source at `1d33d14fdafd26100aa7bf616758786d79ac7b96` and later branch `6b6cab2a26f7a11985e6129ab51b4e909a2e9460` was inspected to understand feature behavior. It is not included in Analyzer source, runtime or Prism dependencies. The finder implementations, posed geometry and UI are original. [FINDERS.md](FINDERS.md) records original equivalents and differences; Glazed's restrictive license is not treated as permission to incorporate its code.
+
 # Third-party materials and dependencies
 
 Analyzer's original Java code, GLSL shaders, UI resources, and Python/PowerShell distribution tools are licensed under the MIT license in `LICENSE`. The items below retain their own licenses. This document records direct assets/tooling and runtime dependencies; it does not relicense Minecraft or its transitive libraries.

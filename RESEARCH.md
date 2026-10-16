@@ -1,3 +1,5 @@
+> **0.13.0 finder audit:** All 27 ESP module families were inspected in pinned official Glazed source. [Current original equivalents and differences](FINDERS.md) distinguish exact received-data detectors from heuristic pattern candidates. No upstream code or dependency is bundled.
+
 # Analyzer research and implementation scope
 
 The comparison and scope table below record the initial research and **historical 0.2.0** implementation. Analyzer 0.4.0 also adds a detailed [37-entry cosmetics comparison](RESEARCH-COSMETICS.md), fifteen new modules and improved 60% HUD typography. Analyzer 0.3.0 added three menus, editable HUD themes, event-driven visuals and opt-in combat/movement/world actions. Its current 107-module catalogue is in [MODULES.md](MODULES.md). The new [ROADMAP.md](ROADMAP.md) compares every one of the 163 entries in Temple.nz's official catalogue, with implemented scopes and missing behavior stated individually. Selected in-game evidence is in [VALIDATION.md](VALIDATION.md).

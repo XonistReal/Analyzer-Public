@@ -60,6 +60,9 @@ public final class AnalyzerClient implements ClientModInitializer {
         dev.analyzer.render.XrayRenderer.register(CORE);
         dev.analyzer.render.SchematicPreviewRenderer.register(CORE);
         dev.analyzer.render.EntityChamsRenderer.register(CORE);
+        dev.analyzer.finder.FinderEngine.register(CORE);
+        dev.analyzer.render.EntityFinderRenderer.register(CORE);
+        dev.analyzer.render.RegionMapHud.register(CORE);
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
         ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
             if (screen instanceof TitleScreen) {
@@ -95,7 +98,8 @@ public final class AnalyzerClient implements ClientModInitializer {
         }
         if (saveCountdown > 0 && --saveCountdown == 0) saveConfig();
         if (FabricLoader.getInstance().isDevelopmentEnvironment() && Boolean.getBoolean("analyzer.smoke")) {
-            if (Boolean.getBoolean("analyzer.chamsSmoke")) ChamsSmoke.tick(client);
+            if (Boolean.getBoolean("analyzer.findersSmoke")) FindersSmoke.tick(client);
+            else if (Boolean.getBoolean("analyzer.chamsSmoke")) ChamsSmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.privacySmoke")) PrivacySmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.homeSmoke")) HomeSmoke.tick(client);
             else DevSmoke.tick(client);

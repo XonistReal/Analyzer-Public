@@ -45,6 +45,9 @@ public final class BuiltinModules {
         ));
         modules.addAll(ClientModules.definitions());
         modules.add(ChamsSettings.definition());
+        modules.addAll(BlockFinderModules.definitions());
+        modules.addAll(EntityFinderModules.definitions());
+        modules.addAll(SurveyFinderModules.definitions());
         modules.addAll(VisualModules.definitions());
         modules.addAll(XrayModules.definitions());
         modules.addAll(CosmeticModules.definitions());

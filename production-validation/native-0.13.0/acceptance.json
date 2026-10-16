@@ -1,0 +1,99 @@
+{
+  "release": "0.13.0",
+  "date": "2026-10-16",
+  "status": "build_and_focused_native_acceptance_passed",
+  "modules": 156,
+  "controls": 1791,
+  "newModuleFamilies": 27,
+  "policyAssertions": 72928,
+  "policySuites": 29,
+  "nativeChecks": 99,
+  "nativePositiveDetectors": 25,
+  "regionMapHudAndHistoryScreen": "Actual native rendered and visually inspected",
+  "bedrockVoid": "Pure policy fixtures only; no native bottom-layer capture in this focused run",
+  "observerUpdates": {
+    "requests": 20,
+    "actualReceivedChanges": 36,
+    "result": "Full chunk and kelp aggregates complete without losing other positive markers"
+  },
+  "nativeFeatures": [
+    "Exact held-trident positive/negative and live entity-family filters",
+    "Actual biped-model bones, including limbs",
+    "17 block/chunk/survey positives plus eight entity positives",
+    "Actual source properties, full chunk evidence and controlled kelp columns",
+    "Local stash history and native shader Findings browser",
+    "Actual received budding-amethyst removal clears its marker",
+    "All module disable and real world-disconnect cleanup",
+    "Five native framebuffer writes and clean GL checks"
+  ],
+  "nativePreconditions": "Isolated command-built integrated-server arena; natural kelp removed only below the test chunk before placing two four-high columns; Scout is an explicit client-local invisible player fixture",
+  "limits": [
+    "Received loaded data only, without forced chunk loads or hidden inventory access",
+    "Heuristic candidates can occur naturally; no calibrated base probability or guaranteed server result",
+    "Original module-family equivalents; not all upstream settings or subheuristics",
+    "Region Map is a configurable coordinate grid, not verified DonutSMP region IDs",
+    "Block Notifier currently selects block groups",
+    "Bounded scanning and frequent actual block-type replacement can delay aggregate completion",
+    "Other combat/automation and replacement-renderer acceptance not rerun"
+  ],
+  "sourceReference": {
+    "repository": "https://github.com/realnnpg/glazed",
+    "branch1214": "1d33d14fdafd26100aa7bf616758786d79ac7b96",
+    "laterDefault": "6b6cab2a26f7a11985e6129ab51b4e909a2e9460",
+    "usage": "Behavior only; no upstream code or dependency incorporated"
+  },
+  "buildSha256": "48367376e21d2f801a30aee1e54a85dfbe9fef4515e1491c0dbfef0ac9540fbd",
+  "captures": {
+    "screenshots/analyzer-native-finders-blocks.png": {
+      "sha256": "69453c7cb77f1b1c55aa74b85160096548f35597d12ab1db1f2654b273f8e1b9",
+      "bytes": 376467,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-finders-entities.png": {
+      "sha256": "23a1ed4cc1dc66d5c6971ee32ab9a7b8857341b0a237dc109b9f9a0d504e8014",
+      "bytes": 420067,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-finders-history.png": {
+      "sha256": "1b595386b9bda1c549ac6f3921dcdedaee4bcee413a9ed29be87129ce190242d",
+      "bytes": 761482,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-finders-skeleton.png": {
+      "sha256": "a0afca317e6a09a3cd7ae103247235986685ce0a4128389ece170320c59ad447",
+      "bytes": 364179,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-finders-stash-map.png": {
+      "sha256": "1a924b5d494623d5f2784ea1a1681b57b77edf6172cdd3ebd048e2f50a5faaaa",
+      "bytes": 367586,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    }
+  },
+  "logs": {
+    "finders-0.13.0-final-build.log": "e7dd58a1affe3994221a324e84bd8ac3091d06ee6741b3457dcd1c3ea2edf84c",
+    "finders-0.13.0-runtime-final.log": "3418a56ba77a6c8e23622dc75394e375fb2e06e1b125a56ce1c92516ec6a068f"
+  },
+  "earlierAttempts": "Earlier development attempts found stale/fairness/natural-fixture/quit-sequence issues; only the completed final run is native acceptance.",
+  "nativeClassFilesMatchFinalArtifact": 477
+}

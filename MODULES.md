@@ -1,6 +1,6 @@
 # Analyzer module catalogue
 
-129 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
+156 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
 
 ## Render
 
@@ -10,6 +10,33 @@
 | Tracers | Single clean lines to selected entities, using the same colors as Entity ESP. | Off |
 | Atmosphere | Cinematic bloom and color grading. Sky Aurora controls the sky. | Off |
 | Entity Chams | Shader materials on actual living models, with separate visible and occluded colors. | Off |
+| Amethyst Finder | Marks received budding amethyst or geode blocks; chunk evidence is local to loaded data. | Off |
+| Bedrock Void ESP | Finds known air openings in the world's lowest layer beside received bedrock. | Off |
+| Beehive ESP | Shows received beehives and bee nests at the selected honey level. | Off |
+| Block Notifier | Highlights selected valuable blocks, workstations or storage in received chunks. | Off |
+| Covered Hole ESP | Finds a solid cover above a bounded, enclosed vertical shaft; natural formations can match. | Off |
+| Deepslate ESP | Highlights deepslate by type and height; high blocks are a clue rather than placement proof. | Off |
+| Dripstone ESP | Marks supported pointed-dripstone columns up to 32 blocks long. | Off |
+| Hole / Tunnel / Stairs ESP | Recognizes bounded shafts, enclosed corridors and rising passage patterns in loaded terrain. | Off |
+| Light ESP | Highlights received emitted block light; sunlight is excluded and source mode avoids propagated-light clutter. | Off |
+| 1 x 1 Holes | Finds one-cell pockets with a solid floor and four walls; matching terrain may be natural. | Off |
+| Piston ESP | Highlights received pistons and piston heads, optionally only extended mechanisms. | Off |
+| Rotated Deepslate ESP | Shows raw deepslate with an actual horizontal axis; axisless decorative blocks are excluded. | Off |
+| Spawner Notifier | Marks received spawner blocks without claiming hidden contents, activation or server data access. | Off |
+| Sweet Berry ESP | Shows berry bushes from their actual received growth age. | Off |
+| Vine ESP | Shows bounded vine columns, optionally requiring an observed solid block below their base. | Off |
+| Collectible ESP | Mark loaded item frames, armor stands and placed banners; contents stay server-controlled. | Off |
+| Drowned Trident ESP | Mark received drowned actually holding a trident in either hand; drops are not guaranteed. | Off |
+| Invisible ESP | Mark received invisible players and mobs without altering their visibility or inventory. | Off |
+| Llama ESP | Mark loaded llamas, optionally including trader llamas. | Off |
+| Pillager ESP | Mark loaded pillagers with independent debug outlines. | Off |
+| Skeleton ESP | Draw animated bones from the real posed biped model for selected players and mobs. | Off |
+| Villager ESP | Mark loaded villagers, optionally including zombie villagers. | Off |
+| Wandering Trader ESP | Mark received wandering traders; no unreceived entities or trade data are inferred. | Off |
+| Advanced Stash Finder | Records received storage clusters by chunk, with actual counts and local history. | Off |
+| Chunk Finder | Shows explainable building and farm evidence in received chunks; candidates can be natural. | Off |
+| Kelp ESP | Marks tall kelp distributions near a selected top height; this is a pattern, not proof of a farm. | Off |
+| Region Map | Original coordinate grid of your position and locally recorded stashes; no assumed server region IDs. | Off |
 | Block Highlight | A pulsing outline of the block under your crosshair. | Off |
 | Target ESP | A clean debug box on your crosshair target or recently attacked entity, with optional orbit rings. | Off |
 | Hole ESP | Outline loaded single-block holes with resistant floors and walls. | Off |

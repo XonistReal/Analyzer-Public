@@ -91,8 +91,8 @@ public final class StudioScreen extends CatalogScreen {
         button(draw, "profiles", "Profiles", 396, 116, 91, 27, false, () -> client.setScreen(MenuScreens.profiles(core, this)));
         button(draw, "hud-editor", "Edit HUD", 494, 116, 105, 27, false, () -> client.setScreen(new HudEditorScreen(core, this)));
         button(draw, "automation", "Automation", 606, 116, 129, 27, false, () -> client.setScreen(MenuScreens.automation(core, this)));
-        button(draw, "appearance", "Appearance", 742, 116, 130, 27, false, () -> inspect("hud"));
-        label(draw, visible().size() + " modules", 888, 124, .8f, SECONDARY);
+        button(draw, "appearance", "Appearance", 742, 116, 100, 27, false, () -> inspect("hud"));
+        button(draw, "findings", "Findings", 849, 116, 108, 27, false, () -> client.setScreen(new FinderHistoryScreen(core, this)));
     }
     @Override protected void button(DrawContext draw, String id, String value, int x, int y, int w, int h, boolean selected, Runnable action) {
         Area hit = new Area(x, y, w, h); boolean hovered = hit.contains(mx, my);
@@ -135,7 +135,7 @@ public final class StudioScreen extends CatalogScreen {
             GuiDraw.shaderCard(draw, card.x, y, CARD_WIDTH, card.height, 19, accent, glass(), theme(), area.contains(mx, my) ? 1 : 0, false);
             GuiDraw.heading(draw, textRenderer, GuiDraw.truncate(textRenderer, module.name(), 211, 1.48f), card.x + 17, y + 17, 1.48f, WHITE);
             GuiDraw.shaderPill(draw, card.x + CARD_WIDTH - 62, y + 17, 45, 21, accent, ease("module:" + id, on ? 1 : 0));
-            List<String> desc = GuiDraw.wrap(textRenderer, module.description(), CARD_WIDTH - 34, .95f);
+            List<String> desc = GuiDraw.wrap(textRenderer, FinderStatus.description(core, module), CARD_WIDTH - 34, .95f);
             for (int line = 0; line < Math.min(2, desc.size()); line++) label(draw, desc.get(line), card.x + 17, y + 47 + line * 13, .95f, SECONDARY);
             clippedControl("inspect:" + id, new Area(card.x + 3, y + 3, CARD_WIDTH - 6, 80), CATALOG, 0, () -> {
                 selected = module; if (open) expanded.remove(id); else expanded.add(id); searchFocused = false; capture = null;
