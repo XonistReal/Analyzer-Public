@@ -317,6 +317,7 @@ public final class GuiDraw {
     }
 
     public static String truncate(TextRenderer renderer, String value, float maxWidth, float scale) {
+        value = dev.analyzer.privacy.NameChanger.render(value);
         if (width(renderer, value, scale) <= maxWidth) return value;
         String ending = "…";
         if (width(renderer, ending, scale) > maxWidth) return "";
@@ -326,6 +327,7 @@ public final class GuiDraw {
     }
 
     public static List<String> wrap(TextRenderer renderer, String value, float maxWidth, float scale) {
+        value = dev.analyzer.privacy.NameChanger.render(value);
         List<String> lines = new ArrayList<>();
         String line = "";
         if (maxWidth <= 0) return lines;

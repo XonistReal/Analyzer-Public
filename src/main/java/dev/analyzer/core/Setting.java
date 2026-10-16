@@ -5,7 +5,7 @@ import java.util.Objects;
 
 /** Immutable, typed setting metadata. Every write goes through normalization. */
 public final class Setting<T> {
-    public enum Kind { BOOLEAN, NUMBER, CHOICE }
+    public enum Kind { BOOLEAN, NUMBER, CHOICE, TEXT }
 
     private final String id;
     private final String label;
@@ -58,6 +58,12 @@ public final class Setting<T> {
                 Double.NaN, Double.NaN, Double.NaN, options);
     }
 
+    /** A short, unformatted local alias. Spaces around input are ignored; unsafe glyphs are rejected. */
+    public static Setting<String> text(String id, String label, String defaultValue, int maxLength) {
+        if (maxLength < 1 || maxLength > 128) throw new IllegalArgumentException("Invalid text limit: " + id);
+        return new Setting<>(id, label, Kind.TEXT, String.class, defaultValue, 1, maxLength, Double.NaN, List.of());
+    }
+
     /** Rejects wrong types and invalid choices; clamps and snaps finite numbers. */
     public T normalize(Object value) {
         Object normalized;
@@ -82,6 +88,12 @@ public final class Setting<T> {
                     throw invalid(value);
                 }
                 normalized = value;
+            }
+            case TEXT -> {
+                if (!(value instanceof String text)) throw invalid(value);
+                String stripped = text.strip();
+                if (stripped.length() < min || stripped.length() > max || !stripped.matches("[A-Za-z0-9_]+")) throw invalid(value);
+                normalized = stripped;
             }
             default -> throw new IllegalStateException("Unhandled setting kind: " + kind);
         }

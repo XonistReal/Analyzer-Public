@@ -1,0 +1,92 @@
+{
+  "release": "0.13.1",
+  "date": "2026-10-16",
+  "status": "build_and_focused_native_acceptance_passed",
+  "modules": 157,
+  "controls": 1821,
+  "policySuites": 31,
+  "policyAssertions": 77720,
+  "tracerPolicyAssertions": 4682,
+  "namePolicyAssertions": 46,
+  "nativeChecks": 162,
+  "nativeTracerProducerOriginPassCombinations": 30,
+  "nativeWalkingBobProjectionSamples": 10,
+  "tracerProducers": [
+    "tracers",
+    "storage-esp",
+    "amethyst-finder",
+    "villager-esp",
+    "skeleton-esp"
+  ],
+  "origins": [
+    "Crosshair",
+    "Bottom",
+    "Top"
+  ],
+  "visibilityPasses": [
+    "through walls",
+    "depth tested"
+  ],
+  "cameraCoverage": [
+    "First person and back third person",
+    "FOV 70 / 90 / 100",
+    "Moved/rotated camera",
+    "Actual walking sprint/view bob in both passes"
+  ],
+  "nativeNameCoverage": [
+    "String/Text/OrderedText actual draw endpoints and widths",
+    "Styled sibling names, trimming, wrapping and native chat layout",
+    "Live alias/disable and previously cached helper/visible chat refresh",
+    "Unchanged source Text/OrderedText and raw stored chat",
+    "Unchanged actual session/profile names and UUIDs",
+    "Native TextField content/caret/insertion/pixel geometry",
+    "Native multiline EditBox line ranges and pointer/vertical cursor",
+    "Native SelectionManager raw width validation",
+    "All nine mixin targets explicitly loaded",
+    "Actual shader alias editor: validation, typed characters, Apply and Cancel"
+  ],
+  "preconditions": "Isolated command-built integrated-server arena with real chest, budding amethyst, villager, central Husk and own scoreboard entry. Inspector overlay explicitly draws native String/Text/OrderedText, Lato and player-list text.",
+  "limits": [
+    "Only local own-name visual text substitution; account/server identity and outgoing chat stay actual",
+    "Native editable contents intentionally show real text; book read-only author/header remains masked",
+    "Images, skins and third-party custom font/render paths are outside masking",
+    "Book/sign-specific targets load and bytecode scopes are reviewed; raw input tests use native text/selection/multiline objects rather than a full book/sign interaction sequence",
+    "Native camera tests do not simulate actual damage; transform policy fixtures cover projection tilt",
+    "Other combat/automation, replacement renderers and remote-server outcomes not rerun"
+  ],
+  "buildSha256": "8f654976f8c2e4add5234cbfea67846a6781341400d5180488c216c801911b6e",
+  "captures": {
+    "screenshots/analyzer-native-tracer-privacy-crosshair.png": {
+      "sha256": "43f88b77c72ceee4c7d0f48a692bc9e194841a8494b4c2907fb4c22bc54d044d",
+      "bytes": 432278,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-tracer-privacy-bottom.png": {
+      "sha256": "5968d67c7a7c4eecf3030e934d54b9ec1c2798ad7e527680ae89ff7726e08fdf",
+      "bytes": 442202,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-tracer-privacy-top.png": {
+      "sha256": "10e2f86332ddf5f3ca57b706a7bc55e9ebfca0172bc5df270e3f2b8e7267dd2a",
+      "bytes": 429952,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    }
+  },
+  "logs": {
+    "tracer-privacy-0.13.1-final-build.log": "c61390bcdfbfcfb7284878a87ae9d8279f022d7f94ab9f02e0fd806956834b43",
+    "tracer-privacy-0.13.1-runtime-third.log": "90c867c66340afa4208aa4d422f66cc18e4d0344c3b3b0735f012574717bd6a7"
+  },
+  "earlierAttempts": "Earlier native attempts exposed fixture population timing/camera visibility; two compile attempts exposed a protected nested fixture type. Only the completed third native run is acceptance."
+}

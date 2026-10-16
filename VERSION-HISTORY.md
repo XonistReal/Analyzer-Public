@@ -1,3 +1,7 @@
+## 0.13.1 - Screen-locked tracers and local name alias
+
+Adds independent Crosshair / Bottom / Top origins to every tracer producer using the actual native projection, while retaining target endpoint choices. Opt-in Name Changer provides an editable local alias across rendered text with matching measurement and cached-chat refresh. Account/server identity and original messages remain unchanged. [Controls and limits](TRACERS-AND-NAME.md); [current validation](VALIDATION.md).
+
 ## 0.13.0 - Finders and specialized ESP
 
 Adds 27 original finder/ESP module families, exact loaded entity/block-state predicates, bounded fair chunk scans, local scoped stash history, the shader Findings browser, coordinate Region Map and actual posed skeleton bones. Glazed is a behavior reference only. [Controls/coverage](FINDERS.md) and [current policy/native evidence](VALIDATION.md) distinguish heuristics and observed results.
@@ -8,7 +12,7 @@ Original GLSL materials follow actual animated living-model geometry: Flat, Meta
 
 # Saved Analyzer versions
 
-The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analyzer) preserves **22 version tags**. Existing commits/tags are retained; recovery commits use their actual backup date rather than invented development dates. **Main/v0.13.0 contain the complete current project and tests.** The original 15-tag transfer remains documented in [GITHUB-BACKUP.md](GITHUB-BACKUP.md).
+The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analyzer) preserves **23 version tags**. Existing commits/tags are retained; recovery commits use their actual backup date rather than invented development dates. **Main/v0.13.1 contain the complete current project and tests.** The original 15-tag transfer remains documented in [GITHUB-BACKUP.md](GITHUB-BACKUP.md).
 
 | Version/update | Tag | Source provenance |
 | --- | --- | --- |
@@ -33,6 +37,7 @@ The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analy
 | 0.10.3 motion and planning | `v0.10.3` | Acceleration-aware camera braking, stable mining approaches, nearest-first resources and checked route corrections; deterministic tests, gameplay checks left to the user |
 | 0.11.0 combat, ESP and construction | `v0.11.0` | Coordinated combat and three additions, debug ESP, local registry item requests, schematic ghosts and reusable fluid buckets; deterministic/registry checks separated from gameplay |
 | 0.12.0 shader entity chams | `v0.12.0` | Original posed-model GLSL materials, independent visible/occluded palettes, shader wire edges, policy tests and focused native GPU/capture evidence |
+| 0.13.1 tracer origins and name alias | `v0.13.1` | Exact rendered tracer transforms, original local text masking, safe editable fields and focused policy/native evidence |
 | 0.13.0 finders and specialized ESP | `v0.13.0` | Original loaded-data detectors, scoped stash history, coordinate map and posed skeletons; upstream behavior only, with separate policy/native evidence |
 
 The existing eight tags were originally reconstructed from saved source exports; their original-export hashes remain in their commit messages. They are not moved or rewritten by this backup. Those original source ZIPs are not available on this PC, so release source ZIPs are newly generated from the preserved Git tags.

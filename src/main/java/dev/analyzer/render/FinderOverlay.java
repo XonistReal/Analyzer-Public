@@ -2,6 +2,7 @@ package dev.analyzer.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.*;
@@ -9,6 +10,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
+import org.joml.Matrix4f;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,13 +18,16 @@ import java.util.List;
 public final class FinderOverlay {
     private FinderOverlay() { }
     public record Shape(Box box, int color, boolean tracer) { }
-    public record Segment(Vec3d from, Vec3d to, int color) { }
+    public record Segment(Vec3d from, Vec3d to, int color, String tracerModule, String tracerOrigin) {
+        public Segment(Vec3d from, Vec3d to, int color) { this(from, to, color, null, null); }
+    }
     private static final int[] EDGES = {0,1,1,5,5,4,4,0,2,3,3,7,7,6,6,2,0,2,1,3,5,7,4,6};
 
-    public static void draw(WorldRenderContext context, List<Shape> shapes, boolean throughWalls, float width) {
+    public static void draw(WorldRenderContext context, List<Shape> shapes, boolean throughWalls, float width,
+                            String tracerOrigin, String module) {
         if (shapes.isEmpty()) return;
         List<Segment> segments = new ArrayList<>();
-        Vec3d start = context.camera().getPos().add(Vec3d.fromPolar(context.camera().getPitch(), context.camera().getYaw()).multiply(.5));
+        Vec3d start = shapes.stream().anyMatch(Shape::tracer) ? tracerStart(context, throughWalls, tracerOrigin, module) : null;
         for (Shape shape : shapes) {
             if (segments.size() >= 8192) break;
             Box b = shape.box();
@@ -32,18 +37,28 @@ public final class FinderOverlay {
                 segments.add(new Segment(new Vec3d((a&1)==0?b.minX:b.maxX,(a&2)==0?b.minY:b.maxY,(a&4)==0?b.minZ:b.maxZ),
                         new Vec3d((c&1)==0?b.minX:b.maxX,(c&2)==0?b.minY:b.maxY,(c&4)==0?b.minZ:b.maxZ),shape.color()));
             }
-            if (shape.tracer()) segments.add(new Segment(start,b.getCenter(),shape.color()));
+            if (shape.tracer() && start != null) segments.add(new Segment(start,b.getCenter(),shape.color(), module, tracerOrigin));
         }
         drawLines(context, segments, throughWalls, width);
+    }
+
+    /** Absolute world input for the same matrix scope used by drawLines below. */
+    public static Vec3d tracerStart(WorldRenderContext context, boolean throughWalls, String origin, String module) {
+        Matrix4f drawView = new Matrix4f(RenderSystem.getModelViewMatrix());
+        if (throughWalls) drawView.mul(context.positionMatrix());
+        var relative = TracerOrigin.cameraRelative(RenderSystem.getProjectionMatrix(), drawView, origin,
+                MinecraftClient.getInstance().getWindow().getFramebufferHeight());
+        return relative == null ? null : context.camera().getPos().add(relative.x, relative.y, relative.z);
     }
 
     public static void drawLines(WorldRenderContext context, List<Segment> segments, boolean throughWalls, float width) {
         if (segments.isEmpty()) return;
         State state = new State();
         var matrices = RenderSystem.getModelViewStack();
-        matrices.pushMatrix();
+        // LAST already owns the camera view; END has popped it. Install it only for END.
+        if (throughWalls) matrices.pushMatrix();
         try {
-            matrices.mul(context.positionMatrix());
+            if (throughWalls) matrices.mul(context.positionMatrix());
             RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc(); RenderSystem.disableCull();
             RenderSystem.depthMask(false); RenderSystem.depthFunc(GL11.GL_LEQUAL);
             if (throughWalls) RenderSystem.disableDepthTest(); else RenderSystem.enableDepthTest();
@@ -60,9 +75,13 @@ public final class FinderOverlay {
                 direction=direction.normalize();
                 buffer.vertex((float)from.x,(float)from.y,(float)from.z).color(segment.color()).normal((float)direction.x,(float)direction.y,(float)direction.z);
                 buffer.vertex((float)to.x,(float)to.y,(float)to.z).color(segment.color()).normal((float)direction.x,(float)direction.y,(float)direction.z);
+                if (segment.tracerModule() != null) TracerOrigin.submitted(segment.tracerModule(), segment.tracerOrigin(),
+                        RenderSystem.getProjectionMatrix(), RenderSystem.getModelViewMatrix(),
+                        (float)from.x,(float)from.y,(float)from.z,
+                        MinecraftClient.getInstance().getWindow().getFramebufferHeight());
             }
             var built=buffer.endNullable(); if (built!=null) BufferRenderer.drawWithGlobalProgram(built);
-        } finally { matrices.popMatrix(); state.restore(); }
+        } finally { if (throughWalls) matrices.popMatrix(); state.restore(); }
     }
     private static final class State {
         final boolean depth=GL11.glIsEnabled(GL11.GL_DEPTH_TEST),blend=GL11.glIsEnabled(GL11.GL_BLEND),cull=GL11.glIsEnabled(GL11.GL_CULL_FACE);

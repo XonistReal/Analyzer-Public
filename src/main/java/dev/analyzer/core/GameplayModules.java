@@ -11,6 +11,8 @@ public final class GameplayModules {
         out.addAll(CombatSettings.definitions());
         out.addAll(HvhSettings.definitions());
         out.addAll(MovementSettings.definitions());
+        add(out, "name-changer", "Name Changer", "Show a local alias for your own name in rendered labels and chat. Your account and outgoing text stay unchanged; editable input shows its actual text.", Category.CLIENT,
+                Setting.text("alias", "Alias (letters, numbers, _)", "Player", 32));
         add(out, "auto-eat", "Auto Eat", "Begin eating below the hunger threshold and continue until full; temporarily owns and restores use input/slot.", Category.PLAYER,
                 Setting.number("hunger", "Eat below hunger", 16, 1, 20, 1));
         add(out, "auto-gapple", "Auto Gapple", "Use a hotbar golden apple below a health threshold.", Category.PLAYER,

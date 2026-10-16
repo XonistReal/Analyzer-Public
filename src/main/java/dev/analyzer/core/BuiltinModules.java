@@ -74,6 +74,7 @@ public final class BuiltinModules {
         List<Setting<?>> settings = new ArrayList<>(List.of(
                 Setting.bool("labels", "Container labels", false),
                 Setting.bool("tracers", "Storage tracers", false),
+                Setting.choice("tracer-origin", "Tracer origin", "Crosshair", "Crosshair", "Bottom", "Top"),
                 Setting.number("tracer-width", "Tracer width", 1, .5, 4, .25)));
         settings.addAll(espGeometrySettings(64, 128));
         for (EspSettings.StorageGroup group : EspSettings.StorageGroup.values()) {
@@ -93,7 +94,8 @@ public final class BuiltinModules {
                 Setting.bool("through-walls", "Through walls", true),
                 Setting.number("line-width", "Line width", 1, .5, 4, .25),
                 Setting.number("opacity", "Line opacity (%)", 100, 10, 100, 5),
-                Setting.choice("anchor", "Line anchor", "Center", "Center", "Feet", "Head"),
+                Setting.choice("tracer-origin", "Tracer origin", "Crosshair", "Crosshair", "Bottom", "Top"),
+                Setting.choice("anchor", "Target anchor", "Center", "Center", "Feet", "Head"),
                 Setting.bool("match-esp-colors", "Use Entity ESP colors", true)));
         settings.addAll(EspSettings.entityColors());
         return List.copyOf(settings);

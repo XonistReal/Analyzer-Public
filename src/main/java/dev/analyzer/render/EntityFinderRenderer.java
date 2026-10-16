@@ -204,14 +204,15 @@ public final class EntityFinderRenderer {
                     List<FinderOverlay.Shape> tracers = shapes(id, delta, true);
                     // Skeleton tracers accompany its actual bones; no entity boxes substitute for bones.
                     List<FinderOverlay.Segment> lines = new ArrayList<>();
-                    Vec3d eye = context.camera().getPos();
-                    Vec3d start = eye.add(Vec3d.fromPolar(context.camera().getPitch(), context.camera().getYaw()).multiply(.1));
-                    for (var shape : tracers) lines.add(new FinderOverlay.Segment(start, shape.box().getCenter(), shape.color()));
+                    Vec3d start = tracers.isEmpty() ? null : FinderOverlay.tracerStart(context, throughWalls,
+                            core.getChoice(id, "tracer-origin"), id);
+                    if (start != null) for (var shape : tracers) lines.add(new FinderOverlay.Segment(start, shape.box().getCenter(),
+                            shape.color(), id, core.getChoice(id, "tracer-origin")));
                     FinderOverlay.drawLines(context, lines, throughWalls, (float) core.getNumber(id, "line-width"));
                 }
             } else {
                 FinderOverlay.draw(context, shapes(id, delta, core.getBoolean(id, "tracers")), throughWalls,
-                        (float) core.getNumber(id, "line-width"));
+                        (float) core.getNumber(id, "line-width"), core.getChoice(id, "tracer-origin"), id);
             }
         }
     }

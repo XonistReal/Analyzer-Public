@@ -91,6 +91,10 @@ public final class AnalyzerCore {
         return String.class.cast(getValue(moduleId, settingId));
     }
 
+    public String getText(String moduleId, String settingId) {
+        return String.class.cast(getValue(moduleId, settingId));
+    }
+
     public synchronized void setValue(String moduleId, String settingId, Object value) {
         Setting<?> setting = definition(moduleId).setting(settingId);
         Object normalized = setting.normalize(value);
@@ -291,7 +295,7 @@ public final class AnalyzerCore {
                 if (!primitive.isNumber()) throw new IllegalArgumentException("Expected number");
                 yield primitive.getAsDouble();
             }
-            case CHOICE -> {
+            case CHOICE, TEXT -> {
                 if (!primitive.isString()) throw new IllegalArgumentException("Expected string");
                 yield primitive.getAsString();
             }

@@ -13,6 +13,7 @@ public final class FinderSettings {
         settings.add(Setting.number("max-markers", "Maximum markers", 128, 8, 512, 8));
         settings.add(Setting.bool("through-walls", "Through walls", true));
         settings.add(Setting.bool("tracers", "Tracers", false));
+        settings.add(Setting.choice("tracer-origin", "Tracer origin", "Crosshair", "Crosshair", "Bottom", "Top"));
         settings.add(Setting.number("line-width", "Line width", 1, .5, 3, .25));
         settings.add(Setting.number("opacity", "Opacity (%)", 100, 10, 100, 5));
         settings.add(Setting.bool("notify", "Local discovery messages", false));

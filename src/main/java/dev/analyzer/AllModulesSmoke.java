@@ -220,6 +220,7 @@ final class AllModulesSmoke {
             case BOOLEAN -> variant == 2;
             case NUMBER -> setting.min() + (setting.max() - setting.min()) * (variant == 1 ? .15 : .85);
             case CHOICE -> variant == 1 ? setting.choices().getFirst() : setting.choices().getLast();
+            case TEXT -> variant == 1 ? "Player_1" : "Stream_2";
         };
     }
 
@@ -242,6 +243,7 @@ final class AllModulesSmoke {
                     case BOOLEAN -> List.of(false, true);
                     case NUMBER -> List.of(setting.min(), (setting.min() + setting.max()) / 2, setting.max());
                     case CHOICE -> setting.choices();
+                    case TEXT -> List.of("Player_1", "Stream_2");
                 };
                 var normalized = new ArrayList<Object>();
                 for (Object value : inputs) {
@@ -250,7 +252,7 @@ final class AllModulesSmoke {
                     else require(actual.equals(value), "Exact typed matrix " + module.id() + "/" + setting.id());
                 }
                 Object before = matrix.getValue(module.id(), setting.id());
-                Object invalid = switch (setting.kind()) { case BOOLEAN -> "true"; case NUMBER -> Double.NaN; case CHOICE -> "__invalid_choice__"; };
+                Object invalid = switch (setting.kind()) { case BOOLEAN -> "true"; case NUMBER -> Double.NaN; case CHOICE -> "__invalid_choice__"; case TEXT -> "unsafe\ntext"; };
                 boolean rejected = false;
                 try { matrix.setValue(module.id(), setting.id(), invalid); } catch (IllegalArgumentException expected) { rejected = true; rejectedWrites++; }
                 require(rejected && matrix.getValue(module.id(), setting.id()).equals(before), "Invalid write leaves matrix state intact " + module.id() + "/" + setting.id());
@@ -273,6 +275,7 @@ final class AllModulesSmoke {
                             case BOOLEAN -> cycle % 2 == 0;
                             case NUMBER -> setting.min() + (setting.max() - setting.min()) * (cycle % 3) / 2;
                             case CHOICE -> setting.choices().get(cycle % setting.choices().size());
+                            case TEXT -> "Player_" + cycle;
                         };
                         matrix.setValue(module.id(), setting.id(), value); settingsWrites++;
                     }

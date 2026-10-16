@@ -1,3 +1,17 @@
+# Screen-locked tracers and local name alias - October 16, 2026
+
+Analyzer **0.13.1** adds independent **Tracer origin → Crosshair / Bottom / Top** throughout entity/storage/finder/skeleton tracers, retaining saved target anchors, and opt-in **Client → Name Changer → Alias**. [Controls and scope](TRACERS-AND-NAME.md).
+
+Java 21 `build moduleCatalog publishLocal` passes **77,720 assertions across 31 suites**, including **4,682 tracer-transform assertions** and **46 name policy/config assertions**. The catalogue exports **157 modules / 1,821 controls**. Optional Windows schematic symlink cases remain explicitly skipped. Final build/feed SHA-256: **8f654976f8c2e4add5234cbfea67846a6781341400d5180488c216c801911b6e**.
+
+The completed isolated `runTracerPrivacySmoke` passes **162 native checks**, including **30 producer/origin/visibility-pass combinations** and **10 submitted-origin samples during actual walking bob**, with first/back-third-person views, FOV 70/90/100 and moved/rotated cameras. All five representative producers emit vertices that project to the chosen screen position; all 29 source schemas and varied transforms have deterministic coverage. Three unedited **1920 x 1080** captures were visually inspected: the lines meet the crosshair, bottom and top, with the own name replaced in actual chat, tab, sidebar and native/Lato labels. There are no ERROR/FATAL entries in the completed log; native GL error checks pass.
+
+Native String/Text/OrderedText drawing and widths agree with the alias; styled names, trimming/wrapping, live edits/disable and cached chat/helper presentation pass. Original message components, session/profile names and UUIDs remain unchanged. Actual TextField and multiline EditBox cursor/line geometry and SelectionManager validators retain raw input. The real shader alias editor accepts typed characters, rejects an invalid value and exercises Apply/Cancel. All nine mixin targets load. Book/sign-specific injection scopes were independently reviewed against pinned bytecode; this run does not type through complete book/sign screens. Actual damage, remote servers, custom third-party font paths and unrelated combat/automation were not rerun.
+
+Earlier incomplete fixture runs encountered population timing/target visibility and a protected nested fixture type; they are not acceptance. The final command-built arena contains actual received blocks/mobs and an own-scoreboard entry. Native input handling remains development-only in the isolated launch. [Screenshots](screenshots/README.md) and [acceptance JSON](production-validation/native-0.13.1/acceptance.json) retain evidence hashes. Editable contents intentionally stay real, while the account and server identity are never renamed. Prism delivery verifies matching build/feed/package/install hashes and preserves user game data and launcher preferences.
+
+## Earlier 0.13.0 evidence
+
 # Loaded finders and specialized ESP - October 16, 2026
 
 Analyzer **0.13.0** adds **27 original module-family equivalents**, including Advanced Stash Finder, Amethyst Finder, exact entity/equipment/state detectors, posed Skeleton ESP, local Findings history and a coordinate Region Map. [Controls, source references and differences](FINDERS.md).

@@ -1,6 +1,6 @@
 # Analyzer module catalogue
 
-156 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
+157 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
 
 ## Render
 
@@ -201,5 +201,6 @@
 | --- | --- | --- |
 | Interface | Glass or solid panels, accent colors and motion control. | On |
 | Server Privacy | Reduce mod-identifying metadata and text probes. Vanilla-only channels can disable server-connected mods; gameplay remains observable. | On |
+| Name Changer | Show a local alias for your own name in rendered labels and chat. Your account and outgoing text stay unchanged; editable input shows its actual text. | Off |
 | Automation | Review a local task plan. Safer routing and active Survival protection guard its normal actions. | Off |
 

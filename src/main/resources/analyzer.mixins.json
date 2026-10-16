@@ -9,6 +9,8 @@
     "HomeTitleMixin", "HomeListMixin", "HomeListWidthMixin", "HomeWidgetMixin", "HomeSliderMixin", "HomeScanningMixin",
     "PrivacyConnectionMixin", "PrivacyTextCodecsMixin", "PrivacyTextTranslationMixin", "PrivacyTextKeybindMixin",
     "PrivacyTextMutableMixin", "PrivacyTextSignMixin", "PrivacyLanguageStorageMixin", "PrivacyPackLoaderMixin",
-    "PrivacyPackHeadersMixin", "PrivacyPackDownloaderMixin", "PrivacyPackNetworkMixin"],
+    "PrivacyPackHeadersMixin", "PrivacyPackDownloaderMixin", "PrivacyPackNetworkMixin",
+    "NameChangerTextRendererMixin", "NameChangerTextHandlerMixin", "NameChangerChatMixin", "NameChangerEditableMixin",
+    "NameChangerBookEditMixin", "NameChangerSignEditMixin", "NameChangerSelectionMixin", "NameChangerEditBoxMixin", "NameChangerEditBoxWidgetMixin"],
   "injectors": { "defaultRequire": 1 }
 }

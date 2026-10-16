@@ -559,7 +559,8 @@ public final class FinderEngine {
                 shapes.add(new FinderOverlay.Shape(new Box(mark.x(), mark.y(), mark.z(), mark.x() + mark.width(),
                         mark.y() + mark.height(), mark.z() + mark.depth()).expand(.002), color, tracers));
             }
-            FinderOverlay.draw(context, shapes, throughWalls, (float) core.getNumber(id, "line-width"));
+            FinderOverlay.draw(context, shapes, throughWalls, (float) core.getNumber(id, "line-width"),
+                    core.getChoice(id, "tracer-origin"), id);
         }
     }
 

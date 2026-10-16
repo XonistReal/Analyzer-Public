@@ -4,6 +4,7 @@ run/
 run-native-automation/
 run-chams-smoke/
 run-finders-smoke/
+run-tracer-privacy-smoke/
 .idea/
 *.iml
 .DS_Store

@@ -12,7 +12,7 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 156, "Release catalogue includes 156 registered modules");
+            check(core.modules().size() == 157, "Release catalogue includes 157 registered modules");
             check(core.modules().stream().map(ModuleDefinition::id).distinct().count() == core.modules().size(), "Unique module IDs");
             for (Category category : Category.values())
                 check(core.modules().stream().anyMatch(module -> module.category() == category), "Populated category " + category);
@@ -399,7 +399,7 @@ public final class CoreSelfTest {
                     if (!settings.has(setting.id()) || module.id().equals("menu") && setting.id().equals("layout")) continue;
                     var value = settings.get(setting.id());
                     Object expected = switch (setting.kind()) {
-                        case BOOLEAN -> value.getAsBoolean(); case NUMBER -> value.getAsDouble(); case CHOICE -> value.getAsString();
+                        case BOOLEAN -> value.getAsBoolean(); case NUMBER -> value.getAsDouble(); case CHOICE, TEXT -> value.getAsString();
                     };
                     check(core.getValue(module.id(), setting.id()).equals(expected), "Legacy HVH profile preserves setting " + module.id() + "/" + setting.id());
                 }

@@ -246,15 +246,20 @@ public final class AnalyzerRenderer {
             if (!storageScreen && !storageTargets.isEmpty()) drawEsp("storage-esp", storageTargets, context);
             if (!tracerTargets.isEmpty()) {
                 setDepth(core.getBoolean("tracers", "through-walls"));
-                // A point just beyond the near plane anchors the lines at the center of view.
-                Vector3f start = new Vector3f(0, -0.025f, -0.25f).rotate(context.camera().getRotation());
+                Vector3f start = TracerOrigin.cameraRelative(RenderSystem.getProjectionMatrix(),
+                        RenderSystem.getModelViewMatrix(), core.getChoice("tracers", "tracer-origin"),
+                        client.getWindow().getFramebufferHeight());
                 float width = (float) core.getNumber("tracers", "line-width");
-                drawTracers(tracerTargets, start, width, opacity("tracers"), core.getChoice("tracers", "anchor"));
+                if (start != null) drawTracers(tracerTargets, start, width, opacity("tracers"), core.getChoice("tracers", "anchor"),
+                        "tracers", core.getChoice("tracers", "tracer-origin"));
             }
             if (containers && core.getBoolean("storage-esp", "tracers") && !storageTargets.isEmpty()) {
                 setDepth(core.getBoolean("storage-esp", "through-walls"));
-                Vector3f start = new Vector3f(0, -0.025f, -0.25f).rotate(context.camera().getRotation());
-                drawTracers(storageTargets, start, (float) core.getNumber("storage-esp", "tracer-width"), opacity("storage-esp"), "Center");
+                Vector3f start = TracerOrigin.cameraRelative(RenderSystem.getProjectionMatrix(),
+                        RenderSystem.getModelViewMatrix(), core.getChoice("storage-esp", "tracer-origin"),
+                        client.getWindow().getFramebufferHeight());
+                if (start != null) drawTracers(storageTargets, start, (float) core.getNumber("storage-esp", "tracer-width"), opacity("storage-esp"), "Center",
+                        "storage-esp", core.getChoice("storage-esp", "tracer-origin"));
             }
             if (!entityScreen && !entityTargets.isEmpty()) drawLabels("entity-esp", entityTargets, context,
                     core.getBoolean("entity-esp", "labels"), core.getBoolean("entity-esp", "health"));
@@ -335,7 +340,8 @@ public final class AnalyzerRenderer {
         BufferRenderer.drawWithGlobalProgram(lines.end());
     }
 
-    private static void drawTracers(List<Target> targets, Vector3f start, float width, int alpha, String anchor) {
+    private static void drawTracers(List<Target> targets, Vector3f start, float width, int alpha, String anchor,
+                                    String module, String origin) {
         RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
         RenderSystem.lineWidth(width);
         BufferBuilder lines = Tessellator.getInstance().begin(VertexFormat.DrawMode.LINES, VertexFormats.LINES);
@@ -346,6 +352,8 @@ public final class AnalyzerRenderer {
                     Palette.alpha(target.color, alpha));
         }
         BufferRenderer.drawWithGlobalProgram(lines.end());
+        TracerOrigin.submitted(module, origin, RenderSystem.getProjectionMatrix(), RenderSystem.getModelViewMatrix(),
+                start.x, start.y, start.z, MinecraftClient.getInstance().getWindow().getFramebufferHeight());
     }
 
     private static void outlineBox(BufferBuilder buffer, Box box, int color, boolean corners) {

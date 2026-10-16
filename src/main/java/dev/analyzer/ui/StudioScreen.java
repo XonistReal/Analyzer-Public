@@ -200,13 +200,19 @@ public final class StudioScreen extends CatalogScreen {
                         clippedControl("setting:" + mid + ":" + setting.id(), new Area(x + 6, y, width - 12, height - 3), clip, 0,
                                 () -> {core.setValue(mid, setting.id(), !core.getBoolean(mid, setting.id())); changed();});
                     }
-                    case CHOICE -> {
+                    case CHOICE, TEXT -> {
                         Area hit = new Area(x + 8, controlY, width - 18, 25);
                         GuiDraw.shaderCard(draw, hit.x(), hit.y(), hit.w(), hit.h(), 8, accent, false, "Classic", hit.contains(mx, my) ? 1 : 0, false);
                         label(draw, GuiDraw.truncate(textRenderer, core.getChoice(mid, setting.id()), hit.w() - 36, .94f), hit.x() + 9, hit.y() + 7, .94f, WHITE);
                         label(draw, "›", hit.right() - 15, hit.y() + 6, 1.1f, SECONDARY);
-                        clippedControl("setting:" + mid + ":" + setting.id(), hit, clip, 0, () -> cycle(mid, setting, 1));
-                        clippedControl("setting-back:" + mid + ":" + setting.id(), hit, clip, 1, () -> cycle(mid, setting, -1));
+                        clippedControl("setting:" + mid + ":" + setting.id(), hit, clip, 0, () -> {
+                            if (setting.kind() == Setting.Kind.TEXT) client.setScreen(new TextSettingScreen(core, mid, setting, this));
+                            else cycle(mid, setting, 1);
+                        });
+                        clippedControl("setting-back:" + mid + ":" + setting.id(), hit, clip, 1, () -> {
+                            if (setting.kind() == Setting.Kind.TEXT) client.setScreen(new TextSettingScreen(core, mid, setting, this));
+                            else cycle(mid, setting, -1);
+                        });
                     }
                     case NUMBER -> {
                         double value = core.getNumber(mid, setting.id());

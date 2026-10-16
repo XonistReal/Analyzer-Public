@@ -30,6 +30,7 @@ public final class ModuleCatalog {
                 data.addProperty("kind", setting.kind().name()); data.add("default", gson.toJsonTree(setting.defaultValue()));
                 if (setting.kind() == Setting.Kind.NUMBER) { data.addProperty("min", setting.min()); data.addProperty("max", setting.max()); data.addProperty("step", setting.step()); }
                 if (setting.kind() == Setting.Kind.CHOICE) data.add("choices", gson.toJsonTree(setting.choices()));
+                if (setting.kind() == Setting.Kind.TEXT) { data.addProperty("maxLength", (int)setting.max()); data.addProperty("format", "ASCII letters, numbers, underscore"); }
                 settings.add(data);
             }
             entry.add("settings", settings); catalog.add(entry);

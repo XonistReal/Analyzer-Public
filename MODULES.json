@@ -374,6 +374,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "tracer-width",
         "label": "Tracer width",
         "kind": "NUMBER",
@@ -1519,8 +1530,19 @@
         "step": 5.0
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "anchor",
-        "label": "Line anchor",
+        "label": "Target anchor",
         "kind": "CHOICE",
         "default": "Center",
         "choices": [
@@ -3555,6 +3577,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -3681,6 +3714,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -3821,6 +3865,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -3967,6 +4022,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -4108,6 +4174,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -4258,6 +4335,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -4396,6 +4484,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -4560,6 +4659,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -4732,6 +4842,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -4855,6 +4976,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -5000,6 +5132,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -5130,6 +5273,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -5253,6 +5407,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -5381,6 +5546,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -5515,6 +5691,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -5666,6 +5853,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -5783,6 +5981,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -5922,6 +6131,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -6047,6 +6267,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -6164,6 +6395,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -6321,6 +6563,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -6452,6 +6705,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -6569,6 +6833,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -6774,6 +7049,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -6953,6 +7239,17 @@
         "default": false
       },
       {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
+      },
+      {
         "id": "line-width",
         "label": "Line width",
         "kind": "NUMBER",
@@ -7115,6 +7412,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -7297,6 +7605,17 @@
         "label": "Tracers",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "tracer-origin",
+        "label": "Tracer origin",
+        "kind": "CHOICE",
+        "default": "Crosshair",
+        "choices": [
+          "Crosshair",
+          "Bottom",
+          "Top"
+        ]
       },
       {
         "id": "line-width",
@@ -16252,6 +16571,23 @@
         "min": 0.1,
         "max": 0.8,
         "step": 0.01
+      }
+    ]
+  },
+  {
+    "id": "name-changer",
+    "name": "Name Changer",
+    "category": "Client",
+    "description": "Show a local alias for your own name in rendered labels and chat. Your account and outgoing text stay unchanged; editable input shows its actual text.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "alias",
+        "label": "Alias (letters, numbers, _)",
+        "kind": "TEXT",
+        "default": "Player",
+        "maxLength": 32,
+        "format": "ASCII letters, numbers, underscore"
       }
     ]
   },

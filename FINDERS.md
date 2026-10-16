@@ -36,6 +36,8 @@ Enable **Keep local stash history** to remember qualifying observations. **Findi
 | Wandering Trader ESP | Actual received wandering traders |
 | 1 x 1 Holes | Sealed single-cell air pockets, with optional cover filtering |
 
+In 0.13.1 every finder tracer has **Tracer origin → Crosshair / Bottom / Top**, independent of its color and target. See [screen anchors and local name privacy](TRACERS-AND-NAME.md).
+
 Block and entity overlays use thin native shader-expanded debug lines with independent marker colors, Custom RGB, opacity, through-wall control and optional tracers. Common controls that do not apply to a HUD or entity-only module are hidden. Discovery messages stay local, deduplicated and rate limited. No webhook, automatic disconnect, teleport command or remote notification is sent by these modules.
 
 Terrain scans are incremental, nearest-first and bounded to at most 16,384 lookup units per tick. Neighbor probes consume the same budget; interrupted predicates resume instead of bypassing limits. Palette pruning skips irrelevant sections. Expedited refreshes yield to ordinary work so distant chunks cannot be permanently starved. Received block changes, replacement chunks, unloading, settings changes and world changes invalidate affected observations. Active block replacement may still delay a coherent chunk aggregate; scan status is shown in enabled Studio cards rather than implying an instant complete survey. Caches, marker counts and notices have independent caps.

@@ -1,3 +1,13 @@
+# Screen-locked tracers and local name alias - 0.13.1
+
+Three unedited 1920 x 1080 native captures from the completed isolated `runTracerPrivacySmoke`. All five representative tracer producers use their selected screen origin. Actual native chat, tab, sidebar and String/Text/OrderedText/Lato labels display the local alias `PrivatePilot`. Blocks, mobs and scoreboard are integrated-server fixture preconditions; no user world or account was altered. These frames show through-wall mode; the complete 162-check run also verifies depth-tested origins and live walking bob.
+
+- [Crosshair origin and local name alias](analyzer-native-tracer-privacy-crosshair.png)
+- [Bottom origin](analyzer-native-tracer-privacy-bottom.png)
+- [Top origin in third person](analyzer-native-tracer-privacy-top.png)
+
+[Controls and limits](../TRACERS-AND-NAME.md) · [Acceptance](../production-validation/native-0.13.1/acceptance.json). Historical screenshots and their scopes follow.
+
 # Finder and specialized ESP screenshots - 0.13.0
 
 Five unedited 1920 x 1080 native Minecraft framebuffer captures from the completed isolated `runFindersSmoke`. Actual integrated-server mobs, equipment, blocks and chunk patterns are fixture preconditions; Scout is an explicitly client-local invisible player model. All five images were visually inspected. The run completes 99 checks and 25 detector positives, plus the actual map HUD/Findings screen; Bedrock Void is covered by pure policy fixtures only.

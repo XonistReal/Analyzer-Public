@@ -17,7 +17,7 @@ final class SettingSections {
         if (module.settings().stream().anyMatch(value -> value.id().equals("scan-budget"))) {
             String id = setting.id();
             if (id.startsWith("marker-")) return "Colors";
-            if (java.util.Set.of("through-walls", "tracers", "line-width", "opacity", "max-markers").contains(id)) return "Presentation";
+            if (java.util.Set.of("through-walls", "tracers", "tracer-origin", "line-width", "opacity", "max-markers").contains(id)) return "Presentation";
             if (java.util.Set.of("range", "scan-budget", "notify").contains(id)) return "Scanning and notices";
             return module.id().equals("region-map") ? "Coordinate map" : "Detection";
         }
@@ -38,7 +38,7 @@ final class SettingSections {
             if (module.id().equals("storage-esp") && java.util.Arrays.stream(dev.analyzer.core.EspSettings.StorageGroup.values())
                     .anyMatch(group -> group.id().equals(id))) return "Storage filters";
             if (id.equals("through-walls") || id.equals("line-width") || id.equals("style") || id.equals("min-marker-pixels")
-                    || id.equals("range") || id.equals("opacity") || id.equals("anchor") || id.equals("tracers") || id.equals("tracer-width")) return "Boxes and visibility";
+                    || id.equals("range") || id.equals("opacity") || id.equals("anchor") || id.equals("tracers") || id.equals("tracer-origin") || id.equals("tracer-width")) return "Boxes and visibility";
             return "Labels and distance";
         }
         if (module.category() != Category.COMBAT && module.category() != Category.HVH && module.category() != Category.MOVEMENT) return "";
@@ -77,7 +77,8 @@ final class SettingSections {
         String id = setting.id(), name = module.id();
         if (module.settings().stream().anyMatch(value -> value.id().equals("scan-budget"))) {
             if (id.equals("marker-red") || id.equals("marker-green") || id.equals("marker-blue")) return choice(core,module,"marker-color").equals("Custom");
-            if (name.equals("region-map") && java.util.Set.of("range", "scan-budget", "max-markers", "through-walls", "tracers", "line-width", "notify").contains(id)) return false;
+            if (name.equals("region-map") && java.util.Set.of("range", "scan-budget", "max-markers", "through-walls", "tracers", "tracer-origin", "line-width", "notify").contains(id)) return false;
+            if (id.equals("tracer-origin")) return enabled(core, module, "tracers");
         }
         if (name.equals("chams")) {
             if (id.equals("wire-width")) return choice(core, module, "style").equals("Wireframe");
@@ -101,7 +102,7 @@ final class SettingSections {
                 if (name.equals("storage-esp") && !enabled(core, module, group)) return false;
                 if (!id.endsWith("-color")) return choice(core, module, group + "-color").equals("Custom");
             }
-            if (id.equals("tracer-width")) return enabled(core, module, "tracers");
+            if (id.equals("tracer-width") || id.equals("tracer-origin") && name.equals("storage-esp")) return enabled(core, module, "tracers");
             if (id.startsWith("label-") || id.equals("distance-scale") || id.equals("fade-labels")
                     || id.equals("max-labels") || id.equals("declutter"))
                 return enabled(core, module, "labels") || name.equals("entity-esp") && enabled(core, module, "health");
