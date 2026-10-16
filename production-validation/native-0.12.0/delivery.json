@@ -1,0 +1,15 @@
+{
+  "version": "0.12.0",
+  "sha256": "88946eb4a8eb7ceb45e8954629b689d5c2ae59d26fe68ff3e2c35a541900db4d",
+  "instance": "C:\\Users\\sould\\AppData\\Roaming\\PrismLauncher\\instances\\Analyzer-0.10.0-Prism-1.21.4",
+  "installed": "C:\\Users\\sould\\AppData\\Roaming\\PrismLauncher\\instances\\Analyzer-0.10.0-Prism-1.21.4\\minecraft\\mods\\analyzer-0.12.0-88946eb4a8eb.jar",
+  "package": "C:\\Users\\sould\\Desktop\\Analyzer-0.12.0-Prism-1.21.4.zip",
+  "protectedFilesPreserved": 89,
+  "activeMods": [
+    "analyzer-0.12.0-88946eb4a8eb.jar",
+    "fabric-api-0.119.4+1.21.4.jar",
+    "litematica-fabric-1.21.4-0.21.0.jar",
+    "malilib-fabric-1.21.4-0.23.1.jar"
+  ],
+  "packageSha256": "5442ca8be535f401ac05a5dd67165604ad8a8d342dc724b3beb48db4225c7e49"
+}

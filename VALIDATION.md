@@ -1,3 +1,15 @@
+# Shader entity chams - October 15, 2026
+
+Analyzer **0.12.0** adds opt-in **Render > Entity Chams** with **Flat / Metallic / Glass / Glow / Wireframe** on actual posed living models. Visible/occluded group colors and opacity are independent, with optional matching to Entity ESP. Debug boxes remain separate. [Material settings and scope](ENTITY-CHAMS.md).
+
+Java 21 `build moduleCatalog publishLocal` passes **70,965 assertions across 24 suites**, including **1,043 chams policy assertions**, and exports **129 modules / 1,373 controls**. Optional Windows schematic-library symlink cases remain skipped where unavailable. Build/feed SHA-256: **88946eb4a8eb7ceb45e8954629b689d5c2ae59d26fe68ff3e2c35a541900db4d**.
+
+The isolated `runChamsSmoke` native client passes **32 focused scene checks plus 535 live GL assertions**, produces nine unedited **1920 x 1080** framebuffer captures, and completes without ERROR/FATAL entries. Actual integrated-server mobs, storage and an occluding stone-brick wall are fixture preconditions; Scout is a client-local player rendering fixture. Each scene submits five posed models / 840 vertices. All five styles, separate occluded colors, disabling the hidden pass, module disable cleanup, actual resource reload and independent debug boxes are observed. Live checks compare incoming/outgoing program, VAO/VBO/EBO, depth, blend, cull, write masks, polygon state, line width, bindings and viewport/scissor state. All nine images were visually inspected. The first development pass exposed unsupported driver wide lines; final Wireframe uses shader pixel edges, and a small shared depth tolerance removes coplanar color striping. The completed second run is the current evidence.
+
+Scope remains base living/skin models: normal armor/equipment/accessories remain. Glass uses translucent Fresnel shading and Glow an emissive rim; no scene refraction or postprocess bloom is claimed. Replacement renderers/resource-pack models and unrelated combat/automation acceptance are outside this focused run. [Capture index](screenshots/README.md) and [machine-readable evidence](production-validation/native-0.12.0/acceptance.json) retain hashes. Prism delivery verifies the same JAR across build/feed/package/install and preserves existing worlds, configs, profiles, schematics, unrelated mods and launcher Java settings.
+
+## Earlier 0.11.0 evidence
+
 # Later focused ESP photo pass — October 15, 2026
 
 At the user's request, Analyzer **0.11.0** subsequently ran in an isolated Minecraft 1.21.4 development world and produced **four original 1920 × 1080 framebuffer photos**: entity groups, storage colors, matching tracers and through-wall boxes. **Nine focused checks**, including clean OpenGL errors before all four captures, passed. The images were visually inspected. Mobs/storage/cart/wall are real integrated-server objects; the cyan Scout player is an explicit client-local rendering fixture.

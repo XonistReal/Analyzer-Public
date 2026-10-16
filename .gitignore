@@ -2,6 +2,7 @@
 build/
 run/
 run-native-automation/
+run-chams-smoke/
 .idea/
 *.iml
 .DS_Store

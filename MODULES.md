@@ -1,6 +1,6 @@
 # Analyzer module catalogue
 
-128 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
+129 registered modules. Descriptions state the implemented scope; matching reference names do not imply feature parity. Gameplay automation is opt-in.
 
 ## Render
 
@@ -9,6 +9,7 @@
 | Entity ESP | Clean debug boxes for players, hostile mobs and non-hostile mobs. | Off |
 | Tracers | Single clean lines to selected entities, using the same colors as Entity ESP. | Off |
 | Atmosphere | Cinematic bloom and color grading. Sky Aurora controls the sky. | Off |
+| Entity Chams | Shader materials on actual living models, with separate visible and occluded colors. | Off |
 | Block Highlight | A pulsing outline of the block under your crosshair. | Off |
 | Target ESP | A clean debug box on your crosshair target or recently attacked entity, with optional orbit rings. | Off |
 | Hole ESP | Outline loaded single-block holes with resistant floors and walls. | Off |

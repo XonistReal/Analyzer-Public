@@ -3081,6 +3081,406 @@
     ]
   },
   {
+    "id": "chams",
+    "name": "Entity Chams",
+    "category": "Render",
+    "description": "Shader materials on actual living models, with separate visible and occluded colors.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "style",
+        "label": "Material style",
+        "kind": "CHOICE",
+        "default": "Flat",
+        "choices": [
+          "Flat",
+          "Metallic",
+          "Glass",
+          "Glow",
+          "Wireframe"
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "passives",
+        "label": "Non-hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "self",
+        "label": "Own player in third person",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "invisibles",
+        "label": "Invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "range",
+        "label": "Range (blocks)",
+        "kind": "NUMBER",
+        "default": 128.0,
+        "min": 8.0,
+        "max": 256.0,
+        "step": 8.0
+      },
+      {
+        "id": "through-walls",
+        "label": "Occluded model pass",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "visible-opacity",
+        "label": "Visible opacity (%)",
+        "kind": "NUMBER",
+        "default": 85.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "hidden-opacity",
+        "label": "Occluded opacity (%)",
+        "kind": "NUMBER",
+        "default": 45.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 5.0
+      },
+      {
+        "id": "effect-strength",
+        "label": "Material strength",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 2.0,
+        "step": 0.05
+      },
+      {
+        "id": "animation-speed",
+        "label": "Material animation speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 3.0,
+        "step": 0.05
+      },
+      {
+        "id": "wire-width",
+        "label": "Wire width",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 3.0,
+        "step": 0.25
+      },
+      {
+        "id": "match-esp-colors",
+        "label": "Use Entity ESP visible colors",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "players-color",
+        "label": "Visible players color",
+        "kind": "CHOICE",
+        "default": "Cyan",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "players-red",
+        "label": "Visible players red",
+        "kind": "NUMBER",
+        "default": 102.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-green",
+        "label": "Visible players green",
+        "kind": "NUMBER",
+        "default": 223.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-blue",
+        "label": "Visible players blue",
+        "kind": "NUMBER",
+        "default": 247.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-color",
+        "label": "Visible hostile mobs color",
+        "kind": "CHOICE",
+        "default": "Red",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "hostiles-red",
+        "label": "Visible hostile mobs red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-green",
+        "label": "Visible hostile mobs green",
+        "kind": "NUMBER",
+        "default": 113.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-blue",
+        "label": "Visible hostile mobs blue",
+        "kind": "NUMBER",
+        "default": 136.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-color",
+        "label": "Visible non-hostile mobs color",
+        "kind": "CHOICE",
+        "default": "Mint",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "passives-red",
+        "label": "Visible non-hostile mobs red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-green",
+        "label": "Visible non-hostile mobs green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-blue",
+        "label": "Visible non-hostile mobs blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-hidden-color",
+        "label": "Occluded players color",
+        "kind": "CHOICE",
+        "default": "Violet",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "players-hidden-red",
+        "label": "Occluded players red",
+        "kind": "NUMBER",
+        "default": 181.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-hidden-green",
+        "label": "Occluded players green",
+        "kind": "NUMBER",
+        "default": 155.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "players-hidden-blue",
+        "label": "Occluded players blue",
+        "kind": "NUMBER",
+        "default": 250.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-hidden-color",
+        "label": "Occluded hostile mobs color",
+        "kind": "CHOICE",
+        "default": "Orange",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "hostiles-hidden-red",
+        "label": "Occluded hostile mobs red",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-hidden-green",
+        "label": "Occluded hostile mobs green",
+        "kind": "NUMBER",
+        "default": 165.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "hostiles-hidden-blue",
+        "label": "Occluded hostile mobs blue",
+        "kind": "NUMBER",
+        "default": 99.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-hidden-color",
+        "label": "Occluded non-hostile mobs color",
+        "kind": "CHOICE",
+        "default": "Blue",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "passives-hidden-red",
+        "label": "Occluded non-hostile mobs red",
+        "kind": "NUMBER",
+        "default": 131.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-hidden-green",
+        "label": "Occluded non-hostile mobs green",
+        "kind": "NUMBER",
+        "default": 180.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "passives-hidden-blue",
+        "label": "Occluded non-hostile mobs blue",
+        "kind": "NUMBER",
+        "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
     "id": "place-animation",
     "name": "Place Animation",
     "category": "Cosmetics",

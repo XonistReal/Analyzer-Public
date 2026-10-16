@@ -1,3 +1,5 @@
+> **0.12.0 addition:** [Entity Chams](ENTITY-CHAMS.md) provides five GLSL materials on actual posed models, with independent visible/occluded colors. It can be used alongside the debug ESP below.
+
 # Combat and debug ESP — 0.11.0
 
 Combat modules share a per-tick camera/action owner instead of rotating and switching independently. Active protection and projectile use take priority; melee waits while an accepted explosive/placement action owns the tick. Auto Weapon and Shield Breaker coordinate their slot changes. Aura prefers reachable targets, preserves its lock where appropriate, and can require the actual camera ray before attacking. Mining, held-item use, target hurt time and weapon-settle gates are exposed in settings. Fractional action deadlines preserve configured average CPS. Projectile aim uses a lower ballistic arc estimate; it is not a complete drag/collision simulation or a guarantee of a hit.

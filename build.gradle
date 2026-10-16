@@ -44,6 +44,11 @@ tasks.register('espCheck', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.analyzer.render.EspLayoutSelfTest'
 }
+tasks.register('chamsCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.render.ChamsPolicySelfTest'
+}
 tasks.register('plannerCheck', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -95,7 +100,7 @@ tasks.register('packPrivacyCheck', JavaExec) {
         mainClass = "dev.analyzer.automation.${entry}"
     }
 }
-tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('plannerCheck'), tasks.named('materialRecipesCheck'), tasks.named('safetyCheck'),
+tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('chamsCheck'), tasks.named('plannerCheck'), tasks.named('materialRecipesCheck'), tasks.named('safetyCheck'),
     tasks.named('combatCheck'), tasks.named('movementCheck'), tasks.named('hvhCheck'), tasks.named('gameplayConfigCheck'), tasks.named('privacyConfigCheck'), tasks.named('privacyCheck'), tasks.named('packPrivacyCheck'),
     tasks.named('automationMotionCheck'), tasks.named('nativePathfinderCheck'), tasks.named('schematicCheck'), tasks.named('retreatCheck'),
     tasks.named('automationInputCheck'), tasks.named('schematicLibraryCheck'), tasks.named('miningRecoveryCheck'), tasks.named('groundRecoveryCheck'), tasks.named('localIntentCheck'), tasks.named('routeFollowingCheck'), tasks.named('xrayCheck') }
@@ -154,6 +159,19 @@ tasks.register('publishLocal') {
 
 loom {
     runs {
+        chamsSmoke {
+            client()
+            name 'Analyzer native entity material acceptance'
+            runDir 'run-chams-smoke'
+            vmArg '-Danalyzer.smoke=true'
+            vmArg '-Danalyzer.chamsSmoke=true'
+            programArg '--username'
+            programArg 'AnalyzerDev'
+            programArg '--width'
+            programArg '1920'
+            programArg '--height'
+            programArg '1080'
+        }
         nativeAutomationSmoke {
             client()
             name 'Analyzer original automation acceptance'

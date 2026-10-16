@@ -1,3 +1,7 @@
+# Shader entity chams in 0.12.0
+
+The user requested actual shader-based entity chams with CS-style material choices. Keep opt-in **Render > Entity Chams** with original GLSL **Flat / Metallic / Glass / Glow / Wireframe**, using real posed living-model geometry rather than filled entity boxes. Preserve players/hostiles/non-hostiles filters, optional invisibles and own third-person model, independent visible/occluded palettes and opacity, optional visible color matching to Entity ESP, range and material controls. Debug ESP/tracers remain independently usable. Only base model/skin layers are recolored; equipment/features retain their ordinary render. Glass is translucent Fresnel material, Glow an emissive rim; do not claim scene refraction or postprocess bloom. Keep capture/vertex caps, frame/world/disable cleanup, GL-state restoration and reload/shutdown resource release. Shader failure retains ordinary native entity rendering. Current scope/evidence: `ENTITY-CHAMS.md` and `VALIDATION.md`.
+
 # Analyzer project instructions
 
 ## Native automation in 0.10.0

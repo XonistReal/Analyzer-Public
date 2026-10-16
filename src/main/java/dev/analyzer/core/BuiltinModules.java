@@ -44,6 +44,7 @@ public final class BuiltinModules {
                         Setting.number("strength", "Strength", 0.75, 0, 1, 0.01)))
         ));
         modules.addAll(ClientModules.definitions());
+        modules.add(ChamsSettings.definition());
         modules.addAll(VisualModules.definitions());
         modules.addAll(XrayModules.definitions());
         modules.addAll(CosmeticModules.definitions());

@@ -14,6 +14,15 @@ final class SettingSections {
     private SettingSections() { }
     static String group(ModuleDefinition module, Setting<?> setting) {
         if (module.id().equals("hud")) return setting.id().startsWith("menu-") ? "Menu appearance" : setting.id().startsWith("home-") ? "Home screen" : "HUD appearance";
+        if (module.id().equals("chams")) {
+            String id = setting.id();
+            if (id.contains("-hidden-") || id.equals("hidden-opacity") || id.equals("through-walls")) return "Occluded models";
+            if (id.endsWith("-color") || id.endsWith("-red") || id.endsWith("-green") || id.endsWith("-blue")
+                    || id.equals("match-esp-colors") || id.equals("visible-opacity")) return "Visible colors";
+            if (id.equals("players") || id.equals("hostiles") || id.equals("passives") || id.equals("self")
+                    || id.equals("invisibles") || id.equals("range")) return "Targets";
+            return "Material";
+        }
         if (module.id().equals("entity-esp") || module.id().equals("storage-esp") || module.id().equals("tracers")) {
             String id = setting.id();
             if (id.endsWith("-color") || id.endsWith("-red") || id.endsWith("-green") || id.endsWith("-blue")
@@ -59,6 +68,19 @@ final class SettingSections {
     /** Hide values belonging to another mode while keeping their saved values intact. */
     static boolean visible(AnalyzerCore core, ModuleDefinition module, Setting<?> setting) {
         String id = setting.id(), name = module.id();
+        if (name.equals("chams")) {
+            if (id.equals("wire-width")) return choice(core, module, "style").equals("Wireframe");
+            if (id.equals("hidden-opacity") || id.contains("-hidden-")) {
+                if (!enabled(core, module, "through-walls")) return false;
+            }
+            if (id.endsWith("-color") || id.endsWith("-red") || id.endsWith("-green") || id.endsWith("-blue")) {
+                String colorGroup = id.substring(0, id.lastIndexOf('-'));
+                String target = colorGroup.replace("-hidden", "");
+                if (!enabled(core, module, target)) return false;
+                if (!colorGroup.endsWith("-hidden") && enabled(core, module, "match-esp-colors")) return false;
+                if (!id.endsWith("-color")) return choice(core, module, colorGroup + "-color").equals("Custom");
+            }
+        }
         if (name.equals("entity-esp") || name.equals("storage-esp") || name.equals("tracers")) {
             boolean color = id.endsWith("-color") || id.endsWith("-red") || id.endsWith("-green") || id.endsWith("-blue");
             if (color) {

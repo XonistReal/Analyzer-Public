@@ -1,0 +1,109 @@
+{
+  "release": "0.12.0",
+  "date": "2026-10-15",
+  "status": "build_and_focused_native_material_acceptance_passed",
+  "policyAssertions": 70965,
+  "policySuites": 24,
+  "chamsPolicyAssertions": 1043,
+  "modules": 129,
+  "controls": 1373,
+  "native": {
+    "command": "gradlew.bat runChamsSmoke",
+    "focusedSceneChecks": 32,
+    "liveGlAssertions": 535,
+    "modelsPerFrame": 5,
+    "verticesPerFrame": 840,
+    "nativeWorld": "isolated run-chams-smoke/Analyzer-Chams-Smoke",
+    "playerFixture": "Scout is an explicit client-local OtherClientPlayerEntity; mobs/wall/storage are actual integrated-server state",
+    "passed": [
+      "All five material programs render on posed native models",
+      "Visible/occluded palettes and real wall opt-out",
+      "No coplanar hidden-color striping in final captures",
+      "Shader face-edge widths without unsupported wide lines or triangle diagonals",
+      "Disable clears queued meshes",
+      "535 live GL state/invalid input/close/recompile assertions",
+      "Actual resource reload resumes native shader rendering",
+      "Independent debug boxes combine with model materials"
+    ],
+    "errorFatalEntries": 0,
+    "visualInspection": "All nine unedited native captures inspected",
+    "limits": [
+      "Base living model/skin geometry; equipment and feature layers retain normal rendering",
+      "Glass is translucent Fresnel shading; Glow is emissive rim without scene refraction or post bloom",
+      "Only loaded, in-view native model submissions; third-party renderers not verified",
+      "Focused fixture does not rerun combat/automation acceptance"
+    ]
+  },
+  "captures": {
+    "screenshots/analyzer-native-chams-depth-only.png": {
+      "sha256": "ae4c2c7c69ba1eb5ce650b9085d87de4699aa37c5ad370463da29f7b34791381",
+      "bytes": 200312,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-chams-flat.png": {
+      "sha256": "b31055750d55eb8f01cda363290b8ef3925e9f0c292769d934d30e06a81361f7",
+      "bytes": 426101,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-chams-glass.png": {
+      "sha256": "0ae3e36aaafb52bedf194ed3c80a3aa94392775f9d44047973f4f8d631d5e1a2",
+      "bytes": 355148,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-chams-glow.png": {
+      "sha256": "3e46c248b07510adc938094332d6778a9d64f9c115881d5f7f323235da1c68b7",
+      "bytes": 330196,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-chams-metallic.png": {
+      "sha256": "e7b677849f201f88e32f56a37c92f585cf4cda248ae8093a34ca136f1d1b2b45",
+      "bytes": 379736,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-chams-occluded.png": {
+      "sha256": "b7a9eee848d271bfa0c3a2ae5d820a6f47ef57a685aeeb18215f0931ccacb1eb",
+      "bytes": 213570,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-chams-reloaded.png": {
+      "sha256": "1a5af1a135662f59c0803349bc15f79c28cdce46b5d8181600e5077b45158a42",
+      "bytes": 211834,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-chams-wireframe.png": {
+      "sha256": "a8ae8539dcafaa70af7388a2bd2e46337c4032ed2f64456ce6601d536df39ba5",
+      "bytes": 342489,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-chams-with-boxes.png": {
+      "sha256": "1203201f83a96416f2fd80ba63f10a42b38c4c01b9956724853aec552df9ac37",
+      "bytes": 275316,
+      "width": 1920,
+      "height": 1080,
+      "source": "unedited native framebuffer"
+    }
+  },
+  "buildSha256": "88946eb4a8eb7ceb45e8954629b689d5c2ae59d26fe68ff3e2c35a541900db4d",
+  "logs": {
+    "chams-0.12.0-final-build.log": "d7f8c73a6a1fc26bf5bdd216d773e1e58130a023a61f2d1fcb434119bcbbfe05",
+    "chams-0.12.0-runtime.log": "c47ec7d687ebba9f6e480bf26c6f5626d3c0a554b4fc1b406d97299efab9ebe8"
+  },
+  "skipped": "Optional Windows schematic-library symlink cases remain skipped where creation is unavailable",
+  "delivery": "Prism ZIP and installed JAR must match published build SHA; existing game/launcher data is verified separately by the delivery report."
+}

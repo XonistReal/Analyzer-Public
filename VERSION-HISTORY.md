@@ -1,6 +1,10 @@
+## 0.12.0 - Shader entity chams
+
+Original GLSL materials follow actual animated living-model geometry: Flat, Metallic, Glass, Glow and Wireframe. Players, hostile mobs and non-hostile mobs have independent visible/occluded palettes and opacity, with optional Entity ESP color matching. Debug boxes and tracers remain independent. Shader capture and buffers are bounded and cleared across frames, world changes, disabling and reload. See [Entity Chams](ENTITY-CHAMS.md) and [validation](VALIDATION.md). The native Prism delivery preserves existing user game data and launcher preferences.
+
 # Saved Analyzer versions
 
-The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analyzer) preserves **20 version tags**. Existing commits/tags are retained; recovery commits use their actual backup date rather than invented development dates. **Main/v0.11.0 contain the complete current project and tests.** The original 15-tag transfer remains documented in [GITHUB-BACKUP.md](GITHUB-BACKUP.md).
+The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analyzer) preserves **21 version tags**. Existing commits/tags are retained; recovery commits use their actual backup date rather than invented development dates. **Main/v0.12.0 contain the complete current project and tests.** The original 15-tag transfer remains documented in [GITHUB-BACKUP.md](GITHUB-BACKUP.md).
 
 | Version/update | Tag | Source provenance |
 | --- | --- | --- |
@@ -24,6 +28,7 @@ The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analy
 | 0.10.2 local intents, recovery and X-ray | `v0.10.2` | Local quantities/named schematics, checked mining/tree/workstation recovery and three native textured X-ray styles with separate current evidence |
 | 0.10.3 motion and planning | `v0.10.3` | Acceleration-aware camera braking, stable mining approaches, nearest-first resources and checked route corrections; deterministic tests, gameplay checks left to the user |
 | 0.11.0 combat, ESP and construction | `v0.11.0` | Coordinated combat and three additions, debug ESP, local registry item requests, schematic ghosts and reusable fluid buckets; deterministic/registry checks separated from gameplay |
+| 0.12.0 shader entity chams | `v0.12.0` | Original posed-model GLSL materials, independent visible/occluded palettes, shader wire edges, policy tests and focused native GPU/capture evidence |
 
 The existing eight tags were originally reconstructed from saved source exports; their original-export hashes remain in their commit messages. They are not moved or rewritten by this backup. Those original source ZIPs are not available on this PC, so release source ZIPs are newly generated from the preserved Git tags.
 

@@ -12,7 +12,7 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 128, "Release catalogue includes 128 registered modules");
+            check(core.modules().size() == 129, "Release catalogue includes 129 registered modules");
             check(core.modules().stream().map(ModuleDefinition::id).distinct().count() == core.modules().size(), "Unique module IDs");
             for (Category category : Category.values())
                 check(core.modules().stream().anyMatch(module -> module.category() == category), "Populated category " + category);

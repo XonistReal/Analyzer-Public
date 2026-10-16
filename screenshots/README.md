@@ -1,3 +1,19 @@
+# Shader entity materials - 0.12.0
+
+Nine unedited 1920 x 1080 native Minecraft framebuffer captures from `runChamsSmoke`. Actual integrated-server mobs demonstrate hostile/non-hostile groups; Scout is an explicit client-local player model fixture. Five posed meshes submit 840 vertices in the focused arena. A real received stone-brick wall tests occluded palettes and the depth-only opt-out. GL-state restoration and resource reload pass; the final capture combines independent debug boxes and metallic chams.
+
+- [Flat](analyzer-native-chams-flat.png)
+- [Metallic](analyzer-native-chams-metallic.png)
+- [Glass](analyzer-native-chams-glass.png)
+- [Glow](analyzer-native-chams-glow.png)
+- [Wireframe](analyzer-native-chams-wireframe.png)
+- [Occluded colors through a real wall](analyzer-native-chams-occluded.png)
+- [Occluded pass disabled](analyzer-native-chams-depth-only.png)
+- [Metallic after resource reload](analyzer-native-chams-reloaded.png)
+- [Metallic with independent debug boxes](analyzer-native-chams-with-boxes.png)
+
+[Settings and limits](../ENTITY-CHAMS.md). Current evidence: [0.12.0 acceptance](../production-validation/native-0.12.0/acceptance.json). These focused material tests do not establish unrelated combat/automation behavior or third-party renderer compatibility. Older screenshots and their version scopes follow.
+
 # Native ESP photos — October 15, 2026
 
 Four original 1920 × 1080 in-game screenshots from Analyzer 0.11.0 in an isolated development world:

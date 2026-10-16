@@ -21,7 +21,7 @@ public final class GameplayConfigSelfTest {
                     """);
             AnalyzerCore core = new AnalyzerCore(directory);
             core.load();
-            check(core.modules().size() == 128, "Combat extensions retain the existing gameplay definitions");
+            check(core.modules().size() == 129, "Chams extends the catalogue without removing gameplay definitions");
             check(core.loadWarnings().isEmpty(), "Old setting types and choices remain valid");
             check(core.isEnabled("speed") && core.keybind("speed") == 71, "Explicit old enable and binding survive");
             equal(.55, core.getNumber("speed", "speed"), "Old speed is retained");
