@@ -1,3 +1,13 @@
+# Kill Aura silent rotations - 0.13.2
+
+Three unedited 1920 x 1080 native framebuffer captures from the completed isolated `runSilentAimSmoke`. The visible camera stays west at 90 / 7.5 while the target stands north, outside the viewport. The development evidence overlay shows actual integrated-server look and target health. Movement/Packet hold the server-facing angle; Pulse has already returned it to the visible camera after its real attack. Exact attack-time angles, real damage, moving-target continuation and cleanup are verified independently in the completed 427-check run.
+
+- [Silent movement](analyzer-native-silent-aim-0.png)
+- [Silent packet](analyzer-native-silent-aim-1.png)
+- [Silent pulse after return](analyzer-native-silent-aim-2.png)
+
+The platform, diamond sword and sole damageable Husk are development fixture preconditions. No user world or account was changed. [Controls and limits](../SILENT-AIM.md) · [Acceptance](../production-validation/native-0.13.2/acceptance.json). Historical captures follow.
+
 # Screen-locked tracers and local name alias - 0.13.1
 
 Three unedited 1920 x 1080 native captures from the completed isolated `runTracerPrivacySmoke`. All five representative tracer producers use their selected screen origin. Actual native chat, tab, sidebar and String/Text/OrderedText/Lato labels display the local alias `PrivatePilot`. Blocks, mobs and scoreboard are integrated-server fixture preconditions; no user world or account was altered. These frames show through-wall mode; the complete 162-check run also verifies depth-tested origins and live walking bob.

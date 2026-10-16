@@ -12315,7 +12315,7 @@
     "id": "kill-aura",
     "name": "Kill Aura",
     "category": "Combat",
-    "description": "Choose, rotate toward and attack filtered targets with normal reach and bounded charged actions.",
+    "description": "Choose filtered targets and attack with normal reach, bounded charged actions and camera or selectable server-only rotations.",
     "defaultEnabled": false,
     "settings": [
       {
@@ -12478,7 +12478,10 @@
         "default": "Client",
         "choices": [
           "Client",
-          "None"
+          "None",
+          "Silent movement",
+          "Silent packet",
+          "Silent pulse"
         ]
       },
       {
@@ -12600,7 +12603,7 @@
       },
       {
         "id": "require-ray",
-        "label": "Require actual camera ray through target hitbox",
+        "label": "Require active aim ray through target hitbox",
         "kind": "BOOLEAN",
         "default": true
       },
@@ -12632,6 +12635,24 @@
           "Packet",
           "None"
         ]
+      },
+      {
+        "id": "silent-settle",
+        "label": "Wait after first silent look (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "silent-refresh",
+        "label": "Explicit look refresh (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 1.0,
+        "max": 20.0,
+        "step": 1.0
       }
     ]
   },

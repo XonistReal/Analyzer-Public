@@ -18,7 +18,13 @@ public final class CombatSettings {
             Setting.bool("only-click", "Only acquire while holding attack", false),
             Setting.bool("prefer-reachable", "Prefer targets inside actual melee reach", true)));
         rotation(aura, 12); timing(aura, false);
-        add(modules, "kill-aura", "Kill Aura", "Choose, rotate toward and attack filtered targets with normal reach and bounded charged actions.", aura);
+        aura.replaceAll(setting -> setting.id().equals("rotation")
+                ? Setting.choice("rotation", "Rotation", "Client", "Client", "None", "Silent movement", "Silent packet", "Silent pulse")
+                : setting.id().equals("require-ray")
+                ? Setting.bool("require-ray", "Require active aim ray through target hitbox", true) : setting);
+        aura.add(Setting.number("silent-settle", "Wait after first silent look (ticks)", 1, 0, 10, 1));
+        aura.add(Setting.number("silent-refresh", "Explicit look refresh (ticks)", 1, 1, 20, 1));
+        add(modules, "kill-aura", "Kill Aura", "Choose filtered targets and attack with normal reach, bounded charged actions and camera or selectable server-only rotations.", aura);
 
         List<Setting<?>> aim = targets(6, 8); rotation(aim, 12); aim.removeIf(setting -> setting.id().equals("hit-angle"));
         aim.addAll(List.of(Setting.bool("legit", "Visible gradual assistance while clicking", false),

@@ -52,7 +52,7 @@ final class SettingSections {
         if (id.contains("cps") || id.contains("cooldown") || id.contains("jitter") || id.contains("delay")
                 || id.contains("interval") || id.equals("timing") || id.contains("charge") || id.equals("wait-for-crit")
                 || id.equals("hurt-time") || id.equals("settle-ticks")) return "Timing";
-        if (id.contains("rotation") || id.equals("rotate") || id.equals("turn-speed") || id.equals("smoothing")
+        if (id.startsWith("silent-") || id.contains("rotation") || id.equals("rotate") || id.equals("turn-speed") || id.equals("smoothing")
                 || id.startsWith("aim-") || id.equals("hit-angle") || id.equals("swing")) return "Aim and presentation";
         if (module.category() == Category.HVH && !module.id().equals("target-strafe")) return "Placement and behavior";
         return "General";
@@ -109,8 +109,11 @@ final class SettingSections {
         }
         boolean legit = enabled(core, module, "legit");
         if (name.equals("kill-aura")) {
+            if (id.equals("rotation")) return !legit;
             if (id.equals("switch-delay")) return !legit && choice(core, module, "mode").equals("Switch");
             if (id.equals("max-targets")) return !legit && choice(core, module, "mode").equals("Multi");
+            if (id.equals("silent-settle")) return !legit && java.util.Set.of("Silent movement", "Silent packet").contains(choice(core, module, "rotation"));
+            if (id.equals("silent-refresh")) return !legit && choice(core, module, "rotation").equals("Silent packet");
         }
         if (name.equals("speed") && (id.equals("speed") || id.equals("multiplier"))) return !legit && !choice(core, module, "profile").equals("Sprint hop");
         if (name.equals("fly")) {

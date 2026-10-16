@@ -1,3 +1,17 @@
+# Kill Aura silent rotation transports - October 16, 2026
+
+Analyzer **0.13.2** adds **Silent movement / Silent packet / Silent pulse** under Kill Aura Rotation while retaining Client/None preferences and normal combat gates. [Controls and mode differences](SILENT-AIM.md).
+
+Java 21 `build moduleCatalog publishLocal` passes **79,135 assertions across 32 suites**, including **1,413 silent-aim policy/config assertions**. The catalogue has **157 modules / 1,823 controls**. Optional Windows schematic-library symlink cases remain explicitly skipped. Final build/feed SHA-256: **77280aad2a78dd21aa9187bd00f51e3ddd5f17f3d42a4d961d5dd0bfcdbfa25a**.
+
+The completed isolated `runSilentAimSmoke` passes **427 native checks**, including **319 camera-stability tick samples**, with three inspected **1920 x 1080** framebuffer captures. Actual outbound look/attack ordering is observed; a separate integrated-server attack callback records the look at the real ordinary melee interaction, followed by actual server health loss. All three modes hit while the local camera remains at **90 / 7.5** and the target is north. Movement uses normal cadence; Packet emits explicit looks; Pulse sends aim/attack/return in order. The fresh server ray intersects the actual target hitbox. A continuously moving server target receives further real damage over 100 ticks without starving the movement transport.
+
+Real weapon charge, normal reach and a received stone wall prevent invalid actions. Disable, changed mode, an actual inventory menu, removal of the sole server target and disconnect from an active lease clear ownership and restore ordinary look where applicable. Cross-controller handoff and correction/respawn code paths were reviewed, with no claim of a full native combat/task or active-correction matrix. Native GL error checks pass, all three screenshot callbacks finish and the completed log has no ERROR/FATAL entries.
+
+The isolated fixture explicitly discards old entities and binds server/client observations to one authoritative damageable 200-health NoAI Husk. It waits for actual teleport/wall replication before range/visibility cases. Earlier attempts exposed replication-sensitive point tolerance, a cached view vector within the pulse packet batch and an old saved entity resurrected by setup; only the completed fourth run is acceptance. Moving-target checks derive the ray from exact server attack-time yaw/pitch and a fresh server AABB; they do not promise zero-latency point accuracy. Local packet transmission is not a server acknowledgement. Remote anti-cheat/tweak acceptance, unrelated module behavior and replacement renderers remain unverified. [Evidence JSON](production-validation/native-0.13.2/acceptance.json) and [captures](screenshots/README.md) retain hashes. Prism delivery verifies matching build/feed/package/install hashes and preserves user worlds, configs, profiles, schematics, other mods and launcher preferences.
+
+## Earlier 0.13.1 evidence
+
 # Screen-locked tracers and local name alias - October 16, 2026
 
 Analyzer **0.13.1** adds independent **Tracer origin → Crosshair / Bottom / Top** throughout entity/storage/finder/skeleton tracers, retaining saved target anchors, and opt-in **Client → Name Changer → Alias**. [Controls and scope](TRACERS-AND-NAME.md).

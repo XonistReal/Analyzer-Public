@@ -1,0 +1,19 @@
+# Kill Aura silent rotations - 0.13.2
+
+**Combat → Kill Aura → Rotation** now offers **Client / None / Silent movement / Silent packet / Silent pulse**. Existing Client and None preferences keep their behavior; missing older fields still default to Client. Kill Aura remains opt-in. The visible-crosshair/120-degree-cone option deliberately uses the real camera and overrides silent choices.
+
+| Silent mode | What changes on the wire |
+| --- | --- |
+| Silent movement | Leases yaw/pitch reads only inside Minecraft's normal movement-packet method. Native change detection and ordinary movement cadence send the look. Attacks wait until a look for the current target was actually transmitted locally. |
+| Silent packet | Holds the same leased movement look and additionally sends explicit look-only updates on acquisition, at the configured refresh interval and immediately before an eligible attack. |
+| Silent pulse | Plans the aim locally between attacks, sends a look-only packet before the eligible attack batch and restores the real view in a finally block afterward. Ordinary look remains in use between attacks. |
+
+The modes keep your actual yaw, pitch, camera, model interpolation and input direction untouched. Native packets retain real position, ground and collision values; no extra position or critical-spoof packets are introduced. A held server-facing look can be visible to other players. These are distinct transmission/timing choices, not guarantees that a particular server accepts them.
+
+**Maximum turn**, **Smoothing** and **Aim point** control the virtual aim too. One yaw/pitch angular budget is shared per tick; a target batch uses one direction, without snapping once per victim. Pulse can transmit a larger single angle change after several ticks of local planning, followed by an immediate return packet; its wire changes are intentionally different from continuous rotation. **Wait after first silent look** is a 0–10 tick target-lease warmup, default 1, for Movement and Packet. It does not mean a server acknowledgement or require a moving target to become stationary. **Explicit look refresh** is 1–20 ticks, default 1, for Packet only.
+
+Acquisition still uses the selected filters and the real camera's field of view. Set the existing target FOV as needed. Normal reach, charge/CPS, weapon, reaction, hurt-time, falling-critical timing, friend/team and visibility protections remain. **Require active aim ray** defaults on. Silent attacks check the server-facing ray against the current hitbox and real block collision shapes; Movement uses its actual previously transmitted angle, even if this tick has planned the next tracking step. This avoids waiting forever on a moving target. The existing maximum aim error is applied to that actual attack direction.
+
+Short-lived ownership ends on disable, changed mode/settings/target, missing or replaced entities, menus, death, vehicles, world/disconnect changes, unowned item use/mining pauses, native tasks or another combat/action owner. Owned offhand shielding preserves its ordinary release-before-attack behavior. Server position/look correction or respawn drops the lease without sending a counter-correction. Returning to the real look updates native last-sent bookkeeping without changing the rendered player view. Other controllers' actions cancel the Aura look before their own interaction is sent.
+
+Only original Analyzer code and Minecraft/Fabric APIs are used. No Meteor, Glazed or Baritone dependency is added. Integrated-server evidence verifies native packet order, real attack-time look, actual damage, camera stability and cleanup. Remote server tweaks/anti-cheat, latency and other mods can change acceptance; those outcomes are not established by local tests. Current evidence is in [VALIDATION.md](VALIDATION.md).

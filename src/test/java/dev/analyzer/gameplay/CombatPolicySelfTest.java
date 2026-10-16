@@ -75,7 +75,12 @@ public final class CombatPolicySelfTest {
             if (legacy.contains(module.id()) && !module.id().equals("auto-weapon") && !module.id().equals("shield-breaker")) {
                 for (String id : List.of("players", "hostiles", "passives", "range", "fov", "turn-speed")) check(module.settings().stream().anyMatch(setting -> setting.id().equals(id)), "Legacy setting remains loadable: " + module.id() + "/" + id);
             }
-            check(module.settings().stream().filter(setting -> setting.kind() == dev.analyzer.core.Setting.Kind.CHOICE).noneMatch(setting -> setting.choices().contains("Silent") || setting.choices().contains("Packet") && !setting.id().equals("swing")), "Unsupported silent rotation / packet crit modes are not exposed: " + module.id());
+            check(module.settings().stream().filter(setting -> setting.kind() == dev.analyzer.core.Setting.Kind.CHOICE).noneMatch(setting ->
+                setting.choices().contains("Silent") || setting.choices().contains("Packet") && !setting.id().equals("swing")
+                    || setting.choices().stream().anyMatch(value -> value.startsWith("Silent "))
+                        && !(module.id().equals("kill-aura") && setting.id().equals("rotation")
+                            && setting.choices().stream().filter(value -> value.startsWith("Silent ")).allMatch(List.of("Silent movement", "Silent packet", "Silent pulse")::contains))),
+                "Only implemented Kill Aura silent transports are exposed; packet crits remain absent: " + module.id());
         }
         System.out.println("Analyzer combat policy: " + assertions + " assertions passed.");
         System.out.println("Combat controls: " + modules.stream().map(module -> module.id() + "=" + module.settings().size()).collect(java.util.stream.Collectors.joining(", ")));

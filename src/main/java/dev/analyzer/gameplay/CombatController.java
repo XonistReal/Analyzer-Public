@@ -52,6 +52,7 @@ final class CombatController {
     private CombatController() { }
 
     static void reset() {
+        SilentRotation.cancel();
         releaseBlock();
         restoreCriticalSprint();
         firstSeen.clear(); seenInstances.clear(); locks.clear(); switchAt.clear(); nextAction.clear(); jitterAt.clear(); observations.clear(); pairs.clear(); clickClocks.clear();
@@ -60,7 +61,7 @@ final class CombatController {
         lastTotemPop = -1;
     }
     static void totemPopped() { lastTotemPop = ticks; }
-    static void suspend() { releaseBlock(); criticalTarget = null; restoreCriticalSprint(); observations.clear(); locks.clear(); }
+    static void suspend() { SilentRotation.cancel(); releaseBlock(); criticalTarget = null; restoreCriticalSprint(); observations.clear(); locks.clear(); }
     static void yieldForFood() {
         if (ownedBlock && (on("auto-eat") && (autoEatRefilling || mc.player.getHungerManager().getFoodLevel() < num("auto-eat", "hunger"))
                 || on("auto-gapple") && mc.player.getHealth() <= num("auto-gapple", "health"))) releaseBlock();
@@ -112,6 +113,14 @@ final class CombatController {
         if (id.equals("kill-aura") && legit(id)) fov = Math.min(fov, 120);
         return Math.abs(MathHelper.wrapDegrees(yaw - p.getYaw())) <= fov * 0.5;
     }
+    /** Revalidate current filters before a short-lived server-look lease can transmit next tick. */
+    static boolean silentEligible(LivingEntity entity) {
+        return eligible("kill-aura", entity, numOr("kill-aura", "range", 3) + numOr("kill-aura", "aim-range", 0));
+    }
+    static boolean silentUsingAllowed() {
+        return ownedBlock && mc.player != null && mc.player.isUsingItem()
+                && mc.player.getActiveHand() == Hand.OFF_HAND && mc.player.getActiveItem().isOf(Items.SHIELD);
+    }
     static List<LivingEntity> targets(String id) { return targets(id, numOr(id, "range", 3)); }
     /** Shared HvH acquisition; no Kill Aura lock/switch side effects. */
     static List<LivingEntity> targets(String id, double rangeOverride) {
@@ -148,6 +157,7 @@ final class CombatController {
     static void aim(String id, Vec3d point, double degrees) { aim(id, point, degrees, 0, 100); }
     private static void aim(String id, Vec3d point, double degrees, double smoothing, double strength) {
         if (!combatControls.camera(id)) return;
+        if (!id.equals("kill-aura")) SilentRotation.cancel();
         var p = mc.player; Vec3d delta = point.subtract(p.getEyePos());
         if (delta.lengthSquared() < 1.0e-10) return;
         float yaw = delta.horizontalLengthSquared() < 1.0e-10 ? p.getYaw() : (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90);
@@ -159,6 +169,22 @@ final class CombatController {
         if (choiceOr(id, "rotation", "Client").equals("None") && !legit(id)) return;
         aim(id, point, numOr(id, "turn-speed", id.equals("shield-breaker") ? 30 : 12),
             legit(id) ? Math.max(50, numOr(id, "smoothing", 0)) : numOr(id, "smoothing", 0), numOr(id, "strength", 100));
+    }
+    private static boolean silent(String id) {
+        return id.equals("kill-aura") && !legit(id) && SilentRotation.isSilent(choiceOr(id, "rotation", "Client"));
+    }
+    private static boolean rotateForAttack(String id, LivingEntity victim, Vec3d point) {
+        if (!silent(id)) { SilentRotation.cancel(); rotate(id, point); return true; }
+        if (!combatControls.camera(id)) { SilentRotation.cancel(); note(id, "Waiting for the current aim owner"); return false; }
+        boolean updated = SilentRotation.update(id, victim, point, choice(id, "rotation"),
+                numOr(id, "turn-speed", 12), numOr(id, "smoothing", 0), 100);
+        if (!updated) note(id, SilentRotation.status());
+        return updated;
+    }
+    private static double aimError(Vec3d point, SilentAimPolicy.Angles angles) {
+        if (angles == null) return angle(point);
+        Vec3d delta = point.subtract(mc.player.getEyePos());
+        return SilentAimPolicy.angleTo(angles, delta.x, delta.y, delta.z);
     }
     private static boolean melee(ItemStack stack) {
         String name = Registries.ITEM.getId(stack.getItem()).getPath();
@@ -222,6 +248,7 @@ final class CombatController {
         if (slot < 0) { note(id, "Need a totem in the hotbar"); handUntil = 0; return false; }
         if (p.isUsingItem() && !ownedBlock) { note(id, "Waiting for the active item use to finish"); return false; }
         if (!combatControls.action(id)) return false;
+        SilentRotation.cancel();
         chooseWeapon(slot); note(id, "Holding a main-hand totem for the selected protection window"); acted(id); return true;
     }
     private static void releaseBlock() {
@@ -242,6 +269,7 @@ final class CombatController {
         if (p.isUsingItem() && !ownedBlock || !combatControls.canAct(id)) return;
         if (bool(id, "face-threat") && threat != null) rotate(id, aimPoint(id, threat));
         if (!combatControls.action(id)) return;
+        SilentRotation.cancel();
         if (ownedBlock && p.isUsingItem()) { force(mc.options.useKey); note(id, "Holding the offhand shield between attacks"); return; }
         if (interactionBudget < 1 || p.getItemCooldownManager().isCoolingDown(p.getOffHandStack())) return;
         interactionBudget--;
@@ -337,6 +365,7 @@ final class CombatController {
         if (!clock(schedule).ready(ticks)) return;
         if (legit(id) && ThreadLocalRandom.current().nextInt(20) == 0) return;
         if (!combatControls.action(id)) return;
+        SilentRotation.cancel();
         clock(schedule).schedule(ticks, clickInterval(id, schedule)); interactionBudget--;
         var result = mc.crosshairTarget instanceof BlockHitResult hit
             ? mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hit)
@@ -417,9 +446,15 @@ final class CombatController {
         return true;
     }
     private static boolean cameraHits(String id, LivingEntity victim) {
+        return cameraHits(id, victim, null);
+    }
+    private static boolean cameraHits(String id, LivingEntity victim, SilentAimPolicy.Angles angles) {
         if (!boolOr(id, "require-ray", true)) return true;
         Vec3d start = mc.player.getEyePos();
-        Vec3d end = start.add(mc.player.getRotationVec(1).multiply(Math.min(numOr(id, "range", 3), mc.player.getEntityInteractionRange())));
+        var silentDirection = angles == null ? null : SilentAimPolicy.direction(angles);
+        Vec3d direction = silentDirection == null ? mc.player.getRotationVec(1)
+                : new Vec3d(silentDirection.x(), silentDirection.y(), silentDirection.z());
+        Vec3d end = start.add(direction.multiply(Math.min(numOr(id, "range", 3), mc.player.getEntityInteractionRange())));
         var point = victim.getBoundingBox().raycast(start, end);
         if (point.isEmpty() && !victim.getBoundingBox().contains(start)) return false;
         if (allowsObstructed(id)) return true;
@@ -450,6 +485,7 @@ final class CombatController {
         // A different controller already aimed or performed an action this tick.
         // Do not change its hotbar selection, camera, sprint state or item use.
         if (combatControls.occupiedByOther("melee")) {
+            SilentRotation.cancel();
             releaseBlock(); criticalTarget = null; restoreCriticalSprint();
             for (String id : List.of("kill-aura", "aim-assist", "trigger-bot", "auto-clicker", "criticals", "shield-breaker", "auto-weapon"))
                 if (on(id)) note(id, "Waiting for the current explosive / placement action");
@@ -478,26 +514,31 @@ final class CombatController {
         } else if (!shieldPending && (victim != null || physical(mc.options.attackKey) && pointed != null)) delayedSwitch = autoWeapon(victim, pointed);
         if (shieldReady && victim == null) { victim = pointed; attacker = "shield-breaker"; }
         if (victim == null) {
+            SilentRotation.cancel();
             observations.remove("trigger-bot"); observations.remove("auto-weapon"); criticalTarget = null; restoreCriticalSprint();
             autoBlock(false); assist(); rightClicker(); return;
         }
         target = victim;
+        if (!silent(attacker)) SilentRotation.cancel();
         boolean reacted = !attacker.equals("trigger-bot") || observed(attacker, victim, reaction(attacker));
         if (!attacker.equals("trigger-bot")) observations.remove("trigger-bot");
         if (criticalTarget != null && criticalTarget != victim) { criticalTarget = null; restoreCriticalSprint(); }
         if (delayedSwitch) { note(attacker, "Waiting for the selected combat weapon"); autoBlock(false); return; }
         Vec3d point = aimPoint(attacker, victim);
         if (!p.canInteractWithEntity(victim, 0) || distance(victim) > numOr(attacker, "range", 3)) {
-            autoBlock(false); rotate(attacker, point); note(attacker, "Target outside normal attack reach; acquisition only"); return;
+            autoBlock(false); rotateForAttack(attacker, victim, point); note(attacker, "Target outside normal attack reach; acquisition only"); return;
         }
         if (victim.hurtTime > numOr(attacker, "hurt-time", 10) || !timingReady(attacker)) {
-            autoBlock(false); rotate(attacker, point); return;
+            autoBlock(false); rotateForAttack(attacker, victim, point); return;
         }
         if (ownedBlock) { releaseBlock(); note(attacker, "Released the offhand shield before attacking"); return; }
         if (ticks <= blockReleased) return;
-        rotate(attacker, point);
-        if (angle(point) > numOr(attacker, "hit-angle", 180) || !cameraHits(attacker, victim)) {
-            note(attacker, "Turning until the actual camera ray reaches the target hitbox"); return;
+        if (!rotateForAttack(attacker, victim, point)) return;
+        boolean silentAim = silent(attacker);
+        SilentAimPolicy.Angles planned = silentAim ? SilentRotation.angles() : null;
+        if (silentAim && planned == null || aimError(point, planned) > numOr(attacker, "hit-angle", 180) || !cameraHits(attacker, victim, planned)) {
+            note(attacker, silentAim ? "Turning the server aim until its ray reaches the target hitbox"
+                    : "Turning until the actual camera ray reaches the target hitbox"); return;
         }
         if (attacker.equals("kill-aura") && legit(attacker) && (!(mc.crosshairTarget instanceof EntityHitResult hit) || hit.getEntity() != victim)) return;
         if (!reacted) { note(attacker, "Waiting for crosshair reaction delay"); return; }
@@ -505,15 +546,22 @@ final class CombatController {
         if (attacker.equals("auto-clicker") && legit(attacker) && ThreadLocalRandom.current().nextInt(20) == 0) { scheduled(attacker); return; }
         List<LivingEntity> victims = attacker.equals("kill-aura") && !legit(attacker) && choice(attacker, "mode").equals("Multi") ? targets(attacker) : List.of(victim);
         int limit = CombatPolicy.targetLimit(choiceOr(attacker, "mode", "Single"), legit(attacker), (int) numOr(attacker, "max-targets", 1)), sent = 0;
-        for (LivingEntity current : victims) {
-            if (sent >= limit || attackBudget < 1) break;
-            if (current.hurtTime > numOr(attacker, "hurt-time", 10) || !cameraHits(attacker, current)
-                    || angle(aimPoint(attacker, current)) > numOr(attacker, "hit-angle", 180)) continue;
-            if (attack(current, attacker)) {
-                sent++;
-                if (on("criticals") && bool("criticals", "crit-particles") && CombatPolicy.falling(p.isOnGround(), p.getVelocity().y, p.fallDistance)) p.addCritParticles(current);
+        try {
+            if (silentAim && !SilentRotation.prepareAttack(attacker, victim, point)) { note(attacker, SilentRotation.status()); return; }
+            // Movement mode must use its actual transmitted direction, which may be one
+            // tracking step behind. A moving target is checked against its fresh hitbox.
+            SilentAimPolicy.Angles attacking = silentAim ? SilentRotation.attackAngles() : null;
+            if (silentAim && attacking == null) { note(attacker, "Waiting for a transmitted silent aim direction"); return; }
+            for (LivingEntity current : victims) {
+                if (sent >= limit || attackBudget < 1) break;
+                if (current.hurtTime > numOr(attacker, "hurt-time", 10) || !cameraHits(attacker, current, attacking)
+                        || aimError(aimPoint(attacker, current), attacking) > numOr(attacker, "hit-angle", 180)) continue;
+                if (attack(current, attacker)) {
+                    sent++;
+                    if (on("criticals") && bool("criticals", "crit-particles") && CombatPolicy.falling(p.isOnGround(), p.getVelocity().y, p.fallDistance)) p.addCritParticles(current);
+                }
             }
-        }
+        } finally { if (silentAim) SilentRotation.finishAttack(); }
         if (sent > 0) scheduled(attacker);
         criticalTarget = null; restoreCriticalSprint();
     }

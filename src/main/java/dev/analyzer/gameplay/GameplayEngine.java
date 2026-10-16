@@ -85,7 +85,7 @@ public final class GameplayEngine {
         if (registered) return;
         registered = true;
         ClientTickEvents.END_CLIENT_TICK.register(GameplayEngine::tick);
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { releaseKeys(); restoreSlot(); resetControllers(); });
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { SilentRotation.correctedOrDisconnected(); releaseKeys(); restoreSlot(); resetControllers(); });
     }
     public static LivingEntity target() { return target != null && target.isAlive() ? target : null; }
     public static String status(String id) {
@@ -106,6 +106,7 @@ public final class GameplayEngine {
         ticks++;
         releaseKeys();
         if (world != client.world) {
+            SilentRotation.correctedOrDisconnected();
             restoreSlot(); resetControllers(); consuming = false; fishingAwaitUntil = 0; target = null; next.clear(); deathTicks = 0; world = client.world;
         }
         if (client.player == null || client.world == null || client.interactionManager == null) { target = null; resetControllers(); return; }
@@ -154,6 +155,7 @@ public final class GameplayEngine {
             if (ticks - lastFailure >= 100) { lastFailure = ticks; AnalyzerClient.LOGGER.warn("Gameplay automation paused after a guarded tick failure", ex); }
             for (String id : IDS) if (on(id)) note(id, "Paused: " + ex.getClass().getSimpleName());
         } finally {
+            SilentRotation.endTick();
             if (!slotRequested && !consuming) restoreSlot();
             wasGround = p.isOnGround();
         }
@@ -249,7 +251,7 @@ public final class GameplayEngine {
                 ? stack.isOf(Items.GOLDEN_APPLE) || stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)
                 : stack.contains(DataComponentTypes.FOOD)));
         if (slot < 0) { note(id, "Put food in the hotbar"); return false; }
-        selectSlot(slot); interactionBudget--;
+        SilentRotation.cancel(); selectSlot(slot); interactionBudget--;
         var result = mc.interactionManager.interactItem(p, Hand.MAIN_HAND);
         if (result.isAccepted() && p.isUsingItem()) {
             consuming = true; consumeModule = id; consumeStart = ticks; acted(id); force(mc.options.useKey); note(id, "Eating"); return true;
@@ -367,6 +369,7 @@ public final class GameplayEngine {
             }
         }
         if (!combatControls.action(id)) return false;
+        if (!id.equals("kill-aura")) SilentRotation.cancel();
         attackBudget--; mc.interactionManager.attackEntity(mc.player, entity); swing(id); attacks++; acted(id);
         note(id, "Attacked " + entity.getName().getString()); return true;
     }
@@ -387,6 +390,7 @@ public final class GameplayEngine {
         int original = mc.player.getInventory().selectedSlot;
         try {
             if (!combatControls.action(id)) return false;
+            if (!id.equals("kill-aura")) SilentRotation.cancel();
             if (switching.equals("Normal")) restoreSlot();
             mc.player.getInventory().selectedSlot = slot;
             interactionBudget--;
@@ -450,7 +454,7 @@ public final class GameplayEngine {
         boolean bite = hooked && ((FishingBobberAccessor) mc.player.fishHook).analyzer$caughtFish();
         if (!bite && (hooked || !bool("auto-fish", "cast"))) { note("auto-fish", hooked ? "Waiting for synchronized fish bite" : "Cast the rod to begin"); return; }
         if (!ready("auto-fish", (int) num("auto-fish", "delay"))) return;
-        selectSlot(slot); interactionBudget--;
+        SilentRotation.cancel(); selectSlot(slot); interactionBudget--;
         var result = mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
         if (!result.isAccepted()) { note("auto-fish", "Fishing interaction unavailable"); return; }
         fishingAwaitUntil = hooked ? 0 : ticks + 40;

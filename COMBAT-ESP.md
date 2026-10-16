@@ -1,3 +1,5 @@
+In **0.13.2**, Kill Aura adds three original server-facing rotation modes while preserving the visible camera and normal reach/charge/ownership gates. See [Silent aim controls and limits](SILENT-AIM.md).
+
 > **0.13.0:** [Finders](FINDERS.md) adds original equivalents for all 27 Glazed ESP module families, with local scoped history and native debug geometry.
 
 > **0.12.0 addition:** [Entity Chams](ENTITY-CHAMS.md) provides five GLSL materials on actual posed models, with independent visible/occluded colors. It can be used alongside the debug ESP below.

@@ -56,6 +56,12 @@ tasks.register('namePrivacyCheck', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.analyzer.privacy.NameChangerSelfTest'
 }
+
+tasks.register('silentAimCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.gameplay.SilentAimPolicySelfTest'
+}
 tasks.register('chamsCheck', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -119,7 +125,7 @@ tasks.register('packPrivacyCheck', JavaExec) {
         mainClass = "dev.analyzer.automation.${entry}"
     }
 }
-tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('tracerCheck'), tasks.named('namePrivacyCheck'), tasks.named('chamsCheck'), tasks.named('blockFinderCheck'), tasks.named('entityFinderCheck'), tasks.named('chunkFinderCheck'), tasks.named('regionMapCheck'), tasks.named('finderUpdateCheck'), tasks.named('plannerCheck'), tasks.named('materialRecipesCheck'), tasks.named('safetyCheck'),
+tasks.named('check') { dependsOn tasks.named('coreCheck'), tasks.named('espCheck'), tasks.named('tracerCheck'), tasks.named('namePrivacyCheck'), tasks.named('silentAimCheck'), tasks.named('chamsCheck'), tasks.named('blockFinderCheck'), tasks.named('entityFinderCheck'), tasks.named('chunkFinderCheck'), tasks.named('regionMapCheck'), tasks.named('finderUpdateCheck'), tasks.named('plannerCheck'), tasks.named('materialRecipesCheck'), tasks.named('safetyCheck'),
     tasks.named('combatCheck'), tasks.named('movementCheck'), tasks.named('hvhCheck'), tasks.named('gameplayConfigCheck'), tasks.named('privacyConfigCheck'), tasks.named('privacyCheck'), tasks.named('packPrivacyCheck'),
     tasks.named('automationMotionCheck'), tasks.named('nativePathfinderCheck'), tasks.named('schematicCheck'), tasks.named('retreatCheck'),
     tasks.named('automationInputCheck'), tasks.named('schematicLibraryCheck'), tasks.named('miningRecoveryCheck'), tasks.named('groundRecoveryCheck'), tasks.named('localIntentCheck'), tasks.named('routeFollowingCheck'), tasks.named('xrayCheck') }
@@ -178,6 +184,19 @@ tasks.register('publishLocal') {
 
 loom {
     runs {
+        silentAimSmoke {
+            client()
+            name 'Analyzer native Kill Aura silent rotation acceptance'
+            runDir 'run-silent-aim-smoke'
+            vmArg '-Danalyzer.smoke=true'
+            vmArg '-Danalyzer.silentAimSmoke=true'
+            programArg '--username'
+            programArg 'AnalyzerDev'
+            programArg '--width'
+            programArg '1920'
+            programArg '--height'
+            programArg '1080'
+        }
         tracerPrivacySmoke {
             client()
             name 'Analyzer tracer anchors and local name privacy acceptance'

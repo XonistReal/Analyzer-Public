@@ -2,7 +2,7 @@
   "required": true,
   "package": "dev.analyzer.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["CombatNetworkMixin", "HandledScreenAccessor", "GameRendererMixin", "SkyRenderingMixin", "LightmapMixin", "InGameHudMixin",
+  "client": ["CombatNetworkMixin", "SilentRotationPlayerMixin", "SilentRotationNetworkMixin", "SilentRotationCorrectionMixin", "HandledScreenAccessor", "GameRendererMixin", "SkyRenderingMixin", "LightmapMixin", "InGameHudMixin",
     "InteractionCooldownAccessor", "WorkstationWorldAccessor", "WorkstationPendingAccessor", "WorkstationOwnershipMixin", "SchematicFluidAccess", "XrayBlockRenderMixin", "XrayLayersMixin", "XrayBlockFacesMixin", "XrayOcclusionMixin", "XrayBlockEntityMixin", "UtilityInteractionMixin", "FishingBobberAccessor", "SafeWalkMixin",
     "VisualInteractionMixin", "VisualNetworkMixin", "FinderBlockUpdatesMixin", "ItemPhysicsStateMixin", "ItemPhysicsRendererMixin",
     "HandTweaksMixin", "CrystalCosmeticsMixin", "PlayerCosmeticsMixin", "PlayerPoseMixin", "LivingEntityChamsMixin", "EntitySkeletonEspMixin", "AnalyzerFontMixin",

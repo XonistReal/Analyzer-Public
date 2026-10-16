@@ -1,0 +1,76 @@
+{
+  "release": "0.13.2",
+  "date": "2026-10-16",
+  "status": "build_and_focused_native_acceptance_passed",
+  "modules": 157,
+  "controls": 1823,
+  "policySuites": 32,
+  "policyAssertions": 79135,
+  "silentAimPolicyAssertions": 1413,
+  "nativeChecks": 427,
+  "nativeStableCameraTickSamples": 319,
+  "nativeModes": [
+    "Silent movement",
+    "Silent packet",
+    "Silent pulse"
+  ],
+  "nativeEvidence": [
+    "Actual ordinary outbound look/attack ordering",
+    "Independent integrated-server AttackEntityCallback captures attack-time yaw/pitch",
+    "Actual damageable target health decreases on server",
+    "Attack-time server look ray intersects fresh server target AABB",
+    "Stationary attack-point error below configured two degrees",
+    "Movement mode continues attacking a continuously moving target for 100 ticks",
+    "Pulse restores the ordinary camera look after actual attack",
+    "Normal weapon charge, reach and block obstruction gates",
+    "Active disable/mode/menu/target-loss/disconnect cleanup",
+    "Three original framebuffer writes and clean GL checks"
+  ],
+  "preconditions": "Guarded isolated Survival world; one authoritative damageable 200-health NoAI Husk, diamond sword, server-built platform/wall, actual server/client position and block acknowledgements. Local camera faces west (90/7.5); target is north.",
+  "limits": [
+    "Local integrated-server acceptance does not establish compatibility with remote server tweaks or anti-cheat",
+    "Movement input and actual camera remain real; held server look can be visible to other players",
+    "A local send observation is not a server acknowledgement; server callback/health evidence is recorded independently",
+    "Moving target tests use actual attack-angle server ray and fresh hitbox, not a zero-latency two-degree point promise",
+    "Cross-module handoff and correction/respawn paths are reviewed; a full native matrix of combat/native-task combinations and active server corrections was not run",
+    "Other combat/automation, renderer replacement and remote latency behavior not rerun"
+  ],
+  "buildSha256": "77280aad2a78dd21aa9187bd00f51e3ddd5f17f3d42a4d961d5dd0bfcdbfa25a",
+  "captures": {
+    "screenshots/analyzer-native-silent-aim-0.png": {
+      "mode": "Silent movement",
+      "sha256": "97eeda936e27b8f6b1f78a8b5ea089494f4aa50aa2309f1c02a43a3cf7441c12",
+      "bytes": 445028,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-silent-aim-1.png": {
+      "mode": "Silent packet",
+      "sha256": "386c168f5da5f9efafb2df3b77d9b51cc0e556ba92d8e1c630511b0611df440f",
+      "bytes": 230486,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    },
+    "screenshots/analyzer-native-silent-aim-2.png": {
+      "mode": "Silent pulse",
+      "sha256": "229990a48275f4e88014464854511867747db6b5d4fd6c1147f41b79542d5c6a",
+      "bytes": 208748,
+      "size": [
+        1920,
+        1080
+      ],
+      "source": "unedited native framebuffer"
+    }
+  },
+  "logs": {
+    "silent-aim-0.13.2-final-build.log": "c6df7f1655d18ee8ffda6f59ed3328e1c96116280bce6ff556307a0150ddae18",
+    "silent-aim-0.13.2-runtime-fourth.log": "543f13e5f498a84c8975ac3a9ba44d83949c8759792ef7f74b6eb4c9c0a638e7"
+  },
+  "earlierAttempts": "Earlier fixture runs exposed replication-sensitive point assertions, cached/interpolated ray reads within a pulse packet batch, and a resurrected saved fixture entity. Only the completed fourth run is acceptance."
+}

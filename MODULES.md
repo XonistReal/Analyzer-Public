@@ -92,7 +92,7 @@
 
 | Module | Behavior | Default |
 | --- | --- | --- |
-| Kill Aura | Choose, rotate toward and attack filtered targets with normal reach and bounded charged actions. | Off |
+| Kill Aura | Choose filtered targets and attack with normal reach, bounded charged actions and camera or selectable server-only rotations. | Off |
 | Aim Assist | Pull your actual camera toward a filtered target with configurable aim point, strength and smoothing. | Off |
 | Trigger Bot | Attack a filtered crosshair target after its reaction delay, normal reach and selected charge timing. | Off |
 | Auto Clicker | Repeat held entity attacks or ordinary item/block use with bounded steady, random or paired timing. | Off |
