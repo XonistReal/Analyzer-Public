@@ -48,6 +48,22 @@ public abstract class CatalogScreen extends Screen {
     protected void backdrop(DrawContext draw){GpuEffects.drawBackdrop(draw);}
     public CatalogScreen inspect(String id){return this;}
     public CatalogScreen withParent(Screen parent){returnParent=parent;return this;}
+    protected void editText(String module, Setting<?> setting) {
+        if (module.equals("sky") && setting.id().equals("custom-path")) {
+            client.setScreen(new SkyboxBrowserScreen(core, this, client.runDirectory.toPath(), path -> {
+                core.setValue("sky", "custom-path", path.toAbsolutePath().normalize().toString());
+                core.setValue("sky", "source", "Custom"); changed(); AnalyzerClient.saveConfig();
+                dev.analyzer.skybox.CustomSkybox.refresh();
+            }));
+        } else client.setScreen(new TextSettingScreen(core, module, setting, this));
+    }
+    protected String settingText(String module, Setting<?> setting) {
+        String value = core.getChoice(module, setting.id());
+        if (!module.equals("sky") || !setting.id().equals("custom-path")) return value;
+        if (value.isBlank()) return "Browse images / cube folders…";
+        try { return java.nio.file.Path.of(value).getFileName().toString(); }
+        catch (RuntimeException failure) { return "Choose another skybox…"; }
+    }
     public Screen parentScreen(){return returnParent;}
     public String selectedModuleId(){return null;}
     public List<String> visibleModuleIds(){return matching().stream().map(ModuleDefinition::id).toList();}
@@ -164,10 +180,10 @@ public abstract class CatalogScreen extends Screen {
                     case CHOICE,TEXT->{
                         Area hit=new Area(x+9,controlY,width-18,26);
                         GuiDraw.shaderCard(draw,hit.x,hit.y,hit.w,hit.h,7,accent,glass(),theme(),hit.contains(mx,my)?1:0,false);
-                        label(draw,GuiDraw.truncate(textRenderer,core.getChoice(id,setting.id()),hit.w-28,.91f),hit.x+9,hit.y+8,.91f,accent);
+                        label(draw,GuiDraw.truncate(textRenderer,settingText(id,setting),hit.w-28,.91f),hit.x+9,hit.y+8,.91f,accent);
                         label(draw,"›",hit.right()-15,hit.y+7,1,Palette.TEXT);
-                        clippedControl("setting:"+id+":"+setting.id(),hit,viewport,0,()->{if(setting.kind()==Setting.Kind.TEXT)client.setScreen(new TextSettingScreen(core,id,setting,this));else cycle(id,setting,1);});
-                        clippedControl("setting-back:"+id+":"+setting.id(),hit,viewport,1,()->{if(setting.kind()==Setting.Kind.TEXT)client.setScreen(new TextSettingScreen(core,id,setting,this));else cycle(id,setting,-1);});
+                        clippedControl("setting:"+id+":"+setting.id(),hit,viewport,0,()->{if(setting.kind()==Setting.Kind.TEXT)editText(id,setting);else cycle(id,setting,1);});
+                        clippedControl("setting-back:"+id+":"+setting.id(),hit,viewport,1,()->{if(setting.kind()==Setting.Kind.TEXT)editText(id,setting);else cycle(id,setting,-1);});
                     }
                     case NUMBER->{
                         double value=core.getNumber(id,setting.id());
@@ -245,7 +261,7 @@ public abstract class CatalogScreen extends Screen {
         if(!searchFocused&&focusedControl!=null){
             if(key==GLFW.GLFW_KEY_ENTER||key==GLFW.GLFW_KEY_KP_ENTER||key==GLFW.GLFW_KEY_SPACE){controls.stream().filter(c->c.id.equals(focusedControl)).findFirst().ifPresent(c->c.action.run());applyKeyPressNarratorDelay();return true;}
             if(key==GLFW.GLFW_KEY_LEFT||key==GLFW.GLFW_KEY_RIGHT){Setting<?> s=definitionSetting(focusedControl);if(s!=null){String mid=focusedControl.split(":")[1];int direction=key==GLFW.GLFW_KEY_LEFT?-1:1;
-                if(s.kind()==Setting.Kind.NUMBER){core.setValue(mid,s.id(),core.getNumber(mid,s.id())+direction*s.step());changed();}else if(s.kind()==Setting.Kind.CHOICE)cycle(mid,s,direction);else if(s.kind()==Setting.Kind.TEXT)client.setScreen(new TextSettingScreen(core,mid,s,this));else{core.setValue(mid,s.id(),!core.getBoolean(mid,s.id()));changed();}applyKeyPressNarratorDelay();return true;}}
+                if(s.kind()==Setting.Kind.NUMBER){core.setValue(mid,s.id(),core.getNumber(mid,s.id())+direction*s.step());changed();}else if(s.kind()==Setting.Kind.CHOICE)cycle(mid,s,direction);else if(s.kind()==Setting.Kind.TEXT)editText(mid,s);else{core.setValue(mid,s.id(),!core.getBoolean(mid,s.id()));changed();}applyKeyPressNarratorDelay();return true;}}
         }
         if(!searchFocused)return super.keyPressed(key,scan,modifiers);
         if((modifiers&GLFW.GLFW_MOD_CONTROL)!=0&&key==GLFW.GLFW_KEY_A){selectAll=true;return true;}

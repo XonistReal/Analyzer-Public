@@ -1,0 +1,83 @@
+{
+  "release": "0.14.0",
+  "date": "2026-10-16",
+  "status": "full_build_and_focused_native_acceptance_passed",
+  "modules": 157,
+  "controls": 1829,
+  "policySuites": 33,
+  "policyAssertions": 79162,
+  "skyboxPolicyAssertions": 27,
+  "nativeSkyboxChecks": 55,
+  "nativeCaptures": [
+    {
+      "path": "screenshots/analyzer-native-skybox-browser.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 553651,
+      "sha256": "0b2d49e23c647dda260889b04e2f50f4a7924d10932a726feb47b66b9452f256"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-cube.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 421940,
+      "sha256": "b7097a962d2974fe24991f1cd6cb044a11b21f122802d733cc6488fee2d218a0"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-end-dimension.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 497570,
+      "sha256": "1a8c646b279d3a07a7e1fa3354aafe952b63ae064fbecbcae3e6faa60286a1d9"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-minecraft-end.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 3031141,
+      "sha256": "71c2f0e06b91f0fdf8f9741d319c0ab37bac36844ffe44b57e0751f045e3983c"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-minecraft-panorama.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 2047144,
+      "sha256": "5da8e3dc7929c0631fe7647806840cb958f32384a6031514b315f630daafadca"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-panorama.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 527059,
+      "sha256": "9a116ca1f7cd8026b6c43792964dc00c16066b0f27f7e791a3521c76140bd22b"
+    }
+  ],
+  "buildSha256": "b11c46345e3a28acd489c1c763070f241ec87d3183c68cc5718d05e97abe7c15",
+  "logs": {
+    "skybox-0.14.0-final-build.log": "192c94ea9494e33334857db81a1c1b9be27d2484b2e76fe649ae95a0e96d2e58",
+    "skybox-0.14.0-native-final-verified.log": "a7e95dad8c8848a83205416113bb5a7205799eff0edaca7a5b7ce67b983e9c2b"
+  },
+  "skyboxEvidence": "production-validation/native-0.14.0/skybox.json",
+  "cosmeticCandidates": 8,
+  "cosmeticsRuntimeIntegrated": false,
+  "cosmeticReviewPackage": {
+    "name": "Analyzer-Cosmetics-Review.zip",
+    "bytes": 749235,
+    "sha256": "4edee6033fcb56feac2f811e727d953de532cb9247d6cd3eadeec15bc767cf90"
+  },
+  "cosmeticScope": "Actual downloaded geometry/textures; four wing texture looks share one supplied 17-part Minecraft pivot rig and original flap animation. No rig authored and no weighted-skin claim. MIT/CC0 source notices and hashes retained; user selections required before wearable integration.",
+  "cosmeticVisualEvidence": "Prior in-app-browser inspection verified actual wing animation, four accessory thumbnail choices, full-size crown and saved pick updates at 736-pixel width. Later review changes add a source-linked CDN/WebGL fallback and preserve model rendering. No claim of a completed 320-pixel or synthetic CDN-failure browser run.",
+  "limits": [
+    "Raw VTF/VMT/VPK and packaged OptiFine/FabricSkyBoxes formats need image conversion",
+    "Only PNG/JPEG 2:1 panoramas and six square face folders imported",
+    "Native sun/moon/clouds remain native",
+    "Replacement sky/shader renderer compatibility not established",
+    "Windows optional symlink fixture skipped because OS link creation permission unavailable",
+    "End dragon thick fog suppresses Minecraft sky rendering; the End opt-in follows that native condition"
+  ],
+  "optionalSkippedFixtures": [
+    "Windows skybox-library symlink creation permission",
+    "Windows schematic-library symlink creation permission"
+  ],
+  "otherModules": "Existing deterministic suites passed; unrelated native gameplay and external renderer/server compatibility were not rerun."
+}

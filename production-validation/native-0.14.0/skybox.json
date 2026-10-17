@@ -1,0 +1,85 @@
+{
+  "version": "0.14.0",
+  "scope": "Original local custom skybox importer, shader and shelf",
+  "nativeAssertions": 55,
+  "pureAssertions": 27,
+  "nativeLog": "build/reports/skybox-0.14.0-native-final-verified.log",
+  "nativeLogSha256": "a7e95dad8c8848a83205416113bb5a7205799eff0edaca7a5b7ce67b983e9c2b",
+  "nativeStatus": "BUILD SUCCESSFUL",
+  "nativeErrors": 0,
+  "captures": [
+    {
+      "path": "screenshots/analyzer-native-skybox-browser.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 553651,
+      "sha256": "0b2d49e23c647dda260889b04e2f50f4a7924d10932a726feb47b66b9452f256"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-cube.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 421940,
+      "sha256": "b7097a962d2974fe24991f1cd6cb044a11b21f122802d733cc6488fee2d218a0"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-end-dimension.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 497570,
+      "sha256": "1a8c646b279d3a07a7e1fa3354aafe952b63ae064fbecbcae3e6faa60286a1d9"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-minecraft-end.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 3031141,
+      "sha256": "71c2f0e06b91f0fdf8f9741d319c0ab37bac36844ffe44b57e0751f045e3983c"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-minecraft-panorama.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 2047144,
+      "sha256": "5da8e3dc7929c0631fe7647806840cb958f32384a6031514b315f630daafadca"
+    },
+    {
+      "path": "screenshots/analyzer-native-skybox-panorama.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 527059,
+      "sha256": "9a116ca1f7cd8026b6c43792964dc00c16066b0f27f7e791a3521c76140bd22b"
+    }
+  ],
+  "observed": [
+    "Actual native normal-sky pass draws a selected 2:1 PNG panorama",
+    "Six matching named cube faces load and draw",
+    "Current Minecraft menu panorama and native End texture load from resource manager",
+    "Shader shelf uses actual game skyboxes path, file row and Use selected clicks",
+    "Bad path retains ordinary native sky and reports an error",
+    "Native resource reload reuploads textures",
+    "Disable releases textures; re-enable reloads",
+    "Selected native GL-state values restored after actual shader draws",
+    "Actual End dimension requires End opt-in",
+    "Actual Nether transition releases custom textures and performs no draw/upload",
+    "Return to Overworld and actual disconnect cleanup",
+    "Native End sky callback renders repeated custom frames outside the dragon fight thick-fog area",
+    "Native dragon thick fog suppresses the whole sky pass; no forced render bypass is used",
+    "Completed framebuffer pixel validation: Overworld 987/1340 blue samples, End 1200/1340 blue samples",
+    "Native panorama faces use the actual CubeMapRenderer geometry and UV orientation (+X=1, -X=3, +Y=4, -Y=5, +Z=0, -Z=2)"
+  ],
+  "limits": [
+    "Raw VTF/VMT/VPK and packaged OptiFine/FabricSkyBoxes formats need image conversion",
+    "Only PNG/JPEG 2:1 panoramas and six square face folders imported",
+    "Native sun/moon/clouds remain native",
+    "Replacement sky/shader renderer compatibility not established",
+    "Windows optional symlink fixture skipped because OS link creation permission unavailable",
+    "End dragon thick fog suppresses Minecraft sky rendering; the End opt-in follows that native condition"
+  ],
+  "priorFixtureNotes": [
+    "The earlier 49-check fixture counted manual tick-time draws and did not prove visible End rendering; its black End screenshot is superseded.",
+    "The next End-pass fixture timed out because the End dragon bossbar suppresses the whole native sky pass.",
+    "The diagnostic run was deliberately stopped after proving END sky type, no submersion/status effects, and zero native End frames.",
+    "This final 55-check run independently requires repeated actual End callback draws and colored pixels in completed Overworld/End framebuffer captures."
+  ]
+}

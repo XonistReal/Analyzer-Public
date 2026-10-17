@@ -75,6 +75,12 @@ final class SettingSections {
     /** Hide values belonging to another mode while keeping their saved values intact. */
     static boolean visible(AnalyzerCore core, ModuleDefinition module, Setting<?> setting) {
         String id = setting.id(), name = module.id();
+        if (name.equals("sky")) {
+            boolean procedural = choice(core, module, "source").equals("Procedural");
+            if (id.equals("custom-path")) return choice(core, module, "source").equals("Custom");
+            if (id.equals("preset") || id.equals("stars") || id.equals("speed")) return procedural;
+            if (java.util.Set.of("rotation", "exposure", "weather-fade", "end-sky").contains(id)) return !procedural;
+        }
         if (module.settings().stream().anyMatch(value -> value.id().equals("scan-budget"))) {
             if (id.equals("marker-red") || id.equals("marker-green") || id.equals("marker-blue")) return choice(core,module,"marker-color").equals("Custom");
             if (name.equals("region-map") && java.util.Set.of("range", "scan-budget", "max-markers", "through-walls", "tracers", "tracer-origin", "line-width", "notify").contains(id)) return false;

@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Entity ESP | Clean debug boxes for players, hostile mobs and non-hostile mobs. | Off |
 | Tracers | Single clean lines to selected entities, using the same colors as Entity ESP. | Off |
-| Atmosphere | Cinematic bloom and color grading. Sky Aurora controls the sky. | Off |
+| Atmosphere | Cinematic bloom and color grading. Skybox controls the sky. | Off |
 | Entity Chams | Shader materials on actual living models, with separate visible and occluded colors. | Off |
 | Amethyst Finder | Marks received budding amethyst or geode blocks; chunk evidence is local to loaded data. | Off |
 | Bedrock Void ESP | Finds known air openings in the world's lowest layer beside received bedrock. | Off |
@@ -51,7 +51,7 @@
 | --- | --- | --- |
 | Storage ESP | Debug boxes around loaded containers, with colors for each storage group. | Off |
 | Fullbright | Lift world lighting for clearer exploration. | Off |
-| Sky Aurora | Animated sky curtains, stars and cosmic color above your world. | On |
+| Skybox | Procedural skies, local panoramic images and six-face skyboxes. | On |
 | Scaffold | Place hotbar blocks underneath your feet using ordinary block interactions. | Off |
 | Tower | While holding jump, rise onto automatically placed hotbar blocks. | Off |
 | Air Place | While holding use, attempt to place a block at your crosshair in empty air. | Off |

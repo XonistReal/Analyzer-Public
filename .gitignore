@@ -6,6 +6,7 @@ run-chams-smoke/
 run-finders-smoke/
 run-tracer-privacy-smoke/
 run-silent-aim-smoke/
+run-skybox-smoke/
 .idea/
 *.iml
 .DS_Store

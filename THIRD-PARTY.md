@@ -1,3 +1,7 @@
+## Review-only cosmetic candidates
+
+The separate `design/cosmetics-review` documentation assets and `Analyzer-Cosmetics-Review.zip` contain downloaded wearable candidates awaiting user selection. They are not runtime Analyzer assets or dependencies. Paul Fulham's Wings geometry, textures and original part/pivot animation source are MIT, with the complete notice retained. BullHornGames' crown, DefecateRainbows' Robin Hood hat, FacadeGaikan' top hat and Saraskau's backpack are creator-posted CC0; source snapshots, original files, conversion disclosures and hashes accompany the review. The browser review loads Three.js 0.160.1 from its public CDN; the Minecraft client does not depend on it. [Complete provenance and boundaries](COSMETICS-SHORTLIST.md).
+
 ## Finder behavioral reference in 0.13.0
 
 The Glazed ESP source at `1d33d14fdafd26100aa7bf616758786d79ac7b96` and later branch `6b6cab2a26f7a11985e6129ab51b4e909a2e9460` was inspected to understand feature behavior. It is not included in Analyzer source, runtime or Prism dependencies. The finder implementations, posed geometry and UI are original. [FINDERS.md](FINDERS.md) records original equivalents and differences; Glazed's restrictive license is not treated as permission to incorporate its code.

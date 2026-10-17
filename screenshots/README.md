@@ -1,3 +1,16 @@
+# Custom skyboxes - 0.14.0
+
+Six unedited 1920 × 1080 native framebuffer captures from the completed 55-check isolated skybox run. Grid/gradient images are original diagnostic fixtures, not cosmetic art or shipped sky presets. End rendering is observed outside Minecraft's native dragon boss fog.
+
+- [Shader folder browser](analyzer-native-skybox-browser.png)
+- [Imported 2:1 panorama](analyzer-native-skybox-panorama.png)
+- [Imported six-face cube](analyzer-native-skybox-cube.png)
+- [Native Minecraft menu panorama texture source](analyzer-native-skybox-minecraft-panorama.png)
+- [Native Minecraft End texture source in the Overworld](analyzer-native-skybox-minecraft-end.png)
+- [Imported panorama in the actual End dimension outside boss fog](analyzer-native-skybox-end-dimension.png)
+
+[Controls and boundaries](../CUSTOM-SKYBOX.md) · [Native evidence and hashes](../production-validation/native-0.14.0/skybox.json). Cosmetic previews are a separate review of downloaded assets, not in-game wearable captures. Historical captures follow.
+
 # Kill Aura silent rotations - 0.13.2
 
 Three unedited 1920 x 1080 native framebuffer captures from the completed isolated `runSilentAimSmoke`. The visible camera stays west at 90 / 7.5 while the target stands north, outside the viewport. The development evidence overlay shows actual integrated-server look and target health. Movement/Packet hold the server-facing angle; Pulse has already returned it to the visible camera after its real attack. Exact attack-time angles, real damage, moving-target continuation and cleanup are verified independently in the completed 427-check run.

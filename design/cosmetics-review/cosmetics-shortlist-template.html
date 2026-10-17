@@ -1,0 +1,373 @@
+<div id="analyzer-cosmetics-shortlist">
+  <style>
+    #analyzer-cosmetics-shortlist .gallery-title { padding-right:100px; }
+    #analyzer-cosmetics-shortlist .viewer-wrap { position:relative; }
+    #analyzer-cosmetics-shortlist .model-canvas { display:block; width:100%; height:310px; touch-action:none; cursor:grab; }
+    #analyzer-cosmetics-shortlist .model-canvas:active { cursor:grabbing; }
+    #analyzer-cosmetics-shortlist .option-preview { width:100%; height:126px; display:block; object-fit:contain; }
+    #analyzer-cosmetics-shortlist .option { display:grid; gap:6px; min-width:0; }
+    #analyzer-cosmetics-shortlist .group { margin-top:20px; }
+    #analyzer-cosmetics-shortlist .selection-line { min-height:24px; margin-top:12px; }
+    #analyzer-cosmetics-shortlist .model-detail { min-height:42px; overflow-wrap:anywhere; }
+    #analyzer-cosmetics-shortlist .gallery-status { padding-top:10px; }
+    #analyzer-cosmetics-shortlist .fallback-options { display:grid; gap:10px; }
+    #analyzer-cosmetics-shortlist .fallback-options[hidden] { display:none; }
+    #analyzer-cosmetics-shortlist .viz-controls[hidden] { display:none; }
+    @media(max-width:420px) { #analyzer-cosmetics-shortlist .model-canvas { height:270px; } }
+  </style>
+  <h3 class="gallery-title">Choose your cosmetics</h3>
+  <div class="card viewer-wrap">
+    <canvas class="model-canvas" role="img" aria-label="Interactive model preview on a neutral block mannequin. Drag to rotate."></canvas>
+    <div class="viz-row">
+      <span class="current-name">Angel wings</span>
+      <span class="text-small text-muted">Drag to rotate · Neutral mannequin</span>
+    </div>
+  </div>
+  <div class="viz-controls">
+    <label class="form-check form-switch"><input class="form-check-input animation-switch" type="checkbox" checked disabled><span class="form-check-label">Animate wings</span></label>
+    <label class="form-check form-switch"><input class="form-check-input mannequin-switch" type="checkbox" checked disabled><span class="form-check-label">Show mannequin</span></label>
+    <button type="button" class="btn view-reset" disabled>Reset view</button>
+  </div>
+  <div class="model-detail text-small text-muted" aria-live="polite"></div>
+  <div class="group wings-group" hidden>
+    <h3>Wings</h3>
+    <div class="viz-grid wing-options"></div>
+    <div class="text-small text-muted">Paul Fulham · <a href="https://github.com/pau101/Wings/tree/174929878d09490b012dbfa4e8d23d56f02b5add" target="_blank" rel="noopener noreferrer">Wings</a> · <a href="https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/LICENSE.md" target="_blank" rel="noopener noreferrer">MIT license</a></div>
+  </div>
+  <div class="group hat-group" hidden>
+    <h3>Hats &amp; accessories</h3>
+    <div class="viz-grid hat-options"></div>
+  </div>
+  <div class="selection-line" aria-live="polite">Selected: <span class="selected-names">None yet</span></div>
+  <div class="fallback-options" aria-label="Cosmetic choices and original sources"></div>
+  <div class="text-small text-muted">Review only · Cosmetics are not installed.</div>
+  <div class="gallery-status text-small" role="status">Loading model preview…</div>
+  <script type="application/json" class="wing-data">__WING_DATA__</script>
+  <script type="application/json" class="hat-data">__HAT_DATA__</script>
+  <script>
+    (() => {
+      const root = document.getElementById('analyzer-cosmetics-shortlist');
+      const list = root.querySelector('.fallback-options');
+      const wings = JSON.parse(root.querySelector('.wing-data').textContent);
+      const hats = JSON.parse(root.querySelector('.hat-data').textContent);
+      const candidates = [
+        ...wings.textures.map(look => ({id:look.id,name:look.title,source:wings.source.url,license:'MIT'})),
+        ...hats
+      ];
+      let selected = new Set();
+      function update() {
+        list.querySelectorAll('input').forEach(input => {input.checked = selected.has(input.dataset.id);});
+        if (!list.hidden) root.querySelector('.selected-names').textContent = candidates.filter(c => selected.has(c.id)).map(c => c.name).join(', ') || 'None yet';
+      }
+      function apply(state) {
+        const saved = state?.privateContent;
+        if (saved?.version === 1 && Array.isArray(saved.selectedIds)) selected = new Set(saved.selectedIds.filter(id => candidates.some(c => c.id === id)));
+        update();
+      }
+      candidates.forEach(candidate => {
+        const row = document.createElement('div');
+        const label = document.createElement('label'); label.className = 'form-check';
+        const input = document.createElement('input'); input.type = 'checkbox'; input.className = 'form-check-input'; input.dataset.id = candidate.id;
+        const name = document.createElement('span'); name.className = 'form-check-label'; name.textContent = candidate.name;
+        const source = document.createElement('a'); source.href = candidate.source; source.target = '_blank'; source.rel = 'noopener noreferrer'; source.textContent = 'Original source · ' + candidate.license;
+        input.addEventListener('change', () => {
+          if (input.checked) selected.add(candidate.id); else selected.delete(candidate.id);
+          update();
+          window.openai?.setWidgetState?.({modelContent:{selectedCosmetics:candidates.filter(c => selected.has(c.id)).map(c => c.name)},privateContent:{version:1,selectedIds:[...selected]}})?.catch(() => {});
+        });
+        label.append(input,name); row.append(label,source); list.append(row);
+      });
+      apply(window.openai?.widgetState);
+      window.addEventListener('openai:set_globals', event => {if (event.detail?.globals?.widgetState && !list.hidden) apply(event.detail.globals.widgetState);});
+    })();
+  </script>
+  <script type="module">
+    try {
+    const THREE = await import('https://esm.sh/three@0.160.1');
+    const root = document.getElementById('analyzer-cosmetics-shortlist');
+    const wingData = JSON.parse(root.querySelector('.wing-data').textContent);
+    const hatData = JSON.parse(root.querySelector('.hat-data').textContent);
+    const canvas = root.querySelector('.model-canvas');
+    const status = root.querySelector('.gallery-status');
+    const currentName = root.querySelector('.current-name');
+    const detail = root.querySelector('.model-detail');
+    const animationSwitch = root.querySelector('.animation-switch');
+    const mannequinSwitch = root.querySelector('.mannequin-switch');
+    const resetView = root.querySelector('.view-reset');
+    const selectedNames = root.querySelector('.selected-names');
+    const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    let activeId = 'angel', animated = !reducedMotion, mannequinVisible = true, yaw = .16, pitch = .15;
+    let selected = new Set(), pointer = null, drawing = false, previousTime = 0, time = 2, thumbnailMode = false;
+    const sourceTitle = 'Existing 17-part Minecraft pivot rig · 4 texture looks · 792 triangles · Original flap animation';
+    const assets = new Map();
+    const styleProbe = document.createElement('span');
+    styleProbe.style.color = 'var(--muted-foreground)'; root.appendChild(styleProbe);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(37,1,.1,400);
+    const renderer = new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0,0);
+    scene.add(new THREE.AmbientLight(0xffffff,2.0));
+    const key = new THREE.DirectionalLight(0xffffff,2.1); key.position.set(25,70,60); scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffffff,1.3); rim.position.set(-35,25,-35); scene.add(rim);
+    const ground = new THREE.Group(); scene.add(ground);
+    const geometryOwner = new THREE.Group(); scene.add(geometryOwner);
+    function themeColor(variable) {
+      styleProbe.style.color = 'var('+variable+')';
+      const c = new THREE.Color(getComputedStyle(styleProbe).color);
+      return c;
+    }
+    const avatarMaterial = new THREE.MeshStandardMaterial({color:themeColor('--muted-foreground'),roughness:.9,transparent:true,opacity:.38});
+    const mannequin = new THREE.Group(); scene.add(mannequin);
+    function mannequinBox(w,h,d,x,y,z) {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),avatarMaterial); mesh.position.set(x,y,z); mannequin.add(mesh);
+    }
+    mannequinBox(8,8,8,0,4,0); mannequinBox(8,12,4,0,-6,0);
+    mannequinBox(4,12,4,-6,-6,0); mannequinBox(4,12,4,6,-6,0);
+    mannequinBox(4,12,4,-2,-18,0); mannequinBox(4,12,4,2,-18,0);
+    const materialCache = new Map();
+    async function loadWingTexture(uri) {
+      const texture = await new Promise((resolve,reject)=>new THREE.TextureLoader().load(uri,resolve,undefined,reject));
+      texture.magFilter=THREE.NearestFilter; texture.minFilter=THREE.NearestFilter;
+      texture.colorSpace=THREE.SRGBColorSpace;
+      return new THREE.MeshStandardMaterial({map:texture,roughness:.85,metalness:0,side:THREE.DoubleSide,alphaTest:.15});
+    }
+    function meshBuilder() {
+      const positions=[],uvs=[],indices=[];
+      function quad(v,u1,v1,u2,v2,tw=64,th=64) {
+        const n=positions.length/3;
+        v.forEach(p=>positions.push(...p));
+        [[u2,v1],[u1,v1],[u1,v2],[u2,v2]].forEach(p=>uvs.push(p[0]/tw,1-p[1]/th));
+        indices.push(n,n+1,n+2,n,n+2,n+3);
+      }
+      function finish() {
+        const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+        geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2)); geo.setIndex(indices); geo.computeVertexNormals(); return geo;
+      }
+      return {quad,finish};
+    }
+    function boxGeometry(box) {
+      const out=meshBuilder();
+      const [x0,y0,z0]=box.origin,[w,h,d]=box.size,[u,v]=box.uv;
+      const x1=x0+w,y1=y0+h,z1=z0+d;
+      const a=[x0,y0,z0],b=[x1,y0,z0],c=[x1,y1,z0],e=[x0,y1,z0],f=[x0,y0,z1],g=[x1,y0,z1],k=[x1,y1,z1],l=[x0,y1,z1];
+      out.quad([g,f,a,b],u+d,v,u+d+w,v+d);
+      out.quad([c,e,l,k],u+d+w,v+d,u+d+w+w,v);
+      out.quad([a,f,l,e],u,v+d,u+d,v+d+h);
+      out.quad([b,a,e,c],u+d,v+d,u+d+w,v+d+h);
+      out.quad([g,b,c,k],u+d+w,v+d,u+d+w+d,v+d+h);
+      out.quad([f,g,k,l],u+d+w+d,v+d,u+d+w+d+w,v+d+h);
+      return out.finish();
+    }
+    function extrusionGeometry(panel) {
+      const out=meshBuilder();
+      const [x0,y0,z0]=panel.origin,w=panel.width,h=panel.height,[u,v]=panel.uv;
+      const x1=x0+w,y1=y0+h,z1=z0+1;
+      function add(ax,ay,az,bx,by,bz,u1,v1,u2,v2,vertical=false) {
+        out.quad([[bx,ay,az],[ax,ay,vertical?az:bz],[ax,by,bz],[bx,by,vertical?bz:az]],u1,v1,u2,v2);
+      }
+      add(x0,y0,z0,x1,y1,z0,u,v,u+w,v+h);
+      add(x0,y1,z1,x1,y0,z1,u,v+h,u+w,v);
+      for(let i=0;i<w;i++) {
+        const sample=u+i+.5;
+        add(x0+i,y0,z0,x0+i,y1,z1,sample,v,sample,v+h);
+        add(x0+i+1,y1,z0,x0+i+1,y0,z1,sample,v+h,sample,v);
+      }
+      for(let i=0;i<h;i++) {
+        const sample=v+i+.5;
+        add(x0,y0+i+1,z0,x1,y0+i+1,z1,u,sample,u+w,sample,true);
+        add(x1,y0+i,z0,x0,y0+i,z1,u+w,sample,u,sample,true);
+      }
+      return out.finish();
+    }
+    const sharedGeometry = new Map();
+    wingData.parts.forEach(p=>{if(p.box)sharedGeometry.set(p.name,boxGeometry(p.box));else if(p.extrudedTexture)sharedGeometry.set(p.name,extrusionGeometry(p.extrudedTexture));});
+    function makeWings(material) {
+      const object=new THREE.Group(), parts=new Map();
+      object.scale.set(1,-1,1);
+      wingData.parts.forEach(p=>{
+        const part=new THREE.Group();part.name=p.name;part.position.fromArray(p.pivot);part.rotation.order='ZYX';
+        if(sharedGeometry.has(p.name))part.add(new THREE.Mesh(sharedGeometry.get(p.name),material));
+        parts.set(p.name,part);
+      });
+      wingData.parts.forEach(p=>{if(p.parent)parts.get(p.parent).add(parts.get(p.name));else object.add(parts.get(p.name));});
+      return {object,parts};
+    }
+    function animateWing(asset,t) {
+      const bones=wingData.animation.restWingDegrees,feathers=wingData.animation.restFeatherDegrees;
+      for(let i=0;i<4;i++) {
+        const weight=Math.min(Math.abs(i-1),2)/2,cycle=t-weight*1.2;
+        const x=(Math.sin(cycle+Math.PI/2)-1)/2*16+8;
+        const y=(Math.sin(cycle)*26+12)*(1-weight*(Math.min(Math.sin(cycle+Math.PI),0)/2+1)*Math.sin(t));
+        const angles=[bones[i][0]+x,bones[i][1]+y,bones[i][2]];
+        for(const [side,sign] of [['Left',1],['Right',-1]]) {
+          const bone=asset.parts.get(wingData.rig[side==='Left'?'leftChain':'rightChain'][i]);
+          bone.rotation.set(angles[0]*Math.PI/180,angles[1]*sign*Math.PI/180,angles[2]*sign*Math.PI/180,'ZYX');
+          const feather=asset.parts.get(wingData.rig[side==='Left'?'leftFeathers':'rightFeathers'][i]);
+          feather.rotation.set(feathers[i][0]*Math.PI/180,feathers[i][1]*sign*Math.PI/180,feathers[i][2]*sign*Math.PI/180,'ZYX');
+        }
+      }
+    }
+    async function makeHat(data) {
+      const object=new THREE.Group();
+      for(const part of data.meshes) {
+        const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(part.positions,3));
+        if(part.indices)geo.setIndex(part.indices);
+        if(part.uvs)geo.setAttribute('uv',new THREE.Float32BufferAttribute(part.uvs,2));
+        if(part.normals)geo.setAttribute('normal',new THREE.Float32BufferAttribute(part.normals,3));else geo.computeVertexNormals();
+        let map=null;
+        if(part.texture) {
+          map=await new Promise((resolve,reject)=>new THREE.TextureLoader().load(part.texture,resolve,undefined,reject));
+          map.magFilter=THREE.NearestFilter;map.minFilter=THREE.NearestFilter;map.colorSpace=THREE.SRGBColorSpace;
+        }
+        const material=new THREE.MeshStandardMaterial({color:new THREE.Color(...(part.color||[.7,.7,.7])),map,roughness:.85,metalness:0,side:THREE.DoubleSide,alphaTest:map?.15:0});
+        const mesh=new THREE.Mesh(geo,material);object.add(mesh);
+      }
+      if(data.previewTransform) {
+        const transform=data.previewTransform;
+        if(transform.rotation)object.rotation.fromArray([...transform.rotation,'XYZ']);
+        if(transform.scale)object.scale.setScalar(transform.scale);
+        if(transform.position)object.position.fromArray(transform.position);
+      } else {
+        const bounds=new THREE.Box3().setFromObject(object),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
+        if(data.id==='backpack') {
+          const scale=12/Math.max(size.y,.001);object.scale.setScalar(scale);
+          object.position.set(-center.x*scale,-6-center.y*scale,3-bounds.min.z*scale);
+        } else {
+          const scale=10/Math.max(size.x,.001);object.scale.setScalar(scale);
+          object.position.set(-center.x*scale,7.5-bounds.min.y*scale,-center.z*scale);
+        }
+      }
+      return object;
+    }
+    function setCamera() {
+      const wing=assets.get(activeId)?.kind==='wing';
+      const r=thumbnailMode?(wing?56:activeId==='backpack'?45:38):(activeId==='backpack'?70:wing?82:56);
+      const targetY=thumbnailMode?(wing?-7:activeId==='backpack'?-6:4):(wing?-8:-1);
+      camera.position.set(Math.sin(yaw)*Math.cos(pitch)*r,targetY+Math.sin(pitch)*r,Math.cos(yaw)*Math.cos(pitch)*r);
+      camera.lookAt(0,targetY,0);
+    }
+    function renderNow() {
+      if(!assets.size)return;
+      const width=canvas.clientWidth,height=canvas.clientHeight;
+      renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();setCamera();renderer.render(scene,camera);
+    }
+    function persist() {
+      const snapshot={version:1,activeId,animated,mannequinVisible,yaw,pitch,selectedIds:[...selected]};
+      window.openai?.setWidgetState?.({modelContent:{selectedCosmetics:[...selected].map(id=>assets.get(id)?.name).filter(Boolean)},privateContent:snapshot})?.catch(()=>{});
+    }
+    function updateSelection() {
+      selectedNames.textContent=[...selected].map(id=>assets.get(id)?.name).filter(Boolean).join(', ')||'None yet';
+      root.querySelectorAll('[data-select-id]').forEach(input=>{input.checked=selected.has(input.dataset.selectId);});
+    }
+    function activate(id,save=true) {
+      if(!assets.has(id))return;
+      activeId=id;
+      assets.forEach((asset,key)=>{asset.object.visible=key===id;});
+      const asset=assets.get(id);currentName.textContent=asset.name;
+      detail.textContent=asset.kind==='wing'?sourceTitle:asset.detail;
+      root.querySelectorAll('[data-inspect-id]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.inspectId===id)));
+      if(save){yaw=asset.kind==='wing'?.16:asset.id==='backpack'?0:Math.PI+.24;pitch=.15;persist();}
+      renderNow();
+    }
+    function applyState(state) {
+      const saved=state?.privateContent;
+      if(!saved||saved.version!==1)return;
+      if(Array.isArray(saved.selectedIds))selected=new Set(saved.selectedIds.filter(id=>assets.has(id)));
+      if(typeof saved.animated==='boolean')animated=saved.animated;
+      if(typeof saved.mannequinVisible==='boolean')mannequinVisible=saved.mannequinVisible;
+      if(Number.isFinite(saved.yaw))yaw=saved.yaw;
+      if(Number.isFinite(saved.pitch))pitch=Math.max(-.8,Math.min(.8,saved.pitch));
+      mannequin.visible=mannequinVisible;mannequinSwitch.checked=mannequinVisible;animationSwitch.checked=animated;
+      updateSelection();activate(assets.has(saved.activeId)?saved.activeId:'angel',false);
+    }
+    function createOption(asset) {
+      const option=document.createElement('div');option.className='option';
+      const image=document.createElement('img');image.className='option-preview';image.alt=asset.name+' actual model preview';
+      const button=document.createElement('button');button.type='button';button.className='btn';button.textContent=asset.name;button.dataset.inspectId=asset.id;button.setAttribute('aria-pressed','false');
+      button.addEventListener('click',()=>activate(asset.id));
+      const label=document.createElement('label');label.className='form-check';
+      const input=document.createElement('input');input.type='checkbox';input.className='form-check-input';input.dataset.selectId=asset.id;input.setAttribute('aria-label','Choose '+asset.name);
+      const span=document.createElement('span');span.className='form-check-label';span.textContent='Add to my picks';
+      input.addEventListener('change',()=>{if(input.checked)selected.add(asset.id);else selected.delete(asset.id);updateSelection();persist();});
+      label.append(input,span);option.append(image,button,label);
+      if(asset.kind==='hat') {
+        const credit=document.createElement('div');credit.className='text-small text-muted';
+        const source=document.createElement('a');source.href=asset.source;source.target='_blank';source.rel='noopener noreferrer';source.textContent=asset.author+' · '+asset.license;
+        credit.append(source);option.append(credit);
+      }
+      root.querySelector(asset.kind==='wing'?'.wing-options':'.hat-options').append(option);
+      return image;
+    }
+    function thumbnail(asset,image) {
+      assets.forEach(a=>a.object.visible=a===asset);
+      if(asset.kind==='wing')animateWing(asset,4.71);
+      const previous=activeId;activeId=asset.id;
+      const previousYaw=yaw,previousPitch=pitch;
+      yaw=asset.kind==='wing'?.16:asset.id==='backpack'?0:Math.PI+.24;pitch=.2;
+      thumbnailMode=true;
+      renderer.setSize(336,184,false);camera.aspect=336/184;camera.updateProjectionMatrix();setCamera();renderer.render(scene,camera);
+      image.src=canvas.toDataURL('image/png');
+      thumbnailMode=false;
+      activeId=previous;yaw=previousYaw;pitch=previousPitch;
+    }
+    animationSwitch.addEventListener('change',()=>{animated=animationSwitch.checked;persist();});
+    mannequinSwitch.addEventListener('change',()=>{mannequinVisible=mannequinSwitch.checked;mannequin.visible=mannequinVisible;persist();renderNow();});
+    resetView.addEventListener('click',()=>{const asset=assets.get(activeId);yaw=asset.kind==='wing'?.16:asset.id==='backpack'?0:Math.PI+.24;pitch=.15;persist();renderNow();});
+    canvas.addEventListener('pointerdown',event=>{pointer={id:event.pointerId,x:event.clientX,y:event.clientY};canvas.setPointerCapture(event.pointerId);});
+    canvas.addEventListener('pointermove',event=>{if(!pointer||event.pointerId!==pointer.id)return;yaw-=(event.clientX-pointer.x)*.012;pitch=Math.max(-.8,Math.min(.8,pitch+(event.clientY-pointer.y)*.008));pointer.x=event.clientX;pointer.y=event.clientY;renderNow();});
+    function endDrag(event){if(pointer&&event.pointerId===pointer.id){pointer=null;persist();}}
+    canvas.addEventListener('pointerup',endDrag);canvas.addEventListener('pointercancel',endDrag);
+    window.addEventListener('openai:set_globals',event=>{if(event.detail?.globals?.widgetState)applyState(event.detail.globals.widgetState);});
+    new ResizeObserver(renderNow).observe(canvas);
+    const themeObserver=new MutationObserver(()=>{
+      avatarMaterial.color.copy(themeColor('--muted-foreground'));
+      const current=activeId;
+      assets.forEach(asset=>{if(asset.previewImage)thumbnail(asset,asset.previewImage);});
+      assets.forEach(asset=>{if(asset.kind==='wing')animateWing(asset,time);});
+      activate(current,false);
+    });
+    themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class','style','data-theme']});
+    try {
+      for(const look of wingData.textures) {
+        const material=await loadWingTexture(look.inlineTexture);materialCache.set(look.id,material);
+        const model=makeWings(material);
+        const asset={id:look.id,name:look.title,kind:'wing',...model};assets.set(asset.id,asset);geometryOwner.add(asset.object);animateWing(asset,time);
+      }
+      for(const hat of hatData) {
+        const object=await makeHat(hat),asset={...hat,kind:'hat',object};assets.set(asset.id,asset);geometryOwner.add(object);
+      }
+      if(hatData.length)root.querySelector('.hat-group').hidden=false;
+      root.querySelector('.wings-group').hidden=false;
+      for(const asset of assets.values()){const image=createOption(asset);asset.previewImage=image;thumbnail(asset,image);}
+      animationSwitch.disabled=false;mannequinSwitch.disabled=false;resetView.disabled=false;
+      root.querySelector('.fallback-options').hidden=true;
+      animationSwitch.checked=animated;activate('angel',false);applyState(window.openai?.widgetState);
+      status.textContent='';
+      function frame(stamp) {
+        if(!root.isConnected)return;
+        const delta=Math.min((stamp-previousTime)/1000,.05);previousTime=stamp;
+        if(animated&&document.visibilityState!=='hidden') {
+          time+=delta*4.5;
+          const asset=assets.get(activeId);if(asset?.kind==='wing')animateWing(asset,time);
+          renderNow();
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    } catch(error) {
+      status.textContent='The 3D preview could not load. Source links and downloaded models remain available.';
+      status.setAttribute('role','alert');console.error(error);
+    }
+    } catch(error) {
+      const failedRoot = document.getElementById('analyzer-cosmetics-shortlist');
+      failedRoot.querySelector('.viewer-wrap').hidden = true;
+      failedRoot.querySelector('.viz-controls').hidden = true;
+      const failedStatus = failedRoot.querySelector('.gallery-status');
+      failedStatus.textContent = '3D preview unavailable. Choices and original source links remain available below the selection.';
+      failedStatus.setAttribute('role','alert');
+      console.error(error);
+    }
+  </script>
+</div>

@@ -64,6 +64,11 @@ public final class Setting<T> {
         return new Setting<>(id, label, Kind.TEXT, String.class, defaultValue, 1, maxLength, Double.NaN, List.of());
     }
 
+    /** A local filesystem selection, edited by its dedicated folder browser rather than alias entry. */
+    public static Setting<String> filePath(String id, String label) {
+        return new Setting<>(id, label, Kind.TEXT, String.class, "", 0, 4096, Double.NaN, List.of());
+    }
+
     /** Rejects wrong types and invalid choices; clamps and snaps finite numbers. */
     public T normalize(Object value) {
         Object normalized;
@@ -92,7 +97,9 @@ public final class Setting<T> {
             case TEXT -> {
                 if (!(value instanceof String text)) throw invalid(value);
                 String stripped = text.strip();
-                if (stripped.length() < min || stripped.length() > max || !stripped.matches("[A-Za-z0-9_]+")) throw invalid(value);
+                if (stripped.length() < min || stripped.length() > max
+                        || (min == 0 ? stripped.codePoints().anyMatch(c -> Character.isISOControl(c) || c == 0xA7)
+                                     : !stripped.matches("[A-Za-z0-9_]+"))) throw invalid(value);
                 normalized = stripped;
             }
             default -> throw new IllegalStateException("Unhandled setting kind: " + kind);

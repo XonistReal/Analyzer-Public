@@ -42,7 +42,7 @@ def main() -> None:
         raise ValueError("Fabric API must be the verified 0.119.4+1.21.4 build")
 
     required_docs = (
-        "README.md", "PRISM.md", "AGENTS.md", "AUTOMATION.md", "AUTOMATION-MOTION.md", "COMBAT-ESP.md", "SILENT-AIM.md", "ENTITY-CHAMS.md", "FINDERS.md", "TRACERS-AND-NAME.md", "SCHEMATIC-CONSTRUCTION.md", "SAFETY.md", "UI-OVERHAUL-PLAN.md", "UI-OVERHAUL.md",
+        "README.md", "PRISM.md", "AGENTS.md", "AUTOMATION.md", "AUTOMATION-MOTION.md", "COMBAT-ESP.md", "SILENT-AIM.md", "CUSTOM-SKYBOX.md", "COSMETICS-SHORTLIST.md", "ENTITY-CHAMS.md", "FINDERS.md", "TRACERS-AND-NAME.md", "SCHEMATIC-CONSTRUCTION.md", "SAFETY.md", "UI-OVERHAUL-PLAN.md", "UI-OVERHAUL.md",
         "UI-REFERENCES.md", "HOME-SCREEN.md", "HOME-REFERENCES.md", "MODULE-TESTS.md", "STUDIO-COMPLETE.md",
         "SERVER-PRIVACY.md", "LIQUID-GLASS.md", "MOVING-PCS.md", "VERSION-HISTORY.md", "GITHUB-BACKUP.md",
         "ESP-READABILITY.md", "GAMEPLAY-SETTINGS.md", "XRAY.md", "MODULES.md",
@@ -53,6 +53,8 @@ def main() -> None:
     optional_logs = ("VALIDATION.log", "PIXEL-VALIDATION.log")
     updater = repo / "tools/prism/Update-Analyzer.ps1"
     native_evidence = Path(f"production-validation/native-{manifest['version']}/acceptance.json")
+    native_details = sorted(path for path in (repo / native_evidence.parent).glob("*.json")
+                            if path.name not in {"acceptance.json", "delivery.json"})
     reference_dir = Path("design/ui-references")
     reference_images = (
         "reference-1-temple-simple.png", "reference-2-temple-glass.png",
@@ -64,7 +66,7 @@ def main() -> None:
         "reference-1-panorama.jpg", "reference-2-options.jpg", "reference-3-orbit.jpg",
         "reference-4-worlds.jpg", "reference-5-servers.jpg",
     )
-    required_files = [repo / doc for doc in required_docs] + [updater, repo / native_evidence]
+    required_files = [repo / doc for doc in required_docs] + [updater, repo / native_evidence] + native_details
     dependency_source = repo / "dependencies/fabric-api-0.119.4+1.21.4-source.zip"
     required_files.append(dependency_source)
     required_files.extend(repo / reference_dir / name for name in reference_images)
@@ -134,6 +136,8 @@ WrapperCommand=
         shutil.copyfile(repo / doc, instance / doc)
     (instance / native_evidence.parent).mkdir(parents=True)
     shutil.copyfile(repo / native_evidence, instance / native_evidence)
+    for detail in native_details:
+        shutil.copyfile(detail, instance / native_evidence.parent / detail.name)
     # Unmodified comparison references accompany the design docs, not runtime assets.
     packaged_references = instance / reference_dir
     packaged_references.mkdir(parents=True)

@@ -13,4 +13,8 @@ public abstract class SkyRenderingMixin {
     private void analyzer$sky(float red, float green, float blue, CallbackInfo ci) {
         GpuEffects.renderSky();
     }
+    @Inject(method = "renderEndSky", at = @At("RETURN"))
+    private void analyzer$endSky(CallbackInfo ci) {
+        dev.analyzer.skybox.CustomSkybox.nativePass(true);
+    }
 }

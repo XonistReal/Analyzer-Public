@@ -1,3 +1,7 @@
+## 0.14.0 - Custom skyboxes and cosmetic review
+
+Adds original local panorama/cubemap rendering, a shader folder browser, native Minecraft panorama/End texture sources and bounded asynchronous import/resource cleanup. Existing procedural settings remain the default. Eight licensed downloaded cosmetic candidates are preserved for visual selection, with the supplied wing rig and original animations; no wearable integration occurs before selection. [Skybox controls](CUSTOM-SKYBOX.md) · [Cosmetic shortlist](COSMETICS-SHORTLIST.md) · [Validation](VALIDATION.md).
+
 ## 0.13.2 - Kill Aura silent rotation transports
 
 Adds Silent movement, Silent packet and Silent pulse to Kill Aura while preserving Client/None preferences. Original bounded virtual aiming leaves the camera unchanged and validates actual transmitted look against fresh geometry. Native tests separate server-observed attack/damage from remote-server compatibility. [Controls](SILENT-AIM.md) · [Validation](VALIDATION.md).
@@ -16,7 +20,7 @@ Original GLSL materials follow actual animated living-model geometry: Flat, Meta
 
 # Saved Analyzer versions
 
-The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analyzer) preserves **24 version tags**. Existing commits/tags are retained; recovery commits use their actual backup date rather than invented development dates. **Main/v0.13.2 contain the complete current project and tests.** The original 15-tag transfer remains documented in [GITHUB-BACKUP.md](GITHUB-BACKUP.md).
+The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analyzer) preserves **25 version tags**. Existing commits/tags are retained; recovery commits use their actual backup date rather than invented development dates. **Main/v0.14.0 contain the complete current project and tests.** The original 15-tag transfer remains documented in [GITHUB-BACKUP.md](GITHUB-BACKUP.md).
 
 | Version/update | Tag | Source provenance |
 | --- | --- | --- |
@@ -42,6 +46,7 @@ The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analy
 | 0.11.0 combat, ESP and construction | `v0.11.0` | Coordinated combat and three additions, debug ESP, local registry item requests, schematic ghosts and reusable fluid buckets; deterministic/registry checks separated from gameplay |
 | 0.12.0 shader entity chams | `v0.12.0` | Original posed-model GLSL materials, independent visible/occluded palettes, shader wire edges, policy tests and focused native GPU/capture evidence |
 | 0.13.2 Kill Aura silent rotations | `v0.13.2` | Original packet-angle leases, three timing modes, fixed camera, fresh virtual rays and native attack evidence |
+| 0.14.0 Custom skyboxes and cosmetic review | `v0.14.0` | Local images/cube faces, native sky sources, folder shelf and separately licensed review-only wearable candidates |
 | 0.13.1 tracer origins and name alias | `v0.13.1` | Exact rendered tracer transforms, original local text masking, safe editable fields and focused policy/native evidence |
 | 0.13.0 finders and specialized ESP | `v0.13.0` | Original loaded-data detectors, scoped stash history, coordinate map and posed skeletons; upstream behavior only, with separate policy/native evidence |
 

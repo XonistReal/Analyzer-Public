@@ -203,14 +203,14 @@ public final class StudioScreen extends CatalogScreen {
                     case CHOICE, TEXT -> {
                         Area hit = new Area(x + 8, controlY, width - 18, 25);
                         GuiDraw.shaderCard(draw, hit.x(), hit.y(), hit.w(), hit.h(), 8, accent, false, "Classic", hit.contains(mx, my) ? 1 : 0, false);
-                        label(draw, GuiDraw.truncate(textRenderer, core.getChoice(mid, setting.id()), hit.w() - 36, .94f), hit.x() + 9, hit.y() + 7, .94f, WHITE);
+                        label(draw, GuiDraw.truncate(textRenderer, settingText(mid, setting), hit.w() - 36, .94f), hit.x() + 9, hit.y() + 7, .94f, WHITE);
                         label(draw, "›", hit.right() - 15, hit.y() + 6, 1.1f, SECONDARY);
                         clippedControl("setting:" + mid + ":" + setting.id(), hit, clip, 0, () -> {
-                            if (setting.kind() == Setting.Kind.TEXT) client.setScreen(new TextSettingScreen(core, mid, setting, this));
+                            if (setting.kind() == Setting.Kind.TEXT) editText(mid, setting);
                             else cycle(mid, setting, 1);
                         });
                         clippedControl("setting-back:" + mid + ":" + setting.id(), hit, clip, 1, () -> {
-                            if (setting.kind() == Setting.Kind.TEXT) client.setScreen(new TextSettingScreen(core, mid, setting, this));
+                            if (setting.kind() == Setting.Kind.TEXT) editText(mid, setting);
                             else cycle(mid, setting, -1);
                         });
                     }

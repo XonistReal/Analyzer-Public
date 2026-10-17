@@ -31,14 +31,20 @@ public final class BuiltinModules {
                         Setting.number("density", "Density", 0.75, 0, 1, 0.05))),
                 new ModuleDefinition("menu", "Interface", "Glass or solid panels, accent colors and motion control.",
                         Category.CLIENT, true, menuSettings()),
-                new ModuleDefinition("sky", "Sky Aurora", "Animated sky curtains, stars and cosmic color above your world.",
+                new ModuleDefinition("sky", "Skybox", "Procedural skies, local panoramic images and six-face skyboxes.",
                         Category.WORLD, true, List.of(
+                        Setting.choice("source", "Sky source", "Procedural", "Procedural", "Custom", "Minecraft panorama", "Minecraft End"),
+                        Setting.filePath("custom-path", "Browse custom skyboxes…"),
                         Setting.choice("preset", "Sky preset", "Aurora", "Aurora", "Nebula", "Ember"),
                         Setting.number("intensity", "Intensity", 0.8, 0, 1, 0.05),
                         Setting.bool("stars", "Twinkling stars", true),
                         Setting.number("speed", "Animation speed", 0.6, 0, 2, 0.05),
-                        Setting.choice("day-night", "Visible when", "Always", "Always", "Night"))),
-                new ModuleDefinition("shader", "Atmosphere", "Cinematic bloom and color grading. Sky Aurora controls the sky.",
+                        Setting.choice("day-night", "Visible when", "Always", "Always", "Night"),
+                        Setting.number("rotation", "Custom yaw rotation (degrees)", 0, -180, 180, 1),
+                        Setting.number("exposure", "Custom brightness", 1, .1, 3, .05),
+                        Setting.bool("weather-fade", "Custom sky fades in rain", true),
+                        Setting.bool("end-sky", "Custom sky in the End", false))),
+                new ModuleDefinition("shader", "Atmosphere", "Cinematic bloom and color grading. Skybox controls the sky.",
                         Category.VISUAL, false, List.of(
                         Setting.choice("preset", "Preset", "Aurora", "Off", "Aurora", "Ember", "Frost", "Bloom"),
                         Setting.number("strength", "Strength", 0.75, 0, 1, 0.01)))

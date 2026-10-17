@@ -62,6 +62,13 @@ tasks.register('silentAimCheck', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.analyzer.gameplay.SilentAimPolicySelfTest'
 }
+
+tasks.register('customSkyboxCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.skybox.SkyboxSelfTest'
+}
+tasks.named('check') { dependsOn tasks.named('customSkyboxCheck') }
 tasks.register('chamsCheck', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -184,6 +191,19 @@ tasks.register('publishLocal') {
 
 loom {
     runs {
+        skyboxSmoke {
+            client()
+            name 'Analyzer native custom skybox acceptance'
+            runDir 'run-skybox-smoke'
+            vmArg '-Danalyzer.smoke=true'
+            vmArg '-Danalyzer.skyboxSmoke=true'
+            programArg '--username'
+            programArg 'AnalyzerDev'
+            programArg '--width'
+            programArg '1920'
+            programArg '--height'
+            programArg '1080'
+        }
         silentAimSmoke {
             client()
             name 'Analyzer native Kill Aura silent rotation acceptance'

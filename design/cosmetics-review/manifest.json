@@ -1,0 +1,457 @@
+{
+  "schema": "analyzer-cosmetics-review-v1",
+  "created": "2026-10-16",
+  "purpose": "Eight visual review candidates only; nothing installed or integrated",
+  "candidateCount": 8,
+  "candidateIds": [
+    "angel",
+    "dragon",
+    "bat",
+    "parrot",
+    "gold-crown",
+    "robin-hood-hat",
+    "top-hat",
+    "backpack"
+  ],
+  "candidates": [
+    {
+      "id": "angel",
+      "name": "Angel wings",
+      "author": "Paul Fulham (pau101)",
+      "source": "https://github.com/pau101/Wings/tree/174929878d09490b012dbfa4e8d23d56f02b5add",
+      "license": "MIT",
+      "commercialUse": true,
+      "originalTexture": "models/wings/angel_wings.png",
+      "geometry": "models/wings/avian-review.json",
+      "originalSources": "sources/wings",
+      "rig": "Existing 17-part hierarchical Minecraft part/pivot rig; no weighted skin",
+      "triangles": 792,
+      "sameGeometryAsOtherWingLooks": true,
+      "runtimeInstalled": false
+    },
+    {
+      "id": "dragon",
+      "name": "Dragon wings",
+      "author": "Paul Fulham (pau101)",
+      "source": "https://github.com/pau101/Wings/tree/174929878d09490b012dbfa4e8d23d56f02b5add",
+      "license": "MIT",
+      "commercialUse": true,
+      "originalTexture": "models/wings/dragon_wings.png",
+      "geometry": "models/wings/avian-review.json",
+      "originalSources": "sources/wings",
+      "rig": "Existing 17-part hierarchical Minecraft part/pivot rig; no weighted skin",
+      "triangles": 792,
+      "sameGeometryAsOtherWingLooks": true,
+      "runtimeInstalled": false
+    },
+    {
+      "id": "bat",
+      "name": "Bat wings",
+      "author": "Paul Fulham (pau101)",
+      "source": "https://github.com/pau101/Wings/tree/174929878d09490b012dbfa4e8d23d56f02b5add",
+      "license": "MIT",
+      "commercialUse": true,
+      "originalTexture": "models/wings/bat_wings.png",
+      "geometry": "models/wings/avian-review.json",
+      "originalSources": "sources/wings",
+      "rig": "Existing 17-part hierarchical Minecraft part/pivot rig; no weighted skin",
+      "triangles": 792,
+      "sameGeometryAsOtherWingLooks": true,
+      "runtimeInstalled": false
+    },
+    {
+      "id": "parrot",
+      "name": "Parrot wings",
+      "author": "Paul Fulham (pau101)",
+      "source": "https://github.com/pau101/Wings/tree/174929878d09490b012dbfa4e8d23d56f02b5add",
+      "license": "MIT",
+      "commercialUse": true,
+      "originalTexture": "models/wings/parrot_wings.png",
+      "geometry": "models/wings/avian-review.json",
+      "originalSources": "sources/wings",
+      "rig": "Existing 17-part hierarchical Minecraft part/pivot rig; no weighted skin",
+      "triangles": 792,
+      "sameGeometryAsOtherWingLooks": true,
+      "runtimeInstalled": false
+    },
+    {
+      "id": "gold-crown",
+      "name": "Low-poly gold crown",
+      "author": "BullHornGames",
+      "slug": "low-poly-crown",
+      "source": "https://opengameart.org/content/low-poly-crown",
+      "detail": "208-triangle original downloaded crown mesh, unrigged head attachment. Gold is a review preview color; the source mesh has no material.",
+      "mount": "head",
+      "license": "CC0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "preview_conversion": "Original geometry evaluated in Blender 3.6.23; global transforms applied; Blender Z-up to viewer Y-up; triangle normals and authored base colors copied. Model has not been rigged or integrated into Minecraft.",
+      "review_json": "models/accessories/gold-crown/gold-crown-review.json",
+      "glb": "models/accessories/gold-crown/gold-crown.glb",
+      "triangles": 208,
+      "materials": [
+        {
+          "color": [
+            0.83,
+            0.52,
+            0.08
+          ],
+          "source_material": "Review gold (source mesh is untextured)"
+        }
+      ],
+      "original_download_urls": [
+        "https://opengameart.org/sites/default/files/lowPolyCrown.zip"
+      ],
+      "source_page_snapshot": "provenance/gold-crown-source-page.html.txt",
+      "original_license": "CC0-1.0",
+      "status": "Review candidate only; not integrated into Minecraft or Analyzer"
+    },
+    {
+      "id": "robin-hood-hat",
+      "name": "Robin Hood hat",
+      "author": "DefecateRainbows",
+      "slug": "robin-hood-hat",
+      "source": "https://opengameart.org/content/robin-hood-hat",
+      "detail": "Low-poly green hat with a red feather. Original downloaded mesh, unrigged head attachment.",
+      "mount": "head",
+      "license": "CC0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "preview_conversion": "Original geometry evaluated in Blender 3.6.23; global transforms applied; Blender Z-up to viewer Y-up; triangle normals and authored base colors copied. Model has not been rigged or integrated into Minecraft.",
+      "review_json": "models/accessories/robin-hood-hat/robin-hood-hat-review.json",
+      "glb": "models/accessories/robin-hood-hat/robin-hood-hat.glb",
+      "triangles": 508,
+      "materials": [
+        {
+          "color": [
+            0.66186,
+            0.00215,
+            0.0
+          ],
+          "source_material": "Material.001"
+        },
+        {
+          "color": [
+            0.03436,
+            0.44798,
+            0.0084
+          ],
+          "source_material": "Material"
+        }
+      ],
+      "original_download_urls": [
+        "https://opengameart.org/sites/default/files/robinHoodHat.blend",
+        "https://opengameart.org/sites/default/files/robinHoodHatLowPoly.blend"
+      ],
+      "source_page_snapshot": "provenance/robin-hood-hat-source-page.html.txt",
+      "original_license": "CC0-1.0",
+      "status": "Review candidate only; not integrated into Minecraft or Analyzer"
+    },
+    {
+      "id": "top-hat",
+      "name": "Classic top hat",
+      "author": "FacadeGaikan",
+      "slug": "hats",
+      "source": "https://opengameart.org/content/hats",
+      "detail": "Short top hat from a downloaded low-poly hat pack. Original mesh and packed blackhat.png texture; unrigged head attachment.",
+      "mount": "head",
+      "texture": "blackhat.png",
+      "license": "CC0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "preview_conversion": "Original geometry evaluated in Blender 3.6.23; global transforms applied; Blender Z-up to viewer Y-up; triangle normals and authored base colors copied. Model has not been rigged or integrated into Minecraft.",
+      "review_json": "models/accessories/top-hat/top-hat-review.json",
+      "glb": "models/accessories/top-hat/top-hat.glb",
+      "triangles": 544,
+      "materials": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "source_material": "hat2"
+        }
+      ],
+      "original_download_urls": [
+        "https://opengameart.org/sites/default/files/hats_0.blend"
+      ],
+      "source_page_snapshot": "provenance/top-hat-source-page.html.txt",
+      "original_license": "CC0-1.0",
+      "status": "Review candidate only; not integrated into Minecraft or Analyzer",
+      "original_source_note": "The byte-identical original small blend source also contains other hats; only the top-hat mesh is a gallery candidate or converted preview. Other source objects are archival provenance, not selected cosmetics."
+    },
+    {
+      "id": "backpack",
+      "name": "Camping backpack",
+      "author": "Saraskau",
+      "source": "https://opengameart.org/content/low-poly-camping-assets",
+      "license": "CC0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "detail": "Original olive camping backpack. Unrigged back attachment.",
+      "mount": "back",
+      "preview_conversion": "Original downloaded OBJ vertex/normal coordinates retained (authored Y-up OBJ); polygon fans triangulated; original MTL Kd colors copied. No new geometry or rigging.",
+      "review_json": "models/accessories/backpack/camping-backpack-review.json",
+      "triangles": 496,
+      "original_download_urls": [
+        "https://opengameart.org/sites/default/files/low_poly_camping_assets.zip"
+      ],
+      "source_page_snapshot": "provenance/backpack-source-page.html.txt",
+      "original_license": "CC0-1.0",
+      "status": "Review candidate only; not integrated into Minecraft or Analyzer"
+    }
+  ],
+  "presentation": {
+    "standalone": "index.html",
+    "fragment": "cosmetics-shortlist.html",
+    "template": "cosmetics-shortlist-template.html",
+    "assetsInline": true,
+    "renderer": "Three.js 0.160.1; CDN internet required for 3D; eight-choice/source-link fallback independent of renderer",
+    "mannequin": "Original neutral block mannequin for preview scale only"
+  },
+  "excluded": "No .git, Blender executable, tool caches, unrelated discovery packs, launcher accounts, runtime JAR or Prism mod files. Small original top-hat source retains its archival other objects; they are not review candidates.",
+  "files": {
+    "models/wings/LICENSE-pau101-Wings.md": {
+      "bytes": 1068,
+      "sha256": "5f0bba0e728ba7b81fe85be064f76ad3e77bb75c4b53a9949198e6a8136885b0",
+      "kind": "original license",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/tree/174929878d09490b012dbfa4e8d23d56f02b5add/LICENSE.md"
+    },
+    "sources/wings/src/main/java/me/paulf/wings/client/model/ModelWings.java": {
+      "bytes": 1256,
+      "sha256": "d8e70da3ce27e2f30450a2de4e19e7f24d04590976e0d35565886366fef4b738",
+      "kind": "original source bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/client/model/ModelWings.java"
+    },
+    "sources/wings/src/main/java/me/paulf/wings/client/model/ModelWingsAvian.java": {
+      "bytes": 6305,
+      "sha256": "daf73e59eb13b9fa508f1e0dc656908adf809df13dd2037be7be5d3560a0d402",
+      "kind": "original source bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/client/model/ModelWingsAvian.java"
+    },
+    "sources/wings/src/main/java/me/paulf/wings/client/model/Model3DTexture.java": {
+      "bytes": 5973,
+      "sha256": "f8f9e1dd96aa56de1b6ade40ff21e625a245df5a507c9a642f5269fd991eee47",
+      "kind": "original source bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/client/model/Model3DTexture.java"
+    },
+    "sources/wings/src/main/java/me/paulf/wings/client/flight/Animator.java": {
+      "bytes": 204,
+      "sha256": "750c4701d75b7a25132a25760e560834c495a53995e5f458436fc958d725c127",
+      "kind": "original source bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/client/flight/Animator.java"
+    },
+    "sources/wings/src/main/java/me/paulf/wings/client/flight/AnimatorAvian.java": {
+      "bytes": 11987,
+      "sha256": "48ca97bc83b2c2a8e3c25cd490a7e47a625f9fedec695322676ff0ee9b42559d",
+      "kind": "original source bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/client/flight/AnimatorAvian.java"
+    },
+    "sources/wings/src/main/java/me/paulf/wings/client/ClientProxy.java": {
+      "bytes": 6895,
+      "sha256": "a763ffbd69b00d816df53cb3730fdd31e5db1d0cc948332c75e6e2781c8cdd17",
+      "kind": "original source bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/client/ClientProxy.java"
+    },
+    "sources/wings/src/main/java/me/paulf/wings/util/Mth.java": {
+      "bytes": 2067,
+      "sha256": "8975035a98643082656d30e81eef400d863410d349b844126159d4eb434f486d",
+      "kind": "original source bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/util/Mth.java"
+    },
+    "models/wings/angel_wings.png": {
+      "bytes": 1359,
+      "sha256": "46a26ab825c1c3e2098e8a4ebcdab7446de01220c510bd5364d0931d00a3e1b8",
+      "kind": "original texture bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/resources/assets/wings/textures/entity/angel_wings.png"
+    },
+    "models/wings/dragon_wings.png": {
+      "bytes": 1572,
+      "sha256": "5ff2d07eefe8d0aa2429bd8d2e515ba72285f88128284dcb277dba3b158438d7",
+      "kind": "original texture bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/resources/assets/wings/textures/entity/dragon_wings.png"
+    },
+    "models/wings/bat_wings.png": {
+      "bytes": 2276,
+      "sha256": "62a667138ce4f43adf9e0216cdeca08bf1f6a67ee6d68076d7196c78f16f9cb1",
+      "kind": "original texture bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/resources/assets/wings/textures/entity/bat_wings.png"
+    },
+    "models/wings/parrot_wings.png": {
+      "bytes": 1136,
+      "sha256": "e51a09e1c54db9b0663da42e16c741471cce8170d117bf8c216f5ae0e360031d",
+      "kind": "original texture bytes",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/resources/assets/wings/textures/entity/parrot_wings.png"
+    },
+    "models/wings/avian-review.json": {
+      "bytes": 13606,
+      "sha256": "f5ee96dcd78ee41f1674adc12d5653dc39050aec395e4d5e6f10e59b97d4875a",
+      "kind": "review geometry conversion",
+      "license": "MIT",
+      "source": "https://github.com/pau101/Wings/tree/174929878d09490b012dbfa4e8d23d56f02b5add"
+    },
+    "licenses/CC0-1.0.txt": {
+      "bytes": 7048,
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "kind": "original license",
+      "license": "CC0-1.0",
+      "source": "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
+    },
+    "models/accessories/gold-crown/gold-crown-review.json": {
+      "bytes": 42261,
+      "sha256": "a073b62a841c3ad1cabf211d77fd842844238d557a7463713fd52368db68432b",
+      "kind": "review geometry conversion",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/low-poly-crown"
+    },
+    "models/accessories/gold-crown/gold-crown.glb": {
+      "bytes": 14356,
+      "sha256": "7b6e31f4bc0eebb052941c70e57cdbe0fb258831be3db56c6e63d23a520359c9",
+      "kind": "review format conversion",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/low-poly-crown"
+    },
+    "sources/accessories/gold-crown/lowPolyCrown.zip": {
+      "bytes": 85739,
+      "sha256": "d56fd72dcc0831a7af0eee975af19ba4af4a5c153f3c26a57b5ae1b9f3c644d2",
+      "kind": "original source bytes",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/low-poly-crown"
+    },
+    "provenance/gold-crown-source-page.html.txt": {
+      "bytes": 22065,
+      "sha256": "4f9021eec2c576c1dca8dd006740e0a31cc2af01eae755c064876b5a8a40b2b3",
+      "kind": "original creator page snapshot",
+      "license": "source metadata",
+      "source": "https://opengameart.org/content/low-poly-crown"
+    },
+    "models/accessories/robin-hood-hat/robin-hood-hat-review.json": {
+      "bytes": 131666,
+      "sha256": "e3635d573b2ea2107b7cf165eb51ad36cdbdf4d1e4f28e166c36834fe87f10c8",
+      "kind": "review geometry conversion",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/robin-hood-hat"
+    },
+    "models/accessories/robin-hood-hat/robin-hood-hat.glb": {
+      "bytes": 50728,
+      "sha256": "29db447fed2c2f0f09b1eb8479b8067a34abeaa162fcd7bf64c9e59ad1362ae6",
+      "kind": "review format conversion",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/robin-hood-hat"
+    },
+    "sources/accessories/robin-hood-hat/robinHoodHatLowPoly.blend": {
+      "bytes": 502600,
+      "sha256": "432e1255821668043a5d0ad22c1ff51639a8ff8869b8edc7879054828060f89f",
+      "kind": "original source bytes",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/robin-hood-hat"
+    },
+    "provenance/robin-hood-hat-source-page.html.txt": {
+      "bytes": 27472,
+      "sha256": "0cbf0082a3e567f338c3ccd28779e832ff3b745d406d4a583c569509d127ec34",
+      "kind": "original creator page snapshot",
+      "license": "source metadata",
+      "source": "https://opengameart.org/content/robin-hood-hat"
+    },
+    "models/accessories/top-hat/top-hat-review.json": {
+      "bytes": 111356,
+      "sha256": "52ef171e137edaa9df027bd65e5ec882ccc36dcefcde6cd6603ae226710aba5f",
+      "kind": "review geometry conversion",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/hats"
+    },
+    "models/accessories/top-hat/top-hat.glb": {
+      "bytes": 18028,
+      "sha256": "bf9c7ad281d42d36c1e26096a724a83e8995afea82c08267225a4ba882987ff9",
+      "kind": "review format conversion",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/hats"
+    },
+    "sources/accessories/top-hat/hats_0.blend": {
+      "bytes": 866656,
+      "sha256": "be9d6aac6f50cb15bc33565c0587c2e1c2273ef02807a6b134265dd2eb4234b6",
+      "kind": "original source bytes",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/hats"
+    },
+    "provenance/top-hat-source-page.html.txt": {
+      "bytes": 29620,
+      "sha256": "f4736f61c12fa602dda21d493077d3ceed0e685de2cc0a4a64353399ccd71847",
+      "kind": "original creator page snapshot",
+      "license": "source metadata",
+      "source": "https://opengameart.org/content/hats"
+    },
+    "models/accessories/backpack/camping-backpack-review.json": {
+      "bytes": 80083,
+      "sha256": "a32ffb3ef5211c0b6ee1e0ffee31b5c7b24e694c0730afe5e79b0cd196ed7197",
+      "kind": "review geometry conversion",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/low-poly-camping-assets"
+    },
+    "sources/accessories/backpack/original/obj/backpack.obj": {
+      "bytes": 43346,
+      "sha256": "3f01d4e59ead75d3eaca9da20fd8ef094bc3bb60a994e33961c13f2e9d42fe09",
+      "kind": "original source bytes",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/low-poly-camping-assets"
+    },
+    "sources/accessories/backpack/original/mtl/backpack.mtl": {
+      "bytes": 1173,
+      "sha256": "be26a0baeb5cdb6211452b4240e2a35393a15481769d21067184d940c0a24aa4",
+      "kind": "original source bytes",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/low-poly-camping-assets"
+    },
+    "provenance/backpack-source-page.html.txt": {
+      "bytes": 20415,
+      "sha256": "e4ab0ac06d2f518ea8e3575909c228ce86e4011525d50c87264f03ec44cdcc15",
+      "kind": "original creator page snapshot",
+      "license": "source metadata",
+      "source": "https://opengameart.org/content/low-poly-camping-assets"
+    },
+    "models/accessories/gallery-meshes.json": {
+      "bytes": 365371,
+      "sha256": "6d4f3a59617dd73ec679fc00002358b288c96b425c91408c8af36a7c056db37e",
+      "kind": "review geometry conversion",
+      "license": "CC0-1.0",
+      "source": "Four creator pages listed in manifest candidates"
+    },
+    "cosmetics-shortlist.html": {
+      "bytes": 405631,
+      "sha256": "8b673a900ff4e9b949b784d968a111cd9c40935c0c72ec506662307311ff0f54",
+      "kind": "review presentation",
+      "license": "Analyzer original review code plus embedded attributed model data",
+      "source": "This review; model licenses follow the included manifest"
+    },
+    "cosmetics-shortlist-template.html": {
+      "bytes": 23764,
+      "sha256": "933c46bcc7411d563eec158e9c235828f462d4d6b3a4df835f3e684390f3f742",
+      "kind": "review presentation",
+      "license": "Analyzer original review code plus embedded attributed model data",
+      "source": "This review; model licenses follow the included manifest"
+    },
+    "index.html": {
+      "bytes": 493923,
+      "sha256": "ff22cc3fd4b4be8de1856fcf6acda6bc81bd9098148ac862c29a19afb8b953d4",
+      "kind": "review presentation",
+      "license": "Analyzer original review code plus embedded attributed model data",
+      "source": "This review; model licenses follow the included manifest"
+    },
+    "README.md": {
+      "bytes": 3541,
+      "sha256": "5a6c119ec6ea5c3fc5955625f68b3a7a3b41162aa299388a449d089f56a5e2b7",
+      "kind": "review documentation",
+      "license": "Analyzer documentation",
+      "source": "This review"
+    }
+  }
+}

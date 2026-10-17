@@ -36,6 +36,7 @@ public final class GpuEffects {
     /** Called in the actual Overworld sky pass, before terrain and celestial objects. */
     public static void renderSky() {
         var core = AnalyzerClient.CORE;
+        if (core != null && !core.getChoice("sky", "source").equals("Procedural")) { dev.analyzer.skybox.CustomSkybox.nativePass(false); return; }
         var client = MinecraftClient.getInstance();
         if (core == null || !core.isEnabled("sky") || failed || client.world == null
                 || client.world.getDimensionEffects().getSkyType() != DimensionEffects.SkyType.NORMAL
@@ -203,6 +204,7 @@ public final class GpuEffects {
     }
 
     public static void close() {
+        dev.analyzer.skybox.CustomSkybox.close();
         if (grading != 0) GL20.glDeleteProgram(grading);
         if (backdrop != 0) GL20.glDeleteProgram(backdrop);
         if (sky != 0) GL20.glDeleteProgram(sky);

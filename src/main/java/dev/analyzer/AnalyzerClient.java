@@ -60,6 +60,7 @@ public final class AnalyzerClient implements ClientModInitializer {
         dev.analyzer.render.XrayRenderer.register(CORE);
         dev.analyzer.render.SchematicPreviewRenderer.register(CORE);
         dev.analyzer.render.EntityChamsRenderer.register(CORE);
+        dev.analyzer.skybox.CustomSkybox.register();
         dev.analyzer.finder.FinderEngine.register(CORE);
         dev.analyzer.render.EntityFinderRenderer.register(CORE);
         dev.analyzer.render.RegionMapHud.register(CORE);
@@ -98,7 +99,8 @@ public final class AnalyzerClient implements ClientModInitializer {
         }
         if (saveCountdown > 0 && --saveCountdown == 0) saveConfig();
         if (FabricLoader.getInstance().isDevelopmentEnvironment() && Boolean.getBoolean("analyzer.smoke")) {
-            if (Boolean.getBoolean("analyzer.silentAimSmoke")) SilentAimSmoke.tick(client);
+            if (Boolean.getBoolean("analyzer.skyboxSmoke")) SkyboxSmoke.tick(client);
+            else if (Boolean.getBoolean("analyzer.silentAimSmoke")) SilentAimSmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.tracerPrivacySmoke")) TracerPrivacySmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.findersSmoke")) FindersSmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.chamsSmoke")) ChamsSmoke.tick(client);

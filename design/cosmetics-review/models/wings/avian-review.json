@@ -1,0 +1,659 @@
+{
+  "schema": "analyzer-cosmetics-review-wing-parts-v1",
+  "purpose": "Read-only visual shortlist; not installed, imported, or enabled in Analyzer.",
+  "source": {
+    "author": "Paul Fulham (pau101)",
+    "project": "Wings",
+    "url": "https://github.com/pau101/Wings",
+    "commit": "174929878d09490b012dbfa4e8d23d56f02b5add",
+    "license": "MIT",
+    "licenseURL": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/LICENSE.md",
+    "licenseLocal": "LICENSE-pau101-Wings.md",
+    "licenseObligation": "Retain copyright and MIT permission notice with copies/substantial portions.",
+    "commercialUse": true,
+    "format": "Minecraft 1.16 Java ModelRenderer parts plus PNG textures and Java procedural animator",
+    "rigType": "Existing hierarchical Minecraft part/pivot rig. No weighted/skinned mesh, glTF skin, armature modifier, or imported keyframe clips.",
+    "geometryURL": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/client/model/ModelWingsAvian.java",
+    "animationURL": "https://github.com/pau101/Wings/blob/174929878d09490b012dbfa4e8d23d56f02b5add/src/main/java/me/paulf/wings/client/flight/AnimatorAvian.java"
+  },
+  "textureSize": [
+    64,
+    64
+  ],
+  "coordinateSystem": "ModelRenderer original pixels; +Y down, +Z behind player. Scale 1/16 per Minecraft block. Euler application M=T*Rz*Ry*Rx.",
+  "parts": [
+    {
+      "name": "root",
+      "parent": null,
+      "pivot": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "coracoidLeft",
+      "parent": "root",
+      "pivot": [
+        1.5,
+        5.5,
+        2.5
+      ],
+      "defaultUV": [
+        0.0,
+        28.0
+      ],
+      "box": {
+        "origin": [
+          0.0,
+          -1.5,
+          -1.5
+        ],
+        "size": [
+          5.0,
+          3.0,
+          3.0
+        ],
+        "uv": [
+          0.0,
+          28.0
+        ],
+        "inflation": 0.0
+      }
+    },
+    {
+      "name": "coracoidRight",
+      "parent": "root",
+      "pivot": [
+        -1.5,
+        5.5,
+        2.5
+      ],
+      "defaultUV": [
+        0.0,
+        34.0
+      ],
+      "box": {
+        "origin": [
+          -5.0,
+          -1.5,
+          -1.5
+        ],
+        "size": [
+          5.0,
+          3.0,
+          3.0
+        ],
+        "uv": [
+          0.0,
+          34.0
+        ],
+        "inflation": 0.0
+      }
+    },
+    {
+      "name": "humerusLeft",
+      "parent": "coracoidLeft",
+      "pivot": [
+        4.7,
+        -0.6,
+        0.1
+      ],
+      "defaultUV": [
+        0.0,
+        0.0
+      ],
+      "box": {
+        "origin": [
+          -0.1,
+          -1.1,
+          -2.0
+        ],
+        "size": [
+          7.0,
+          3.0,
+          4.0
+        ],
+        "uv": [
+          0.0,
+          0.0
+        ],
+        "inflation": 0.0
+      }
+    },
+    {
+      "name": "humerusRight",
+      "parent": "coracoidRight",
+      "pivot": [
+        -4.7,
+        -0.6,
+        0.1
+      ],
+      "defaultUV": [
+        0.0,
+        7.0
+      ],
+      "box": {
+        "origin": [
+          -6.9,
+          -1.1,
+          -2.0
+        ],
+        "size": [
+          7.0,
+          3.0,
+          4.0
+        ],
+        "uv": [
+          0.0,
+          7.0
+        ],
+        "inflation": 0.0
+      }
+    },
+    {
+      "name": "ulnaLeft",
+      "parent": "humerusLeft",
+      "pivot": [
+        6.5,
+        0.2,
+        0.1
+      ],
+      "defaultUV": [
+        22.0,
+        0.0
+      ],
+      "box": {
+        "origin": [
+          0.0,
+          -1.5,
+          -1.5
+        ],
+        "size": [
+          9.0,
+          3.0,
+          3.0
+        ],
+        "uv": [
+          22.0,
+          0.0
+        ],
+        "inflation": 0.0
+      }
+    },
+    {
+      "name": "ulnaRight",
+      "parent": "humerusRight",
+      "pivot": [
+        -6.5,
+        0.2,
+        0.1
+      ],
+      "defaultUV": [
+        22.0,
+        6.0
+      ],
+      "box": {
+        "origin": [
+          -9.0,
+          -1.5,
+          -1.5
+        ],
+        "size": [
+          9.0,
+          3.0,
+          3.0
+        ],
+        "uv": [
+          22.0,
+          6.0
+        ],
+        "inflation": 0.0
+      }
+    },
+    {
+      "name": "carpalsLeft",
+      "parent": "ulnaLeft",
+      "pivot": [
+        8.5,
+        0.0,
+        0.0
+      ],
+      "defaultUV": [
+        46.0,
+        0.0
+      ],
+      "box": {
+        "origin": [
+          0.0,
+          -1.0,
+          -1.0
+        ],
+        "size": [
+          5.0,
+          2.0,
+          2.0
+        ],
+        "uv": [
+          46.0,
+          0.0
+        ],
+        "inflation": 0.0
+      }
+    },
+    {
+      "name": "carpalsRight",
+      "parent": "ulnaRight",
+      "pivot": [
+        -8.5,
+        0.0,
+        0.0
+      ],
+      "defaultUV": [
+        46.0,
+        4.0
+      ],
+      "box": {
+        "origin": [
+          -5.0,
+          -1.0,
+          -1.0
+        ],
+        "size": [
+          5.0,
+          2.0,
+          2.0
+        ],
+        "uv": [
+          46.0,
+          4.0
+        ],
+        "inflation": 0.0
+      }
+    },
+    {
+      "name": "feathersCoracoidLeft",
+      "parent": "coracoidLeft",
+      "pivot": [
+        0.4,
+        0.0,
+        1.0
+      ],
+      "extrudedTexture": {
+        "uv": [
+          6.0,
+          40.0
+        ],
+        "origin": [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "width": 6.0,
+        "height": 8.0,
+        "depth": 1
+      }
+    },
+    {
+      "name": "feathersCoracoidRight",
+      "parent": "coracoidRight",
+      "pivot": [
+        -0.4,
+        0.0,
+        1.0
+      ],
+      "extrudedTexture": {
+        "uv": [
+          0.0,
+          40.0
+        ],
+        "origin": [
+          -6.0,
+          0.0,
+          -1.0
+        ],
+        "width": 6.0,
+        "height": 8.0,
+        "depth": 1
+      }
+    },
+    {
+      "name": "feathersTertiaryLeft",
+      "parent": "humerusLeft",
+      "pivot": [
+        0.0,
+        1.5,
+        1.0
+      ],
+      "extrudedTexture": {
+        "uv": [
+          10.0,
+          14.0
+        ],
+        "origin": [
+          0.0,
+          0.0,
+          -0.5
+        ],
+        "width": 10.0,
+        "height": 14.0,
+        "depth": 1
+      }
+    },
+    {
+      "name": "feathersTertiaryRight",
+      "parent": "humerusRight",
+      "pivot": [
+        0.0,
+        1.5,
+        1.0
+      ],
+      "extrudedTexture": {
+        "uv": [
+          0.0,
+          14.0
+        ],
+        "origin": [
+          -10.0,
+          0.0,
+          -0.5
+        ],
+        "width": 10.0,
+        "height": 14.0,
+        "depth": 1
+      }
+    },
+    {
+      "name": "feathersSecondaryLeft",
+      "parent": "ulnaLeft",
+      "pivot": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "defaultUV": [
+        22.0,
+        12.0
+      ],
+      "extrudedTexture": {
+        "uv": [
+          31.0,
+          14.0
+        ],
+        "origin": [
+          -2.0,
+          0.0,
+          -0.5
+        ],
+        "width": 11.0,
+        "height": 12.0,
+        "depth": 1
+      }
+    },
+    {
+      "name": "feathersSecondaryRight",
+      "parent": "ulnaRight",
+      "pivot": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "extrudedTexture": {
+        "uv": [
+          20.0,
+          14.0
+        ],
+        "origin": [
+          -9.0,
+          0.0,
+          -0.5
+        ],
+        "width": 11.0,
+        "height": 12.0,
+        "depth": 1
+      }
+    },
+    {
+      "name": "feathersPrimaryLeft",
+      "parent": "carpalsLeft",
+      "pivot": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "extrudedTexture": {
+        "uv": [
+          53.0,
+          14.0
+        ],
+        "origin": [
+          0.0,
+          -2.1,
+          -0.5
+        ],
+        "width": 11.0,
+        "height": 11.0,
+        "depth": 1
+      }
+    },
+    {
+      "name": "feathersPrimaryRight",
+      "parent": "carpalsRight",
+      "pivot": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "extrudedTexture": {
+        "uv": [
+          42.0,
+          14.0
+        ],
+        "origin": [
+          -11.0,
+          -2.1,
+          -0.5
+        ],
+        "width": 11.0,
+        "height": 11.0,
+        "depth": 1
+      }
+    }
+  ],
+  "textures": [
+    {
+      "id": "angel",
+      "title": "Angel wings",
+      "url": "angel_wings.png",
+      "sameGeometry": true
+    },
+    {
+      "id": "dragon",
+      "title": "Dragon wings",
+      "url": "dragon_wings.png",
+      "sameGeometry": true
+    },
+    {
+      "id": "bat",
+      "title": "Bat wings",
+      "url": "bat_wings.png",
+      "sameGeometry": true
+    },
+    {
+      "id": "parrot",
+      "title": "Parrot wings",
+      "url": "parrot_wings.png",
+      "sameGeometry": true
+    }
+  ],
+  "rig": {
+    "partCount": 17,
+    "root": "root",
+    "leftChain": [
+      "coracoidLeft",
+      "humerusLeft",
+      "ulnaLeft",
+      "carpalsLeft"
+    ],
+    "rightChain": [
+      "coracoidRight",
+      "humerusRight",
+      "ulnaRight",
+      "carpalsRight"
+    ],
+    "leftFeathers": [
+      "feathersCoracoidLeft",
+      "feathersTertiaryLeft",
+      "feathersSecondaryLeft",
+      "feathersPrimaryLeft"
+    ],
+    "rightFeathers": [
+      "feathersCoracoidRight",
+      "feathersTertiaryRight",
+      "feathersSecondaryRight",
+      "feathersPrimaryRight"
+    ],
+    "rightRotationMirroring": [
+      1,
+      -1,
+      -1
+    ],
+    "proof": "ModelWingsAvian calls addChild for every hierarchy edge and applies independent upstream animator rotations to all eight paired bone/feather parts. ModelWings.setAngles mirrors right Y/Z. The four selectable looks are textures on the same supplied articulated wing mesh."
+  },
+  "animation": {
+    "unit": "degrees",
+    "clips": "Upstream procedural idle/lift/glide/fall/land states; no exported binary/keyframe animation clips.",
+    "restWingDegrees": [
+      [
+        0,
+        -23.5,
+        -16
+      ],
+      [
+        0,
+        13,
+        29
+      ],
+      [
+        0,
+        12,
+        -28
+      ],
+      [
+        0,
+        4,
+        18.3
+      ]
+    ],
+    "restFeatherDegrees": [
+      [
+        0,
+        0,
+        23.48
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "idleWingDegrees": [
+      [
+        40,
+        -60,
+        -50
+      ],
+      [
+        72,
+        10,
+        100
+      ],
+      [
+        0,
+        -10,
+        -120
+      ],
+      [
+        10,
+        0,
+        100
+      ]
+    ],
+    "idleFeatherDegrees": [
+      [
+        10,
+        20,
+        23.48
+      ],
+      [
+        0,
+        20,
+        -70
+      ],
+      [
+        0,
+        10,
+        40
+      ],
+      [
+        -20,
+        0,
+        20
+      ]
+    ],
+    "idleFormula": "For i=0..3, pos=min(abs(i-1),2)/2; add sin(t)*3*pos to wing Y; add -sin(t)*5*pos to feather Y. t advances .035 per game tick.",
+    "liftFormula": "For i=0..3, pos=min(abs(i-1),2)/2; cycle=t-pos*1.2; x=(sin(cycle+pi/2)-1)/2*16+8; y=(sin(cycle)*26+12)*(1-pos*(min(sin(cycle+pi),0)/2+1)*sin(t)); add [x,y,0] to restWingDegrees[i], feathers=restFeatherDegrees. t advance lerps .375 to .225 over first100ticks.",
+    "glideFormula": "For i=0..3, pos=min(abs(i-1),2)/2; add [0,(sin(t)*5-14)*pos,0] to restWingDegrees[i]. Upstream adds subtle feather X noise; preview may hold feather rest. t advances .045 per tick."
+  },
+  "meshNotes": {
+    "baseCubes": 8,
+    "featherExtrusions": 8,
+    "featherGeometry": "Exact upstream feather is a 1-pixel-deep cutout-textured rectangular extrusion, not a flat billboard: front/back quads plus one thin side-strip per texture column/row. Transparent texels discard.",
+    "featherFaceUV": "Front spans [u,v]..[u+width,v+height]; back reversed V. Each 1-pixel side-strip samples the center of its edge texel. Do not stretch the complete 64x64 atlas over each part.",
+    "featherQuadCounts": [
+      30,
+      30,
+      50,
+      50,
+      48,
+      48,
+      46,
+      46
+    ],
+    "totalNativeQuads": 396,
+    "totalNativeTriangles": 792,
+    "triangleNote": "Includes transparent regions before alpha discard. 8solidcubes*6faces+8extrusions, based on 2+2*width+2*height each."
+  },
+  "downloadedFiles": {
+    "angel_wings.png": {
+      "bytes": 1359,
+      "sha256": "46a26ab825c1c3e2098e8a4ebcdab7446de01220c510bd5364d0931d00a3e1b8"
+    },
+    "dragon_wings.png": {
+      "bytes": 1572,
+      "sha256": "5ff2d07eefe8d0aa2429bd8d2e515ba72285f88128284dcb277dba3b158438d7"
+    },
+    "bat_wings.png": {
+      "bytes": 2276,
+      "sha256": "62a667138ce4f43adf9e0216cdeca08bf1f6a67ee6d68076d7196c78f16f9cb1"
+    },
+    "parrot_wings.png": {
+      "bytes": 1136,
+      "sha256": "e51a09e1c54db9b0663da42e16c741471cce8170d117bf8c216f5ae0e360031d"
+    },
+    "LICENSE-pau101-Wings.md": {
+      "bytes": 1089,
+      "sha256": "ba41308f670d16b6307b9d8adb652996d3c4e6bf40c61efa6e0febd7bc776bef"
+    }
+  }
+}

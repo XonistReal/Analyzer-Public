@@ -1,2 +1,8 @@
 * -text
 gradlew text eol=lf
+
+# Review manifests describe exact downloaded/exported bytes on every platform.
+design/cosmetics-review/** -text
+# Inert downloaded provenance and original source are archival, not project edits.
+design/cosmetics-review/provenance/** -diff
+design/cosmetics-review/sources/** -diff

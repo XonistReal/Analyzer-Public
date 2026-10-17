@@ -1,3 +1,17 @@
+# Custom skyboxes and cosmetic selection - October 16, 2026
+
+Analyzer **0.14.0** extends **World → Skybox** with local 2:1 PNG/JPEG panoramas, six matching square cube faces, a shader folder browser and native Minecraft panorama/End texture sources. Existing Aurora/Nebula/Ember settings retain Procedural as their default. [Controls and format limits](CUSTOM-SKYBOX.md).
+
+Java 21 `build moduleCatalog` and final `publishLocal` pass **79,162 assertions across 33 suites**, including **27 skybox import/library/config assertions**. The exported catalogue has **157 modules / 1,829 controls**. Optional Windows skybox/schematic symlink fixtures explicitly skip because operating-system link permission is unavailable. Final build/feed SHA-256: **b11c46345e3a28acd489c1c763070f241ec87d3183c68cc5718d05e97abe7c15**.
+
+The completed isolated native run passes **55 checks** and writes six inspected **1920 × 1080** framebuffer captures. Actual library row/Use selected clicks, PNG and cube imports, both native texture choices, bad-path/native-sky fallback, resource reload, disable/re-enable, selected GL-state restoration, real End/Nether transitions and loaded disconnect cleanup are observed. The custom source uses the native End pass outside dragon boss fog; Minecraft suppresses its entire sky pass inside that fog, which is preserved. Completed Overworld/End PNGs independently contain **987/1340** and **1200/1340** sampled blue fixture pixels, respectively. Native Minecraft panorama cube mapping was corrected against its actual vertex/UV geometry and matching source edges.
+
+Earlier draw-count-only fixture output did not prove visible End rendering and is superseded; the subsequent timeout exposed the native boss-fog gate. Only `skybox-0.14.0-native-final-verified.log` and its completed, pixel-checked captures are current acceptance. [Native evidence](production-validation/native-0.14.0/skybox.json) retains those distinctions. Native sun/moon/clouds remain native; replacement sky renderers/shader packs, arbitrary resource-pack formats and raw VTF/VPK import are not established. The Nether remains unchanged.
+
+Eight downloaded cosmetic candidates are preserved separately for user selection. Four wing looks share one supplied 17-part Minecraft pivot rig and its original flap definitions; crown, Robin Hood hat, top hat and backpack use actual downloaded geometry. MIT/CC0 creator sources, exact original files, conversion disclosures, manifests and portable ZIP integrity are verified. Prior browser inspection shows actual wing animation, accessory thumbnails, full-size crown rendering and saved selection changes at 736-pixel width. The later source-linked CDN/WebGL fallback is syntax-checked; a completed 320-pixel or synthetic outage browser run is not claimed. No candidate is integrated into the runtime JAR or equipped in game. [Review scope](COSMETICS-SHORTLIST.md) · [Combined acceptance](production-validation/native-0.14.0/acceptance.json). Prism delivery separately verifies preserved user data and matching build/feed/package/install hashes.
+
+## Earlier 0.13.2 evidence
+
 # Kill Aura silent rotation transports - October 16, 2026
 
 Analyzer **0.13.2** adds **Silent movement / Silent packet / Silent pulse** under Kill Aura Rotation while retaining Client/None preferences and normal combat gates. [Controls and mode differences](SILENT-AIM.md).
