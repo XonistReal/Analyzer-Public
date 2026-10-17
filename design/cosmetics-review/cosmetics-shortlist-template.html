@@ -186,6 +186,8 @@
     function makeWings(material) {
       const object=new THREE.Group(), parts=new Map();
       object.scale.set(1,-1,1);
+      // Mount the supplied rig at the upper torso without changing its joints.
+      object.position.y=3;
       wingData.parts.forEach(p=>{
         const part=new THREE.Group();part.name=p.name;part.position.fromArray(p.pivot);part.rotation.order='ZYX';
         if(sharedGeometry.has(p.name))part.add(new THREE.Mesh(sharedGeometry.get(p.name),material));
@@ -236,7 +238,8 @@
           object.position.set(-center.x*scale,-6-center.y*scale,3-bounds.min.z*scale);
         } else {
           const scale=10/Math.max(size.x,.001);object.scale.setScalar(scale);
-          object.position.set(-center.x*scale,7.5-bounds.min.y*scale,-center.z*scale);
+          const brimBase=data.id==='top-hat'?8:7.5;
+          object.position.set(-center.x*scale,brimBase-bounds.min.y*scale,-center.z*scale);
         }
       }
       return object;

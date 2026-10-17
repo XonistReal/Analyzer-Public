@@ -2,6 +2,8 @@
 
 The user requested free commercial-use 3D cosmetics to inspect before choosing which enter Analyzer. Eight looks are downloaded and previewable in `design/cosmetics-review/index.html`; the portable copy is `Analyzer-Cosmetics-Review` on the Desktop, with `Analyzer-Cosmetics-Review.zip` beside it. Nothing in this review adds a cosmetic to the game, JAR, Prism mods, or player inventory.
 
+**Fit revision 2:** the current preview and Desktop folder raise all four wing looks three Minecraft pixels toward the shoulders. The top hat's brim now rests on head-top Y=8 instead of penetrating it by half a pixel. `Analyzer-Cosmetics-Review-Fit-2.zip` contains these corrected placements; the original release archive remains unchanged. This review adjustment does not change the installed Minecraft client.
+
 | Candidate | Creator | License | Existing articulation |
 | --- | --- | --- | --- |
 | Angel wings | Paul Fulham / pau101 | MIT | Existing Minecraft part/pivot rig |

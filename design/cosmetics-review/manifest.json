@@ -204,7 +204,15 @@
     "template": "cosmetics-shortlist-template.html",
     "assetsInline": true,
     "renderer": "Three.js 0.160.1; CDN internet required for 3D; eight-choice/source-link fallback independent of renderer",
-    "mannequin": "Original neutral block mannequin for preview scale only"
+    "mannequin": "Original neutral block mannequin for preview scale only",
+    "fitRevision": 2,
+    "wingRootOffsetMinecraftPixels": [
+      0,
+      3,
+      0
+    ],
+    "topHatBrimContactY": 8,
+    "downloadArchive": "Analyzer-Cosmetics-Review-Fit-2.zip"
   },
   "excluded": "No .git, Blender executable, tool caches, unrelated discovery packs, launcher accounts, runtime JAR or Prism mod files. Small original top-hat source retains its archival other objects; they are not review candidates.",
   "files": {
@@ -426,29 +434,29 @@
       "source": "Four creator pages listed in manifest candidates"
     },
     "cosmetics-shortlist.html": {
-      "bytes": 405631,
-      "sha256": "8b673a900ff4e9b949b784d968a111cd9c40935c0c72ec506662307311ff0f54",
+      "bytes": 405798,
+      "sha256": "6e71d2b471487c378bb32f3e51a819b00b091d5fb8c21115aa6050b9027cb94b",
       "kind": "review presentation",
       "license": "Analyzer original review code plus embedded attributed model data",
       "source": "This review; model licenses follow the included manifest"
     },
     "cosmetics-shortlist-template.html": {
-      "bytes": 23764,
-      "sha256": "933c46bcc7411d563eec158e9c235828f462d4d6b3a4df835f3e684390f3f742",
+      "bytes": 23928,
+      "sha256": "ad40247833ab5d6b80c88b11b8c055da5513b1ee8b04982752998d078e8966bc",
       "kind": "review presentation",
       "license": "Analyzer original review code plus embedded attributed model data",
       "source": "This review; model licenses follow the included manifest"
     },
     "index.html": {
-      "bytes": 493923,
-      "sha256": "ff22cc3fd4b4be8de1856fcf6acda6bc81bd9098148ac862c29a19afb8b953d4",
+      "bytes": 494097,
+      "sha256": "d13189b264043b9f5bdfb3c24617f80e08166704ac6b80222e0de0f96f8ba8e8",
       "kind": "review presentation",
       "license": "Analyzer original review code plus embedded attributed model data",
       "source": "This review; model licenses follow the included manifest"
     },
     "README.md": {
-      "bytes": 3541,
-      "sha256": "5a6c119ec6ea5c3fc5955625f68b3a7a3b41162aa299388a449d089f56a5e2b7",
+      "bytes": 3939,
+      "sha256": "e902e17749491e5933f55d2edfdb8144b79f8fab37af8f962a55f18087fb94b0",
       "kind": "review documentation",
       "license": "Analyzer documentation",
       "source": "This review"

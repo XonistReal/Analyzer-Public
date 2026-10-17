@@ -4,6 +4,8 @@ Open **index.html** to inspect the eight review candidates. The renderer loads T
 
 The selectable looks are Angel, Dragon, Bat and Parrot wings; a crown; Robin Hood hat; top hat; and camping backpack. All geometry comes from the downloaded source files, with documented coordinate conversion and preview fitting on a neutral block mannequin. The crown's gold preview material is disclosed: its source mesh is untextured. Four wing looks share one supplied articulated model; they are texture variants, not four different meshes.
 
+**Fit revision 2:** all four wing looks mount three Minecraft pixels higher on the upper torso. The top hat's lowest brim surface rests exactly on the head's top at Y=8, lifting it half a pixel from the previous placement. These are attachment transforms; the downloaded geometry, rig, textures and animation are unchanged. The updated portable archive is `Analyzer-Cosmetics-Review-Fit-2.zip`.
+
 ## Existing wing rig
 
 Paul Fulham (pau101), **Wings**, MIT, pinned commit `174929878d09490b012dbfa4e8d23d56f02b5add`.
