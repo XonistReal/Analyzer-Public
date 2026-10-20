@@ -1,5 +1,7 @@
 # Cosmetics: published controls and Analyzer scope
 
+**0.15.0 addition:** the approved [Wings](WINGS.md) use an attributed MIT rig/animation adaptation and original upstream textures. The comparison below records the earlier original procedural cosmetic modules and does not claim that the downloaded wing rig was authored by Analyzer.
+
 Compared October 9, 2026 against the 37 Cosmetics entries in Temple.nz's [official module catalogue](https://temple.nz/modules) and its [public settings data](https://temple.nz/assets/data/modules.json?v=be4c7e7b). The reference column summarizes setting families, not observed footage or copied descriptions. Analyzer's column describes its own 1.21.4 implementation and registered controls. Exact Analyzer defaults, bounds and setting IDs are exported in [MODULES.md](MODULES.md) and [MODULES.json](MODULES.json).
 
 The code, procedural meshes and effects are original. Similar module or option names do not establish identical rendering, complete control coverage or compatibility with Temple's Minecraft version. This table covers the cosmetic category; [ROADMAP.md](ROADMAP.md) covers the wider catalogue, and [VALIDATION.md](VALIDATION.md) identifies the controls and events checked in game.

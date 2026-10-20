@@ -32,6 +32,11 @@ jar {
     from('LATO-OFL.txt')
     from('THIRD-PARTY.md')
     from('DEPENDENCY-SOURCES.md')
+    from('WINGS-MIT-LICENSE.txt')
+}
+tasks.named('sourcesJar') {
+    from('LICENSE') { rename { "${it}_${project.base.archivesName.get()}" } }
+    from('FONT-LICENSE.txt', 'LATO-OFL.txt', 'THIRD-PARTY.md', 'DEPENDENCY-SOURCES.md', 'WINGS-MIT-LICENSE.txt')
 }
 
 tasks.register('coreCheck', JavaExec) {
@@ -69,6 +74,12 @@ tasks.register('customSkyboxCheck', JavaExec) {
     mainClass = 'dev.analyzer.skybox.SkyboxSelfTest'
 }
 tasks.named('check') { dependsOn tasks.named('customSkyboxCheck') }
+tasks.register('wingPolicyCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.cosmetic.WingPolicySelfTest'
+}
+tasks.named('check') { dependsOn tasks.named('wingPolicyCheck') }
 tasks.register('chamsCheck', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -191,6 +202,19 @@ tasks.register('publishLocal') {
 
 loom {
     runs {
+        wingsSmoke {
+            client()
+            name 'Analyzer native approved wing cosmetics acceptance'
+            runDir 'run-wings-smoke'
+            vmArg '-Danalyzer.smoke=true'
+            vmArg '-Danalyzer.wingsSmoke=true'
+            programArg '--username'
+            programArg 'AnalyzerDev'
+            programArg '--width'
+            programArg '1920'
+            programArg '--height'
+            programArg '1080'
+        }
         skyboxSmoke {
             client()
             name 'Analyzer native custom skybox acceptance'

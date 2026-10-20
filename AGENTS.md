@@ -1,8 +1,14 @@
+# Approved wings and public delivery in 0.15.0
+
+The user selected all four reviewed wing appearances for integration. Keep **Cosmetics → Wings** opt-in, self-only and attached at the approved raised upper-back position, using Paul Fulham's supplied 17-part articulated Minecraft rig and original texture bytes with full MIT attribution. Preserve native posed-body transforms, normal depth/cutout rendering, animation/height/scale controls and equipment visibility settings. No flight, networking, weighted-skin or four-distinct-mesh claim. Unselected hats/accessories remain review-only; the new original ornate previews in `design/hats-review` require selection before runtime integration. See `WINGS.md` and `HAT-DESIGNS.md`.
+
+The user authorized public GitHub publication on October 20, 2026. The original XonistReal/Analyzer repository remains private; XonistReal/Analyzer-Public is a filtered public mirror omitting the two archival files in PUBLICATION.md. Preserve original private tags and metadata; public filtered tags have different hashes. Publish current verified artifacts to the public repository. Public downloads use the portable Prism defaults: local development updating disabled and no machine-specific manifest or PowerShell pre-launch command. `--connect-local-feed` is an explicit packaging opt-in. Preserve the existing user's enabled local feed and pre-launch command during installation. Keep secrets, accounts and user game data out of Git and release assets; retain prior version tags and accurate third-party notices. Module/settings documentation is generated from the actual registry by `moduleCatalog`.
+
 # Custom skyboxes and cosmetic selection in 0.14.0
 
 Keep **World → Skybox** on the existing `sky` module, with **Procedural** and saved Aurora/Nebula/Ember choices preserved. Custom imports use actual local paths from the shader-styled `minecraft/skyboxes` shelf or explicit drag/drop: bounded 2:1 PNG/JPEG panoramas or matching px/nx/py/ny/pz/nz cube faces. Native Minecraft panorama/End choices use the resource manager, not bundled game art. Preserve async bounded decode, stale-request rejection, GPU/state restoration, native-sky failure fallback and resource cleanup. End rendering is opt-in, follows the actual native sky pass and respects boss-fog suppression; the Nether remains unchanged. No raw VTF/VPK or arbitrary resource-pack parser is claimed. Details: `CUSTOM-SKYBOX.md`.
 
-The user requires seeing and selecting downloaded hats/wings before wearable integration. The eight candidates in `design/cosmetics-review` and the separate review ZIP are review assets only: keep them out of runtime resources, mod dependencies and equipped player rendering until selected. Four wing looks share Paul Fulham's existing 17-part Minecraft pivot rig and original animations; do not call these weighted/skinned meshes or four distinct meshes. Retain full MIT notices with wing copies; preserve CC0 creator provenance for accessories. No Lunar or Valve cosmetic art is copied. See `COSMETICS-SHORTLIST.md`.
+The user requires seeing and selecting downloaded hats/wings before wearable integration. The eight candidates in `design/cosmetics-review` and the separate review ZIP began as review assets only. In 0.15.0 the four wings were selected; keep the other unselected candidates out of runtime resources, mod dependencies and equipped player rendering. Four wing looks share Paul Fulham's existing 17-part Minecraft pivot rig and original animations; do not call these weighted/skinned meshes or four distinct meshes. Retain full MIT notices with wing copies; preserve CC0 creator provenance for accessories. No Lunar or Valve cosmetic art is copied. See `COSMETICS-SHORTLIST.md`.
 
 # Kill Aura silent rotations in 0.13.2
 
@@ -70,9 +76,9 @@ The user explicitly requested on October 11, 2026 that every Analyzer update als
 
 Current computer paths:
 
-- Prism instance: `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4` (located again on October 14; inspect embedded version rather than the folder name)
-- Local manifest: `C:\Users\sould\Desktop\analyzer-updates\release.json`
-- Import ZIP: `C:\Users\sould\Desktop\Analyzer-<version>-Prism-1.21.4.zip`
+- Prism instance: `%USERPROFILE%\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4` (located again on October 14; inspect embedded version rather than the folder name)
+- Local manifest: `%USERPROFILE%\Desktop\analyzer-updates\release.json`
+- Import ZIP: `%USERPROFILE%\Desktop\Analyzer-<version>-Prism-1.21.4.zip`
 - Java 21 JDK: `C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot`
 
 The portable ZIP inherits Prism's Java settings. The current imported instance retains the user's Prism-managed Java selection; use the JDK path above for project builds without overwriting launcher preferences. Do not include launcher accounts or credentials in packages.

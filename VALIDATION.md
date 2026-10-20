@@ -1,3 +1,17 @@
+# Articulated wings and public delivery — October 20, 2026
+
+Analyzer **0.15.0** adds opt-in **Cosmetics → Wings** with Angel / Dragon / Bat / Parrot, Auto / Flap / Idle / Glide / Still, animation speed/strength and scale/height/back-offset controls. The approved attachment is raised three Minecraft pixels and follows the native posed body. Four original textures share Paul Fulham's supplied 17-part MIT rig. [Controls and attribution](WINGS.md).
+
+Java 21 `build moduleCatalog` and `publishLocal` pass **79,277 assertions across 34 suites**, including **103 wing policy/config assertions**. The generated catalogue documents **158 modules / 1,839 settings**, with every default, numeric bound/step and choice readable in Markdown. The source JAR and runtime JAR both retain full wing/font notices. Final build/feed SHA-256: **ac80dfdd12f8b5cae220ed241afdaf246fa3e0a9e41a31350792fb73e98d8de1**.
+
+The completed isolated `runWingsSmoke` passes **39 native checks** and writes seven inspected **1920 × 1080** framebuffer captures. Actual feature draws confirm unchanged texture resources, 1,584 submitted vertices, the raised mount, crouched body attachment and armor spacing. The fixture observes Elytra hiding/override, first-person suppression, resource reload, disable/re-enable and loaded disconnect cleanup. All screenshot callbacks finish; GL checks pass and the completed log contains no ERROR/FATAL entries. [Native evidence](production-validation/native-0.15.0/wings.json) · [Combined acceptance](production-validation/native-0.15.0/acceptance.json).
+
+Native screenshots exercise Flap; Auto/Idle/Glide/Still, finite mirrored geometry, speed/strength bounds and profile/config compatibility have deterministic coverage. No full native pose/renderer/server matrix is claimed. The three original ornate hat concepts remain review-only and outside runtime, with 600 animation-frame geometry samples rather than claimed native wearable acceptance. Other modules' deterministic checks pass; unrelated native gameplay was not rerun.
+
+Public source preserves tag names/metadata in a filtered copy, omitting the two archival files with unresolved helper provenance while leaving the original private history unchanged. [Publication scope](PUBLICATION.md). Public Prism packages disable the optional local feed and contain no author-specific manifest path or pre-launch command. The existing user's installed instance retains its deliberate local feed, launcher preferences and unrelated game data; delivery checks compare build/feed/package/installed hashes and preserve a recoverable prior JAR. Optional Windows symlink fixtures remain explicitly skipped where OS link permission is unavailable.
+
+## Earlier 0.14.0 evidence
+
 # Custom skyboxes and cosmetic selection - October 16, 2026
 
 Analyzer **0.14.0** extends **World → Skybox** with local 2:1 PNG/JPEG panoramas, six matching square cube faces, a shader folder browser and native Minecraft panorama/End texture sources. Existing Aurora/Nebula/Ember settings retain Procedural as their default. [Controls and format limits](CUSTOM-SKYBOX.md).

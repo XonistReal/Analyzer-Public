@@ -1,3 +1,9 @@
+# Current wing captures — 0.15.0
+
+Actual 1920 × 1080 Minecraft development framebuffers from the isolated native fixture: [Angel](analyzer-native-wings-angel.png), [Dragon](analyzer-native-wings-dragon.png), [Bat](analyzer-native-wings-bat.png), [Parrot](analyzer-native-wings-parrot.png), [crouching](analyzer-native-wings-crouching.png), [armor](analyzer-native-wings-armored.png), [settings](analyzer-native-wings-settings.png). Wing angles differ across captured flap phases. These are local-player cosmetic draws; no hats are equipped. [Evidence and hashes](../production-validation/native-0.15.0/wings.json).
+
+## Historical captures
+
 # Custom skyboxes - 0.14.0
 
 Six unedited 1920 × 1080 native framebuffer captures from the completed 55-check isolated skybox run. Grid/gradient images are original diagnostic fixtures, not cosmetic art or shipped sky presets. End rendering is observed outside Minecraft's native dragon boss fog.

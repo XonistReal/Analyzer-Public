@@ -45,6 +45,17 @@ public final class CosmeticModules {
                 Setting.number("flow", "Flow", 1, 0, 2, 0.05), Setting.number("ripple", "Ripple", 0.5, 0, 2, 0.05),
                 Setting.number("wind", "Wind", 0.4, 0, 2, 0.05), Setting.number("opacity", "Opacity", 0.9, 0.2, 1, 0.05)));
         add(out, "cape", "Cape", "An original segmented cloth mesh with moving hems and colors, visible in third person. No image/GIF importer.", cape);
+        add(out, "wings", "Wings", "Approved Angel, Dragon, Bat and Parrot textures on an existing articulated wing rig. Local third-person cosmetic; no flight or server broadcast.",
+                Setting.choice("style", "Wing style", "Angel", "Angel", "Dragon", "Bat", "Parrot"),
+                Setting.choice("animation", "Animation", "Auto", "Auto", "Flap", "Idle", "Glide", "Still"),
+                Setting.number("speed", "Animation speed", 1, 0, 3, 0.05),
+                Setting.number("strength", "Animation strength", 1, 0, 1.5, 0.05),
+                Setting.number("scale", "Wing scale", 1, 0.5, 1.5, 0.05),
+                Setting.number("height", "Extra height (pixels)", 0, -4, 8, 0.25),
+                Setting.number("back-offset", "Extra back offset (pixels)", 0, -2, 6, 0.25),
+                Setting.bool("hide-elytra", "Hide with Elytra", true),
+                Setting.bool("armor-clearance", "Extra chest armor clearance", true),
+                Setting.bool("fullbright", "Fullbright texture (no bloom)", false));
         List<Setting<?>> pet = colors(false);
         pet.addAll(List.of(Setting.choice("pet", "Companion", "Rune Orb", "Rune Orb", "Ghost", "Dragon"),
                 Setting.choice("position", "Pet position", "Shoulder", "Shoulder", "Orbit", "Behind"),

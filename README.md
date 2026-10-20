@@ -1,122 +1,62 @@
-> **0.14.0:** Skybox adds local panorama/six-face imports, a folder browser and native Minecraft texture sources. Eight downloaded cosmetic candidates are available for visual selection; they are not installed on players. [Skybox controls](CUSTOM-SKYBOX.md) · [Cosmetic shortlist](COSMETICS-SHORTLIST.md).
-
-> **0.13.2:** Kill Aura gains Silent movement / Silent packet / Silent pulse with a fixed local camera, bounded virtual turning and native attack validation. [Controls and scope](SILENT-AIM.md).
-
-> **0.13.1:** Screen-locked Crosshair / Bottom / Top tracer origins throughout the client, plus an opt-in editable client-side Name Changer. [Controls and scope](TRACERS-AND-NAME.md).
-
-> **0.13.0:** 27 original finder/ESP modules, including Advanced Stash Finder, Amethyst Finder, posed Skeleton ESP and a local Findings browser. [Controls and coverage](FINDERS.md).
-
-> **0.12.0:** Shader Entity Chams: Flat, Metallic, Glass, Glow and Wireframe, with separate visible/occluded colors. [Settings and scope](ENTITY-CHAMS.md).
-
-> **0.11.0:** Coordinated combat, Auto Block / Double Hand / Hover Totem, debug ESP, registry-backed item requests and schematic ghosts with reusable buckets. [Combat and ESP](COMBAT-ESP.md) · [Schematic construction and limits](SCHEMATIC-CONSTRUCTION.md).
-
-> **0.10.3 motion/planning fixes:** Camera braking, stable mining approaches, view-preserving descent corrections and nearest-first resource/route planning. [Details and validation scope](AUTOMATION-MOTION.md).
-
-> **0.10.2 Local requests, recovery and X-ray:** Review requests such as “get me 600 sand” or “get just 37 diamonds”, or build one actual selected/named schematic. Native mining clears checked natural cover, tree recovery uses verified descents, and task-owned crafting tables are collected. Render → X-ray provides 15% terrain, terrain outlines and ores-only styles, with visible workstations/storage and entity highlights. Auto Eat now refills to full hunger after triggering. See [Automation](AUTOMATION.md), [X-ray](XRAY.md) and [observed validation](VALIDATION.md).
-
 # Analyzer
 
-An original client for **Minecraft Java Edition 1.21.4**, built on **Fabric and Java 21**. Analyzer **0.14.0** has **157 registered modules**: local name masking, server privacy, world visuals, editable HUD widgets, a custom Home screen, two native shader module menus, combat/HvH, movement, inventory automation and building/mining utilities. Prism integration includes a local development updater.
+A Minecraft Java **1.21.4** utility client built with **Fabric and Java 21**. Analyzer combines shader menus and HUDs, world visuals, ESP, combat and movement tools, local task automation, and player cosmetics.
 
-![Studio with the supplied transparent wordmark](screenshots/analyzer-liquid-studio-glass.png)
+**[Download the latest release](https://github.com/XonistReal/Analyzer-Public/releases/latest)** · **[Source ZIP (main)](https://github.com/XonistReal/Analyzer-Public/archive/refs/heads/main.zip)** · **[All modules and settings](MODULES.md)** · **[Installation](docs/INSTALLATION.md)** · **[Build guide](docs/DEVELOPING.md)**
 
-## Install and start
+![Analyzer Studio with the Glass theme](screenshots/analyzer-liquid-studio-glass.png)
 
-**Prism Launcher:** drag `Analyzer-0.14.0-Prism-1.21.4.zip` onto Prism's main window and import it. The archive includes Analyzer, Fabric API, and the Windows local updater. See [PRISM.md](PRISM.md) for installation and updates. An existing Analyzer instance connected to the project's feed updates on its next launch after Minecraft is closed; native Automation is included in Analyzer.
+## Download
 
-Project updates also rebuild the Prism ZIP and update the user's local Analyzer instance. The standing delivery workflow is recorded in [AGENTS.md](AGENTS.md).
+Open the [latest release](https://github.com/XonistReal/Analyzer-Public/releases/latest) and choose an asset:
 
-For another launcher, create a **Fabric 1.21.4** instance with **Java 21**, then place both `analyzer-0.14.0.jar` and `fabric-api-0.119.4+1.21.4.jar` in its `mods/` folder. The verified loader is **0.16.14**; Analyzer requires **0.16.10 or newer**. Keep one Analyzer JAR installed. The Prism ZIP uses a checksum suffix on the Analyzer filename.
+| You want to… | Download |
+| --- | --- |
+| Import a ready-to-use Prism Launcher instance | `Analyzer-<version>-Prism-1.21.4.zip` |
+| Add Analyzer to an existing Fabric instance | `analyzer-<version>.jar`, plus the required Fabric API |
+| Read or modify the complete project | The release's source ZIP, or clone this repository |
+| Verify a download | Compare it with the release's `SHA256SUMS.txt` |
 
-The custom Home screen opens by default over Minecraft's panorama. Use its top-right button to switch to Orbit; **Vanilla menu** saves the original title preference. [Home controls](HOME-SCREEN.md) describes the real world/server and options pages. Click **Modules** on Home or **Analyzer** on the vanilla title screen or press **Right Shift** in game. Fresh installs open **Studio** with the **Rose** accent; choose **HUD Studio → Menu layout → Studio** to switch an existing preference. **Profiles → studio → Load** adds selected cosmetics and Studio appearance; **cinematic**, **classic** and **neon** also open Studio while retaining their distinct visual settings and HUD themes. These four visual profiles leave gameplay automation off. Loading **hvh** explicitly enables Kill Aura, Crystal Aura, Surround, Auto Weapon, Auto Totem, Auto Armor and Keep Sprint, with combat HUD widgets. Earlier **showcase**, **arctic**, **cinder**, **aurora**, **ember** and **minimal** profiles remain available. Profiles opens from every menu; Back restores the parent catalogue context.
+The current release is **0.15.0**. The Prism package includes Analyzer and Fabric API; use your own Minecraft account and a Java 21 installation. Manual installs target Fabric Loader **0.16.14** and Fabric API **0.119.4+1.21.4**. Other Minecraft versions require a different build. [Installation and updating →](docs/INSTALLATION.md)
 
-Profiles are seeded once without overwriting existing files. Workspace, Classic and Compact layout values in an older config or profile migrate to Studio when loaded. This changes only the active layout value; source profile bytes and all unrelated settings remain intact. Back to modules therefore cannot reopen a retired layout. Loading a profile replaces active settings and module keybinds. Settings live in `config/analyzer/config.json`; profiles in `config/analyzer/profiles/`, friends in `config/analyzer/friends.txt`. The updater preserves these and your worlds.
+## Modules and settings
 
-## Menus and HUD
+The [module catalogue](MODULES.md) is generated from the same definitions as the in-game menu. It lists every registered module, its behavior, whether it starts enabled, and its settings with defaults, numeric bounds and available choices. [MODULES.json](MODULES.json) provides the same registry as structured data.
 
-**Watermark → Logo** selects **Analyzer logo** (default) or **A logo**. Gameplay and the HUD editor show one supplied image at a time. The choice saves with your settings and profiles; placement, scale, opacity and version caption are retained.
+| Area | Examples | Details |
+| --- | --- | --- |
+| Menus and HUD | Studio and Click GUI, editable widgets, Glass/Classic/Minimal/Neon themes, custom Home screen | [Using the menu](docs/MODULE-GUIDE.md), [Home](HOME-SCREEN.md), [liquid glass](LIQUID-GLASS.md) |
+| ESP and finders | Entity and storage debug boxes, screen-locked tracers, Advanced Stash Finder, Amethyst Finder, local Findings history | [ESP](COMBAT-ESP.md), [finders](FINDERS.md), [tracers](TRACERS-AND-NAME.md) |
+| World rendering | Five posed-model chams materials, three X-ray styles, procedural and imported skyboxes | [Chams](ENTITY-CHAMS.md), [X-ray](XRAY.md), [skyboxes](CUSTOM-SKYBOX.md) |
+| Combat and movement | Kill Aura and opt-in silent rotations, target filters, defensive inventory tools, movement and placement helpers | [Combat](COMBAT-ESP.md), [silent aim](SILENT-AIM.md), [settings](GAMEPLAY-SETTINGS.md) |
+| Automation | Local material requests, native pathfinding and mining, tool recovery, schematic ghosts and material-first building | [Automation](AUTOMATION.md), [construction](SCHEMATIC-CONSTRUCTION.md), [protection](SAFETY.md) |
+| Privacy | Local name masking and configurable server-information protections | [Name Changer](TRACERS-AND-NAME.md), [Server Privacy](SERVER-PRIVACY.md) |
+| Cosmetics | Angel, Dragon, Bat and Parrot wings on a shared articulated rig; cape, pets and visual effects | [Wings and settings](WINGS.md), [Cosmetics catalogue](MODULES.md#cosmetics) |
 
-- **Studio:** a centered black-and-charcoal shell, top category tabs, three columns of rounded cards and settings that expand inside each card. A card's switch enables/disables the module separately. Expanded cards scroll their long settings; the catalogue scrolls separately. GLSL draws smooth surfaces, shadows, pills and glow; the bundled Lato Regular/Bold font gives this menu a wider typeface.
-- **Click GUI:** the new shader category-column board. Category buttons reveal their columns; drag a header to reposition it and right-click to collapse it. Scroll individual module/settings columns or use the horizontal rail to reach the board. Module titles inspect settings independently of their switches. It shares Studio's Lato font, shader controls and auxiliary screens.
-- **HUD Studio** exposes **Menu layout → Studio / Click GUI**, **Menu material → Glass / Solid**, **Menu theme → Glass / Classic / Minimal / Neon**, and **Accent colour → Rose / Mint / Violet / Gold**. These alias Interface's canonical saved preferences. Studio's **Appearance** action, Click GUI's **Style** action and the HUD editor open these controls. Workspace, Classic and Compact are removed layouts; **Classic** remains a theme.
-- **Edit HUD:** drag widgets, right-click to toggle them, use arrows to move a selection, and choose grid snapping, scale and **Glass / Classic / Minimal / Neon** themes. Settings and reset controls are available in the editor. **Show active** starts with enabled widgets; **Show all** exposes disabled ones for positioning.
-- Fresh HUD settings use **60% scale**. Updating preserves a saved scale and existing widget positions. To change an older setup, open **HUD Studio → HUD scale** or use the editor scale controls. HUD text now uses Lato with a readable minimum size as panels shrink; its panels, slots, keycaps and bars use Studio's native shader surfaces. Radar and protection notices share the new HUD surface.
-- Menu theme and HUD theme are independent. **Glass theme** uses original liquid-glass GLSL: a captured scene refracts through curved surfaces, with lightly frosted interiors, subtle color dispersion and directional edge highlights. **Menu material** controls background softness and the outer shell: Glass softens the background, while Solid keeps it crisp. Glass-theme cards and controls retain refraction with Solid material. Under **Interface**, motion zero freezes menu movement. See [optics and verification](LIQUID-GLASS.md).
-- Assign a module **Keybind** in its expanded Studio card or Click GUI settings. **Backspace/Delete** clears it; **Escape** cancels. Changes save automatically.
-- Expanded cards and Click GUI settings group related settings and wrap labels; fields for inactive modes keep their saved values. Click a numeric value or **right-click its slider row** to type a precise value, then press Enter or Apply. **Tab / Shift+Tab** moves visible focus, **Enter / Space** activates the focused control, arrow keys adjust supported values, and **Page Up / Down** scrolls settings. Shared catalogue controls provide labels through Minecraft's native narration hook. See [Gameplay settings](GAMEPLAY-SETTINGS.md) for behavior and reference gaps.
-- Returning from **Profiles**, **Edit HUD** or **Automation** restores the parent screen's search/category/selection context. Loading a profile remains an explicit replacement of module settings and keybinds.
+**New in 0.15.0:** the four approved wing looks are wearable on the local player's third-person model, with animation, scale and placement controls. [Ornate hat concepts](HAT-DESIGNS.md) remain review assets. [Release history →](VERSION-HISTORY.md)
 
-The [complete Studio refresh](STUDIO-COMPLETE.md) extends that presentation to Profiles, Automation, numeric entry and HUD editing, using only current shader layouts. The current direction keeps reference 3's black/gray cards, top navigation, inline settings and pink controls in Studio, and adds the new shader Click GUI. The earlier [reference board](UI-REFERENCES.md) records the historical comparisons. Previous Workspace captures and the browser comparison remain historical evidence. The native catalogue exposes **1,829 controls: 1,821 canonical settings plus eight HUD Studio appearance/Home aliases**. [STUDIO-COMPLETE.md](STUDIO-COMPLETE.md) records the original refresh controls and screenshots; [UI-OVERHAUL.md](UI-OVERHAUL.md) retains earlier history; [UI-OVERHAUL-PLAN.md](UI-OVERHAUL-PLAN.md) keeps the acceptance requirements and verification scope.
+ESP and finders use received, loaded game data. Automation uses Analyzer's own local controllers, requires explicit plan review and Start, and reports unsupported requirements. Wing cosmetics are local to your client. Server Privacy reduces specific information leaks; it does not hide your account, IP or gameplay behavior. The feature documents describe these boundaries and [VALIDATION.md](VALIDATION.md) separates automated checks from observed gameplay. Renderer compatibility, including Iris/Sodium, has not been established for every feature.
 
-Server Privacy defaults on for fresh and older configs. Strict mode limits custom channels and can disable mods that require server networking; compatibility switches are explicit. It reduces tested information leaks, without claiming that gameplay behavior is invisible. Saved opt-outs, profiles and other preferences remain independent. [SERVER-PRIVACY.md](SERVER-PRIVACY.md) explains each of the eight protections and their limits.
+## First launch
 
-## Implemented features
+1. Press **Right Shift** in game, or choose **Modules** on Analyzer's Home screen.
+2. Search for a module and expand its settings. Its switch controls whether it is enabled.
+3. Open **HUD Studio** to choose **Studio / Click GUI**, menu appearance and HUD placement. Menu and HUD themes are independent.
+4. For tasks, open **Automation**, enter a goal or choose a schematic, then review the plan before starting it.
 
-The complete IDs, settings and defaults are exported in [MODULES.md](MODULES.md) and [MODULES.json](MODULES.json).
+Gameplay automation starts disabled on a fresh install. Profiles can replace active module settings and keybinds; inspect a profile before using it. Settings, profiles and friends are stored under the instance's `config/analyzer/` directory. [Menu, settings and profiles →](docs/MODULE-GUIDE.md)
 
-| Group | Count | Implemented scope |
-| --- | ---: | --- |
-| Original visual/interface modules | 10 | Entity/Storage ESP, Tracers, Fullbright, Coordinates, Crosshair, menu particles, Interface, Atmosphere and Sky Aurora. ESP includes Boxes/Corners/Screen styles, filters, labels, health, radar and live target/scan statuses. |
-| HUD and client controls | 17 | HUD Studio plus watermark, active modules, FPS, ping, speed, armor, potion effects, Target HUD, keybinds, inventory, compass, biome, world clock, item counter, keystrokes and target distance. Widgets use actual game data and saved positions. |
-| World effects | 31 | Existing place/break/hit effects and overlays now have broader shape, color, timing and target controls. New Air Effects, Block Effects, Damage Effects, Contrails, Storm Effects, Vitals and Hit Sounds use actual world state/events. |
-| Model and item cosmetics | 8 | Item Physics, Hand Tweaks, Crystal Chams, Cape, Pets, Emotes, Walk Style and client-model Spinbot. Original meshes and render transforms; exact controls and limits are compared in [RESEARCH-COSMETICS.md](RESEARCH-COSMETICS.md). |
-| Combat and HvH | 15 | Kill Aura, Aim Assist, Trigger Bot, Auto Clicker, Auto Weapon, Shield Breaker, Bow Aimbot, Criticals; Crystal/Anchor Aura, Surround, Auto Trap, Auto Web, Hole Filler and Target Strafe. These perform ordinary attacks, item/block interactions or client movement. |
-| Movement | 15 | Keep Sprint, Auto Walk, Speed, Fly, Step, Parkour, Safe Walk, Fast Ladder, Reverse Step, Fast Fall, Glide, High Jump, Long Jump, Elytra Boost and Ground Strafe. Owned input and temporary step changes are restored on disable/pause. |
-| Player automation | 10 | Auto Eat/Gapple/Totem/Armor/Tool, Refill, Anti AFK, Auto Respawn, Durability Alert and Auto Fish. Normal inventory actions are guarded; Auto Armor preserves an equipped Elytra. |
-| World utilities | 16 | Scaffold, Tower, Air Place, Nuker, Auto Farm, Auto Tunnel, Bed Breaker, Flatten, Speed Mine, Vein Miner, No Block Interact, Chest Stealer, Middle Click Friend, Player Detection, Notifier and Coord Snapper. Work is bounded to loaded, reachable game data. |
-| Task automation | 1 | Automation reviews local travel, mining, material-first imported schematics, tool recovery, gear and real portal plans. Analyzer performs original native pathfinding; normal inventory actions and actual game-state checks drive stages. Safer routes, proactive hostile avoidance, bounded routes to cover and available-food consumption apply to explicitly started Analyzer tasks. See [AUTOMATION.md](AUTOMATION.md) and [SAFETY.md](SAFETY.md). |
+## Source and contributions
 
-Fresh defaults enable **Sky Aurora, Interface, Particles, Coordinates, HUD Studio, Watermark, Active Modules, FPS, Place Animation, Break Animation and Hit Particles**. All combat, HvH, movement, player automation and world utilities are disabled by default. Entity/Storage ESP are opt-in, or can be enabled through a visual profile.
-
-## Automation protection
-
-Start through **Right Shift → Automation → Review plan → Start reviewed plan**. Fresh settings use cautious native routes, proactively avoid hostile mobs within 16 blocks, eat suitable available food below 14 hunger, and prefer retreat when health is low or an urgent creeper threatens the player. Creepers that are ignited, swelling or close receive priority; occluded hostile mobs can remain threats. Ordinary attacks require actual aligned view, reach and cooldown. Protection pauses the original task and shows **TASK PAUSED FOR SAFETY**; after the three-second quiet delay it checks the configured recovery limits before resuming.
-
-An unavailable retreat or recovery enters a live **SAFETY_HOLD** while protection rechecks threats, terrain and available food. A bounded local search considers loaded routes within the selected escape radius, hostile motion, line of sight and cover. Each movement segment rechecks collision shapes, steps, drops and surface water with a route to air. Urgent creeper retreat can back away while turning. A stage already blocked for another requirement returns to that requirement after protection clears.
-
-User Pause and Stop release owned movement/use inputs. Completion, task blocking, disconnect/death and manual input takeover also release the corresponding controller state. Protection remains bounded to loaded local terrain; it does not navigate deep or enclosed water, climb, fly or fight players. Missing food, trapped terrain and dangerous combat may require manual recovery. Read [SAFETY.md](SAFETY.md) for the exact controls and limits.
-
-## Trying gameplay modules
-
-Enable one module at a time and inspect its settings/status. Target filters default to **Players** for combat; enable **Hostile mobs** and disable Players to try a singleplayer mob arena. Persisted friends are excluded by the default Ignore friends setting. Most gameplay automation pauses while a menu is open.
-
-Melee modules need a suitable hotbar weapon and normal reach/cooldown. Shield Breaker needs an axe; Bow Aimbot supports selected bow/crossbow/trident inputs. Criticals uses real jumping/falling attacks. Surround/Trap/Hole Filler need the selected hotbar building material, Auto Web needs cobwebs, and ordinary placement needs valid support/reach. Crystal Aura needs crystals plus reachable obsidian/bedrock; Anchor Aura needs anchors, glowstone and a non-glowstone hand for detonation in a dimension where anchors explode. The Nether is excluded from detonation.
-
-Crystal/Anchor Aura now combine health/distance guards with loaded-terrain explosion estimates, enemy/self damage limits and friend protection. Self estimates omit protective enchantment/effect reductions; estimates can differ from server outcomes. Fly/Speed offer direct motion and applicable normal-input modes; a server can correct or reject direct motion. Air Place attempts a normal interaction and depends on server acceptance. There are no promised anticheat bypasses, silent rotations or packet criticals. Refill currently restocks low **nonempty** hotbar stacks; weapon/armor scoring uses material estimates rather than full enchantment simulation. The [gameplay settings overhaul](GAMEPLAY-SETTINGS.md) records all implemented behavior and limits.
-
-## Rendering scope
-
-**Sky Aurora** draws original **Aurora / Nebula / Ember** skies and stars in the actual world sky pass before terrain/celestial objects, with intensity, speed, night-only visibility and rain attenuation. **Atmosphere** separately applies GPU bloom, grading and vignette before the HUD; **Bloom** keeps neutral colors and Aurora/Ember/Frost add color looks. Glass-theme surfaces use a separate captured scene for real refraction, curved edge displacement, frost and highlights. Menu material remains the separate background-softness control.
-
-Place/Break Animation adds animated ghost overlays and bounded debris to real local actions; the vanilla block mesh remains. Explosion and totem effects add visuals to actual game events. Player Aura draws rotating rings. Visual styles are original geometry, particles and client render hooks. A style or color option describes the scope of that module; it does not imply Temple's complete material collection. See [RESEARCH-COSMETICS.md](RESEARCH-COSMETICS.md) for the 37 cosmetic reference rows and explicit unsupported controls.
-
-ESP uses entities and containers loaded by the game. **Boxes/Corners** use depth-tested world geometry when Through walls is off. **Screen** draws projected HUD rectangles; disabling Through walls filters by a center line-of-sight raycast, rather than masking individual HUD pixels against world depth. The radar uses selected loaded targets.
-
-Iris is not bundled; Iris/Sodium and other renderer compatibility has not been validated. Analyzer does not add shadow maps, water reflections, volumetric clouds or a replacement world-lighting pipeline. The release is pinned to **1.21.4**; other versions need source changes and a new build.
-
-The [roadmap](ROADMAP.md) compares all **163 Temple.nz reference modules**, distinguishing scoped counterparts, partial implementations and remaining work. HUD widgets count as one reference area. This is not a feature-parity claim. Selected runtime checks are recorded in [VALIDATION.md](VALIDATION.md); not all registered modules or their modes have been tested in game. See [RESEARCH.md](RESEARCH.md) and [RESEARCH-VISUALS.md](RESEARCH-VISUALS.md) for primary sources and sampled visual observations; [RESEARCH-COSMETICS.md](RESEARCH-COSMETICS.md) records the current control-level cosmetic comparison.
-
-## Build from source
-
-Private source and versioned downloads: [XonistReal/Analyzer](https://github.com/XonistReal/Analyzer). See [Moving PCs](MOVING-PCS.md) for cloning, Prism import and reconnecting the local updater.
-
-Select a Java 21 JDK with `JAVA_HOME`, then run:
-
-```powershell
-.\gradlew.bat build          # remapped build + core checks
-.\gradlew.bat moduleCatalog  # export the actual registry
-.\gradlew.bat runClient      # interactive development instance
-.\gradlew.bat runStudioSmoke # focused native GLSL Studio acceptance
-.\gradlew.bat runSmoke       # isolated UI/world/gameplay checks
-.\gradlew.bat runGameplaySmoke # focused gameplay settings and numeric-entry checks
-.\gradlew.bat runNativeAutomationSmoke # isolated native Survival acceptance, without Baritone
-.\gradlew.bat publishLocal   # publish to the Prism local update feed
+```sh
+git clone https://github.com/XonistReal/Analyzer-Public.git
+cd Analyzer-Public
 ```
 
-On macOS/Linux use `./gradlew` in place of `.\gradlew.bat`. The wrapper downloads Gradle 8.12 and checks its SHA-256; Loom fetches pinned official Minecraft/Yarn/Fabric dependencies. The installable artifact is `build/libs/analyzer-0.14.0.jar`.
+With a **Java 21 JDK**, run `./gradlew build moduleCatalog` on Linux/macOS or `.\gradlew.bat build moduleCatalog` in Windows PowerShell. The installable mod is `build/libs/analyzer-0.15.0.jar`; the `-sources.jar` is for reading source, not playing.
 
-`runSmoke` uses the project-local `run/` directory, creates/updates only `run/saves/Analyzer-Smoke`, captures screenshots, and exits. Installed release builds never activate the development harness. See VALIDATION for assertions and results. Optional pixel checks use `python tools/verify_render.py` and `python tools/verify_visuals.py` with Pillow.
+Start with the [source map and build guide](docs/DEVELOPING.md), then read [CONTRIBUTING.md](CONTRIBUTING.md). Module definitions live in `core`, native screens in `ui`, game actions in `gameplay` and `automation`, and rendering in `render`, `effects`, `skybox` and `cosmetic`. The [CI workflow](.github/workflows/build.yml) builds with Java 21 and checks that the generated catalogue stays current.
 
-Source packages are `core/` for definitions/configuration, `ui/` for native screens/HUD, `render/` for overlays/event effects, `effects/` for original GLSL/state restoration, `gameplay/` for bounded game actions, `automation/` for the task planner, original native navigation, inventory stages and Survival guard, and `mixin/` for narrow 1.21.4 hooks.
+Analyzer is [MIT licensed](LICENSE). Included wing assets/code ports, fonts and dependencies retain their own notices in [THIRD-PARTY.md](THIRD-PARTY.md), [WINGS-MIT-LICENSE.txt](WINGS-MIT-LICENSE.txt) and [DEPENDENCY-SOURCES.md](DEPENDENCY-SOURCES.md). Research references and historical archives are documented separately from current runtime dependencies.
 
-Analyzer code is MIT licensed. No client source from GPL projects was copied. Lato used by the current shader menus/HUD and the retained Rajdhani font resource use the SIL Open Font License; see [THIRD-PARTY.md](THIRD-PARTY.md), [LATO-OFL.txt](LATO-OFL.txt), `FONT-LICENSE.txt` and `GRADLE-LICENSE.txt`.
+[Public history and release scope](PUBLICATION.md) explains the retained version tags, archival omissions and historical checksum records.

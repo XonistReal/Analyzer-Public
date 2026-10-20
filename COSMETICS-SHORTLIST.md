@@ -1,4 +1,6 @@
-# Cosmetics shortlist — review before integration
+# Cosmetics shortlist — original review
+
+**Current status (0.15.0):** all four wing looks were selected and implemented in [Cosmetics → Wings](WINGS.md), with the higher Fit-2 attachment. The four old accessory candidates remain unselected; richer original headwear is available in [the new hat review](HAT-DESIGNS.md). The rest of this page records the original review package.
 
 The user requested free commercial-use 3D cosmetics to inspect before choosing which enter Analyzer. Eight looks are downloaded and previewable in `design/cosmetics-review/index.html`; the portable copy is `Analyzer-Cosmetics-Review` on the Desktop, with `Analyzer-Cosmetics-Review.zip` beside it. Nothing in this review adds a cosmetic to the game, JAR, Prism mods, or player inventory.
 
@@ -23,4 +25,4 @@ The view renders geometry from these source files on an original neutral block m
 
 `design/cosmetics-review/manifest.json` records sources, authors, original/derived paths, license identifiers, byte counts and SHA-256 values. `SHA256SUMS.txt` also includes the manifest. The Desktop folder, archive, inline fragment and tracked review folder are checked against these bytes. The package excludes discovery packs, tool executables/caches, nested repositories, accounts and runtime mod files.
 
-Future integration waits for the user's selected models. Rendering, attachment offsets, clipping against equipment/elytra, animation pacing and any visibility/sharing design remain implementation work after that choice; this shortlist is not native in-game acceptance.
+For the still-unselected accessories, integration waits for the user’s choices. Rendering, attachment offsets, clipping against equipment/elytra, animation pacing and any visibility/sharing design remain implementation work after that choice; this shortlist is not native in-game acceptance.

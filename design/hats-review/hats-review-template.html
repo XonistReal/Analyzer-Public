@@ -1,0 +1,103 @@
+<div id="analyzer-ornate-hat-designs">
+  <style>
+    #analyzer-ornate-hat-designs .review-heading {padding-right:100px;}
+    #analyzer-ornate-hat-designs .hat-stage {display:block;width:100%;height:460px;touch-action:none;cursor:grab;}
+    #analyzer-ornate-hat-designs .hat-stage:active {cursor:grabbing;}
+    #analyzer-ornate-hat-designs .design-choices {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0;}
+    #analyzer-ornate-hat-designs .design-choice {display:grid;gap:8px;min-width:0;}
+    #analyzer-ornate-hat-designs .design-thumb {display:block;width:100%;height:125px;object-fit:contain;}
+    #analyzer-ornate-hat-designs .design-summary {min-height:42px;overflow-wrap:anywhere;}
+    #analyzer-ornate-hat-designs .hat-title {margin-top:8px;}
+    #analyzer-ornate-hat-designs .pick-label {overflow-wrap:anywhere;}
+    @media(max-width:420px){#analyzer-ornate-hat-designs .hat-stage{height:365px;}#analyzer-ornate-hat-designs .design-thumb{height:110px;}#analyzer-ornate-hat-designs .design-choices{grid-template-columns:1fr;gap:16px;}#analyzer-ornate-hat-designs .design-choice{grid-template-columns:100px minmax(0,1fr);align-items:center;}#analyzer-ornate-hat-designs .design-thumb{grid-row:span 2;}}
+  </style>
+  <h3 class="review-heading">More detailed hat designs</h3>
+  <canvas class="hat-stage" role="img" aria-label="Original three-dimensional hat concept fitted above a neutral Minecraft-sized head. Drag to turn.">Interactive 3D hat preview.</canvas>
+  <div class="viz-row hat-title"><span class="current-name">Sunforged halo</span><span class="text-small text-muted">Drag to turn</span></div>
+  <div class="viz-controls">
+    <label class="form-check form-switch"><input class="form-check-input animate-input" type="checkbox" checked><span class="form-check-label">Animate effects</span></label>
+    <label class="form-check form-switch"><input class="form-check-input wearer-input" type="checkbox" checked><span class="form-check-label">Show wearer</span></label>
+    <button type="button" class="btn reset-view">Reset view</button>
+  </div>
+  <div class="design-summary text-small text-muted" aria-live="polite">Beveled gold segments · inset runes · warm inner light · drifting sparks</div>
+  <div class="design-choices" aria-label="Preview a hat design">
+    <div class="design-choice"><canvas class="design-thumb" data-thumb="sunforged-halo" aria-hidden="true"></canvas><button type="button" class="btn preview-choice" data-design="sunforged-halo" aria-pressed="true">Sunforged halo</button><label class="form-check pick-label"><input type="checkbox" class="form-check-input pick-input" data-design="sunforged-halo"><span class="form-check-label">Choose halo</span></label></div>
+    <div class="design-choice"><canvas class="design-thumb" data-thumb="sovereign-crown" aria-hidden="true"></canvas><button type="button" class="btn preview-choice" data-design="sovereign-crown" aria-pressed="false">Sovereign crown</button><label class="form-check pick-label"><input type="checkbox" class="form-check-input pick-input" data-design="sovereign-crown"><span class="form-check-label">Choose crown</span></label></div>
+    <div class="design-choice"><canvas class="design-thumb" data-thumb="astral-diadem" aria-hidden="true"></canvas><button type="button" class="btn preview-choice" data-design="astral-diadem" aria-pressed="false">Astral diadem</button><label class="form-check pick-label"><input type="checkbox" class="form-check-input pick-input" data-design="astral-diadem"><span class="form-check-label">Choose diadem</span></label></div>
+  </div>
+  <div class="text-small selection-summary" aria-live="polite">Chosen for review: None yet</div>
+  <div class="text-small text-muted">Original concepts · Review only · Not equipped in game</div>
+  <div class="text-small preview-status" role="status">Loading 3D preview…</div>
+  <script>
+    __GEOMETRY_SOURCE__
+  </script>
+  <script>
+    (()=>{
+      'use strict';
+      const root=document.getElementById('analyzer-ornate-hat-designs');
+      const ids=['sunforged-halo','sovereign-crown','astral-diadem'];
+      const names=['Sunforged halo','Sovereign crown','Astral diadem'];
+      const summaries=['Beveled gold segments · inset runes · warm inner light · drifting sparks','Woven velvet · crossed pearl arches · faceted jewels · braided goldwork','Open rose-gold filigree · seven crystal spires · a fine orbiting star arc'];
+      const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let active=ids[0],selected=new Set(),animated=!reduced,showWearer=true,turn=.1,pitch=.08,renderNow=()=>{},time=1;
+      const applyView=()=>{root.querySelector('.current-name').textContent=names[ids.indexOf(active)];root.querySelector('.design-summary').textContent=summaries[ids.indexOf(active)];root.querySelectorAll('.preview-choice').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.design===active)));root.querySelectorAll('.pick-input').forEach(b=>b.checked=selected.has(b.dataset.design));root.querySelector('.animate-input').checked=animated;root.querySelector('.wearer-input').checked=showWearer;root.querySelector('.selection-summary').textContent='Chosen for review: '+(ids.filter(id=>selected.has(id)).map(id=>names[ids.indexOf(id)]).join(', ')||'None yet');renderNow();};
+      const restore=state=>{const saved=state?.privateContent;if(saved?.version!==1)return;if(ids.includes(saved.active))active=saved.active;if(Array.isArray(saved.selected))selected=new Set(saved.selected.filter(id=>ids.includes(id)));if(typeof saved.animated==='boolean')animated=saved.animated&&!reduced;if(typeof saved.showWearer==='boolean')showWearer=saved.showWearer;turn=Number.isFinite(saved.turn)?Math.max(-Math.PI,Math.min(Math.PI,saved.turn)):.1;pitch=Number.isFinite(saved.pitch)?Math.max(-.3,Math.min(.45,saved.pitch)):.08;applyView();};
+      const save=()=>{window.openai?.setWidgetState?.({modelContent:{reviewOnly:true,selectedHatConcepts:ids.filter(id=>selected.has(id)).map(id=>names[ids.indexOf(id)]),currentlyViewing:names[ids.indexOf(active)]},privateContent:{version:1,active,selected:[...selected],animated,showWearer,turn,pitch}})?.catch(()=>{});};
+      root.querySelectorAll('.preview-choice').forEach(b=>b.addEventListener('click',()=>{active=b.dataset.design;applyView();save();}));
+      root.querySelectorAll('.pick-input').forEach(b=>b.addEventListener('change',()=>{b.checked?selected.add(b.dataset.design):selected.delete(b.dataset.design);applyView();save();}));
+      root.querySelector('.animate-input').addEventListener('change',e=>{animated=e.target.checked;renderNow();save();});
+      root.querySelector('.wearer-input').addEventListener('change',e=>{showWearer=e.target.checked;renderNow();save();});
+      root.querySelector('.reset-view').addEventListener('click',()=>{turn=.1;pitch=.08;renderNow();save();});
+      restore(window.openai?.widgetState);applyView();
+      window.addEventListener('openai:set_globals',event=>{if(event.detail?.globals?.widgetState)restore(event.detail.globals.widgetState);});
+      import('https://esm.sh/three@0.160.1').then(THREE=>{
+        const canvas=root.querySelector('.hat-stage'), status=root.querySelector('.preview-status');
+        const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,preserveDrawingBuffer:true});
+        renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;
+        renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+        const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(36,1,.1,160), focus=new THREE.Group();scene.add(focus);
+        const hats=createAnalyzerHatDesigns(THREE);hats.designs.forEach(d=>focus.add(d.group));
+        const environmentCanvas=document.createElement('canvas');environmentCanvas.width=1024;environmentCanvas.height=512;const ec=environmentCanvas.getContext('2d');
+        ec.fillStyle='#77777c';ec.fillRect(0,0,1024,512);
+        [[210,125,260,'#ffedc9'],[790,150,160,'#d4e5ff'],[520,60,90,'#ffffff']].forEach(([x,y,r,c])=>{const gradient=ec.createRadialGradient(x,y,0,x,y,r);gradient.addColorStop(0,c);gradient.addColorStop(1,'rgba(100,100,110,0)');ec.fillStyle=gradient;ec.fillRect(x-r,y-r,r*2,r*2);});
+        ec.fillStyle='#23242b';ec.fillRect(0,330,1024,182);
+        const environment=new THREE.CanvasTexture(environmentCanvas);environment.mapping=THREE.EquirectangularReflectionMapping;environment.colorSpace=THREE.SRGBColorSpace;scene.environment=environment;
+        const hemi=new THREE.HemisphereLight('#e9e5fa','#363644',2);scene.add(hemi);
+        const key=new THREE.DirectionalLight('#fff1d2',3.8);key.position.set(-13,22,15);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-18;key.shadow.camera.right=18;key.shadow.camera.top=22;key.shadow.camera.bottom=-18;key.shadow.camera.far=70;key.shadow.bias=-.001;scene.add(key);
+        const fill=new THREE.DirectionalLight('#d6e7ff',2.2);fill.position.set(12,12,-6);scene.add(fill);
+        const wearer=new THREE.Group();focus.add(wearer);
+        const shell=new THREE.MeshStandardMaterial({color:'#646775',roughness:.78}), skin=new THREE.MeshStandardMaterial({color:'#aeb2ba',roughness:.82}), collar=new THREE.MeshStandardMaterial({color:'#454650',roughness:.9});
+        const block=(size,pos,material)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(...size),material);m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;wearer.add(m);return m;};
+        block([8,8,8],[0,4,0],skin);block([8,8,4],[0,-4.05,0],shell);block([4,8,4],[-6,-4.05,0],shell);block([4,8,4],[6,-4.05,0],shell);block([7.9,.4,4.05],[0,-.3,0],collar);
+        const face=document.createElement('canvas');face.width=face.height=8;const fc=face.getContext('2d');fc.fillStyle='#afb2bb';fc.fillRect(0,0,8,8);fc.fillStyle='#434653';fc.fillRect(1,3,2,1);fc.fillRect(5,3,2,1);fc.fillStyle='#9196a2';fc.fillRect(3,5,2,1);
+        const faceTexture=new THREE.CanvasTexture(face);faceTexture.magFilter=faceTexture.minFilter=THREE.NearestFilter;faceTexture.colorSpace=THREE.SRGBColorSpace;
+        const faceMaterial=new THREE.MeshStandardMaterial({map:faceTexture,roughness:.8});const head=wearer.children[0];head.material=[skin,skin,skin,skin,faceMaterial,skin];
+        const ground=new THREE.Mesh(new THREE.CircleGeometry(14,64),new THREE.ShadowMaterial({opacity:.13}));ground.rotation.x=-Math.PI/2;ground.position.y=-8.1;scene.add(ground);
+        let previous=performance.now(),frame=0,visible=true,pointer=null,dirty=true,thumbDirty=true;
+        const canvasColor=()=>getComputedStyle(root).getPropertyValue('--foreground').trim()||'#30303a';
+        const resize=()=>{const width=Math.max(1,Math.round(canvas.clientWidth)),height=Math.max(1,Math.round(canvas.clientHeight));renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();dirty=true;thumbDirty=true;};
+        const setCamera=(thumb=false)=>{camera.position.set(thumb?23:25,thumb?17:15,thumb?34:36);camera.lookAt(0,thumb?10:4,0);if(thumb){camera.fov=27;}else{camera.fov=36;camera.position.multiplyScalar(camera.aspect<.9?1.2:1);}camera.updateProjectionMatrix();};
+        const draw=()=>{
+          hats.designs.forEach(d=>d.group.visible=d.id===active);wearer.visible=showWearer;ground.visible=showWearer;
+          focus.rotation.set(pitch,turn,0);hats.animate(time);setCamera();renderer.setClearColor(canvasColor(),0);renderer.render(scene,camera);dirty=false;
+        };
+        function thumbnails(){
+          const oldActive=active,oldTurn=turn,oldPitch=pitch,oldTime=time,oldSize=new THREE.Vector2();renderer.getSize(oldSize);const ratio=renderer.getPixelRatio();
+          renderer.setPixelRatio(1);renderer.setSize(320,240,false);camera.aspect=4/3;turn=.05;pitch=.04;time=1;focus.rotation.set(pitch,turn,0);hats.animate(time);wearer.visible=false;ground.visible=false;setCamera(true);
+          for(const d of hats.designs){hats.designs.forEach(other=>other.group.visible=d.id===other.id);renderer.render(scene,camera);const target=root.querySelector('[data-thumb="'+d.id+'"]');target.width=320;target.height=240;target.getContext('2d').drawImage(canvas,0,0,320,240);}
+          active=oldActive;turn=oldTurn;pitch=oldPitch;time=oldTime;renderer.setPixelRatio(ratio);renderer.setSize(oldSize.x,oldSize.y,false);camera.aspect=oldSize.x/oldSize.y;thumbDirty=false;dirty=true;
+        }
+        renderNow=()=>{dirty=true;};
+        const observer=new ResizeObserver(resize);observer.observe(canvas);
+        const intersection=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});intersection.observe(canvas);
+        canvas.addEventListener('pointerdown',event=>{pointer={id:event.pointerId,x:event.clientX,y:event.clientY};canvas.setPointerCapture(event.pointerId);});
+        canvas.addEventListener('pointermove',event=>{if(!pointer||pointer.id!==event.pointerId)return;turn+=(event.clientX-pointer.x)*.009;turn=Math.atan2(Math.sin(turn),Math.cos(turn));pitch=Math.max(-.3,Math.min(.45,pitch+(event.clientY-pointer.y)*.005));pointer.x=event.clientX;pointer.y=event.clientY;dirty=true;});
+        const up=()=>{if(pointer){pointer=null;save();}};canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+        const tick=now=>{const delta=Math.min(.05,Math.max(0,(now-previous)/1000));previous=now;if(visible&&!document.hidden){if(animated)time+=delta;if(thumbDirty)thumbnails();if(animated||dirty)draw();}frame=requestAnimationFrame(tick);};
+        resize();thumbnails();draw();frame=requestAnimationFrame(tick);status.textContent='';
+        root.dataset.ready='true';root.dataset.geometry=JSON.stringify(hats.designs.map(d=>({id:d.id,...d.counts,minY:d.bounds.min.y,maxY:d.bounds.max.y})));
+        window.addEventListener('pagehide',()=>{cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();hats.dispose();environment.dispose();faceTexture.dispose();faceMaterial.dispose();shell.dispose();skin.dispose();collar.dispose();wearer.traverse(o=>{if(o.isMesh)o.geometry.dispose();});ground.geometry.dispose();ground.material.dispose();renderer.dispose();},{once:true});
+      }).catch(error=>{root.querySelector('.preview-status').textContent='3D preview unavailable. Hat names and review choices remain usable.';root.querySelector('.hat-stage').hidden=true;root.querySelectorAll('.design-thumb').forEach(c=>c.hidden=true);root.dataset.ready='failed';console.error('Analyzer hat preview:',error);});
+    })();
+  </script>
+</div>

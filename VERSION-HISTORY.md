@@ -1,3 +1,7 @@
+## 0.15.0 - Articulated wings and public documentation
+
+Adds opt-in local third-person Angel, Dragon, Bat and Parrot wings on the approved raised upper-back mount, animation and fit controls, preserved MIT source attribution and original textures. New ornate halo/crown/diadem concepts remain review-only. Public downloads have portable Prism defaults; the generated module catalogue lists every setting, default and supported range/choice. [Wings](WINGS.md) · [Hat concepts](HAT-DESIGNS.md) · [Validation](VALIDATION.md).
+
 ## 0.14.0 - Custom skyboxes and cosmetic review
 
 Adds original local panorama/cubemap rendering, a shader folder browser, native Minecraft panorama/End texture sources and bounded asynchronous import/resource cleanup. Existing procedural settings remain the default. Eight licensed downloaded cosmetic candidates are preserved for visual selection, with the supplied wing rig and original animations; no wearable integration occurs before selection. [Skybox controls](CUSTOM-SKYBOX.md) · [Cosmetic shortlist](COSMETICS-SHORTLIST.md) · [Validation](VALIDATION.md).
@@ -20,7 +24,7 @@ Original GLSL materials follow actual animated living-model geometry: Flat, Meta
 
 # Saved Analyzer versions
 
-The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analyzer) preserves **25 version tags**. Existing commits/tags are retained; recovery commits use their actual backup date rather than invented development dates. **Main/v0.14.0 contain the complete current project and tests.** The original 15-tag transfer remains documented in [GITHUB-BACKUP.md](GITHUB-BACKUP.md).
+The original private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analyzer) preserves **26 version tags**. The [public filtered copy](https://github.com/XonistReal/Analyzer-Public) retains those tag names with the archival omissions described in [PUBLICATION.md](PUBLICATION.md); filtered commit identities differ. Existing commits/tags are retained; recovery commits use their actual backup date rather than invented development dates. **Main/v0.15.0 contain the complete current project and tests.** The original 15-tag transfer remains documented in [GITHUB-BACKUP.md](GITHUB-BACKUP.md).
 
 | Version/update | Tag | Source provenance |
 | --- | --- | --- |
@@ -45,10 +49,11 @@ The private [XonistReal/Analyzer repository](https://github.com/XonistReal/Analy
 | 0.10.3 motion and planning | `v0.10.3` | Acceleration-aware camera braking, stable mining approaches, nearest-first resources and checked route corrections; deterministic tests, gameplay checks left to the user |
 | 0.11.0 combat, ESP and construction | `v0.11.0` | Coordinated combat and three additions, debug ESP, local registry item requests, schematic ghosts and reusable fluid buckets; deterministic/registry checks separated from gameplay |
 | 0.12.0 shader entity chams | `v0.12.0` | Original posed-model GLSL materials, independent visible/occluded palettes, shader wire edges, policy tests and focused native GPU/capture evidence |
+| 0.13.0 finders and specialized ESP | `v0.13.0` | Original loaded-data detectors, scoped stash history, coordinate map and posed skeletons; upstream behavior only, with separate policy/native evidence |
+| 0.13.1 tracer origins and name alias | `v0.13.1` | Exact rendered tracer transforms, original local text masking, safe editable fields and focused policy/native evidence |
 | 0.13.2 Kill Aura silent rotations | `v0.13.2` | Original packet-angle leases, three timing modes, fixed camera, fresh virtual rays and native attack evidence |
 | 0.14.0 Custom skyboxes and cosmetic review | `v0.14.0` | Local images/cube faces, native sky sources, folder shelf and separately licensed review-only wearable candidates |
-| 0.13.1 tracer origins and name alias | `v0.13.1` | Exact rendered tracer transforms, original local text masking, safe editable fields and focused policy/native evidence |
-| 0.13.0 finders and specialized ESP | `v0.13.0` | Original loaded-data detectors, scoped stash history, coordinate map and posed skeletons; upstream behavior only, with separate policy/native evidence |
+| 0.15.0 articulated wings and public documentation | `v0.15.0` | Approved MIT rig/textures, animation/fit controls, native acceptance and human-readable settings catalogue |
 
 The existing eight tags were originally reconstructed from saved source exports; their original-export hashes remain in their commit messages. They are not moved or rewritten by this backup. Those original source ZIPs are not available on this PC, so release source ZIPs are newly generated from the preserved Git tags.
 
@@ -58,4 +63,4 @@ Seven saved Prism bundles cover the later 0.5.2 update and 0.6.0–0.9.0. Their 
 
 The original 15 releases and the native 0.10.x releases include Git source exports and SHA-256 checksums. Available Prism/runtime/source archives are release assets; large distribution ZIPs are not committed to Git. Runtime accounts, saves, settings, local update feeds, caches and raw logs remain excluded. Historical screenshots, validation summaries, licenses and available dependency/source archives are preserved. [GITHUB-BACKUP.md](GITHUB-BACKUP.md) describes the original backup and its limits.
 
-On another PC, clone main to develop, or import the latest Prism ZIP to play. The local updater path must be reconnected on that PC; it does not automatically fetch private GitHub releases. See [Moving PCs](MOVING-PCS.md).
+On another PC, clone main to develop, or import the latest Prism ZIP to play. Public Prism imports leave the optional local updater disconnected; developers can connect their own local feed. It does not automatically fetch GitHub releases. See [Moving PCs](MOVING-PCS.md).

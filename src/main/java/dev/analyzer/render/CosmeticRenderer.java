@@ -2,6 +2,7 @@ package dev.analyzer.render;
 
 import dev.analyzer.AnalyzerClient;
 import dev.analyzer.core.AnalyzerCore;
+import dev.analyzer.cosmetic.WingsRenderer;
 import dev.analyzer.ui.Palette;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
@@ -65,6 +66,7 @@ public final class CosmeticRenderer {
         if (MinecraftClient.getInstance().world == null) return "Join a world to see this cosmetic";
         return switch (id) {
             case "cape", "pets", "emotes", "walk-style", "spinbot" -> "Render-only / visible on third-person player models";
+            case "wings" -> "Local third-person cosmetic / not sent to other players / no flight";
             case "hand-tweaks" -> "First-person transform / attacks unchanged";
             case "crystal-chams" -> "Actual crystal mesh / normal world depth";
             default -> "Render-only / game physics unchanged";
@@ -207,9 +209,11 @@ public final class CosmeticRenderer {
     }
 
     public static final class Accessories extends FeatureRenderer<PlayerEntityRenderState, PlayerEntityModel> {
+        private final WingsRenderer wings = new WingsRenderer();
         public Accessories(FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel> context) { super(context); }
         @Override public void render(MatrixStack matrices, VertexConsumerProvider vertices, int light, PlayerEntityRenderState state, float limbAngle, float limbDistance) {
             if (state.invisible || state.spectator) return;
+            if (wings.render(core, getContextModel(), matrices, vertices, light, state)) frame("wings");
             boolean cape = on("cape") && wearer(state) && (!flag("cape", "hide-elytra") || !state.equippedChestStack.isOf(Items.ELYTRA));
             boolean pet = on("pets") && self(state);
             if (!cape && !pet) return;

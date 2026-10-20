@@ -2168,7 +2168,7 @@
         "kind": "TEXT",
         "default": "",
         "maxLength": 4096,
-        "format": "ASCII letters, numbers, underscore"
+        "format": "Local file path; no control characters or section sign"
       },
       {
         "id": "preset",
@@ -12143,6 +12143,103 @@
         "min": 0.2,
         "max": 1.0,
         "step": 0.05
+      }
+    ]
+  },
+  {
+    "id": "wings",
+    "name": "Wings",
+    "category": "Cosmetics",
+    "description": "Approved Angel, Dragon, Bat and Parrot textures on an existing articulated wing rig. Local third-person cosmetic; no flight or server broadcast.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "style",
+        "label": "Wing style",
+        "kind": "CHOICE",
+        "default": "Angel",
+        "choices": [
+          "Angel",
+          "Dragon",
+          "Bat",
+          "Parrot"
+        ]
+      },
+      {
+        "id": "animation",
+        "label": "Animation",
+        "kind": "CHOICE",
+        "default": "Auto",
+        "choices": [
+          "Auto",
+          "Flap",
+          "Idle",
+          "Glide",
+          "Still"
+        ]
+      },
+      {
+        "id": "speed",
+        "label": "Animation speed",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 3.0,
+        "step": 0.05
+      },
+      {
+        "id": "strength",
+        "label": "Animation strength",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 1.5,
+        "step": 0.05
+      },
+      {
+        "id": "scale",
+        "label": "Wing scale",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 1.5,
+        "step": 0.05
+      },
+      {
+        "id": "height",
+        "label": "Extra height (pixels)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -4.0,
+        "max": 8.0,
+        "step": 0.25
+      },
+      {
+        "id": "back-offset",
+        "label": "Extra back offset (pixels)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -2.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "hide-elytra",
+        "label": "Hide with Elytra",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "armor-clearance",
+        "label": "Extra chest armor clearance",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "fullbright",
+        "label": "Fullbright texture (no bloom)",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },

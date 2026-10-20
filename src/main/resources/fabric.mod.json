@@ -7,6 +7,11 @@
   "authors": [
     "Analyzer contributors"
   ],
+  "contact": {
+    "homepage": "https://github.com/XonistReal/Analyzer-Public",
+    "sources": "https://github.com/XonistReal/Analyzer-Public",
+    "issues": "https://github.com/XonistReal/Analyzer-Public/issues"
+  },
   "license": "MIT",
   "icon": "assets/analyzer/icon.png",
   "environment": "client",

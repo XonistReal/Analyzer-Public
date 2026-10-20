@@ -1,5 +1,7 @@
 * -text
 gradlew text eol=lf
+MODULES.md text eol=lf
+MODULES.json text eol=lf
 
 # Review manifests describe exact downloaded/exported bytes on every platform.
 design/cosmetics-review/** -text

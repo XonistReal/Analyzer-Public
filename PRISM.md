@@ -1,52 +1,52 @@
 # Analyzer in Prism Launcher
 
-Analyzer **0.14.0** targets **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Native Automation needs no Baritone or other bot mod. Minecraft account credentials, user worlds/configuration and Minecraft itself are not included.
+Analyzer **0.15.0** uses **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Minecraft, accounts, saved worlds and personal configuration are not included. Native Automation requires no Baritone mod.
 
-## Import or update
+## Install a release
 
-Drag `Analyzer-0.14.0-Prism-1.21.4.zip` onto Prism or use **Add Instance → Import**. The archive has `instance.cfg`, `mmc-pack.json` and `minecraft/mods/` at its root. Use your own Minecraft account and Java 21. The portable ZIP inherits Prism's Java preferences and has no fixed Java path.
+1. Download `Analyzer-0.15.0-Prism-1.21.4.zip` from [Releases](https://github.com/XonistReal/Analyzer-Public/releases/latest).
+2. Drag it onto Prism or use **Add Instance → Import**.
+3. Select your Minecraft account and Java 21 in Prism, then launch.
 
-On this computer, reuse `C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4`. That folder is the current imported instance located on October 14; inspect the installed JAR/version/hash to identify the current build. Future updates preserve launcher Java preferences, worlds, configs, profiles, friends and unrelated mods.
+Public ZIPs inherit Prism's Java selection, have no fixed machine paths and leave the optional Windows local-development updater disabled. They contain no platform-specific pre-launch command. To update an existing instance manually, close Minecraft and replace only its Analyzer mod JAR with the current release JAR. Keep one Analyzer JAR in `minecraft/mods` and preserve your worlds, configurations and unrelated mods.
 
-With Minecraft closed, the verified updater installs the published Analyzer JAR. The native release also retires only the exact formerly bundled official Baritone 1.13.1 JAR to a recoverable `.analyzer-updater/retired-mods` backup. Unknown or modified mod files are retained with a reported reason; no unrelated mod is deleted. A running game's mod files are not overwritten. The next pre-launch update can complete a pending delivery after shutdown.
+## Controls and features
 
-## Controls
+Press **Right Shift** for Studio or shader Click GUI. **HUD Studio → Menu layout** offers Studio / Click GUI, with independent Glass/Classic/Minimal/Neon themes and Rose/Mint/Violet/Gold accents. Home defaults to Minecraft panorama, with Orbit and Vanilla menu alternatives. The watermark shows exactly one selected supplied logo.
 
-Press **Right Shift** for Studio or shader Click GUI. Keep **HUD Studio → Menu layout → Studio / Click GUI**, independent Glass/Classic/Minimal/Neon themes and Rose/Mint/Violet/Gold accents. Retired Workspace/Classic/Compact layout values migrate to Studio; Classic remains a theme. The supplied watermark shows exactly the selected A logo or Analyzer logo.
+The [module catalogue](MODULES.md) lists every module and its actual settings/defaults. [Wings](WINGS.md) is an opt-in local-player cosmetic with four styles and animation/fit controls. [Custom Skybox](CUSTOM-SKYBOX.md) accepts local images and offers native sky sources. The [new hat concepts](HAT-DESIGNS.md) are previews awaiting selection, not installed wearables.
 
-Home defaults to Minecraft panorama, with Orbit and Vanilla menu alternatives. Profiles, HUD editing, Automation and numeric entry retain Studio shader surfaces and bundled Lato. Worlds, servers and native options retain actual Minecraft data/callbacks. Server Privacy keeps its eight default protections and preserves saved opt-outs. See [SERVER-PRIVACY.md](SERVER-PRIVACY.md).
+Open **Automation → Review plan → Start reviewed plan** for local tasks, schematic selection and material review. Saved tasks restore paused. [Automation](AUTOMATION.md), [construction](SCHEMATIC-CONSTRUCTION.md) and [safety](SAFETY.md) describe prerequisites and limits. [Server Privacy](SERVER-PRIVACY.md) describes compatibility opt-outs; it does not promise undetectability.
 
-Enable **Render → X-ray** only when desired. Its World style chooses **Fade terrain / Terrain outlines / Ores only**, with separate ore-group filters and an outline/glow range. Disabling rebuilds ordinary terrain. Read [XRAY.md](XRAY.md) for the native render scope and compatibility limits.
+## Optional Windows development feed
 
-Open **Automation → Review plan → Start reviewed plan** for local native goals, the schematic folder browser and material checklists, adjustable turning and action pacing, tool recovery and mob protection. Saved tasks restore paused. Read [AUTOMATION.md](AUTOMATION.md) and [SAFETY.md](SAFETY.md) for implemented behavior and world prerequisites.
-
-**World → Skybox** retains your existing procedural preset and adds **Custom / Minecraft panorama / Minecraft End** sources. Custom opens a shader folder browser for the instance's `minecraft/skyboxes` directory; use a 2:1 PNG/JPEG or six matching cube faces. External images are saved by path, so copy and reselect them when moving PCs. [Controls and boundaries](CUSTOM-SKYBOX.md). The [downloaded cosmetic shortlist](COSMETICS-SHORTLIST.md) remains a separate review pack awaiting selections; no new wearable assets are installed.
-
-## Local development feed
-
-Build with a Java 21 JDK, then publish:
+From a Java 21 source checkout:
 
 ```powershell
-.\gradlew.bat publishLocal
+.\gradlew.bat build moduleCatalog publishLocal
 ```
 
-The feed is `analyzer-updates/release.json` beside the checkout. `analyzer-updater.json` in the instance enables it and stores its local manifest path. Preserve the Prism pre-launch command. On another Windows PC, reconnect that path after cloning, or set `"enabled": false` until a local feed exists. On macOS/Linux also clear the Windows PowerShell pre-launch command in instance custom commands. [MOVING-PCS.md](MOVING-PCS.md) explains source access and setup.
+This creates `analyzer-updates/release.json` beside the checkout. With Minecraft closed, edit the instance's `analyzer-updater.json`: set `manifestPath` to that local manifest's absolute path and `enabled` to `true`. Set Prism's **Settings → Custom commands → Pre-launch command** to:
 
-Update a closed instance and check it:
+```text
+powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INST_DIR/analyzer-updater/Update-Analyzer.ps1"
+```
+
+The updater compares SHA-256 values, validates metadata, backs up replaced Analyzer JARs and preserves unrelated mods and game data. It never overwrites a running game's mods. It retires only the exact previously bundled official Baritone 1.13.1 JAR into a recoverable backup; unknown/modified files remain untouched. This is a local feed, not an automatic GitHub download service. Existing developer instances keep their deliberate enabled feed and launcher preferences.
+
+To update/check a closed instance manually:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir 'C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4' -Strict
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir 'C:\Users\sould\AppData\Roaming\PrismLauncher\instances\Analyzer-0.10.0-Prism-1.21.4' -Strict -CheckOnly
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir '<your-Prism-instance>' -Strict
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Update-Analyzer.ps1 -InstanceDir '<your-Prism-instance>' -Strict -CheckOnly
 ```
 
-Fresh packages use a new empty staging directory:
+## Build a portable instance
 
-```powershell
-python tools/prism/package_prism.py --fabric-api <fabric-api-0.119.4+1.21.4.jar> --instance-folder <new-empty-staging-directory>
+After `publishLocal`, use a new empty staging directory:
+
+```text
+python tools/prism/package_prism.py --fabric-api <fabric-api-0.119.4+1.21.4.jar> --instance-folder <new-empty-directory>
 ```
 
-The packager verifies the Analyzer feed hash, mod metadata, Fabric API, required docs/references/licenses and ZIP integrity. Updater integration tests use isolated disposable fixtures:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/prism/Test-Updater.ps1
-```
+The packager verifies metadata, source/license inputs and ZIP integrity. Add `--connect-local-feed` only to produce a Windows package deliberately tied to this computer. Public distribution uses the default portable mode. [Moving PCs](MOVING-PCS.md) explains transferring personal data and developing elsewhere.

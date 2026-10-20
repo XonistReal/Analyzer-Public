@@ -22,6 +22,8 @@ def main() -> None:
     parser.add_argument("--instance-folder", type=Path, required=True,
                         help="A new, empty staging directory; existing files are never replaced.")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--connect-local-feed", action="store_true",
+                        help="Opt in to this computer's Windows development feed. Public packages leave it disabled.")
     args = parser.parse_args()
     feed = args.feed.resolve()
     manifest = json.loads((feed / "release.json").read_text(encoding="utf-8"))
@@ -48,7 +50,8 @@ def main() -> None:
         "ESP-READABILITY.md", "GAMEPLAY-SETTINGS.md", "XRAY.md", "MODULES.md",
         "MODULES.json", "ROADMAP.md", "RESEARCH.md", "RESEARCH-VISUALS.md",
         "RESEARCH-COSMETICS.md", "VALIDATION.md", "LICENSE", "FONT-LICENSE.txt",
-        "THIRD-PARTY.md", "DEPENDENCY-SOURCES.md", "LATO-OFL.txt",
+        "THIRD-PARTY.md", "DEPENDENCY-SOURCES.md", "LATO-OFL.txt", "WINGS.md", "WINGS-MIT-LICENSE.txt", "HAT-DESIGNS.md", "PUBLICATION.md",
+        "CONTRIBUTING.md", "docs/INSTALLATION.md", "docs/MODULE-GUIDE.md", "docs/DEVELOPING.md",
     )
     optional_logs = ("VALIDATION.log", "PIXEL-VALIDATION.log")
     updater = repo / "tools/prism/Update-Analyzer.ps1"
@@ -100,8 +103,8 @@ def main() -> None:
     shutil.copyfile(updater, scripts / "Update-Analyzer.ps1")
     (instance / "analyzer-updater.json").write_text(json.dumps({
         "schemaVersion": 1,
-        "enabled": True,
-        "manifestPath": str(feed / "release.json"),
+        "enabled": args.connect_local_feed,
+        "manifestPath": str(feed / "release.json") if args.connect_local_feed else "",
     }, indent=2) + "\n", encoding="utf-8")
     (instance / "mmc-pack.json").write_text(json.dumps({
         "formatVersion": 1,
@@ -124,15 +127,16 @@ MinecraftWinWidth=1280
 MinecraftWinHeight=800
 LaunchMaximized=false
 OverrideCommands=true
-PreLaunchCommand=powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INST_DIR/analyzer-updater/Update-Analyzer.ps1"
+PreLaunchCommand={pre_launch}
 PostExitCommand=
 WrapperCommand=
-""", encoding="utf-8")
+""".format(pre_launch='powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INST_DIR/analyzer-updater/Update-Analyzer.ps1"' if args.connect_local_feed else ""), encoding="utf-8")
     (instance / "Update-Analyzer.cmd").write_text(
         '@echo off\r\npowershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass '
         '-File "%~dp0analyzer-updater\\Update-Analyzer.ps1" -InstanceDir "%~dp0."\r\npause\r\n',
         encoding="ascii")
     for doc in required_docs + tuple(name for name in optional_logs if name not in omitted_logs):
+        (instance / doc).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(repo / doc, instance / doc)
     (instance / native_evidence.parent).mkdir(parents=True)
     shutil.copyfile(repo / native_evidence, instance / native_evidence)
@@ -156,6 +160,7 @@ WrapperCommand=
     licenses = instance / "licenses"
     licenses.mkdir()
     (licenses / "FABRIC-API-LICENSE.txt").write_bytes(fabric_license)
+    shutil.copyfile(repo / "WINGS-MIT-LICENSE.txt", licenses / "WINGS-MIT-LICENSE.txt")
     (instance / "dependencies").mkdir()
     shutil.copyfile(dependency_source, instance / "dependencies" / dependency_source.name)
     output = (args.output or repo.parent / f"Analyzer-{manifest['version']}-Prism-1.21.4.zip").resolve()

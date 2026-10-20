@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible problem with Analyzer.
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions and other mods
+      description: Analyzer version, Minecraft version, Fabric Loader, Fabric API and any other installed mods.
+      placeholder: Analyzer 0.15.0, Minecraft 1.21.4, Fabric Loader 0.16.14…
+    validations:
+      required: true
+  - type: textarea
+    id: settings
+    attributes:
+      label: Affected modules and settings
+      description: Include the enabled modules, profile, relevant settings and renderer/shader mods.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Describe the game context and the smallest sequence that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Relevant screenshot or log excerpt
+      description: Remove account tokens, private server addresses and personal information before sharing. Native observations and policy test results should be identified separately.

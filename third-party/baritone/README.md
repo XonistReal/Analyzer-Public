@@ -1,4 +1,8 @@
-# Baritone dependency
+# Historical Baritone dependency
+
+**Historical only:** this page describes releases through 0.9.0. Analyzer 0.10.0 and later use native automation and have no Baritone runtime/build dependency. The following integration description is retained as an archival record, not current installation guidance.
+
+The public source history omits the old official binary and the separate Nether Pathfinder archive because the latter has no verified redistribution license and is embedded in the former. Upstream provenance and notices remain; original private archive identities are preserved separately. Current public releases contain neither dependency.
 
 Analyzer's optional automation integration uses the public `baritone.api` interface from the **unmodified official Baritone Fabric API 1.13.1 release**, targeting Minecraft Java 1.21.4. This is the API release, which also supplies the functioning pathfinder, rather than the standalone variant with stripped integration names. The dependency is installed as a separate Fabric mod; Analyzer does not shade or merge its classes into the Analyzer JAR.
 

@@ -1,0 +1,73 @@
+{
+  "release": "0.15.0",
+  "date": "2026-10-20",
+  "nativeAssertions": 39,
+  "captures": [
+    {
+      "path": "screenshots/analyzer-native-wings-angel.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 185879,
+      "sha256": "64bb15e9c7145f30d5358ebc4add3feea226f61e1bc7b043fbf15b4c8efa73d4"
+    },
+    {
+      "path": "screenshots/analyzer-native-wings-armored.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 186056,
+      "sha256": "5c2d1c172524ccad1a18e24fa5030614f88bbd6b9317dc6c72c98123aa0f4c58"
+    },
+    {
+      "path": "screenshots/analyzer-native-wings-bat.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 192161,
+      "sha256": "679aebad1b398d68fe9e2f5d40725ae59f6fbc418b1859419e36b4e64046c3a5"
+    },
+    {
+      "path": "screenshots/analyzer-native-wings-crouching.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 181764,
+      "sha256": "e23498a12fff0614492982a3e298834af5dee94db86416355ea590bd144ebef1"
+    },
+    {
+      "path": "screenshots/analyzer-native-wings-dragon.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 194900,
+      "sha256": "ae8dae851bf806d50c36eaa8fae54243cbf578930785201b728e6e373c283c2c"
+    },
+    {
+      "path": "screenshots/analyzer-native-wings-parrot.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 184008,
+      "sha256": "1ae8726d00a1a8116c0b891fe623892105f09b58a0cad2cedb662213b10690ba"
+    },
+    {
+      "path": "screenshots/analyzer-native-wings-settings.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 643070,
+      "sha256": "b573791cef0b1b7f803e7778eb8f390e631831612dda4a825d95507e5311d056"
+    }
+  ],
+  "nativeLogSha256": "a42e68cd27c9624c9d9f91ce18464fc3ed72cf348703b793d7e30ca48d14ba8c",
+  "policyAssertions": 103,
+  "limitations": [
+    "Wings are a local-player third-person cosmetic, not a shared service or flight feature.",
+    "Four looks share one supplied 17-part Minecraft pivot rig, not weighted skinning or four different models.",
+    "Native fixture exercises Flap, crouch, armor, Elytra controls, first-person suppression, reload, disable and disconnect.",
+    "Auto/Idle/Glide/Still and pacing/strength boundaries have deterministic coverage; no full native pose matrix is claimed.",
+    "Unselected hats remain review-only; procedural geometry/fit validation is not native hat rendering acceptance.",
+    "Remote renderer/server compatibility and unrelated gameplay were not rerun."
+  ],
+  "geometry": {
+    "parts": 17,
+    "quads": 396,
+    "submittedVertices": 1584,
+    "raisedMountPixels": 3
+  },
+  "sourceLicense": "MIT; Copyright (c) 2018 Paul Fulham; pinned source and full notice in WINGS.md/WINGS-MIT-LICENSE.txt"
+}

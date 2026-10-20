@@ -99,7 +99,8 @@ public final class AnalyzerClient implements ClientModInitializer {
         }
         if (saveCountdown > 0 && --saveCountdown == 0) saveConfig();
         if (FabricLoader.getInstance().isDevelopmentEnvironment() && Boolean.getBoolean("analyzer.smoke")) {
-            if (Boolean.getBoolean("analyzer.skyboxSmoke")) SkyboxSmoke.tick(client);
+            if (Boolean.getBoolean("analyzer.wingsSmoke")) WingsSmoke.tick(client);
+            else if (Boolean.getBoolean("analyzer.skyboxSmoke")) SkyboxSmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.silentAimSmoke")) SilentAimSmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.tracerPrivacySmoke")) TracerPrivacySmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.findersSmoke")) FindersSmoke.tick(client);
