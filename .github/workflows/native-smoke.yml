@@ -86,7 +86,7 @@ jobs:
           # First real exceptions with their stack heads (audio/narrator noise from the headless runner is skipped).
           awk '/Exception|Error:|ERROR\]/ && !/flite|OpenAL|[Nn]arrator|SoundSystem/ {n=14} n>0 {print; n--}' "$log" | head -90 > first-errors.txt
           echo "::error title=${{ matrix.run }} failed (exit $status)::$(cat first-errors.txt | esc)"
-          echo "::error title=${{ matrix.run }} Analyzer log lines::$(grep -h 'Analyzer' "$log" | tail -45 | esc)"
+          echo "::error title=${{ matrix.run }} Analyzer log lines::$(grep -h 'Analyzer' "$log" | tail -130 | esc)"
           echo "::error title=${{ matrix.run }} log tail::$(tail -15 "$log" | esc)"
           exit 1
       - name: Upload screenshots and logs

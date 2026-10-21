@@ -95,7 +95,7 @@ public final class BetaSmoke {
         }
         track(mc);
         AnalyzerCore core = AnalyzerClient.CORE;
-        if (t >= 20 && t <= 330 && t % 10 == 0) trace(mc);
+        if (t >= 20 && t <= 330 && (t % 10 == 0 || t >= 40 && t <= 110)) trace(mc);
         switch (t++) {
             case 20 -> {
                 // The target is ten blocks behind the camera; Fight Bot must walk there itself.
@@ -249,10 +249,10 @@ public final class BetaSmoke {
     private static void trace(MinecraftClient mc) {
         HuskEntity target = husk(mc);
         var p = mc.player;
-        AnalyzerClient.LOGGER.info("Beta fight trace t={} status=[{}] eyeToHitbox={} charge={} ground={} vy={} sprint={} hurt={} hits={} health={}",
+        AnalyzerClient.LOGGER.info("Beta fight trace t={} status=[{}] eyeToHitbox={} charge={} ground={} vy={} fall={} sprint={} hurt={} hits={} health={}",
                 t, dev.analyzer.gameplay.GameplayEngine.status("fight-bot"),
                 target == null ? "none" : String.format("%.2f", Math.sqrt(target.getBoundingBox().squaredMagnitude(p.getEyePos()))),
-                String.format("%.2f", p.getAttackCooldownProgress(0)), p.isOnGround(), String.format("%.3f", p.getVelocity().y),
+                String.format("%.2f", p.getAttackCooldownProgress(0)), p.isOnGround(), String.format("%.3f", p.getVelocity().y), String.format("%.3f", p.fallDistance),
                 p.isSprinting(), target == null ? -1 : target.hurtTime, hits, huskHealth);
     }
     private static HuskEntity husk(MinecraftClient mc) {
