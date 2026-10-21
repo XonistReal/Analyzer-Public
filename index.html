@@ -576,8 +576,9 @@ dialog::backdrop { background: rgba(6, 5, 10, 0.8); -webkit-backdrop-filter: blu
         </div>
         <div class="tabpanel" role="tabpanel" id="panel-prism" aria-labelledby="tab-prism">
           <ol class="steps">
-            <li>Download <code data-live="prismZip">Analyzer-0.15.0-Prism-1.21.4.zip</code> from the <a href="https://github.com/XonistReal/Analyzer-Public/releases/latest" target="_blank" rel="noopener">latest release</a>.</li>
+            <li>Download <code data-live="prismZip">Analyzer-0.15.0-Prism-1.21.4.zip</code> from the <a data-live-href="prismHref" href="https://github.com/XonistReal/Analyzer-Public/releases/latest" target="_blank" rel="noopener" data-live="prismWhere">latest release</a>.</li>
             <li>Drag the ZIP onto Prism, or choose <b>Add Instance → Import</b> and select it.</li>
+            <li data-live-show="prismSwap" hidden>The newest release ships without its own Prism ZIP, so open the instance's <code>minecraft/mods</code> folder and replace the Analyzer jar with <code data-live="modJar">analyzer-0.15.0.jar</code> from the <a href="https://github.com/XonistReal/Analyzer-Public/releases/latest" target="_blank" rel="noopener">latest release</a>.</li>
             <li>Pick your Minecraft account and Java <span data-live="java">21</span>, launch, and press Right Shift.</li>
           </ol>
           <p>The ZIP already contains Fabric API, so there's nothing else to download.</p>
@@ -1171,11 +1172,18 @@ cd Analyzer-Public
   // The text written in the page is the fallback; anything GitHub can't answer keeps it.
   (function () {
     var REPO = 'XonistReal/Analyzer-Public';
-    var KEY = 'analyzer-live-v1', TTL = 30 * 60 * 1000;
+    var KEY = 'analyzer-live-v2', TTL = 30 * 60 * 1000;
     function apply(d) {
       document.querySelectorAll('[data-live]').forEach(function (el) {
         var v = d[el.getAttribute('data-live')];
         if (v != null && v !== '') el.textContent = v;
+      });
+      document.querySelectorAll('[data-live-href]').forEach(function (el) {
+        var v = d[el.getAttribute('data-live-href')];
+        if (v) el.href = v;
+      });
+      document.querySelectorAll('[data-live-show]').forEach(function (el) {
+        el.hidden = !d[el.getAttribute('data-live-show')];
       });
       if (glass) glass.kick();
     }
@@ -1205,11 +1213,24 @@ cd Analyzer-Public
       var pm = d.prismZip && d.prismZip.match(/-Prism-(.+)\.zip$/i);
       if (pm) d.mc = pm[1];
       var none = function () { return null; };
+      // A release without its own Prism ZIP: point at the newest one that has it, then swap the jar.
+      var prism = d.prismZip ? null : get('https://api.github.com/repos/' + REPO + '/releases?per_page=30', true).then(function (list) {
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].draft) continue;
+          var zip = (list[i].assets || []).filter(function (a) { return /-Prism-[\w.+-]+\.zip$/i.test(a.name); })[0];
+          if (zip) {
+            d.prismZip = zip.name; d.prismHref = list[i].html_url;
+            d.prismWhere = list[i].tag_name + ' release'; d.prismSwap = true;
+            return;
+          }
+        }
+      }).catch(none);
       return Promise.all([
         get(raw(tag, 'gradle.properties')).catch(none),
         get(raw(tag, 'build.gradle')).catch(none),
         get(raw(tag, 'MODULES.json'), true).catch(none),
-        get('https://api.github.com/repos/' + REPO + '/tags?per_page=100', true).catch(none)
+        get('https://api.github.com/repos/' + REPO + '/tags?per_page=100', true).catch(none),
+        prism
       ]).then(function (r) {
         var props = {};
         (r[0] || '').split('\n').forEach(function (line) {
