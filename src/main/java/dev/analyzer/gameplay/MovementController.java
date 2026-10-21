@@ -35,7 +35,8 @@ final class MovementController {
         }
         double forward = (mc.options.forwardKey.isPressed() ? 1 : 0) - (mc.options.backKey.isPressed() ? 1 : 0);
         double side = (mc.options.leftKey.isPressed() ? 1 : 0) - (mc.options.rightKey.isPressed() ? 1 : 0);
-        var input = MovementPolicy.direction(p.getYaw(), forward, side);
+        // Fight Bot movement correction: next tick's physics use its transmitted yaw, so steer with it too.
+        var input = MovementPolicy.direction(FightBotController.movementYaw(p.getYaw()), forward, side);
         Vec3d direction = new Vec3d(input.x(), 0, input.z());
         boolean moving = input.moving(), sneak = mc.options.sneakKey.isPressed(), jump = mc.options.jumpKey.isPressed();
         if (on("target-strafe") && !bool("target-strafe", "legit")) {

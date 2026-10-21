@@ -2,6 +2,7 @@ package dev.analyzer.effects;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.analyzer.AnalyzerClient;
+import dev.analyzer.render.ChamsPolicy;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
@@ -16,7 +17,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 
 /**
  * Original model-space material shaders for captured, already posed entity quads.
@@ -28,7 +28,8 @@ public final class ChamsShader {
     private static final int STRIDE = 6;
     private static final int MAX_VERTICES = 262_144;
     private static int program, vao, vbo, ebo, indexQuadCapacity;
-    private static int projection, tint, style, time, strength, wireSize;
+    private static final int DEFAULT_SECONDARY = 0xFFB59BFA;
+    private static int projection, tint, secondary, style, time, strength, wireSize, edgeOutline;
     private static FloatBuffer upload;
     private static boolean failed;
     private static long draws, passes, vertices;
@@ -49,14 +50,25 @@ public final class ChamsShader {
         return draw(xyzNormals, vertexCount, visibleArgb, hiddenArgb, material, throughWalls, opacity, seconds, 1f, 1f);
     }
 
+    public static boolean draw(float[] xyzNormals, int vertexCount, int visibleArgb, int hiddenArgb,
+                               String material, boolean throughWalls, float opacity, float seconds,
+                               float effectStrength, float wireWidth) {
+        return draw(xyzNormals, vertexCount, visibleArgb, hiddenArgb, material, material, DEFAULT_SECONDARY, false,
+                throughWalls, opacity, seconds, effectStrength, wireWidth);
+    }
+
     /**
      * Render an array of native model quads, six floats per vertex (XYZ then normal).
      * ARGB alpha supplies each pass's opacity; opacity multiplies both. Glow is an
      * emissive surface/rim, not a post-process bloom. Glass is a transparent Fresnel
-     * material, not a refraction copy of the world. Returns false for caller fallback.
+     * material, not a refraction copy of the world. The occluded pass may use its own
+     * material; two-color materials blend toward the secondary RGB. Edges overlays the
+     * model's real face edges on every material except Wireframe. Returns false for
+     * caller fallback.
      */
     public static boolean draw(float[] xyzNormals, int vertexCount, int visibleArgb, int hiddenArgb,
-                               String material, boolean throughWalls, float opacity, float seconds,
+                               String material, String hiddenMaterial, int secondaryArgb, boolean edges,
+                               boolean throughWalls, float opacity, float seconds,
                                float effectStrength, float wireWidth) {
         if (failed) return false;
         if (vertexCount == 0 || opacity <= 0f) return true;
@@ -90,8 +102,9 @@ public final class ChamsShader {
             GL14.glBlendFuncSeparate(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
             GL20.glBlendEquationSeparate(GL14.GL_FUNC_ADD, GL14.GL_FUNC_ADD);
             GL20.glUniformMatrix4fv(projection, false, RenderSystem.getProjectionMatrix().get(stack.mallocFloat(16)));
-            int shaderStyle = styleCode(material);
-            GL20.glUniform1i(style, shaderStyle);
+            GL20.glUniform4f(secondary, (secondaryArgb >>> 16 & 255) / 255f, (secondaryArgb >>> 8 & 255) / 255f,
+                    (secondaryArgb & 255) / 255f, 1f);
+            GL20.glUniform1f(edgeOutline, edges ? 1f : 0f);
             // Keep trigonometric precision on sessions lasting many hours.
             GL20.glUniform1f(time, seconds % 4096f);
             GL20.glUniform1f(strength, Math.clamp(effectStrength, 0f, 2f));
@@ -100,8 +113,9 @@ public final class ChamsShader {
             GL20.glUniform1f(wireSize, Math.clamp(wireWidth, 0.5f, 3f));
             int count = vertexCount / 4 * 6;
             float alpha = Math.clamp(opacity, 0f, 1f);
-            if (throughWalls && (hiddenArgb >>> 24) != 0) pass(hiddenArgb, alpha, GL11.GL_GREATER, count);
-            if ((visibleArgb >>> 24) != 0) pass(visibleArgb, alpha, GL11.GL_LEQUAL, count);
+            if (throughWalls && (hiddenArgb >>> 24) != 0)
+                pass(hiddenArgb, alpha, GL11.GL_GREATER, count, styleCode(hiddenMaterial == null ? material : hiddenMaterial));
+            if ((visibleArgb >>> 24) != 0) pass(visibleArgb, alpha, GL11.GL_LEQUAL, count, styleCode(material));
             draws++;
             vertices += vertexCount;
             return true;
@@ -112,8 +126,9 @@ public final class ChamsShader {
         }
     }
 
-    private static void pass(int argb, float alpha, int comparison, int count) {
+    private static void pass(int argb, float alpha, int comparison, int count, int material) {
         GL11.glDepthFunc(comparison);
+        GL20.glUniform1i(style, material);
         GL20.glUniform4f(tint, (argb >>> 16 & 255) / 255f, (argb >>> 8 & 255) / 255f,
                 (argb & 255) / 255f, (argb >>> 24) / 255f * alpha);
         GL11.glDrawElements(GL11.GL_TRIANGLES, count, GL11.GL_UNSIGNED_INT, 0L);
@@ -122,13 +137,7 @@ public final class ChamsShader {
 
     /** Stable saved labels; unknown older labels use the simple flat material. */
     private static int styleCode(String material) {
-        return switch (material == null ? "" : material.toLowerCase(Locale.ROOT)) {
-            case "metallic" -> 1;
-            case "glass" -> 2;
-            case "glow" -> 3;
-            case "wireframe" -> 4;
-            default -> 0;
-        };
+        return ChamsPolicy.Style.from(material).shaderCode();
     }
 
     private static void ensureUpload(int floats) {
@@ -174,10 +183,12 @@ public final class ChamsShader {
                 throw new IllegalStateException(GL20.glGetProgramInfoLog(linked));
             projection = uniform(linked, "ProjMat");
             tint = uniform(linked, "Tint");
+            secondary = uniform(linked, "Secondary");
             style = uniform(linked, "Style");
             time = uniform(linked, "Time");
             strength = uniform(linked, "Strength");
             wireSize = uniform(linked, "WireWidth");
+            edgeOutline = uniform(linked, "Edges");
             array = GL30.glGenVertexArrays();
             vertexBuffer = GL15.glGenBuffers();
             elementBuffer = GL15.glGenBuffers();
@@ -192,7 +203,7 @@ public final class ChamsShader {
             vao = array;
             vbo = vertexBuffer;
             ebo = elementBuffer;
-            AnalyzerClient.LOGGER.info("Analyzer native entity materials compiled: Flat / Metallic / Glass / Glow / Wireframe");
+            AnalyzerClient.LOGGER.info("Analyzer native entity materials compiled: Flat / Metallic / Glass / Glow / Wireframe / Shaded / Hologram / Gradient / Rim light / Galaxy");
         } catch (Exception failure) {
             if (linked != 0) GL20.glDeleteProgram(linked);
             if (array != 0) GL30.glDeleteVertexArrays(array);

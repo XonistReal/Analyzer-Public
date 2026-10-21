@@ -53,7 +53,7 @@ final class ChamsGlChecks {
                      0.5f,  0.5f, -2f, 0f, 0f, 1f,
                     -0.5f,  0.5f, -2f, 0f, 0f, 1f
             };
-            String[] styles = { "Flat", "Metallic", "Glass", "Glow", "Wireframe" };
+            String[] styles = { "Flat", "Metallic", "Glass", "Glow", "Wireframe", "Shaded", "Hologram", "Gradient", "Rim light", "Galaxy" };
             for (int pattern = 0; pattern < 2; pattern++) {
                 configure(pattern);
                 for (String style : styles) {
@@ -67,7 +67,19 @@ final class ChamsGlChecks {
                     require(GL11.glGetError() == GL11.GL_NO_ERROR, style + " draw produces no GL error");
                 }
             }
-            DETAILS.add("All five GLSL materials compile/draw with two opposite incoming GL-state patterns; every modified state is restored.");
+            DETAILS.add("All ten GLSL materials compile/draw with two opposite incoming GL-state patterns; every modified state is restored.");
+
+            for (String hidden : new String[] { "Flat", "Glow", "Rim light", "Wireframe", "Hologram" }) {
+                Snapshot expected = new Snapshot();
+                long draws = ChamsShader.drawCalls(), passes = ChamsShader.passCount();
+                require(ChamsShader.draw(quad, 4, 0xdde636ee, 0x772adbd5, "Gradient", hidden, 0xff3366ff, true,
+                                true, 0.85f, 23f, 1.3f, 1.5f),
+                        hidden + " occluded material with edges submits both passes");
+                require(ChamsShader.passCount() == passes + 2 && ChamsShader.drawCalls() == draws + 1, hidden + " pass accounting");
+                expected.assertSame(new Snapshot(), hidden + " occluded material");
+                require(GL11.glGetError() == GL11.GL_NO_ERROR, hidden + " occluded material produces no GL error");
+            }
+            DETAILS.add("Separate occluded materials, the secondary color and the edge overlay draw without GL errors.");
 
             Snapshot expected = new Snapshot();
             long draws = ChamsShader.drawCalls(), passes = ChamsShader.passCount();

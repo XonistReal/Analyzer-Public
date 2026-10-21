@@ -308,7 +308,7 @@ public final class AnalyzerCore {
         boolean layout = key.module().equals("menu") && key.setting().equals("layout")
                 || key.module().equals("hud") && key.setting().equals("menu-layout");
         if (layout && decoded instanceof String name
-                && List.of("Workspace", "Classic", "Compact").contains(name)) return "Studio";
+                && List.of("Workspace", "Classic").contains(name)) return "Studio";
         return decoded;
     }
 

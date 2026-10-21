@@ -177,7 +177,9 @@ public final class WingPolicySelfTest {
         var definition = CosmeticModules.definitions().stream().filter(module -> module.id().equals("wings")).findFirst().orElseThrow();
         check(!definition.defaultEnabled(), "Wings are opt-in in fresh and older configurations");
         check(definition.setting("style").choices().equals(List.of("Angel", "Dragon", "Bat", "Parrot")), "Only the four approved downloaded looks are offered");
-        check(CosmeticModules.definitions().stream().noneMatch(module -> module.id().contains("hat") || module.id().equals("crown")), "Unapproved accessory shortlist is not installed as hats");
+        // The user selected only the original Straw Hat (0.16 beta); the shortlist and ornate review hats stay uninstalled.
+        check(CosmeticModules.definitions().stream().noneMatch(module -> module.id().contains("hat") && !module.id().equals("straw-hat")
+                || module.id().equals("crown") || module.id().contains("halo") || module.id().contains("diadem")), "Unapproved accessory shortlist is not installed as hats");
         Path temporary = Files.createTempDirectory("analyzer-wings-check-");
         try {
             Path file = temporary.resolve("config.json");

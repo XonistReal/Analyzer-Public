@@ -2,6 +2,7 @@ package dev.analyzer.render;
 
 import dev.analyzer.AnalyzerClient;
 import dev.analyzer.core.AnalyzerCore;
+import dev.analyzer.cosmetic.StrawHatRenderer;
 import dev.analyzer.cosmetic.WingsRenderer;
 import dev.analyzer.ui.Palette;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -67,6 +68,7 @@ public final class CosmeticRenderer {
         return switch (id) {
             case "cape", "pets", "emotes", "walk-style", "spinbot" -> "Render-only / visible on third-person player models";
             case "wings" -> "Local third-person cosmetic / not sent to other players / no flight";
+            case "straw-hat" -> "Local third-person cosmetic / not sent to other players";
             case "hand-tweaks" -> "First-person transform / attacks unchanged";
             case "crystal-chams" -> "Actual crystal mesh / normal world depth";
             default -> "Render-only / game physics unchanged";
@@ -76,8 +78,9 @@ public final class CosmeticRenderer {
     private static boolean flag(String id, String setting) { return core.getBoolean(id, setting); }
     private static String choice(String id, String setting) { return core.getChoice(id, setting); }
     public static boolean self(PlayerEntityRenderState state) { var p = MinecraftClient.getInstance().player; return p != null && state.id == p.getId(); }
-    private static boolean wearer(PlayerEntityRenderState state) {
-        String who = choice("cape", "who"); return who.equals("Both") || who.equals("Self") == self(state);
+    private static boolean wearer(PlayerEntityRenderState state) { return wearer("cape", state); }
+    private static boolean wearer(String id, PlayerEntityRenderState state) {
+        String who = choice(id, "who"); return who.equals("Both") || who.equals("Self") == self(state);
     }
     private static int color(String id, float age) {
         return switch (choice(id, "color")) {
@@ -210,10 +213,16 @@ public final class CosmeticRenderer {
 
     public static final class Accessories extends FeatureRenderer<PlayerEntityRenderState, PlayerEntityModel> {
         private final WingsRenderer wings = new WingsRenderer();
+        private final StrawHatRenderer hat = new StrawHatRenderer();
         public Accessories(FeatureRendererContext<PlayerEntityRenderState, PlayerEntityModel> context) { super(context); }
         @Override public void render(MatrixStack matrices, VertexConsumerProvider vertices, int light, PlayerEntityRenderState state, float limbAngle, float limbDistance) {
             if (state.invisible || state.spectator) return;
             if (wings.render(core, getContextModel(), matrices, vertices, light, state)) frame("wings");
+            if (on("straw-hat") && wearer("straw-hat", state) && state.pose != EntityPose.SLEEPING) {
+                int tint = choice("straw-hat", "style").equals("Rainbow glass")
+                        ? 0xFF000000 | Color.HSBtoRGB((state.age / 180f) % 1, 0.58f, 1) : color("straw-hat", state.age);
+                if (hat.render(core, getContextModel(), matrices, vertices, light, state, tint)) frame("straw-hat");
+            }
             boolean cape = on("cape") && wearer(state) && (!flag("cape", "hide-elytra") || !state.equippedChestStack.isOf(Items.ELYTRA));
             boolean pet = on("pets") && self(state);
             if (!cape && !pet) return;

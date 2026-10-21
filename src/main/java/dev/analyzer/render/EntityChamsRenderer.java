@@ -151,6 +151,7 @@ public final class EntityChamsRenderer {
         for (Mesh mesh : MESHES) {
             boolean drawn = ChamsShader.draw(mesh.vertices.data, mesh.vertices.count,
                     policy.color(mesh.group, false), policy.color(mesh.group, true), policy.style().label(),
+                    policy.hiddenStyle().label(), policy.secondary(), policy.edges(),
                     policy.throughWalls(), 1f, time * policy.animationSpeed(), policy.effectStrength(), policy.wireWidth());
             if (!drawn) { shaderUnavailable = true; break; }
             draws++;

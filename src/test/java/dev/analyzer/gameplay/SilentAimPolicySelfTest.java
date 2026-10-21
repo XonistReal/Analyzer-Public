@@ -81,8 +81,11 @@ public final class SilentAimPolicySelfTest {
         check(!aura.defaultEnabled(), "Kill Aura remains opt-in");
         check(aura.setting("rotation").defaultValue().equals("Client"), "Missing old rotation fields retain visible Client aiming");
         check(aura.setting("rotation").choices().equals(List.of("Client", "None", "Silent movement", "Silent packet", "Silent pulse")), "Only three explicit new transports extend the old rotation choices");
-        for (var module : modules) if (!module.id().equals("kill-aura"))
-            check(module.settings().stream().noneMatch(setting -> setting.choices().stream().anyMatch(value -> value.startsWith("Silent "))), "Silent choices are scoped to implemented Kill Aura: " + module.id());
+        var bot = modules.stream().filter(module -> module.id().equals("fight-bot")).findFirst().orElseThrow();
+        check(bot.setting("rotation").choices().equals(List.of("Silent movement", "Client")),
+                "Fight Bot uses only the movement lease, the one transport its movement correction matches");
+        for (var module : modules) if (!module.id().equals("kill-aura") && !module.id().equals("fight-bot"))
+            check(module.settings().stream().noneMatch(setting -> setting.choices().stream().anyMatch(value -> value.startsWith("Silent "))), "Silent choices are scoped to implemented Kill Aura and Fight Bot: " + module.id());
         Path directory = Files.createTempDirectory("analyzer-silent-aim-config-");
         try {
             Path file = directory.resolve("config.json");

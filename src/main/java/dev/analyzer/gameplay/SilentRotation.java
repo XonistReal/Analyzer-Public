@@ -17,9 +17,11 @@ import java.util.Map;
 import static dev.analyzer.gameplay.GameplayEngine.*;
 
 /**
- * Original short-lived wire-rotation ownership. Rendering and movement input always read
- * the real player view. Only native movement packet angle reads may use this lease.
- * An observed send means local transmission, never a server acknowledgement.
+ * Original short-lived wire-rotation ownership. Rendering, the camera and the player model always
+ * read the real player view. Native movement packet angle reads may use this lease; Fight Bot may
+ * also ask movement physics to use it for one tick (movement correction) so its ordinary key input,
+ * sprint and transmitted look agree. An observed send means local transmission, never a server
+ * acknowledgement.
  */
 public final class SilentRotation {
     private static final double MATCH_EPSILON = .025;
@@ -32,6 +34,7 @@ public final class SilentRotation {
     private static ClientPlayerEntity movementPlayer;
     private static SilentAimPolicy.Angles movementAngles;
     private static boolean armed, capturing;
+    private static long correctionTick = Long.MIN_VALUE, hookTick = Long.MIN_VALUE;
     private static String reason = "No silent rotation lease";
     private static final ArrayList<Sample> samples = new ArrayList<>();
 
@@ -55,7 +58,7 @@ public final class SilentRotation {
     public static boolean update(String owner, LivingEntity target, Vec3d point, String mode,
                                  double turnSpeed, double smoothing, double strength) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (!isSilent(mode) || !"kill-aura".equals(owner) || !context(client, owner, target, mode)
+        if (!isSilent(mode) || !leaseOwner(owner) || !context(client, owner, target, mode)
                 || point == null || !Double.isFinite(point.x + point.y + point.z)
                 || !target.getBoundingBox().expand(.1).contains(point)) {
             cancel(); reason = "Silent rotation is waiting for valid ownership and a loaded target"; return false;
@@ -146,6 +149,24 @@ public final class SilentRotation {
         return lease.mode.equals("Silent movement") ? hasEmittedLease() ? lease.lastEmission : null : lease.angles;
     }
     public static SilentAimPolicy.Direction direction() { return lease == null ? null : SilentAimPolicy.direction(lease.angles); }
+    public static boolean ownedBy(String owner) { return lease != null && lease.owner.equals(owner); }
+
+    /**
+     * Fight Bot movement correction for the NEXT player tick only: physics (velocity from input and
+     * the sprint-jump boost) read the same lease yaw that native movement will transmit, so input,
+     * sprint and the server-facing look agree. The camera, model and rendering never call this.
+     */
+    public static void requestMovementCorrection() { correctionTick = ticks; }
+    /** True once the physics hook has actually run recently; a missing hook falls back to camera-relative keys. */
+    public static boolean movementCorrectionAvailable() { return hookTick >= ticks - 2; }
+    public static float physicsYaw(Object entity, float ordinary) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || entity == null || entity != client.player || !client.isOnThread()) return ordinary;
+        hookTick = ticks;
+        if (correctionTick != ticks || lease == null || !"fight-bot".equals(lease.owner)
+                || lease.mode.equals("Silent pulse") || !valid(client)) return ordinary;
+        return lease.angles.yaw();
+    }
     public static String status() { return reason; }
     public static boolean active() { return lease != null; }
     public static boolean isSilent(String mode) {
@@ -178,13 +199,19 @@ public final class SilentRotation {
                 || boolOr(owner, "only-click", false) && !physical(client.options.attackKey)) return false;
         if (target == null || !target.isAlive() || target.isRemoved() || target.getWorld() != client.world
                 || client.world.getEntityById(target.getId()) != target) return false;
-        double range = numOr(owner, "range", 3) + numOr(owner, "aim-range", 0);
+        double range = leaseRange(owner);
         return Double.isFinite(range) && range >= 0 && range <= 16
             && target.getBoundingBox().squaredMagnitude(client.player.getEyePos()) <= (range + .05) * (range + .05)
-            && CombatController.silentEligible(target);
+            && CombatController.silentEligible(owner, target);
     }
-    private static int settleTicks() { return (int) Math.clamp(numOr("kill-aura", "silent-settle", 1), 0, 10); }
-    private static int refreshTicks() { return (int) Math.clamp(numOr("kill-aura", "silent-refresh", 1), 1, 20); }
+    /** Only implemented lease owners: Kill Aura and Fight Bot. */
+    private static boolean leaseOwner(String owner) { return "kill-aura".equals(owner) || "fight-bot".equals(owner); }
+    private static double leaseRange(String owner) {
+        return "fight-bot".equals(owner) ? numOr(owner, "chase-range", 8) : numOr(owner, "range", 3) + numOr(owner, "aim-range", 0);
+    }
+    private static String settingsOwner() { return lease == null ? "kill-aura" : lease.owner; }
+    private static int settleTicks() { return (int) Math.clamp(numOr(settingsOwner(), "silent-settle", 1), 0, 10); }
+    private static int refreshTicks() { return (int) Math.clamp(numOr(settingsOwner(), "silent-refresh", 1), 1, 20); }
     private static boolean hasEmittedLease() {
         MinecraftClient client = MinecraftClient.getInstance();
         return emitted != null && emittedPlayer == client.player && emittedWorld == client.world

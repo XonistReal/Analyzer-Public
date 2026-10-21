@@ -56,6 +56,17 @@ public final class CosmeticModules {
                 Setting.bool("hide-elytra", "Hide with Elytra", true),
                 Setting.bool("armor-clearance", "Extra chest armor clearance", true),
                 Setting.bool("fullbright", "Fullbright texture (no bloom)", false));
+        List<Setting<?>> hat = colors(false);
+        hat.addAll(0, List.of(Setting.choice("style", "Hat style", "Straw", "Straw", "Lacquered", "Glass", "Rainbow glass")));
+        hat.addAll(List.of(Setting.choice("who", "Wearers", "Self", "Self", "Players", "Both"),
+                Setting.number("size", "Brim size", 1, 0.8, 1.6, 0.05),
+                Setting.number("height", "Cone height", 1, 0.5, 1.8, 0.05),
+                Setting.number("lift", "Extra height (pixels)", 0, -2, 6, 0.25),
+                Setting.number("tilt", "Tilt (degrees)", 0, -25, 25, 1),
+                Setting.bool("strap", "Chin strap", true),
+                Setting.bool("hide-helmet", "Hide while wearing a helmet", false),
+                Setting.number("opacity", "Glass opacity", 0.6, 0.15, 1, 0.05)));
+        add(out, "straw-hat", "Straw Hat", "An original conical straw hat on the player's head in third person, in woven straw, lacquer or tinted glass. Rendered locally; nobody else sees it.", hat);
         List<Setting<?>> pet = colors(false);
         pet.addAll(List.of(Setting.choice("pet", "Companion", "Rune Orb", "Rune Orb", "Ghost", "Dragon"),
                 Setting.choice("position", "Pet position", "Shoulder", "Shoulder", "Orbit", "Behind"),

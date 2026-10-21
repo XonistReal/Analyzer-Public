@@ -281,7 +281,7 @@ public final class AnalyzerRenderer {
                 core.getBoolean(module, "passives"), core.getBoolean(module, "items"), range * range);
     }
 
-    private static EntityKind kind(Entity entity) {
+    static EntityKind kind(Entity entity) {
         if (entity instanceof PlayerEntity player) return player.isSpectator() ? null : EntityKind.PLAYER;
         if (entity instanceof ItemEntity) return EntityKind.ITEM;
         if (entity instanceof Monster) return EntityKind.HOSTILE;
@@ -321,10 +321,41 @@ public final class AnalyzerRenderer {
             visible.add(target);
         }
         if (visible.isEmpty()) return;
+        String style = core.getChoice(module, "style");
+        // Glow is drawn by Minecraft's entity-outline pass (EspGlow); only labels remain here.
+        if (style.equals("Glow")) return;
         setDepth(core.getBoolean(module, "through-walls"));
-        // A single set of twelve edges: no filled faces, enlarged silhouette or glow pass.
-        drawOutlines(visible, core.getChoice(module, "style").equals("Corners"),
-                (float) core.getNumber(module, "line-width"), opacity(module));
+        if (style.equals("Filled"))
+            drawFaces(visible, (int) Math.round(core.getNumber(module, "fill-opacity") / 100 * 255));
+        // Twelve edges per box (or their corner segments); no enlarged silhouette.
+        drawOutlines(visible, style.equals("Corners"), (float) core.getNumber(module, "line-width"), opacity(module));
+    }
+
+    /** Translucent box faces under the outline, drawn back to front with the targets' order. */
+    private static void drawFaces(List<Target> targets, int alpha) {
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+        BufferBuilder faces = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+        for (Target target : targets) {
+            Box b = target.bounds;
+            int color = Palette.alpha(target.color, alpha);
+            float x0 = (float) b.minX, y0 = (float) b.minY, z0 = (float) b.minZ;
+            float x1 = (float) b.maxX, y1 = (float) b.maxY, z1 = (float) b.maxZ;
+            quad(faces, color, x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1);
+            quad(faces, color, x0, y1, z0, x0, y1, z1, x1, y1, z1, x1, y1, z0);
+            quad(faces, color, x0, y0, z0, x0, y1, z0, x1, y1, z0, x1, y0, z0);
+            quad(faces, color, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1);
+            quad(faces, color, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0);
+            quad(faces, color, x1, y0, z0, x1, y1, z0, x1, y1, z1, x1, y0, z1);
+        }
+        BufferRenderer.drawWithGlobalProgram(faces.end());
+    }
+
+    private static void quad(BufferBuilder buffer, int color, float ax, float ay, float az, float bx, float by, float bz,
+                             float cx, float cy, float cz, float dx, float dy, float dz) {
+        buffer.vertex(ax, ay, az).color(color);
+        buffer.vertex(bx, by, bz).color(color);
+        buffer.vertex(cx, cy, cz).color(color);
+        buffer.vertex(dx, dy, dz).color(color);
     }
 
     private static void setDepth(boolean throughWalls) {
@@ -893,9 +924,9 @@ public final class AnalyzerRenderer {
 
     private record Target(Box bounds, int color, double distanceSquared, Entity entity, String containerName) { }
 
-    private enum EntityKind {
+    enum EntityKind {
         PLAYER("players"), HOSTILE("hostiles"), PASSIVE("passives"), ITEM("items");
-        private final String setting;
+        final String setting;
         EntityKind(String setting) { this.setting = setting; }
     }
 

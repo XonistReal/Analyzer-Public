@@ -79,8 +79,10 @@ public final class CombatPolicySelfTest {
                 setting.choices().contains("Silent") || setting.choices().contains("Packet") && !setting.id().equals("swing")
                     || setting.choices().stream().anyMatch(value -> value.startsWith("Silent "))
                         && !(module.id().equals("kill-aura") && setting.id().equals("rotation")
-                            && setting.choices().stream().filter(value -> value.startsWith("Silent ")).allMatch(List.of("Silent movement", "Silent packet", "Silent pulse")::contains))),
-                "Only implemented Kill Aura silent transports are exposed; packet crits remain absent: " + module.id());
+                            && setting.choices().stream().filter(value -> value.startsWith("Silent ")).allMatch(List.of("Silent movement", "Silent packet", "Silent pulse")::contains))
+                        && !(module.id().equals("fight-bot") && setting.id().equals("rotation")
+                            && setting.choices().stream().filter(value -> value.startsWith("Silent ")).allMatch("Silent movement"::equals))),
+                "Only implemented silent transports are exposed (Kill Aura, Fight Bot movement lease); packet crits remain absent: " + module.id());
         }
         System.out.println("Analyzer combat policy: " + assertions + " assertions passed.");
         System.out.println("Combat controls: " + modules.stream().map(module -> module.id() + "=" + module.settings().size()).collect(java.util.stream.Collectors.joining(", ")));

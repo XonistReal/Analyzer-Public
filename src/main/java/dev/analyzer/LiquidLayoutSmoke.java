@@ -134,11 +134,18 @@ final class LiquidLayoutSmoke {
             ((CatalogScreen) client.currentScreen).inspect("hud");
         });
         seek("setting:hud:menu-layout", client -> { click(client, "setting:hud:menu-layout"); });
-        add("Actual HUD Studio selector opens the new shader Click GUI", 5, client -> {
+        add("Actual HUD Studio selector opens the floating Click GUI", 5, client -> {
+            require(core.getChoice("menu", "layout").equals("Click GUI") && client.currentScreen.getClass().getSimpleName().equals("ClickGuiScreen"),
+                    "The native HUD Studio menu selector cycles from Studio to the floating Click GUI");
+            capture(client, "analyzer-floating-click-gui.png");
+            // The wide category board is now the separate Compact layout.
+            core.setValue("menu", "layout", "Compact"); client.setScreen(MenuScreens.create(core, "hud"));
+        });
+        add("The Compact layout opens the framed shader board", 5, client -> {
             clickGui = client.currentScreen;
-            require(core.getChoice("menu", "layout").equals("Click GUI") && clickGui.getClass().getSimpleName().equals("ClickGuiScreen"),
-                    "The native HUD Studio menu selector offers only the new Click GUI alternative");
-            require(MenuScreens.matchesLayout(core, clickGui), "The saved Click GUI choice resolves to its actual shader screen");
+            require(core.getChoice("menu", "layout").equals("Compact") && clickGui.getClass().getSimpleName().equals("CompactScreen"),
+                    "Compact resolves to the framed category board");
+            require(MenuScreens.matchesLayout(core, clickGui), "The saved Compact choice resolves to its actual shader screen");
             bounds(client, "profiles", "hud-editor", "automation", "appearance");
             capture(client, "analyzer-liquid-click-gui.png");
         });
@@ -199,7 +206,7 @@ final class LiquidLayoutSmoke {
             bounds(client, "value", "apply", "cancel"); click(client, "value"); type(client.currentScreen, "4.25"); click(client, "apply");
             require(client.currentScreen == clickGui && core.getNumber("kill-aura", "range") == 4.25, "Precise input saves genuine module data and returns its exact Click GUI parent");
             save(core); AnalyzerCore reloaded = loadedCore();
-            require(reloaded.getChoice("menu", "layout").equals("Click GUI") && reloaded.getNumber("kill-aura", "range") == 4.25
+            require(reloaded.getChoice("menu", "layout").equals("Compact") && reloaded.getNumber("kill-aura", "range") == 4.25
                     && reloaded.getNumber("menu", "classic-combat-x") == core.getNumber("menu", "classic-combat-x")
                     && reloaded.getNumber("menu", "classic-combat-y") == core.getNumber("menu", "classic-combat-y"),
                     "The new layout, typed setting and dragged category placement survive a real configuration reload");
@@ -214,7 +221,7 @@ final class LiquidLayoutSmoke {
             require(editor instanceof HudEditorScreen, "Click GUI opens the real HUD editor"); bounds(client, "selected-settings", "menu-settings", "done"); click(client, "selected-settings");
         });
         add("Editor settings preserve Click GUI", 4, client -> {
-            require(client.currentScreen.getClass().getSimpleName().equals("ClickGuiScreen"), "HUD Settings retains the selected new shader layout");
+            require(client.currentScreen.getClass().getSimpleName().equals("CompactScreen"), "HUD Settings retains the selected Compact layout");
             client.currentScreen.keyPressed(GLFW.GLFW_KEY_ESCAPE, 0, 0); require(client.currentScreen == editor, "Settings Escape returns the exact HUD editor");
             click(client, "done"); require(client.currentScreen == clickGui, "HUD Done returns the exact Click GUI parent");
             core.setValue("menu", "material", "Solid"); core.setValue("menu", "theme", "Glass"); surfacesBefore = LiquidGlass.surfaceFrames();
@@ -246,7 +253,7 @@ final class LiquidLayoutSmoke {
             });
             add("Resized Studio keeps liquid surfaces " + suffix, 4, client -> {
                 bounds(client, "profiles", "hud-editor", "automation", "appearance", "settings-scroll");
-                core.setValue("menu", "layout", "Click GUI"); clickGui = MenuScreens.create(core, "hud"); client.setScreen(clickGui);
+                core.setValue("menu", "layout", "Compact"); clickGui = MenuScreens.create(core, "hud"); client.setScreen(clickGui);
             });
         }
         add("Set up actual native optical calibration scene", 2, client -> {

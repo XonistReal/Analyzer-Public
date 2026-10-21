@@ -71,7 +71,7 @@ public final class BuiltinModules {
                 Setting.bool("labels", "Name and distance", false),
                 Setting.bool("health", "Health", false),
                 Setting.bool("radar", "Nearby target radar", false)));
-        settings.addAll(espGeometrySettings(128, 256));
+        settings.addAll(espGeometrySettings(128, 256, true));
         settings.addAll(EspSettings.entityColors());
         settings.addAll(espLabelSettings(48, 256, 16));
         return List.copyOf(settings);
@@ -82,7 +82,7 @@ public final class BuiltinModules {
                 Setting.bool("tracers", "Storage tracers", false),
                 Setting.choice("tracer-origin", "Tracer origin", "Crosshair", "Crosshair", "Bottom", "Top"),
                 Setting.number("tracer-width", "Tracer width", 1, .5, 4, .25)));
-        settings.addAll(espGeometrySettings(64, 128));
+        settings.addAll(espGeometrySettings(64, 128, false));
         for (EspSettings.StorageGroup group : EspSettings.StorageGroup.values()) {
             settings.add(Setting.bool(group.id(), group.label(), true));
             settings.addAll(EspSettings.colors(group.id(), group.label(), group.defaultColor()));
@@ -106,12 +106,17 @@ public final class BuiltinModules {
         settings.addAll(EspSettings.entityColors());
         return List.copyOf(settings);
     }
-    private static List<Setting<?>> espGeometrySettings(int range, int maximum) {
+    private static List<Setting<?>> espGeometrySettings(int range, int maximum, boolean entities) {
+        // Glow hands entities to Minecraft's own outline pass, so it exists only for entity ESP.
+        Setting<?> style = entities
+                ? Setting.choice("style", "Box style", "Boxes", "Boxes", "Corners", "Filled", "Glow", "Screen")
+                : Setting.choice("style", "Box style", "Boxes", "Boxes", "Corners", "Filled", "Screen");
         return List.of(Setting.number("range", "Range (blocks)", range, 16, maximum, 8),
                 Setting.bool("through-walls", "Through walls", true),
                 Setting.number("line-width", "Line width", 1, .5, 4, .25),
                 Setting.number("opacity", "Line opacity (%)", 100, 10, 100, 5),
-                Setting.choice("style", "Box style", "Boxes", "Boxes", "Corners", "Screen"),
+                style,
+                Setting.number("fill-opacity", "Fill opacity (%)", 25, 5, 80, 5),
                 Setting.number("min-marker-pixels", "Minimum marker size (pixels)", 0, 0, 12, 1));
     }
     private static List<Setting<?>> espLabelSettings(int range, int maximum, int budget) {

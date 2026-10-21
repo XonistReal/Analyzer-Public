@@ -89,8 +89,19 @@
         "choices": [
           "Boxes",
           "Corners",
+          "Filled",
+          "Glow",
           "Screen"
         ]
+      },
+      {
+        "id": "fill-opacity",
+        "label": "Fill opacity (%)",
+        "kind": "NUMBER",
+        "default": 25.0,
+        "min": 5.0,
+        "max": 80.0,
+        "step": 5.0
       },
       {
         "id": "min-marker-pixels",
@@ -434,8 +445,18 @@
         "choices": [
           "Boxes",
           "Corners",
+          "Filled",
           "Screen"
         ]
+      },
+      {
+        "id": "fill-opacity",
+        "label": "Fill opacity (%)",
+        "kind": "NUMBER",
+        "default": 25.0,
+        "min": 5.0,
+        "max": 80.0,
+        "step": 5.0
       },
       {
         "id": "min-marker-pixels",
@@ -1922,7 +1943,8 @@
         "default": "Studio",
         "choices": [
           "Studio",
-          "Click GUI"
+          "Click GUI",
+          "Compact"
         ]
       },
       {
@@ -2140,6 +2162,222 @@
         "label": "Client collapsed",
         "kind": "BOOLEAN",
         "default": false
+      },
+      {
+        "id": "click-visual-x",
+        "label": "Render panel X",
+        "kind": "NUMBER",
+        "default": 37.5,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-visual-y",
+        "label": "Render panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-visual-collapsed",
+        "label": "Render panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "click-world-x",
+        "label": "World panel X",
+        "kind": "NUMBER",
+        "default": 62.5,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-world-y",
+        "label": "World panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-world-collapsed",
+        "label": "World panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "click-hud-x",
+        "label": "HUD panel X",
+        "kind": "NUMBER",
+        "default": 87.5,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-hud-y",
+        "label": "HUD panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-hud-collapsed",
+        "label": "HUD panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "click-combat-x",
+        "label": "Combat panel X",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-combat-y",
+        "label": "Combat panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-combat-collapsed",
+        "label": "Combat panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "click-movement-x",
+        "label": "Movement panel X",
+        "kind": "NUMBER",
+        "default": 25.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-movement-y",
+        "label": "Movement panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-movement-collapsed",
+        "label": "Movement panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "click-hvh-x",
+        "label": "HVH panel X",
+        "kind": "NUMBER",
+        "default": 12.5,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-hvh-y",
+        "label": "HVH panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-hvh-collapsed",
+        "label": "HVH panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "click-player-x",
+        "label": "Player panel X",
+        "kind": "NUMBER",
+        "default": 75.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-player-y",
+        "label": "Player panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-player-collapsed",
+        "label": "Player panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "click-cosmetics-x",
+        "label": "Cosmetics panel X",
+        "kind": "NUMBER",
+        "default": 50.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-cosmetics-y",
+        "label": "Cosmetics panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-cosmetics-collapsed",
+        "label": "Cosmetics panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "click-client-x",
+        "label": "Client panel X",
+        "kind": "NUMBER",
+        "default": 100.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-client-y",
+        "label": "Client panel Y",
+        "kind": "NUMBER",
+        "default": 7.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 0.1
+      },
+      {
+        "id": "click-client-collapsed",
+        "label": "Client panel collapsed",
+        "kind": "BOOLEAN",
+        "default": false
       }
     ]
   },
@@ -2349,7 +2587,8 @@
         "default": "Studio",
         "choices": [
           "Studio",
-          "Click GUI"
+          "Click GUI",
+          "Compact"
         ]
       },
       {
@@ -3169,8 +3408,33 @@
           "Metallic",
           "Glass",
           "Glow",
-          "Wireframe"
+          "Wireframe",
+          "Shaded",
+          "Hologram",
+          "Gradient",
+          "Rim light",
+          "Galaxy"
         ]
+      },
+      {
+        "id": "hidden-style",
+        "label": "Occluded material",
+        "kind": "CHOICE",
+        "default": "Same as visible",
+        "choices": [
+          "Same as visible",
+          "Flat",
+          "Glow",
+          "Rim light",
+          "Wireframe",
+          "Hologram"
+        ]
+      },
+      {
+        "id": "edges",
+        "label": "Outline model edges",
+        "kind": "BOOLEAN",
+        "default": false
       },
       {
         "id": "players",
@@ -3546,6 +3810,53 @@
         "label": "Occluded non-hostile mobs blue",
         "kind": "NUMBER",
         "default": 255.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "secondary-color",
+        "label": "Secondary material color",
+        "kind": "CHOICE",
+        "default": "Violet",
+        "choices": [
+          "White",
+          "Red",
+          "Orange",
+          "Gold",
+          "Lime",
+          "Mint",
+          "Cyan",
+          "Blue",
+          "Violet",
+          "Pink",
+          "Gray",
+          "Custom"
+        ]
+      },
+      {
+        "id": "secondary-red",
+        "label": "Secondary material red",
+        "kind": "NUMBER",
+        "default": 181.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "secondary-green",
+        "label": "Secondary material green",
+        "kind": "NUMBER",
+        "default": 155.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "secondary-blue",
+        "label": "Secondary material blue",
+        "kind": "NUMBER",
+        "default": 250.0,
         "min": 0.0,
         "max": 255.0,
         "step": 1.0
@@ -12244,6 +12555,136 @@
     ]
   },
   {
+    "id": "straw-hat",
+    "name": "Straw Hat",
+    "category": "Cosmetics",
+    "description": "An original conical straw hat on the player\u0027s head in third person, in woven straw, lacquer or tinted glass. Rendered locally; nobody else sees it.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "style",
+        "label": "Hat style",
+        "kind": "CHOICE",
+        "default": "Straw",
+        "choices": [
+          "Straw",
+          "Lacquered",
+          "Glass",
+          "Rainbow glass"
+        ]
+      },
+      {
+        "id": "color",
+        "label": "Color mode",
+        "kind": "CHOICE",
+        "default": "Theme",
+        "choices": [
+          "Theme",
+          "Mint",
+          "Violet",
+          "Gold",
+          "Rainbow",
+          "Custom"
+        ]
+      },
+      {
+        "id": "red",
+        "label": "Custom red",
+        "kind": "NUMBER",
+        "default": 121.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "green",
+        "label": "Custom green",
+        "kind": "NUMBER",
+        "default": 248.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "blue",
+        "label": "Custom blue",
+        "kind": "NUMBER",
+        "default": 204.0,
+        "min": 0.0,
+        "max": 255.0,
+        "step": 1.0
+      },
+      {
+        "id": "who",
+        "label": "Wearers",
+        "kind": "CHOICE",
+        "default": "Self",
+        "choices": [
+          "Self",
+          "Players",
+          "Both"
+        ]
+      },
+      {
+        "id": "size",
+        "label": "Brim size",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.8,
+        "max": 1.6,
+        "step": 0.05
+      },
+      {
+        "id": "height",
+        "label": "Cone height",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.5,
+        "max": 1.8,
+        "step": 0.05
+      },
+      {
+        "id": "lift",
+        "label": "Extra height (pixels)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -2.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "tilt",
+        "label": "Tilt (degrees)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": -25.0,
+        "max": 25.0,
+        "step": 1.0
+      },
+      {
+        "id": "strap",
+        "label": "Chin strap",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hide-helmet",
+        "label": "Hide while wearing a helmet",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "opacity",
+        "label": "Glass opacity",
+        "kind": "NUMBER",
+        "default": 0.6,
+        "min": 0.15,
+        "max": 1.0,
+        "step": 0.05
+      }
+    ]
+  },
+  {
     "id": "pets",
     "name": "Pets",
     "category": "Cosmetics",
@@ -14491,6 +14932,361 @@
         "default": 6.0,
         "min": 1.0,
         "max": 40.0,
+        "step": 1.0
+      }
+    ]
+  },
+  {
+    "id": "fight-bot",
+    "name": "Fight Bot",
+    "category": "Combat",
+    "description": "Chase a filtered target in range, circle it, jump for falling critical hits and attack with server-facing aim while your camera stays free.",
+    "defaultEnabled": false,
+    "settings": [
+      {
+        "id": "players",
+        "label": "Players",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "hostiles",
+        "label": "Hostile mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "passives",
+        "label": "Passive mobs",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "other-living",
+        "label": "Other living entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-friends",
+        "label": "Ignore saved friends",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "ignore-invisible",
+        "label": "Ignore invisible entities",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-naked",
+        "label": "Ignore players without armor",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "ignore-new",
+        "label": "Ignore newly loaded entities (ticks)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "range",
+        "label": "Attack reach from eyes to hitbox",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 1.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "fov",
+        "label": "Target field of view (degrees)",
+        "kind": "NUMBER",
+        "default": 360.0,
+        "min": 10.0,
+        "max": 360.0,
+        "step": 10.0
+      },
+      {
+        "id": "priority",
+        "label": "Target priority",
+        "kind": "CHOICE",
+        "default": "Distance",
+        "choices": [
+          "Distance",
+          "Health",
+          "Angle",
+          "Armor",
+          "Hurt time"
+        ]
+      },
+      {
+        "id": "through-walls",
+        "label": "Allow obstructed targets",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "wall-range",
+        "label": "Obstructed target range",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 6.0,
+        "step": 0.25
+      },
+      {
+        "id": "chase-range",
+        "label": "Chase range (blocks)",
+        "kind": "NUMBER",
+        "default": 12.0,
+        "min": 3.0,
+        "max": 16.0,
+        "step": 0.5
+      },
+      {
+        "id": "rotation",
+        "label": "Rotation",
+        "kind": "CHOICE",
+        "default": "Silent movement",
+        "choices": [
+          "Silent movement",
+          "Client"
+        ]
+      },
+      {
+        "id": "turn-speed",
+        "label": "Maximum turn (degrees/tick)",
+        "kind": "NUMBER",
+        "default": 40.0,
+        "min": 1.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "smoothing",
+        "label": "Slow down near aim point (%)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 100.0,
+        "step": 1.0
+      },
+      {
+        "id": "aim-point",
+        "label": "Aim point",
+        "kind": "CHOICE",
+        "default": "Chest",
+        "choices": [
+          "Nearest",
+          "Chest",
+          "Head"
+        ]
+      },
+      {
+        "id": "hit-angle",
+        "label": "Maximum attack aim error (degrees)",
+        "kind": "NUMBER",
+        "default": 90.0,
+        "min": 1.0,
+        "max": 180.0,
+        "step": 1.0
+      },
+      {
+        "id": "silent-settle",
+        "label": "Wait after first silent look (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "cooldown",
+        "label": "Required attack charge",
+        "kind": "NUMBER",
+        "default": 0.95,
+        "min": 0.5,
+        "max": 1.0,
+        "step": 0.05
+      },
+      {
+        "id": "hurt-time",
+        "label": "Maximum target hurt time (ticks)",
+        "kind": "NUMBER",
+        "default": 10.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "auto-weapon",
+        "label": "Hold the best hotbar weapon",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "weapon-only",
+        "label": "Only attack with a melee weapon",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "settle-ticks",
+        "label": "Wait after changing held weapon (ticks)",
+        "kind": "NUMBER",
+        "default": 1.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "pause-using",
+        "label": "Pause attacks while using an item",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "pause-mining",
+        "label": "Pause while breaking a block",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "swing",
+        "label": "Swing animation",
+        "kind": "CHOICE",
+        "default": "Client",
+        "choices": [
+          "Client",
+          "Packet",
+          "None"
+        ]
+      },
+      {
+        "id": "movement",
+        "label": "Movement",
+        "kind": "CHOICE",
+        "default": "Chase and circle",
+        "choices": [
+          "Chase and circle",
+          "Chase only",
+          "Stand still"
+        ]
+      },
+      {
+        "id": "keep-distance",
+        "label": "Fighting distance (blocks)",
+        "kind": "NUMBER",
+        "default": 2.6,
+        "min": 1.5,
+        "max": 3.5,
+        "step": 0.1
+      },
+      {
+        "id": "circle",
+        "label": "Circle direction",
+        "kind": "CHOICE",
+        "default": "Away from their aim",
+        "choices": [
+          "Away from their aim",
+          "Clockwise",
+          "Counter-clockwise"
+        ]
+      },
+      {
+        "id": "danger-cone",
+        "label": "Their aim cone to avoid (degrees)",
+        "kind": "NUMBER",
+        "default": 50.0,
+        "min": 0.0,
+        "max": 90.0,
+        "step": 5.0
+      },
+      {
+        "id": "back-off",
+        "label": "Back off while your attack recharges",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "sprint",
+        "label": "Sprint",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "chase-hops",
+        "label": "Sprint-jump while chasing",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "jump-obstacles",
+        "label": "Jump onto one-block obstacles",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "swim",
+        "label": "Swim up in water",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "max-drop",
+        "label": "Never walk off drops deeper than (blocks)",
+        "kind": "NUMBER",
+        "default": 3.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "avoid-hazards",
+        "label": "Avoid lava, fire, cactus and magma",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "manual-override",
+        "label": "Your movement keys take over",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "criticals",
+        "label": "Jump for critical hits",
+        "kind": "BOOLEAN",
+        "default": true
+      },
+      {
+        "id": "crit-lead",
+        "label": "Jump before full charge (ticks)",
+        "kind": "NUMBER",
+        "default": 6.0,
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0
+      },
+      {
+        "id": "crit-only",
+        "label": "Only attack when a critical hit is possible",
+        "kind": "BOOLEAN",
+        "default": false
+      },
+      {
+        "id": "stop-health",
+        "label": "Stop fighting at or below health (0 \u003d never)",
+        "kind": "NUMBER",
+        "default": 0.0,
+        "min": 0.0,
+        "max": 36.0,
         "step": 1.0
       }
     ]

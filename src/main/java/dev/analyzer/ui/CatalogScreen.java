@@ -45,6 +45,10 @@ public abstract class CatalogScreen extends Screen {
     protected abstract void body(DrawContext draw);
     protected boolean shaderStyle(){return true;}
     protected float canvasScale(){return Math.max(.15f,Math.min(1.2f,Math.min((width-20f)/W,(height-20f)/H)));}
+    /** Virtual canvas size; the floating Click GUI uses the real screen instead of the framed 1000x600 shell. */
+    protected int canvasWidth(){return W;}
+    protected int canvasHeight(){return H;}
+    protected boolean drawShell(){return true;}
     protected void backdrop(DrawContext draw){GpuEffects.drawBackdrop(draw);}
     public CatalogScreen inspect(String id){return this;}
     public CatalogScreen withParent(Screen parent){returnParent=parent;return this;}
@@ -72,7 +76,7 @@ public abstract class CatalogScreen extends Screen {
     @Override public void render(DrawContext draw,int mouseX,int mouseY,float delta){
         long now=System.nanoTime();frameSeconds=Math.clamp((now-lastFrame)/1e9,.001,.05);lastFrame=now;
         scale=canvasScale();
-        ox=(width-W*scale)/2;oy=(height-H*scale)/2;
+        ox=(width-canvasWidth()*scale)/2;oy=(height-canvasHeight()*scale)/2;
         if(core.getNumber("menu","motion")>0)oy+=(float)(Math.exp(-(now-opened)/170_000_000.0)*9*scale);
         mx=(mouseX-ox)/scale;my=(mouseY-oy)/scale;
         accent=core.isEnabled("menu")?HudWidgets.accent(core):Palette.MINT;
@@ -80,7 +84,7 @@ public abstract class CatalogScreen extends Screen {
         try(GuiDraw.GlassScope optical=StudioAuxiliary.backdropScope(draw,theme(),()->backdrop(draw))){
         try(GuiDraw.FontScope font=shaderStyle()?GuiDraw.sansFont():null){
         draw.getMatrices().push();draw.getMatrices().translate(ox,oy,0);draw.getMatrices().scale(scale,scale,1);
-        GuiDraw.shaderPanel(draw,10,9,W-20,H-22,24,accent,glass(),theme());
+        if(drawShell())GuiDraw.shaderPanel(draw,10,9,W-20,H-22,24,accent,glass(),theme());
         header(draw);body(draw);footer(draw);
         if(focusedControl!=null)controls.stream().filter(c->c.id.equals(focusedControl)).findFirst().ifPresent(c->
             GuiDraw.roundedBorder(draw,c.area.x-2,c.area.y-2,c.area.w+4,c.area.h+4,5,accent));
@@ -102,8 +106,8 @@ public abstract class CatalogScreen extends Screen {
         control("search",new Area(178,20,244,34),0,()->{searchFocused=true;selectAll=false;capture=null;});
         button(draw,"search-clear","×",424,24,22,26,false,()->{query="";searchFocused=false;searchChanged();});
         int x=465;
-        for(String name:List.of("Studio","Click GUI")){
-            int w=name.equals("Studio")?87:106;
+        for(String name:List.of("Studio","Click GUI","Compact")){
+            int w=name.equals("Studio")?70:name.equals("Click GUI")?80:76;
             button(draw,"layout-"+name.toLowerCase(Locale.ROOT),name,x,23,w,28,name.equals(layout())&&!profilesOpen(),()->switchLayout(name));x+=w+6;
         }
         button(draw,"profiles","Profiles",709,23,69,28,profilesOpen(),()->client.setScreen(MenuScreens.profiles(core,this)));

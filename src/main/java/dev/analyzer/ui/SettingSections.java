@@ -23,7 +23,8 @@ final class SettingSections {
         }
         if (module.id().equals("chams")) {
             String id = setting.id();
-            if (id.contains("-hidden-") || id.equals("hidden-opacity") || id.equals("through-walls")) return "Occluded models";
+            if (id.contains("-hidden-") || id.equals("hidden-opacity") || id.equals("hidden-style") || id.equals("through-walls")) return "Occluded models";
+            if (id.startsWith("secondary-")) return "Material";
             if (id.endsWith("-color") || id.endsWith("-red") || id.endsWith("-green") || id.endsWith("-blue")
                     || id.equals("match-esp-colors") || id.equals("visible-opacity")) return "Visible colors";
             if (id.equals("players") || id.equals("hostiles") || id.equals("passives") || id.equals("self")
@@ -38,11 +39,19 @@ final class SettingSections {
             if (module.id().equals("storage-esp") && java.util.Arrays.stream(dev.analyzer.core.EspSettings.StorageGroup.values())
                     .anyMatch(group -> group.id().equals(id))) return "Storage filters";
             if (id.equals("through-walls") || id.equals("line-width") || id.equals("style") || id.equals("min-marker-pixels")
-                    || id.equals("range") || id.equals("opacity") || id.equals("anchor") || id.equals("tracers") || id.equals("tracer-origin") || id.equals("tracer-width")) return "Boxes and visibility";
+                    || id.equals("fill-opacity") || id.equals("range") || id.equals("opacity") || id.equals("anchor") || id.equals("tracers") || id.equals("tracer-origin") || id.equals("tracer-width")) return "Boxes and visibility";
             return "Labels and distance";
         }
         if (module.category() != Category.COMBAT && module.category() != Category.HVH && module.category() != Category.MOVEMENT) return "";
         String id = setting.id();
+        if (module.id().equals("fight-bot")) {
+            if (java.util.Set.of("movement", "keep-distance", "circle", "danger-cone", "back-off", "sprint", "chase-hops",
+                    "jump-obstacles", "swim", "max-drop", "avoid-hazards", "manual-override").contains(id)) return "Movement";
+            if (id.equals("criticals") || id.equals("crit-lead") || id.equals("crit-only")) return "Critical hits";
+            if (id.equals("chase-range")) return "Targeting";
+            if (id.equals("stop-health")) return "Safety";
+            if (id.equals("auto-weapon") || id.equals("weapon-only")) return "Timing";
+        }
         if (id.equals("players") || id.equals("hostiles") || id.equals("passives") || id.equals("other-living")
                 || id.startsWith("ignore-") || id.equals("fov") || id.equals("range") || id.equals("priority")
                 || id.equals("aim-range") || id.equals("wall-range") || id.equals("targets") || id.equals("target-mode")
@@ -87,7 +96,14 @@ final class SettingSections {
             if (id.equals("tracer-origin")) return enabled(core, module, "tracers");
         }
         if (name.equals("chams")) {
-            if (id.equals("wire-width")) return choice(core, module, "style").equals("Wireframe");
+            if (id.equals("wire-width")) return choice(core, module, "style").equals("Wireframe") || enabled(core, module, "edges")
+                    || choice(core, module, "hidden-style").equals("Wireframe");
+            if (id.equals("hidden-style")) return enabled(core, module, "through-walls");
+            if (id.startsWith("secondary-")) {
+                if (!dev.analyzer.render.ChamsPolicy.Style.from(choice(core, module, "style")).usesSecondary()
+                        && !choice(core, module, "hidden-style").equals("Hologram")) return false;
+                return id.equals("secondary-color") || choice(core, module, "secondary-color").equals("Custom");
+            }
             if (id.equals("hidden-opacity") || id.contains("-hidden-")) {
                 if (!enabled(core, module, "through-walls")) return false;
             }
@@ -109,6 +125,12 @@ final class SettingSections {
                 if (!id.endsWith("-color")) return choice(core, module, group + "-color").equals("Custom");
             }
             if (id.equals("tracer-width") || id.equals("tracer-origin") && name.equals("storage-esp")) return enabled(core, module, "tracers");
+            if (!name.equals("tracers")) {
+                String style = choice(core, module, "style");
+                if (id.equals("fill-opacity")) return style.equals("Filled");
+                // Glow is Minecraft's own outline: it has no line width, opacity or depth choice.
+                if (id.equals("line-width") || id.equals("opacity") || id.equals("min-marker-pixels")) return !style.equals("Glow");
+            }
             if (id.startsWith("label-") || id.equals("distance-scale") || id.equals("fade-labels")
                     || id.equals("max-labels") || id.equals("declutter"))
                 return enabled(core, module, "labels") || name.equals("entity-esp") && enabled(core, module, "health");
@@ -120,6 +142,24 @@ final class SettingSections {
             if (id.equals("max-targets")) return !legit && choice(core, module, "mode").equals("Multi");
             if (id.equals("silent-settle")) return !legit && java.util.Set.of("Silent movement", "Silent packet").contains(choice(core, module, "rotation"));
             if (id.equals("silent-refresh")) return !legit && choice(core, module, "rotation").equals("Silent packet");
+        }
+        // Board column and floating panel placement are edited by dragging, not as numbered fields.
+        if (name.equals("menu") && (id.startsWith("classic-") || id.startsWith("click-"))) return false;
+        if (name.equals("straw-hat")) {
+            boolean glass = choice(core, module, "style").contains("Glass") || choice(core, module, "style").contains("glass");
+            if (id.equals("color")) return choice(core, module, "style").equals("Glass");
+            if (id.equals("red") || id.equals("green") || id.equals("blue")) return choice(core, module, "style").equals("Glass") && choice(core, module, "color").equals("Custom");
+            if (id.equals("opacity")) return glass;
+            if (id.equals("strap")) return !glass;
+        }
+        if (name.equals("fight-bot")) {
+            String movement = choice(core, module, "movement");
+            if (id.equals("danger-cone")) return movement.equals("Chase and circle") && choice(core, module, "circle").equals("Away from their aim");
+            if (id.equals("circle") || id.equals("back-off")) return movement.equals("Chase and circle");
+            if (java.util.Set.of("keep-distance", "sprint", "chase-hops", "jump-obstacles", "max-drop", "avoid-hazards", "manual-override").contains(id))
+                return !movement.equals("Stand still");
+            if (id.equals("crit-lead") || id.equals("crit-only")) return enabled(core, module, "criticals");
+            if (id.equals("silent-settle")) return choice(core, module, "rotation").equals("Silent movement");
         }
         if (name.equals("speed") && (id.equals("speed") || id.equals("multiplier"))) return !legit && !choice(core, module, "profile").equals("Sprint hop");
         if (name.equals("fly")) {

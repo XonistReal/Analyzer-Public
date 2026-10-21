@@ -10,12 +10,20 @@ public final class ClientModules {
 
     public static List<Setting<?>> menuSettings() {
         List<Setting<?>> settings = new ArrayList<>();
-        settings.add(Setting.choice("layout", "Menu layout", "Studio", "Studio", "Click GUI"));
+        settings.add(Setting.choice("layout", "Menu layout", "Studio", "Studio", "Click GUI", "Compact"));
         for (int i = 0; i < Category.values().length; i++) {
             String prefix = "classic-" + Category.values()[i].name().toLowerCase(Locale.ROOT);
             settings.add(Setting.number(prefix + "-x", Category.values()[i].label() + " column X", 2 + i % 5 * 24, 0, 100, 0.1));
             settings.add(Setting.number(prefix + "-y", Category.values()[i].label() + " column Y", 25 + i / 5 * 70, 0, 100, 0.1));
             settings.add(Setting.bool(prefix + "-collapsed", Category.values()[i].label() + " collapsed", false));
+        }
+        // Floating Click GUI panels: positions are fractions of the free screen area so they survive resizes.
+        for (int i = 0; i < Category.values().length; i++) {
+            Category category = Category.values()[i];
+            String prefix = "click-" + category.name().toLowerCase(Locale.ROOT);
+            settings.add(Setting.number(prefix + "-x", category.label() + " panel X", clickPanelX(category), 0, 100, 0.1));
+            settings.add(Setting.number(prefix + "-y", category.label() + " panel Y", 7, 0, 100, 0.1));
+            settings.add(Setting.bool(prefix + "-collapsed", category.label() + " panel collapsed", false));
         }
         return List.copyOf(settings);
     }
@@ -34,7 +42,7 @@ public final class ClientModules {
                 Setting.bool("block-local-pack-urls", "Block local/private pack URLs", true),
                 Setting.bool("scrub-pack-headers", "Hide identifying pack download headers", true))));
         result.add(new ModuleDefinition("hud", "HUD Studio", "Choose your menu, appearance and HUD widget layout.", Category.HUD, true, List.of(
-                Setting.choice("menu-layout", "Menu layout", "Studio", "Studio", "Click GUI"),
+                Setting.choice("menu-layout", "Menu layout", "Studio", "Studio", "Click GUI", "Compact"),
                 Setting.choice("menu-material", "Menu material", "Glass", "Glass", "Solid"),
                 Setting.choice("menu-theme", "Menu theme", "Glass", "Glass", "Classic", "Minimal", "Neon"),
                 Setting.choice("menu-accent", "Accent color", "Rose", "Rose", "Mint", "Violet", "Gold"),
@@ -77,6 +85,14 @@ public final class ClientModules {
                 Setting.bool("mouse", "Show mouse buttons", true)));
         result.add(widget("reach-display", "Target Distance", "Measured camera distance to the current raycast hit.", false, 68, 12));
         return List.copyOf(result);
+    }
+
+    /** Default floating panel order follows the menu's category order, spread across the screen. */
+    public static double clickPanelX(Category category) {
+        List<Category> order = List.of(Category.COMBAT, Category.HVH, Category.MOVEMENT, Category.VISUAL, Category.COSMETICS,
+                Category.WORLD, Category.PLAYER, Category.HUD, Category.CLIENT);
+        int index = Math.max(0, order.indexOf(category));
+        return Math.round(index * 100.0 / (order.size() - 1) * 10) / 10.0;
     }
 
     private static ModuleDefinition widget(String id, String name, String description, boolean enabled,

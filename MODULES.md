@@ -1,6 +1,6 @@
 # Analyzer modules and settings
 
-158 registered modules and 1839 exposed settings. Generated from the actual in-game registry; defaults describe a fresh configuration. HUD Studio appearance/Home aliases share their canonical Interface values.
+160 registered modules and 1931 exposed settings. Generated from the actual in-game registry; defaults describe a fresh configuration. HUD Studio appearance/Home aliases share their canonical Interface values.
 
 [Using modules and profiles](docs/MODULE-GUIDE.md) · [Install](docs/INSTALLATION.md) · [README](README.md)
 
@@ -109,6 +109,7 @@ Choose a category, then click a module for its complete settings. Descriptions s
 | [Auto Block](#module-auto-block) | Raise an equipped offhand shield toward a visible threat between attacks; release it before ordinary melee attacks. | Off |
 | [Double Hand](#module-double-hand) | Temporarily hold a hotbar totem after a real server-reported pop or at low health near a visible threat; yields to Auto Totem once the offhand is protected. | Off |
 | [Hover Totem](#module-hover-totem) | In your own inventory, hold the selected key over a totem to move it into the offhand through a normal guarded slot swap. | Off |
+| [Fight Bot](#module-fight-bot) | Chase a filtered target in range, circle it, jump for falling critical hits and attack with server-facing aim while your camera stays free. | Off |
 
 ## Movement
 
@@ -197,6 +198,7 @@ Choose a category, then click a module for its complete settings. Descriptions s
 | [Crystal Chams](#module-crystal-chams) | Tint the actual crystal model or replace it with an original Gem/Prism mesh. Normal depth remains. | Off |
 | [Cape](#module-cape) | An original segmented cloth mesh with moving hems and colors, visible in third person. No image/GIF importer. | Off |
 | [Wings](#module-wings) | Approved Angel, Dragon, Bat and Parrot textures on an existing articulated wing rig. Local third-person cosmetic; no flight or server broadcast. | Off |
+| [Straw Hat](#module-straw-hat) | An original conical straw hat on the player's head in third person, in woven straw, lacquer or tinted glass. Rendered locally; nobody else sees it. | Off |
 | [Pets](#module-pets) | Original animated Rune Orb, Ghost or Dragon geometry following your rendered body in third person. | Off |
 | [Emotes](#module-emotes) | Pose your local player model in third person. No camera change or server-side animation. | Off |
 | [Walk Style](#module-walk-style) | Alternative local third-person arm, leg and body poses using the existing player model. | Off |
@@ -236,7 +238,8 @@ Clean debug boxes for players, hostile mobs and non-hostile mobs.
 | Through walls (`through-walls`) | Boolean | On | On / Off |
 | Line width (`line-width`) | Number | 1 | 0.5 to 4; step 0.25 |
 | Line opacity (%) (`opacity`) | Number | 100 | 10 to 100; step 5 |
-| Box style (`style`) | Choice | Boxes | Boxes / Corners / Screen |
+| Box style (`style`) | Choice | Boxes | Boxes / Corners / Filled / Glow / Screen |
+| Fill opacity (%) (`fill-opacity`) | Number | 25 | 5 to 80; step 5 |
 | Minimum marker size (pixels) (`min-marker-pixels`) | Number | 0 | 0 to 12; step 1 |
 | Players color (`players-color`) | Choice | Cyan | White / Red / Orange / Gold / Lime / Mint / Cyan / Blue / Violet / Pink / Gray / Custom |
 | Players red (`players-red`) | Number | 102 | 0 to 255; step 1 |
@@ -283,7 +286,8 @@ Debug boxes around loaded containers, with colors for each storage group.
 | Through walls (`through-walls`) | Boolean | On | On / Off |
 | Line width (`line-width`) | Number | 1 | 0.5 to 4; step 0.25 |
 | Line opacity (%) (`opacity`) | Number | 100 | 10 to 100; step 5 |
-| Box style (`style`) | Choice | Boxes | Boxes / Corners / Screen |
+| Box style (`style`) | Choice | Boxes | Boxes / Corners / Filled / Screen |
+| Fill opacity (%) (`fill-opacity`) | Number | 25 | 5 to 80; step 5 |
 | Minimum marker size (pixels) (`min-marker-pixels`) | Number | 0 | 0 to 12; step 1 |
 | Chests (`chests`) | Boolean | On | On / Off |
 | Chests color (`chests-color`) | Choice | Gold | White / Red / Orange / Gold / Lime / Mint / Cyan / Blue / Violet / Pink / Gray / Custom |
@@ -502,7 +506,7 @@ Glass or solid panels, accent colors and motion control.
 | Home background (`home-background`) | Choice | Panorama | Panorama / Orbit |
 | Home animation (`home-motion`) | Number | 0.65 | 0 to 1; step 0.05 |
 | Blur home submenus (`home-blur`) | Boolean | On | On / Off |
-| Menu layout (`layout`) | Choice | Studio | Studio / Click GUI |
+| Menu layout (`layout`) | Choice | Studio | Studio / Click GUI / Compact |
 | Render column X (`classic-visual-x`) | Number | 2 | 0 to 100; step 0.1 |
 | Render column Y (`classic-visual-y`) | Number | 25 | 0 to 100; step 0.1 |
 | Render collapsed (`classic-visual-collapsed`) | Boolean | Off | On / Off |
@@ -530,6 +534,33 @@ Glass or solid panels, accent colors and motion control.
 | Client column X (`classic-client-x`) | Number | 74 | 0 to 100; step 0.1 |
 | Client column Y (`classic-client-y`) | Number | 95 | 0 to 100; step 0.1 |
 | Client collapsed (`classic-client-collapsed`) | Boolean | Off | On / Off |
+| Render panel X (`click-visual-x`) | Number | 37.5 | 0 to 100; step 0.1 |
+| Render panel Y (`click-visual-y`) | Number | 7 | 0 to 100; step 0.1 |
+| Render panel collapsed (`click-visual-collapsed`) | Boolean | Off | On / Off |
+| World panel X (`click-world-x`) | Number | 62.5 | 0 to 100; step 0.1 |
+| World panel Y (`click-world-y`) | Number | 7 | 0 to 100; step 0.1 |
+| World panel collapsed (`click-world-collapsed`) | Boolean | Off | On / Off |
+| HUD panel X (`click-hud-x`) | Number | 87.5 | 0 to 100; step 0.1 |
+| HUD panel Y (`click-hud-y`) | Number | 7 | 0 to 100; step 0.1 |
+| HUD panel collapsed (`click-hud-collapsed`) | Boolean | Off | On / Off |
+| Combat panel X (`click-combat-x`) | Number | 0 | 0 to 100; step 0.1 |
+| Combat panel Y (`click-combat-y`) | Number | 7 | 0 to 100; step 0.1 |
+| Combat panel collapsed (`click-combat-collapsed`) | Boolean | Off | On / Off |
+| Movement panel X (`click-movement-x`) | Number | 25 | 0 to 100; step 0.1 |
+| Movement panel Y (`click-movement-y`) | Number | 7 | 0 to 100; step 0.1 |
+| Movement panel collapsed (`click-movement-collapsed`) | Boolean | Off | On / Off |
+| HVH panel X (`click-hvh-x`) | Number | 12.5 | 0 to 100; step 0.1 |
+| HVH panel Y (`click-hvh-y`) | Number | 7 | 0 to 100; step 0.1 |
+| HVH panel collapsed (`click-hvh-collapsed`) | Boolean | Off | On / Off |
+| Player panel X (`click-player-x`) | Number | 75 | 0 to 100; step 0.1 |
+| Player panel Y (`click-player-y`) | Number | 7 | 0 to 100; step 0.1 |
+| Player panel collapsed (`click-player-collapsed`) | Boolean | Off | On / Off |
+| Cosmetics panel X (`click-cosmetics-x`) | Number | 50 | 0 to 100; step 0.1 |
+| Cosmetics panel Y (`click-cosmetics-y`) | Number | 7 | 0 to 100; step 0.1 |
+| Cosmetics panel collapsed (`click-cosmetics-collapsed`) | Boolean | Off | On / Off |
+| Client panel X (`click-client-x`) | Number | 100 | 0 to 100; step 0.1 |
+| Client panel Y (`click-client-y`) | Number | 7 | 0 to 100; step 0.1 |
+| Client panel collapsed (`click-client-collapsed`) | Boolean | Off | On / Off |
 
 [Back to Client](#client)
 
@@ -603,7 +634,7 @@ Choose your menu, appearance and HUD widget layout.
 
 | Setting | Type | Default | Allowed values |
 | --- | --- | --- | --- |
-| Menu layout (`menu-layout`) | Choice | Studio | Studio / Click GUI |
+| Menu layout (`menu-layout`) | Choice | Studio | Studio / Click GUI / Compact |
 | Menu material (`menu-material`) | Choice | Glass | Glass / Solid |
 | Menu theme (`menu-theme`) | Choice | Glass | Glass / Classic / Minimal / Neon |
 | Accent color (`menu-accent`) | Choice | Rose | Rose / Mint / Violet / Gold |
@@ -899,7 +930,9 @@ Shader materials on actual living models, with separate visible and occluded col
 
 | Setting | Type | Default | Allowed values |
 | --- | --- | --- | --- |
-| Material style (`style`) | Choice | Flat | Flat / Metallic / Glass / Glow / Wireframe |
+| Material style (`style`) | Choice | Flat | Flat / Metallic / Glass / Glow / Wireframe / Shaded / Hologram / Gradient / Rim light / Galaxy |
+| Occluded material (`hidden-style`) | Choice | Same as visible | Same as visible / Flat / Glow / Rim light / Wireframe / Hologram |
+| Outline model edges (`edges`) | Boolean | Off | On / Off |
 | Players (`players`) | Boolean | On | On / Off |
 | Hostile mobs (`hostiles`) | Boolean | On | On / Off |
 | Non-hostile mobs (`passives`) | Boolean | Off | On / Off |
@@ -937,6 +970,10 @@ Shader materials on actual living models, with separate visible and occluded col
 | Occluded non-hostile mobs red (`passives-hidden-red`) | Number | 131 | 0 to 255; step 1 |
 | Occluded non-hostile mobs green (`passives-hidden-green`) | Number | 180 | 0 to 255; step 1 |
 | Occluded non-hostile mobs blue (`passives-hidden-blue`) | Number | 255 | 0 to 255; step 1 |
+| Secondary material color (`secondary-color`) | Choice | Violet | White / Red / Orange / Gold / Lime / Mint / Cyan / Blue / Violet / Pink / Gray / Custom |
+| Secondary material red (`secondary-red`) | Number | 181 | 0 to 255; step 1 |
+| Secondary material green (`secondary-green`) | Number | 155 | 0 to 255; step 1 |
+| Secondary material blue (`secondary-blue`) | Number | 250 | 0 to 255; step 1 |
 
 [Back to Render](#render)
 
@@ -2690,6 +2727,32 @@ Approved Angel, Dragon, Bat and Parrot textures on an existing articulated wing 
 
 [Back to Cosmetics](#cosmetics)
 
+<a id="module-straw-hat"></a>
+
+### Straw Hat
+
+**Cosmetics** · ID: `straw-hat` · Default: **Off**
+
+An original conical straw hat on the player's head in third person, in woven straw, lacquer or tinted glass. Rendered locally; nobody else sees it.
+
+| Setting | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| Hat style (`style`) | Choice | Straw | Straw / Lacquered / Glass / Rainbow glass |
+| Color mode (`color`) | Choice | Theme | Theme / Mint / Violet / Gold / Rainbow / Custom |
+| Custom red (`red`) | Number | 121 | 0 to 255; step 1 |
+| Custom green (`green`) | Number | 248 | 0 to 255; step 1 |
+| Custom blue (`blue`) | Number | 204 | 0 to 255; step 1 |
+| Wearers (`who`) | Choice | Self | Self / Players / Both |
+| Brim size (`size`) | Number | 1 | 0.8 to 1.6; step 0.05 |
+| Cone height (`height`) | Number | 1 | 0.5 to 1.8; step 0.05 |
+| Extra height (pixels) (`lift`) | Number | 0 | -2 to 6; step 0.25 |
+| Tilt (degrees) (`tilt`) | Number | 0 | -25 to 25; step 1 |
+| Chin strap (`strap`) | Boolean | On | On / Off |
+| Hide while wearing a helmet (`hide-helmet`) | Boolean | Off | On / Off |
+| Glass opacity (`opacity`) | Number | 0.6 | 0.15 to 1; step 0.05 |
+
+[Back to Cosmetics](#cosmetics)
+
 <a id="module-pets"></a>
 
 ### Pets
@@ -3144,6 +3207,63 @@ In your own inventory, hold the selected key over a totem to move it into the of
 | Hold key while hovering (`hold-key`) | Choice | Sneak | Sneak / Use / None |
 | Hover before swapping (ticks) (`hover-ticks`) | Number | 3 | 0 to 20; step 1 |
 | Minimum interval between swaps (ticks) (`delay`) | Number | 6 | 1 to 40; step 1 |
+
+[Back to Combat](#combat)
+
+<a id="module-fight-bot"></a>
+
+### Fight Bot
+
+**Combat** · ID: `fight-bot` · Default: **Off**
+
+Chase a filtered target in range, circle it, jump for falling critical hits and attack with server-facing aim while your camera stays free.
+
+| Setting | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| Players (`players`) | Boolean | On | On / Off |
+| Hostile mobs (`hostiles`) | Boolean | Off | On / Off |
+| Passive mobs (`passives`) | Boolean | Off | On / Off |
+| Other living entities (`other-living`) | Boolean | Off | On / Off |
+| Ignore saved friends (`ignore-friends`) | Boolean | On | On / Off |
+| Ignore invisible entities (`ignore-invisible`) | Boolean | Off | On / Off |
+| Ignore players without armor (`ignore-naked`) | Boolean | Off | On / Off |
+| Ignore newly loaded entities (ticks) (`ignore-new`) | Number | 0 | 0 to 100; step 1 |
+| Attack reach from eyes to hitbox (`range`) | Number | 3 | 1 to 6; step 0.25 |
+| Target field of view (degrees) (`fov`) | Number | 360 | 10 to 360; step 10 |
+| Target priority (`priority`) | Choice | Distance | Distance / Health / Angle / Armor / Hurt time |
+| Allow obstructed targets (`through-walls`) | Boolean | Off | On / Off |
+| Obstructed target range (`wall-range`) | Number | 0 | 0 to 6; step 0.25 |
+| Chase range (blocks) (`chase-range`) | Number | 12 | 3 to 16; step 0.5 |
+| Rotation (`rotation`) | Choice | Silent movement | Silent movement / Client |
+| Maximum turn (degrees/tick) (`turn-speed`) | Number | 40 | 1 to 180; step 1 |
+| Slow down near aim point (%) (`smoothing`) | Number | 0 | 0 to 100; step 1 |
+| Aim point (`aim-point`) | Choice | Chest | Nearest / Chest / Head |
+| Maximum attack aim error (degrees) (`hit-angle`) | Number | 90 | 1 to 180; step 1 |
+| Wait after first silent look (ticks) (`silent-settle`) | Number | 1 | 0 to 10; step 1 |
+| Required attack charge (`cooldown`) | Number | 0.95 | 0.5 to 1; step 0.05 |
+| Maximum target hurt time (ticks) (`hurt-time`) | Number | 10 | 0 to 10; step 1 |
+| Hold the best hotbar weapon (`auto-weapon`) | Boolean | On | On / Off |
+| Only attack with a melee weapon (`weapon-only`) | Boolean | Off | On / Off |
+| Wait after changing held weapon (ticks) (`settle-ticks`) | Number | 1 | 0 to 10; step 1 |
+| Pause attacks while using an item (`pause-using`) | Boolean | On | On / Off |
+| Pause while breaking a block (`pause-mining`) | Boolean | On | On / Off |
+| Swing animation (`swing`) | Choice | Client | Client / Packet / None |
+| Movement (`movement`) | Choice | Chase and circle | Chase and circle / Chase only / Stand still |
+| Fighting distance (blocks) (`keep-distance`) | Number | 2.6 | 1.5 to 3.5; step 0.1 |
+| Circle direction (`circle`) | Choice | Away from their aim | Away from their aim / Clockwise / Counter-clockwise |
+| Their aim cone to avoid (degrees) (`danger-cone`) | Number | 50 | 0 to 90; step 5 |
+| Back off while your attack recharges (`back-off`) | Boolean | Off | On / Off |
+| Sprint (`sprint`) | Boolean | On | On / Off |
+| Sprint-jump while chasing (`chase-hops`) | Boolean | On | On / Off |
+| Jump onto one-block obstacles (`jump-obstacles`) | Boolean | On | On / Off |
+| Swim up in water (`swim`) | Boolean | On | On / Off |
+| Never walk off drops deeper than (blocks) (`max-drop`) | Number | 3 | 0 to 10; step 1 |
+| Avoid lava, fire, cactus and magma (`avoid-hazards`) | Boolean | On | On / Off |
+| Your movement keys take over (`manual-override`) | Boolean | On | On / Off |
+| Jump for critical hits (`criticals`) | Boolean | On | On / Off |
+| Jump before full charge (ticks) (`crit-lead`) | Number | 6 | 0 to 10; step 1 |
+| Only attack when a critical hit is possible (`crit-only`) | Boolean | Off | On / Off |
+| Stop fighting at or below health (0 = never) (`stop-health`) | Number | 0 | 0 to 36; step 1 |
 
 [Back to Combat](#combat)
 

@@ -10,13 +10,16 @@ public final class ChamsPolicy {
     private ChamsPolicy() { }
 
     public enum Style {
-        FLAT("Flat", 0), METALLIC("Metallic", 1), GLASS("Glass", 2), GLOW("Glow", 3), WIREFRAME("Wireframe", 4);
+        FLAT("Flat", 0), METALLIC("Metallic", 1), GLASS("Glass", 2), GLOW("Glow", 3), WIREFRAME("Wireframe", 4),
+        SHADED("Shaded", 5), HOLOGRAM("Hologram", 6), GRADIENT("Gradient", 7), RIM("Rim light", 8), GALAXY("Galaxy", 9);
 
         private final String label;
         private final int shaderCode;
         Style(String label, int shaderCode) { this.label = label; this.shaderCode = shaderCode; }
         public String label() { return label; }
         public int shaderCode() { return shaderCode; }
+        /** Materials that blend toward the secondary color. */
+        public boolean usesSecondary() { return this == HOLOGRAM || this == GRADIENT || this == GALAXY; }
 
         /** Unknown historical or damaged input uses a plain material; live choices stay strictly validated. */
         public static Style from(String value) {
@@ -56,9 +59,11 @@ public final class ChamsPolicy {
                            boolean players, boolean hostiles, boolean passives, boolean self, boolean invisibles,
                            double range, boolean throughWalls, double visibleOpacity, double hiddenOpacity,
                            float effectStrength, float animationSpeed, float wireWidth,
-                           Colors visibleColors, Colors hiddenColors) {
+                           Colors visibleColors, Colors hiddenColors, Style hiddenStyle, int secondary, boolean edges) {
         public Snapshot {
             style = style == null ? Style.FLAT : style;
+            // The occluded pass follows the visible material unless a separate one is chosen.
+            hiddenStyle = hiddenStyle == null ? style : hiddenStyle;
             // Invalid distances never turn into an unlimited selection. Percentages are normalized once per frame.
             range = bounded(range, 0, 256, 0);
             visibleOpacity = bounded(visibleOpacity, 0, 100, 0);
@@ -67,6 +72,14 @@ public final class ChamsPolicy {
             animationSpeed = (float) bounded(animationSpeed, 0, 3, 1);
             wireWidth = (float) bounded(wireWidth, .5, 3, 1);
             if (visibleColors == null || hiddenColors == null) throw new IllegalArgumentException("Chams palettes are required");
+        }
+
+        /** Snapshot without the 0.16 material additions: same occluded material, violet secondary, no edges. */
+        public Snapshot(boolean enabled, Style style, boolean players, boolean hostiles, boolean passives, boolean self,
+                        boolean invisibles, double range, boolean throughWalls, double visibleOpacity, double hiddenOpacity,
+                        float effectStrength, float animationSpeed, float wireWidth, Colors visibleColors, Colors hiddenColors) {
+            this(enabled, style, players, hostiles, passives, self, invisibles, range, throughWalls, visibleOpacity, hiddenOpacity,
+                    effectStrength, animationSpeed, wireWidth, visibleColors, hiddenColors, null, 0xFFB59BFA, false);
         }
 
         public boolean accepts(Group group, double distanceSquared, boolean removed, boolean alive,
@@ -111,7 +124,9 @@ public final class ChamsPolicy {
                     core.getBoolean("chams", "through-walls"), core.getNumber("chams", "visible-opacity"),
                     core.getNumber("chams", "hidden-opacity"), (float) core.getNumber("chams", "effect-strength"),
                     (float) core.getNumber("chams", "animation-speed"), (float) core.getNumber("chams", "wire-width"),
-                    colors(core, visibleModule, ""), colors(core, "chams", "-hidden"));
+                    colors(core, visibleModule, ""), colors(core, "chams", "-hidden"),
+                    core.getChoice("chams", "hidden-style").equals("Same as visible") ? null : Style.from(core.getChoice("chams", "hidden-style")),
+                    color(core, "chams", "secondary"), core.getBoolean("chams", "edges"));
         }
     }
 

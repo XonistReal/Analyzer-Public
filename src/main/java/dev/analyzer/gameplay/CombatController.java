@@ -59,9 +59,10 @@ final class CombatController {
         shieldTarget = criticalTarget = null; shieldSlot = -1; shieldUntil = criticalSince = nextHop = 0; sprintReleasedAt = -1;
         blockUntil = handUntil = 0; lastWeaponSlot = -1; weaponSwitchedAt = -1000;
         lastTotemPop = -1;
+        FightBotController.reset();
     }
     static void totemPopped() { lastTotemPop = ticks; }
-    static void suspend() { SilentRotation.cancel(); releaseBlock(); criticalTarget = null; restoreCriticalSprint(); observations.clear(); locks.clear(); }
+    static void suspend() { SilentRotation.cancel(); releaseBlock(); criticalTarget = null; restoreCriticalSprint(); observations.clear(); locks.clear(); FightBotController.reset(); }
     static void yieldForFood() {
         if (ownedBlock && (on("auto-eat") && (autoEatRefilling || mc.player.getHungerManager().getFoodLevel() < num("auto-eat", "hunger"))
                 || on("auto-gapple") && mc.player.getHealth() <= num("auto-gapple", "health"))) releaseBlock();
@@ -70,13 +71,13 @@ final class CombatController {
     private static Vec3d nearest(Vec3d eye, Box box) {
         return new Vec3d(MathHelper.clamp(eye.x, box.minX, box.maxX), MathHelper.clamp(eye.y, box.minY, box.maxY), MathHelper.clamp(eye.z, box.minZ, box.maxZ));
     }
-    private static double distance(LivingEntity entity) { return nearest(mc.player.getEyePos(), entity.getBoundingBox()).distanceTo(mc.player.getEyePos()); }
+    static double distance(LivingEntity entity) { return nearest(mc.player.getEyePos(), entity.getBoundingBox()).distanceTo(mc.player.getEyePos()); }
     private static double angle(Vec3d point) {
         Vec3d delta = point.subtract(mc.player.getEyePos());
         if (delta.lengthSquared() < 1.0e-8) return 0;
         return Math.toDegrees(Math.acos(Math.clamp(mc.player.getRotationVec(1).dotProduct(delta.normalize()), -1, 1)));
     }
-    private static Vec3d aimPoint(String id, LivingEntity entity) {
+    static Vec3d aimPoint(String id, LivingEntity entity) {
         return switch (choiceOr(id, "aim-point", "Head")) {
             case "Nearest" -> nearest(mc.player.getEyePos(), entity.getBoundingBox());
             case "Chest" -> entity.getPos().add(0, entity.getHeight() * 0.6, 0);
@@ -113,9 +114,10 @@ final class CombatController {
         if (id.equals("kill-aura") && legit(id)) fov = Math.min(fov, 120);
         return Math.abs(MathHelper.wrapDegrees(yaw - p.getYaw())) <= fov * 0.5;
     }
-    /** Revalidate current filters before a short-lived server-look lease can transmit next tick. */
-    static boolean silentEligible(LivingEntity entity) {
-        return eligible("kill-aura", entity, numOr("kill-aura", "range", 3) + numOr("kill-aura", "aim-range", 0));
+    /** Revalidate the lease owner's current filters before a short-lived server-look lease can transmit next tick. */
+    static boolean silentEligible(String owner, LivingEntity entity) {
+        return eligible(owner, entity, owner.equals("fight-bot") ? numOr(owner, "chase-range", 8)
+                : numOr(owner, "range", 3) + numOr(owner, "aim-range", 0));
     }
     static boolean silentUsingAllowed() {
         return ownedBlock && mc.player != null && mc.player.isUsingItem()
@@ -165,7 +167,7 @@ final class CombatController {
         p.setYaw(p.getYaw() + (float) CombatPolicy.turn(MathHelper.wrapDegrees(yaw - p.getYaw()), degrees, smoothing, strength));
         p.setPitch(MathHelper.clamp(p.getPitch() + (float) CombatPolicy.turn(pitch - p.getPitch(), degrees, smoothing, strength), -90, 90));
     }
-    private static void rotate(String id, Vec3d point) {
+    static void rotate(String id, Vec3d point) {
         if (choiceOr(id, "rotation", "Client").equals("None") && !legit(id)) return;
         aim(id, point, numOr(id, "turn-speed", id.equals("shield-breaker") ? 30 : 12),
             legit(id) ? Math.max(50, numOr(id, "smoothing", 0)) : numOr(id, "smoothing", 0), numOr(id, "strength", 100));
@@ -181,12 +183,12 @@ final class CombatController {
         if (!updated) note(id, SilentRotation.status());
         return updated;
     }
-    private static double aimError(Vec3d point, SilentAimPolicy.Angles angles) {
+    static double aimError(Vec3d point, SilentAimPolicy.Angles angles) {
         if (angles == null) return angle(point);
         Vec3d delta = point.subtract(mc.player.getEyePos());
         return SilentAimPolicy.angleTo(angles, delta.x, delta.y, delta.z);
     }
-    private static boolean melee(ItemStack stack) {
+    static boolean melee(ItemStack stack) {
         String name = Registries.ITEM.getId(stack.getItem()).getPath();
         return name.endsWith("_sword") || name.endsWith("_axe") || stack.isOf(Items.MACE) || stack.isOf(Items.TRIDENT);
     }
@@ -408,7 +410,25 @@ final class CombatController {
         criticalSprint = false; sprintReleasedAt = -1;
     }
     /** Movement controllers must not immediately reassert sprint during the falling-hit wait. */
-    static boolean suppressSprint() { return criticalTarget != null && on("criticals") && bool("criticals", "sprint-reset"); }
+    static boolean suppressSprint() {
+        return criticalTarget != null && on("criticals") && bool("criticals", "sprint-reset") || FightBotController.suppressSprint();
+    }
+    /** Fight Bot weapon choice: the best usable hotbar melee weapon, then the configured switch settle. */
+    static boolean holdBestWeapon(String id) {
+        int slot = selectWeapon(false, false);
+        if (slot >= 0) chooseWeapon(slot);
+        return weaponSettled(id);
+    }
+    static boolean weaponSettled(String id) {
+        return CombatPolicy.switchSettled(ticks, weaponSwitchedAt, (int) numOr(id, "settle-ticks", 1));
+    }
+    /** Fight Bot owns aim, attacks and movement this tick; melee helpers wait without touching its lease. */
+    static void yieldToFightBot() {
+        releaseBlock(); criticalTarget = null; restoreCriticalSprint();
+        observations.remove("trigger-bot"); observations.remove("auto-weapon");
+        for (String id : List.of("kill-aura", "aim-assist", "trigger-bot", "auto-clicker", "criticals", "shield-breaker", "auto-weapon", "auto-block"))
+            if (on(id)) note(id, "Fight Bot owns aim and attacks while it has a target");
+    }
     private static boolean criticals(LivingEntity victim, String attacker) {
         String id = "criticals"; var p = mc.player;
         String kinds = choiceOr(id, "crit-targets", "Living");
@@ -448,7 +468,7 @@ final class CombatController {
     private static boolean cameraHits(String id, LivingEntity victim) {
         return cameraHits(id, victim, null);
     }
-    private static boolean cameraHits(String id, LivingEntity victim, SilentAimPolicy.Angles angles) {
+    static boolean cameraHits(String id, LivingEntity victim, SilentAimPolicy.Angles angles) {
         if (!boolOr(id, "require-ray", true)) return true;
         Vec3d start = mc.player.getEyePos();
         var silentDirection = angles == null ? null : SilentAimPolicy.direction(angles);

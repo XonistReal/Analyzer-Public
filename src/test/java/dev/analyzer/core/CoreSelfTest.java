@@ -12,7 +12,7 @@ public final class CoreSelfTest {
         Path temporary = Files.createTempDirectory("analyzer-core-test-");
         try {
             AnalyzerCore core = new AnalyzerCore(temporary);
-            check(core.modules().size() == 158, "Release catalogue includes 158 registered modules");
+            check(core.modules().size() == 160, "Release catalogue includes 160 registered modules");
             check(core.modules().stream().map(ModuleDefinition::id).distinct().count() == core.modules().size(), "Unique module IDs");
             for (Category category : Category.values())
                 check(core.modules().stream().anyMatch(module -> module.category() == category), "Populated category " + category);
@@ -274,7 +274,7 @@ public final class CoreSelfTest {
         check(restored.loadWarnings().isEmpty(), "Legacy menu config loads without warnings");
         Files.writeString(directory.resolve("config.json"), """
                 {"schemaVersion":1,"modules":{"hud":{"settings":{
-                  "menu-layout":"Compact","menu-material":"Solid","menu-theme":"Neon","menu-accent":"Violet","theme":"Classic"}}}}
+                  "menu-layout":"Workspace","menu-material":"Solid","menu-theme":"Neon","menu-accent":"Violet","theme":"Classic"}}}}
                 """);
         restored.load();
         check(restored.getChoice("menu", "layout").equals("Studio") && restored.getChoice("menu", "material").equals("Solid")
@@ -286,7 +286,7 @@ public final class CoreSelfTest {
         check(restored.getChoice("menu", "layout").equals("Studio") && restored.getChoice("hud", "menu-theme").equals("Neon"), "Alias-only import saves back as canonical values");
         Files.writeString(directory.resolve("config.json"), """
                 {"schemaVersion":1,"modules":{
-                  "menu":{"settings":{"layout":"Compact","material":"Solid","theme":"Minimal","accent":"Violet"}},
+                  "menu":{"settings":{"layout":"Workspace","material":"Solid","theme":"Minimal","accent":"Violet"}},
                   "hud":{"settings":{"menu-layout":"Classic","menu-material":"Glass","menu-theme":"Neon","menu-accent":"Gold"}}}}
                 """);
         restored.load();
@@ -307,11 +307,17 @@ public final class CoreSelfTest {
     private static void retiredLayoutMigration(Path directory) throws Exception {
         Files.createDirectories(directory.resolve("profiles"));
         AnalyzerCore core = new AnalyzerCore(directory);
-        check(core.definition("menu").setting("layout").choices().equals(java.util.List.of("Studio", "Click GUI")),
-                "Only shader layouts are offered by Interface");
-        check(core.definition("hud").setting("menu-layout").choices().equals(java.util.List.of("Studio", "Click GUI")),
+        check(core.definition("menu").setting("layout").choices().equals(java.util.List.of("Studio", "Click GUI", "Compact")),
+                "Only shader layouts are offered by Interface: Studio, the floating Click GUI and the Compact board");
+        check(core.definition("hud").setting("menu-layout").choices().equals(java.util.List.of("Studio", "Click GUI", "Compact")),
                 "HUD Studio cannot offer a retired layout");
-        for (String retired : java.util.List.of("Workspace", "Classic", "Compact")) {
+        Files.writeString(directory.resolve("config.json"), """
+                {"schemaVersion":1,"modules":{"menu":{"settings":{"layout":"Compact","accent":"Gold"}}}}
+                """);
+        core.load();
+        check(core.getChoice("menu", "layout").equals("Compact") && core.getChoice("hud", "menu-layout").equals("Compact")
+                && core.loadWarnings().isEmpty(), "Compact is a current layout again and loads as the framed board");
+        for (String retired : java.util.List.of("Workspace", "Classic")) {
             for (String authority : java.util.List.of("menu", "hud")) {
                 var document = com.google.gson.JsonParser.parseString("""
                         {"schemaVersion":1,"modules":{
@@ -369,7 +375,7 @@ public final class CoreSelfTest {
                 "Current canonical Click GUI wins a migrated legacy alias");
         for (String malformed : java.util.List.of("7", "null", "{}", "\"Unknown\"")) {
             Files.writeString(directory.resolve("config.json"), "{\"schemaVersion\":1,\"modules\":{\"menu\":{\"settings\":{\"layout\":"
-                    + malformed + "}},\"hud\":{\"settings\":{\"menu-layout\":\"Compact\"}}}}");
+                    + malformed + "}},\"hud\":{\"settings\":{\"menu-layout\":\"Workspace\"}}}}");
             core.load();
             check(core.getChoice("menu", "layout").equals("Studio") && core.loadWarnings().size() == 1,
                     "A migrated valid alias recovers malformed canonical layout " + malformed);

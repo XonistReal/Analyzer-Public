@@ -145,8 +145,10 @@ public final class GameplayEngine {
                 } else if (!CombatController.prepare()) {
                     // Actual explosive/build actions get first refusal. An idle enabled module
                     // owns nothing, so ordinary melee can still proceed in the same tick.
-                    hvh(); combat();
-                }
+                    hvh();
+                    // A Fight Bot with a target owns aim, melee and movement; other melee helpers wait.
+                    if (FightBotController.tick()) CombatController.yieldToFightBot(); else combat();
+                } else FightBotController.stop("Waiting for a projectile aim or protection action");
             }
             if (!eating && !p.isUsingItem()) fishing();
             movement(); playerUtilities();
@@ -369,7 +371,7 @@ public final class GameplayEngine {
             }
         }
         if (!combatControls.action(id)) return false;
-        if (!id.equals("kill-aura")) SilentRotation.cancel();
+        if (!SilentRotation.ownedBy(id)) SilentRotation.cancel();
         attackBudget--; mc.interactionManager.attackEntity(mc.player, entity); swing(id); attacks++; acted(id);
         note(id, "Attacked " + entity.getName().getString()); return true;
     }

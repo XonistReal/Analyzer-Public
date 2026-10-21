@@ -16,6 +16,7 @@ public final class MenuScreens {
     public static Screen create(AnalyzerCore core) {
         return switch (core.getChoice("menu", "layout")) {
             case "Click GUI" -> new ClickGuiScreen(core);
+            case "Compact" -> new CompactScreen(core);
             default -> new StudioScreen(core);
         };
     }
@@ -41,6 +42,7 @@ public final class MenuScreens {
     public static boolean matchesLayout(AnalyzerCore core, Screen screen) {
         return switch (core.getChoice("menu", "layout")) {
             case "Click GUI" -> screen instanceof ClickGuiScreen;
+            case "Compact" -> screen instanceof CompactScreen;
             default -> screen instanceof StudioScreen;
         };
     }

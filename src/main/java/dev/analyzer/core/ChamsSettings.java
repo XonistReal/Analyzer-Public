@@ -15,7 +15,11 @@ public final class ChamsSettings {
 
     public static List<Setting<?>> settings() {
         List<Setting<?>> settings = new ArrayList<>(List.of(
-                Setting.choice("style", "Material style", "Flat", "Flat", "Metallic", "Glass", "Glow", "Wireframe"),
+                Setting.choice("style", "Material style", "Flat", "Flat", "Metallic", "Glass", "Glow", "Wireframe",
+                        "Shaded", "Hologram", "Gradient", "Rim light", "Galaxy"),
+                Setting.choice("hidden-style", "Occluded material", "Same as visible", "Same as visible", "Flat", "Glow",
+                        "Rim light", "Wireframe", "Hologram"),
+                Setting.bool("edges", "Outline model edges", false),
                 Setting.bool("players", "Players", true),
                 Setting.bool("hostiles", "Hostile mobs", true),
                 Setting.bool("passives", "Non-hostile mobs", false),
@@ -35,6 +39,7 @@ public final class ChamsSettings {
         settings.addAll(EspSettings.colors("players-hidden", "Occluded players", "Violet"));
         settings.addAll(EspSettings.colors("hostiles-hidden", "Occluded hostile mobs", "Orange"));
         settings.addAll(EspSettings.colors("passives-hidden", "Occluded non-hostile mobs", "Blue"));
+        settings.addAll(EspSettings.colors("secondary", "Secondary material", "Violet"));
         return List.copyOf(settings);
     }
 }

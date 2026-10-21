@@ -80,6 +80,17 @@ tasks.register('wingPolicyCheck', JavaExec) {
     mainClass = 'dev.analyzer.cosmetic.WingPolicySelfTest'
 }
 tasks.named('check') { dependsOn tasks.named('wingPolicyCheck') }
+tasks.register('fightBotCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.gameplay.FightBotPolicySelfTest'
+}
+tasks.register('strawHatCheck', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.analyzer.cosmetic.StrawHatSelfTest'
+}
+tasks.named('check') { dependsOn tasks.named('fightBotCheck'), tasks.named('strawHatCheck') }
 tasks.register('chamsCheck', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath

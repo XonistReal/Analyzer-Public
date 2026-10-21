@@ -113,7 +113,51 @@ public final class CombatSettings {
             Setting.choice("hold-key", "Hold key while hovering", "Sneak", "Sneak", "Use", "None"),
             Setting.number("hover-ticks", "Hover before swapping (ticks)", 3, 0, 20, 1),
             Setting.number("delay", "Minimum interval between swaps (ticks)", 6, 1, 40, 1))));
+        add(modules, "fight-bot", "Fight Bot", "Chase a filtered target in range, circle it, jump for falling critical hits and attack with server-facing aim while your camera stays free.", fightBot());
         return List.copyOf(modules);
+    }
+    /** Fight Bot owns aim, melee and movement while it has a target; its camera stays free in Silent movement. */
+    private static List<Setting<?>> fightBot() {
+        List<Setting<?>> bot = targets(3, 6);
+        bot.replaceAll(setting -> switch (setting.id()) {
+            case "range" -> Setting.number("range", "Attack reach from eyes to hitbox", 3, 1, 6, 0.25);
+            case "fov" -> Setting.number("fov", "Target field of view (degrees)", 360, 10, 360, 10);
+            default -> setting;
+        });
+        bot.add(Setting.number("chase-range", "Chase range (blocks)", 12, 3, 16, 0.5));
+        rotation(bot, 40);
+        bot.replaceAll(setting -> switch (setting.id()) {
+            case "rotation" -> Setting.choice("rotation", "Rotation", "Silent movement", "Silent movement", "Client");
+            case "aim-point" -> Setting.choice("aim-point", "Aim point", "Chest", "Nearest", "Chest", "Head");
+            default -> setting;
+        });
+        bot.addAll(List.of(
+            Setting.number("silent-settle", "Wait after first silent look (ticks)", 1, 0, 10, 1),
+            Setting.number("cooldown", "Required attack charge", 0.95, 0.5, 1, 0.05),
+            Setting.number("hurt-time", "Maximum target hurt time (ticks)", 10, 0, 10, 1),
+            Setting.bool("auto-weapon", "Hold the best hotbar weapon", true),
+            Setting.bool("weapon-only", "Only attack with a melee weapon", false),
+            Setting.number("settle-ticks", "Wait after changing held weapon (ticks)", 1, 0, 10, 1),
+            Setting.bool("pause-using", "Pause attacks while using an item", true),
+            Setting.bool("pause-mining", "Pause while breaking a block", true),
+            Setting.choice("swing", "Swing animation", "Client", "Client", "Packet", "None"),
+            Setting.choice("movement", "Movement", "Chase and circle", "Chase and circle", "Chase only", "Stand still"),
+            Setting.number("keep-distance", "Fighting distance (blocks)", 2.6, 1.5, 3.5, 0.1),
+            Setting.choice("circle", "Circle direction", "Away from their aim", "Away from their aim", "Clockwise", "Counter-clockwise"),
+            Setting.number("danger-cone", "Their aim cone to avoid (degrees)", 50, 0, 90, 5),
+            Setting.bool("back-off", "Back off while your attack recharges", false),
+            Setting.bool("sprint", "Sprint", true),
+            Setting.bool("chase-hops", "Sprint-jump while chasing", true),
+            Setting.bool("jump-obstacles", "Jump onto one-block obstacles", true),
+            Setting.bool("swim", "Swim up in water", true),
+            Setting.number("max-drop", "Never walk off drops deeper than (blocks)", 3, 0, 10, 1),
+            Setting.bool("avoid-hazards", "Avoid lava, fire, cactus and magma", true),
+            Setting.bool("manual-override", "Your movement keys take over", true),
+            Setting.bool("criticals", "Jump for critical hits", true),
+            Setting.number("crit-lead", "Jump before full charge (ticks)", 6, 0, 10, 1),
+            Setting.bool("crit-only", "Only attack when a critical hit is possible", false),
+            Setting.number("stop-health", "Stop fighting at or below health (0 = never)", 0, 0, 36, 1)));
+        return bot;
     }
     private static List<Setting<?>> targets(double range, double maximum) {
         return new ArrayList<>(List.of(Setting.bool("players", "Players", true),
