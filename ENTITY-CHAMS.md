@@ -1,3 +1,21 @@
+# Entity Chams — 0.16.0 beta materials
+
+0.16.0 adds five materials, a separate material for occluded models, a secondary color and an optional edge outline. Everything below the 0.12.0 heading still applies; saved configurations keep their material and colors.
+
+| New material | Appearance |
+| --- | --- |
+| Shaded | The category color with soft wrapped key light and sky fill, so models read as 3D shapes |
+| Hologram | Scanlines, a sweeping light band and iridescent edges, blending toward the secondary color |
+| Gradient | Two colors flowing diagonally across the model, lightly shaded |
+| Rim light | Clear center with a bright silhouette edge |
+| Galaxy | A slowly drifting nebula between the two colors with twinkling stars |
+
+- **Occluded material** chooses the material for the through-walls pass: *Same as visible*, Flat, Glow, Rim light, Wireframe or Hologram. A visible Metallic model with an occluded Rim light, for example, keeps walls readable without a solid blob behind them.
+- **Secondary material color** is the second color for Hologram, Gradient and Galaxy. It appears only when one of those materials is in use.
+- **Outline model edges** draws the model's real face edges over any material except Wireframe, using the same width as Wireframe.
+
+All ten materials are one GLSL program (`chams.fsh`) with the same depth passes, capture limits and GL-state restoration as before. `ChamsGlChecks` draws every material and each occluded material in the native GL check; that check needs a running client and was not rerun for this beta. See [VALIDATION.md](VALIDATION.md).
+
 # Entity Chams — 0.12.0
 
 Enable **Render → Entity Chams** to apply original GLSL materials to the actual animated living-entity models. Entity ESP and Tracers remain independent: use models, debug boxes, lines, or a combination. Chams starts disabled and does not change an existing profile's other modules.

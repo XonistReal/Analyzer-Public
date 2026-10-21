@@ -1,3 +1,7 @@
+## 0.16.0-beta.1 - First beta: Fight Bot, Straw Hat, Click GUI and new materials
+
+Adds **Combat → Fight Bot**, which chases, circles and attacks a filtered target with timed falling critical hits and silent server-facing aim while the camera stays free, using movement correction so walking matches the transmitted yaw. Adds the original **Cosmetics → Straw Hat** (Straw / Lacquered / Glass / Rainbow glass). **Menu layout** becomes **Studio / Click GUI / Compact**: Click GUI is a true floating-panel GUI, and the former category board is Compact. Entity Chams gains Shaded, Hologram, Gradient, Rim light and Galaxy, a separate occluded material, a secondary color and edge outlines. Entity/Storage ESP gain Filled boxes, and Entity ESP gains a native-outline Glow. Built and checked in GitHub Actions; not natively play-tested. [Fight Bot](FIGHT-BOT.md) · [Straw Hat](STRAW-HAT.md) · [Chams](ENTITY-CHAMS.md) · [Validation](VALIDATION.md).
+
 ## 0.15.0 - Articulated wings and public documentation
 
 Adds opt-in local third-person Angel, Dragon, Bat and Parrot wings on the approved raised upper-back mount, animation and fit controls, preserved MIT source attribution and original textures. New ornate halo/crown/diadem concepts remain review-only. Public downloads have portable Prism defaults; the generated module catalogue lists every setting, default and supported range/choice. [Wings](WINGS.md) · [Hat concepts](HAT-DESIGNS.md) · [Validation](VALIDATION.md).

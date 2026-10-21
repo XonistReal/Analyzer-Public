@@ -4,7 +4,7 @@
 
 ## Find a module
 
-Press **Right Shift** in game or choose **Modules** on the custom Home screen. Search by name or browse the categories. **Studio** uses top tabs and expandable cards; **Click GUI** uses draggable category columns. Both expose the same module registry and saved values.
+Press **Right Shift** in game or choose **Modules** on the custom Home screen. Search by name or browse the categories. **Studio** uses top tabs and expandable cards. **Click GUI** shows free-floating category panels over the game: left-click a module to toggle it, right-click it for its settings, drag a panel's header to move it and right-click the header to collapse it. **Compact** is a shader board of draggable category columns. All three expose the same module registry and saved values.
 
 A module's switch enables or disables its behavior. Expanding its settings is independent of the switch. Gameplay automation is off on a fresh install; visual defaults and the interface have their own defaults. The [catalogue](../MODULES.md) shows the exact state of every module on a fresh configuration.
 
@@ -25,7 +25,7 @@ For precise numeric input, click the displayed value or right-click the slider r
 
 ## Appearance and HUD
 
-Open **HUD Studio** for the current **Studio / Click GUI** layouts, **Glass / Solid** menu material, **Glass / Classic / Minimal / Neon** themes and **Rose / Mint / Violet / Gold** accents. Menu and HUD themes are independent. Classic is a theme; retired Workspace, Classic and Compact layout values migrate to Studio when loaded.
+Open **HUD Studio** for the **Studio / Click GUI / Compact** layouts, **Glass / Solid** menu material, **Glass / Classic / Minimal / Neon** themes and **Rose / Mint / Violet / Gold** accents. Menu and HUD themes are independent. Classic is a theme; retired Workspace and Classic layout values migrate to Studio when loaded.
 
 Choose **Edit HUD** to drag widgets and adjust scale or snapping. Right-click toggles a widget. **Watermark → Logo** selects exactly one of the Analyzer wordmark or A monogram. [Surface rendering](../LIQUID-GLASS.md) and [Home controls](../HOME-SCREEN.md) explain the related visual options.
 

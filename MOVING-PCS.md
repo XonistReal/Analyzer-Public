@@ -1,6 +1,6 @@
 # Analyzer on another PC
 
-The public repository is [XonistReal/Analyzer](https://github.com/XonistReal/Analyzer-Public). **Main contains the complete current 0.15.0 project**, including tests, shaders, supplied branding, tools and documentation. [Version history](VERSION-HISTORY.md) distinguishes preserved original snapshots, recovered runtime-source snapshots and binaries whose exact sources were not saved.
+The public repository is [XonistReal/Analyzer](https://github.com/XonistReal/Analyzer-Public). **Main contains the complete current 0.16.0-beta.1 project**, including tests, shaders, supplied branding, tools and documentation. [Version history](VERSION-HISTORY.md) distinguishes preserved original snapshots, recovered runtime-source snapshots and binaries whose exact sources were not saved.
 
 ## Play through Prism
 

@@ -15,9 +15,10 @@ Use your own Minecraft account. The release does not include Minecraft, account 
 
 ## Prism Launcher
 
-1. Download `Analyzer-<version>-Prism-1.21.4.zip` from the [latest release](https://github.com/XonistReal/Analyzer-Public/releases/latest).
+1. Download `Analyzer-<version>-Prism-1.21.4.zip` from the [latest release](https://github.com/XonistReal/Analyzer-Public/releases/latest). The 0.16.0 beta ships without a Prism ZIP; use [`Analyzer-0.15.0-Prism-1.21.4.zip`](https://github.com/XonistReal/Analyzer-Public/releases/tag/v0.15.0) and then follow step 4.
 2. Drag the ZIP onto Prism, or choose **Add Instance → Import** and select it.
 3. Select your Minecraft account and Java 21 in Prism, then launch the instance.
+4. If the release you want has no Prism ZIP, close Minecraft, open the instance's `minecraft/mods` folder (**Folder → Minecraft folder** in Prism) and replace the Analyzer JAR with that release's `analyzer-<version>.jar`. Fabric API stays the same.
 
 The archive contains Analyzer and Fabric API, and inherits your Prism Java selection. Public packages leave the optional local development updater disconnected. The included updater does not download GitHub releases automatically.
 

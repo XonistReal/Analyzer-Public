@@ -6,7 +6,7 @@ body:
     attributes:
       label: Versions and other mods
       description: Analyzer version, Minecraft version, Fabric Loader, Fabric API and any other installed mods.
-      placeholder: Analyzer 0.15.0, Minecraft 1.21.4, Fabric Loader 0.16.14…
+      placeholder: Analyzer 0.16.0-beta.1, Minecraft 1.21.4, Fabric Loader 0.16.14…
     validations:
       required: true
   - type: textarea

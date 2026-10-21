@@ -50,7 +50,7 @@ def main() -> None:
         "ESP-READABILITY.md", "GAMEPLAY-SETTINGS.md", "XRAY.md", "MODULES.md",
         "MODULES.json", "ROADMAP.md", "RESEARCH.md", "RESEARCH-VISUALS.md",
         "RESEARCH-COSMETICS.md", "VALIDATION.md", "LICENSE", "FONT-LICENSE.txt",
-        "THIRD-PARTY.md", "DEPENDENCY-SOURCES.md", "LATO-OFL.txt", "WINGS.md", "WINGS-MIT-LICENSE.txt", "HAT-DESIGNS.md", "PUBLICATION.md",
+        "THIRD-PARTY.md", "DEPENDENCY-SOURCES.md", "LATO-OFL.txt", "WINGS.md", "WINGS-MIT-LICENSE.txt", "HAT-DESIGNS.md", "FIGHT-BOT.md", "STRAW-HAT.md", "PUBLICATION.md",
         "CONTRIBUTING.md", "docs/INSTALLATION.md", "docs/MODULE-GUIDE.md", "docs/DEVELOPING.md",
     )
     optional_logs = ("VALIDATION.log", "PIXEL-VALIDATION.log")

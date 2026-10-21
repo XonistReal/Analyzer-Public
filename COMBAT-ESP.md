@@ -1,3 +1,5 @@
+> **0.16.0 beta:** [Fight Bot](FIGHT-BOT.md) is a new Combat module that chases, circles and crits a target while your camera stays free. **Box style** adds **Filled** (translucent faces under the outline, with **Fill opacity**) to Entity and Storage ESP, and **Glow** to Entity ESP. Glow hands accepted entities to Minecraft's own entity-outline pass in their ESP color; like vanilla glowing it shows through walls, and line width/opacity don't apply. It only changes how your client draws the entity, never its glowing flag or team. Labels, health bars and the radar still work with Filled and Glow.
+
 In **0.13.2**, Kill Aura adds three original server-facing rotation modes while preserving the visible camera and normal reach/charge/ownership gates. See [Silent aim controls and limits](SILENT-AIM.md).
 
 > **0.13.0:** [Finders](FINDERS.md) adds original equivalents for all 27 Glazed ESP module families, with local scoped history and native debug geometry.

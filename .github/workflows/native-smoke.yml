@@ -1,0 +1,80 @@
+name: Native smoke
+
+# Launches the development client under a virtual display (Mesa software OpenGL) and runs
+# Analyzer's self-checking native acceptance fixtures. Each fixture logs a completion marker
+# and stops the client; a missing marker, crash or timeout fails the job. Run it from the
+# Actions tab, or push any branch named native-smoke/<name> to test that commit.
+on:
+  push:
+    branches: ['native-smoke/**']
+  workflow_dispatch:
+    inputs:
+      smokes:
+        description: Space-separated run names (blank = default set)
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - run: chamsSmoke
+            marker: ANALYZER_CHAMS_COMPLETE
+          - run: liquidLayoutSmoke
+            marker: ANALYZER_LIQUID_LAYOUT_SMOKE_COMPLETE
+          - run: silentAimSmoke
+            marker: ANALYZER_SILENT_AIM_COMPLETE
+          - run: gameplaySmoke
+            marker: ANALYZER_GAMEPLAY_SETTINGS_SMOKE_COMPLETE
+          - run: wingsSmoke
+            marker: ANALYZER_WINGS_COMPLETE
+          - run: uiSmoke
+            marker: ANALYZER_SMOKE_UI_INTERACTIONS_COMPLETE
+    steps:
+      - name: Select fixture
+        id: select
+        run: |
+          wanted="${{ github.event.inputs.smokes }}"
+          if [ -z "$wanted" ] || [[ " $wanted " == *" ${{ matrix.run }} "* ]]; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "go=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Check out source
+        if: steps.select.outputs.go == 'true'
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Java 21
+        if: steps.select.outputs.go == 'true'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Install virtual display and software OpenGL
+        if: steps.select.outputs.go == 'true'
+        run: sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1-mesa-dri libglx-mesa0 libegl1 > /dev/null
+      - name: Run ${{ matrix.run }}
+        if: steps.select.outputs.go == 'true'
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          task="run$(echo '${{ matrix.run }}' | sed 's/^./\U&/')"
+          set +e
+          timeout 1800 xvfb-run -a -s "-screen 0 1920x1080x24" bash ./gradlew --no-daemon "$task" > gradle-run.log 2>&1
+          status=$?
+          set -e
+          log=$(ls -t run*/logs/latest.log 2>/dev/null | head -1)
+          [ -n "$log" ] || log=gradle-run.log
+          esc() { tr -d '\r' | sed -e 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print substr($0,1,300)}'; }
+          if grep -q "${{ matrix.marker }}" "$log"; then
+            echo "::notice title=${{ matrix.run }} passed::$(grep -h "${{ matrix.marker }}" "$log" | tail -1 | cut -c1-1500 | esc)"
+            exit 0
+          fi
+          echo "::error title=${{ matrix.run }} failed (exit $status)::$(grep -hE 'ANALYZER_|Exception|Error|FATAL|ERROR|Caused by|at dev\.analyzer|failed|FAIL' "$log" gradle-run.log | grep -v '^\s*$' | tail -40 | esc)"
+          echo "::error title=${{ matrix.run }} log tail::$(tail -25 "$log" | esc)"
+          exit 1

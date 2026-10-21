@@ -1,5 +1,7 @@
 # Original ornate hat designs — selection pending
 
+> **0.16.0 beta:** a separate, wearable [Straw Hat](STRAW-HAT.md) is now in **Cosmetics**. The three ornate concepts below are still review-only.
+
 The user approved integrating the four wing appearances and asked for richer hat designs instead of the basic shortlist hats. Two supplied Temple photographs are visual direction for an elevated, luminous halo and a detailed velvet crown. The new geometry in `design/hats-review` is original procedural concept work; no Temple or Lunar models, textures, jewelry patterns, shaders or art are copied.
 
 These three hats are **review-only**. They are absent from wearable rendering, runtime resources and the installed cosmetic choices until the user selects a design. The earlier downloaded eight-candidate board and its original model/license bytes remain unchanged.
@@ -18,4 +20,4 @@ The preview uses actual Three.js 0.160.1 geometry and physically lit materials. 
 
 Selecting a checkbox records a review preference locally; it does not equip or install a hat. Native integration, final effect settings, equipment clipping and production geometry budgets follow selection.
 
-Download `Analyzer-Hat-Designs-0.15.0.zip` from the [current release](https://github.com/XonistReal/Analyzer-Public/releases/latest), extract it and open `index.html` in a browser. The review needs internet access for the pinned Three.js module. Geometry/fit validation samples 600 animation frames; a completed native hat-render acceptance or full browser interaction matrix is not claimed.
+Download `Analyzer-Hat-Designs-0.15.0.zip` from the [0.15.0 release](https://github.com/XonistReal/Analyzer-Public/releases/tag/v0.15.0), extract it and open `index.html` in a browser. The review needs internet access for the pinned Three.js module. Geometry/fit validation samples 600 animation frames; a completed native hat-render acceptance or full browser interaction matrix is not claimed.

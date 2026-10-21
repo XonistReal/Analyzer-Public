@@ -1,12 +1,13 @@
 # Analyzer in Prism Launcher
 
-Analyzer **0.15.0** uses **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Minecraft, accounts, saved worlds and personal configuration are not included. Native Automation requires no Baritone mod.
+Analyzer **0.16.0-beta.1** uses the same **Minecraft 1.21.4**, **Fabric Loader 0.16.14**, **Fabric API 0.119.4+1.21.4** and **Java 21**. The native ZIP contains Analyzer and Fabric API as its two mods. Minecraft, accounts, saved worlds and personal configuration are not included. Native Automation requires no Baritone mod.
 
 ## Install a release
 
-1. Download `Analyzer-0.15.0-Prism-1.21.4.zip` from [Releases](https://github.com/XonistReal/Analyzer-Public/releases/latest).
+1. Download `Analyzer-0.15.0-Prism-1.21.4.zip` from the [0.15.0 release](https://github.com/XonistReal/Analyzer-Public/releases/tag/v0.15.0). The 0.16.0 beta is published as a mod JAR without its own Prism ZIP.
 2. Drag it onto Prism or use **Add Instance → Import**.
-3. Select your Minecraft account and Java 21 in Prism, then launch.
+3. Select your Minecraft account and Java 21 in Prism.
+4. For the beta, close Minecraft, open the instance's `minecraft/mods` folder and replace `analyzer-0.15.0*.jar` with `analyzer-0.16.0-beta.1.jar` from the [latest release](https://github.com/XonistReal/Analyzer-Public/releases/latest). Keep Fabric API. Then launch.
 
 Public ZIPs inherit Prism's Java selection, have no fixed machine paths and leave the optional Windows local-development updater disabled. They contain no platform-specific pre-launch command. To update an existing instance manually, close Minecraft and replace only its Analyzer mod JAR with the current release JAR. Keep one Analyzer JAR in `minecraft/mods` and preserve your worlds, configurations and unrelated mods.
 
