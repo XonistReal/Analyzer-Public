@@ -95,7 +95,7 @@ public final class BetaSmoke {
         }
         track(mc);
         AnalyzerCore core = AnalyzerClient.CORE;
-        if (t >= 20 && t <= 330 && (t % 10 == 0 || t >= 40 && t <= 110)) trace(mc);
+        if (t >= 20 && t <= 330 && t % 10 == 0) trace(mc);
         switch (t++) {
             case 20 -> {
                 // The target is ten blocks behind the camera; Fight Bot must walk there itself.

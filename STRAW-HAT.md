@@ -24,4 +24,4 @@ The three ornate concepts in [HAT-DESIGNS.md](HAT-DESIGNS.md) remain review-only
 
 ## Verification
 
-`StrawHatSelfTest` checks the mesh across the full size, height, lift and helmet ranges: 690,207 assertions covering head clearance, brim extent, quad counts with and without the strap, finite vertices, texture coordinates, outward unit normals, the texture resource and the module's defaults. It runs in Gradle `check`. The in-game render has not been natively captured for this beta. See [VALIDATION.md](VALIDATION.md).
+`StrawHatSelfTest` checks the mesh across the full size, height, lift and helmet ranges: 690,207 assertions covering head clearance, brim extent, quad counts with and without the strap, finite vertices, texture coordinates, outward unit normals, the texture resource and the module's defaults. It runs in Gradle `check`. The native `runBetaSmoke` fixture confirms that both Straw and Glass draw on the posed third-person player, and it saves a capture of each. See [VALIDATION.md](VALIDATION.md).

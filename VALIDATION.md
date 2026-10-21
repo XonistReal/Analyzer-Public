@@ -1,3 +1,41 @@
+# First beta — October 21, 2026
+
+Analyzer **0.16.0-beta.1** adds:
+
+- **Combat → Fight Bot**
+- **Cosmetics → Straw Hat**
+- **Studio / Click GUI / Compact** menu layouts
+- Five chams materials, with a separate occluded material, a secondary color and edges
+- **Filled** and **Glow** ESP styles
+
+[Fight Bot](FIGHT-BOT.md) · [Straw Hat](STRAW-HAT.md) · [Chams](ENTITY-CHAMS.md) · [ESP](COMBAT-ESP.md).
+
+Fabric and Mojang hosts were unreachable from the authoring environment, so every build and native check below ran on GitHub Actions (ubuntu-latest, Temurin 21). Java 21 `build moduleCatalog` passes every Gradle `check` suite, and the committed catalogue matches **160 modules / 1,931 settings**. Two suites are new: `FightBotPolicySelfTest` passes **11,605** assertions and `StrawHatSelfTest` **690,207**. Updated suites pass as well: `CoreSelfTest` 2,301, `ChamsPolicySelfTest` 1,065, `SilentAimPolicySelfTest` 1,414 and `GameplayConfigSelfTest` 597.
+
+The [native smoke workflow](.github/workflows/native-smoke.yml) runs real development clients and integrated servers under Xvfb with Mesa software OpenGL:
+
+- **`runBetaSmoke` — 40 checks, 10 captures.**
+  - **Fight Bot:** a 300-health husk stands ten blocks behind a camera facing away. Fight Bot chased it and landed **15 server-side hits** in about 15 seconds, taking it to 145 health. Each hit did **10.33**, a falling critical; a plain hit through the husk's armor does about 6.9. The real camera yaw never moved.
+  - **Straw Hat:** Straw and Glass draw on the posed player.
+  - **ESP:** Filled ESP leaves clean GL state. With Glow ESP, `MinecraftClient.hasOutline` and `Entity.getTeamColorValue` answer for the husk in its ESP color and return to native behavior when disabled.
+  - **Chams:** Hologram and Galaxy draw on the husk with a Rim light occluded material and edges.
+  - **Menus:** In the Click GUI, left-click toggles a Movement module on and off, right-click opens the settings flyout, Escape closes only the flyout, and a header drag saves the panel position. Compact and Studio open with live controls.
+- **`runChamsSmoke` passes.** It includes `ChamsGlChecks`, which compiles and draws all ten materials, plus five occluded-material variants with edges, without GL errors and with every state restored.
+- **`runSilentAimSmoke` passes 425 checks**, including real server attacks and damage through the changed silent-rotation ownership.
+- **`runWingsSmoke` passes 39 checks** through the updated cosmetic renderer.
+- **Mixins:** every client launch applied all mixins, including the two Glow ESP hooks and the two movement-correction hooks.
+
+The first `runBetaSmoke` run showed Fight Bot reaching the target without ever attacking. On 1.21.4 the client player's `fallDistance` stays 0 in the air, so the falling-critical window never opened. This was fixed before release: the bot now measures the drop from the jump's peak. The next run measured the critical hits above.
+
+**Not covered:**
+
+- `runUiSmoke`, `runGameplaySmoke` and `runLiquidLayoutSmoke` fail on the CI runner at tick-timed UI steps for unmodified 0.15.0 as well, so they provide no evidence for this release. A baseline run on the same runner confirmed this.
+- Hardware GPU drivers, Windows/macOS, Iris/Sodium, public servers or anti-cheat, and moving player targets are untested.
+- The Criticals module's own falling check uses the same client `fallDistance` and was not changed or retested.
+- No Prism ZIP is published for this beta. It needs native acceptance on the Windows machine first.
+
+## Earlier 0.15.0 evidence
+
 # Articulated wings and public delivery — October 20, 2026
 
 Analyzer **0.15.0** adds opt-in **Cosmetics → Wings** with Angel / Dragon / Bat / Parrot, Auto / Flap / Idle / Glide / Still, animation speed/strength and scale/height/back-offset controls. The approved attachment is raised three Minecraft pixels and follows the native posed body. Four original textures share Paul Fulham's supplied 17-part MIT rig. [Controls and attribution](WINGS.md).

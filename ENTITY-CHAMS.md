@@ -14,7 +14,7 @@
 - **Secondary material color** is the second color for Hologram, Gradient and Galaxy. It appears only when one of those materials is in use.
 - **Outline model edges** draws the model's real face edges over any material except Wireframe, using the same width as Wireframe.
 
-All ten materials are one GLSL program (`chams.fsh`) with the same depth passes, capture limits and GL-state restoration as before. `ChamsGlChecks` draws every material and each occluded material in the native GL check; that check needs a running client and was not rerun for this beta. See [VALIDATION.md](VALIDATION.md).
+All ten materials are one GLSL program (`chams.fsh`) with the same depth passes, capture limits and GL-state restoration as before. In the native `runChamsSmoke` fixture, `ChamsGlChecks` compiles and draws all ten materials, plus each occluded material with edges, on a real OpenGL context: no GL errors, and every state restored. `runBetaSmoke` draws Hologram and Galaxy on a live husk with a Rim light occluded material and edges. Both runs used Mesa software rendering in CI. Drivers on Windows and macOS were not part of this run. See [VALIDATION.md](VALIDATION.md).
 
 # Entity Chams — 0.12.0
 

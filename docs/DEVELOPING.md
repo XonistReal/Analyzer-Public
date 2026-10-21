@@ -66,7 +66,7 @@ git diff -- MODULES.md MODULES.json
 
 Review and commit both generated files. [`ModuleCatalog`](../src/test/java/dev/analyzer/core/ModuleCatalog.java) exports the actual registry; do not hand-edit generated settings tables. The [GitHub workflow](../.github/workflows/build.yml) builds and fails if regenerating the catalogue changes committed output.
 
-Native smoke tasks such as `runStudioSmoke`, `runSkyboxSmoke` and `runWingsSmoke` launch actual development clients and may create fixture worlds/screenshots. They require a graphical environment and use the run directories configured in `build.gradle`. They are separate from headless CI. Installed release builds do not activate the development harness. [VALIDATION.md](../VALIDATION.md) records what was actually observed for each delivery; a policy test is not evidence of every terrain, renderer or public server working.
+Native smoke tasks such as `runStudioSmoke`, `runSkyboxSmoke` and `runWingsSmoke` launch actual development clients and may create fixture worlds/screenshots. They require a graphical environment and use the run directories configured in `build.gradle`. They are separate from headless CI; the on-demand [native smoke workflow](../.github/workflows/native-smoke.yml) runs a selection of them under Xvfb with software OpenGL, including `runBetaSmoke` for the 0.16 additions. Installed release builds do not activate the development harness. [VALIDATION.md](../VALIDATION.md) records what was actually observed for each delivery; a policy test is not evidence of every terrain, renderer or public server working.
 
 ## Local development updates
 

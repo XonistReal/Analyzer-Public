@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       smokes:
-        description: Space-separated run names (blank = default set)
+        description: Space-separated run names (blank = betaSmoke chamsSmoke silentAimSmoke wingsSmoke)
         required: false
         default: ''
 
@@ -43,8 +43,11 @@ jobs:
       - name: Select fixture
         id: select
         run: |
+          # The tick-timed UI fixtures (uiSmoke, gameplaySmoke, liquidLayoutSmoke) also fail for 0.15.0 on
+          # this runner: under software rendering a frame can outlast the next scripted tick. Name them to run.
           wanted="${{ github.event.inputs.smokes }}"
-          if [ -z "$wanted" ] || [[ " $wanted " == *" ${{ matrix.run }} "* ]]; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "go=false" >> "$GITHUB_OUTPUT"; fi
+          wanted="${wanted:-betaSmoke chamsSmoke silentAimSmoke wingsSmoke}"
+          if [[ " $wanted " == *" ${{ matrix.run }} "* ]]; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "go=false" >> "$GITHUB_OUTPUT"; fi
       - name: Check out source
         if: steps.select.outputs.go == 'true'
         uses: actions/checkout@v7

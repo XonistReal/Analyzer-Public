@@ -52,4 +52,6 @@ The user asked for an automated fight module like those in current clients. Thes
 
 ## Verification
 
-`FightBotPolicySelfTest` covers 11,605 deterministic assertions: key mapping in all directions, chase/circle phases, orbit direction and distance correction, critical jump timing and sprint release, back-off timing, drop limits and health stops. It runs in the Gradle `check` task. In-game behavior on servers has not been natively verified for this beta. See [VALIDATION.md](VALIDATION.md).
+`FightBotPolicySelfTest` covers 11,605 deterministic assertions: key mapping in all directions, chase/circle phases, orbit direction and distance correction, critical jump timing and sprint release, back-off timing, drop limits and health stops. It runs in the Gradle `check` task.
+
+The native `runBetaSmoke` fixture runs a real client and integrated server. A 300-health husk stands ten blocks behind a camera facing the other way. Fight Bot walked to it and landed 15 server-side hits in about 15 seconds. Every hit was a falling critical (10.33 damage each, against about 6.9 for a plain hit through the husk's armor), and the real camera yaw never moved. That run also found and fixed a bug: on 1.21.4 the client's fall distance stays 0 in the air, so the bot now measures the drop from the jump's peak. Behavior on public servers and against moving players has not been tested. See [VALIDATION.md](VALIDATION.md).
