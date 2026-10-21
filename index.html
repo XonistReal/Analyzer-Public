@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Analyzer Client</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Analyzer is a free, open-source Fabric utility client for Minecraft Java 1.21.4, made for anarchy and Donut SMP, with a liquid-glass menu and 158 modules.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Silkscreen&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: frosted instrument panels floating over a live night sky and block floor; one 1180px column, a 12-track bento for features */
+:root {
+  --bg: #0a0910;
+  --ink: #f7f5f8;
+  --ink-2: #dcd8e2;
+  --muted: #bbb7c0;
+  --line: rgba(247, 245, 248, 0.13);
+  --accent: #db85da;
+  --accent-ink: #1a0d1a;
+  --fallback-glass: rgba(24, 20, 33, 0.64);
+  --f-display: "Unbounded", "Lato", system-ui, sans-serif;
+  --f-body: "Lato", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-pixel: "Silkscreen", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --t-xs: 12px;
+  --t-sm: 14px;
+  --t-md: 16px;
+  --t-lg: 18px;
+  --t-h3: 20px;
+  --t-tag: clamp(22px, 2.6vw, 30px);
+  --t-h2: clamp(28px, 4.2vw, 46px);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--bg); scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 var(--t-md)/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 30;
+  background: var(--bg);
+}
+::selection { background: var(--accent); color: var(--accent-ink); }
+a { color: inherit; }
+img { display: block; max-width: 100%; height: auto; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+h2 { font: 700 var(--t-h2)/1.08 var(--f-display); letter-spacing: -0.01em; }
+h3 { font: 700 var(--t-h3)/1.25 var(--f-display); letter-spacing: -0.005em; }
+p { margin: 0; }
+code { font-family: var(--f-mono); font-size: 0.92em; background: rgba(4, 3, 8, 0.45); border: 1px solid var(--line); border-radius: 6px; padding: 0.05em 0.4em; overflow-wrap: anywhere; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Scene layers */
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 40% at 18% 26%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 70%),
+    radial-gradient(50% 34% at 80% 20%, rgba(169, 147, 250, 0.28), transparent 70%),
+    radial-gradient(70% 45% at 50% 112%, rgba(121, 248, 204, 0.12), transparent 70%),
+    linear-gradient(#0e0b1a, #07060b);
+}
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; pointer-events: none; }
+.nav-shell, main, footer { position: relative; z-index: 1; }
+
+/* Glass surfaces: drawn by the WebGL pass; CSS stands in when WebGL is unavailable */
+[data-glass] { position: relative; border-radius: var(--r, 28px); }
+html:not(.gl) [data-glass] {
+  background: var(--fallback-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+}
+html:not(.gl) [data-glass="chip"] { background: rgba(255, 255, 255, 0.08); }
+html:not(.gl) [data-glass][data-accent],
+html:not(.gl) [data-glass][aria-pressed="true"],
+html:not(.gl) [data-glass][aria-selected="true"] { background: var(--accent); }
+
+.wrap { max-width: 1180px; margin-inline: auto; }
+.section { padding-block: clamp(64px, 9vw, 128px) 0; scroll-margin-top: 84px; }
+.eyebrow { font: 400 var(--t-xs)/1.2 var(--f-pixel); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.px { font: 400 11px/1.2 var(--f-pixel); letter-spacing: 0.06em; text-transform: uppercase; }
+.sec-head { max-width: 720px; display: grid; gap: 14px; margin-bottom: clamp(24px, 4vw, 40px); }
+.sec-head p:not(.eyebrow) { color: var(--ink-2); font-size: var(--t-lg); }
+.sec-head, .sec-head h2 { text-shadow: 0 2px 18px rgba(6, 4, 12, 0.7); }
+
+/* Nav: sticky bar uses CSS glass so it can frost the page content that scrolls under it */
+.nav-shell { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; padding-block: 14px; }
+.nav {
+  max-width: 1180px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-radius: 999px;
+  position: relative;
+  isolation: isolate;
+}
+.nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(40, 34, 54, 0.5), rgba(16, 13, 24, 0.42));
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 14px 34px -16px rgba(0, 0, 0, 0.7);
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 15px/1 var(--f-display); letter-spacing: 0.02em; margin-right: auto; }
+.brand img { width: 24px; height: 28px; filter: drop-shadow(0 0 8px rgba(243, 90, 242, 0.5)); }
+.nav-links { display: flex; gap: 2px; }
+.nav-links a { text-decoration: none; color: var(--ink-2); font-size: var(--t-sm); font-weight: 700; padding: 8px 12px; border-radius: 999px; }
+.nav-links a:hover { color: var(--ink); background: rgba(255, 255, 255, 0.07); }
+.nav-actions { display: flex; gap: 6px; }
+.nbtn { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 14px; border-radius: 999px; text-decoration: none; font: 700 var(--t-sm)/1 var(--f-body); color: var(--ink); background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16); }
+.nbtn:hover { background: rgba(255, 255, 255, 0.14); }
+.nbtn-accent { background: var(--accent); color: var(--accent-ink); }
+.nbtn-accent:hover { background: color-mix(in srgb, var(--accent) 86%, white); }
+.nbtn svg, .btn svg { width: 18px; height: 18px; flex: none; }
+
+/* Buttons */
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 22px;
+  --r: 999px;
+  text-decoration: none;
+  font: 700 15px/1 var(--f-body);
+  color: var(--ink);
+  transition: transform 0.2s ease;
+}
+.btn[data-accent] { color: var(--accent-ink); }
+.btn:active { transform: scale(0.97); }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; align-items: stretch; padding-block: clamp(12px, 3vw, 32px) 0; }
+.hero-copy { --r: 32px; padding: clamp(22px, 3vw, 38px); display: flex; flex-direction: column; gap: 18px; }
+.hero-copy h1 { --wm: clamp(240px, 29vw, 400px); line-height: 0; }
+.wordmark { width: var(--wm); max-width: none; margin: calc(var(--wm) * -0.085) 0 calc(var(--wm) * -0.09) calc(var(--wm) * -0.094); }
+.tagline { font: 500 var(--t-tag)/1.18 var(--f-display); letter-spacing: -0.01em; text-wrap: balance; }
+.lead { color: var(--muted); font-size: var(--t-lg); max-width: 34em; }
+.hint { color: var(--muted); font-size: var(--t-sm); line-height: 2.2; }
+.key { --r: 10px; display: inline-flex; align-items: center; vertical-align: middle; min-height: 30px; margin-inline: 4px; padding: 0 10px; font: 400 11px/1 var(--f-pixel); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink); white-space: nowrap; }
+.specs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: auto 0 0; padding-top: 18px; border-top: 1px solid var(--line); }
+.specs div { display: flex; flex-direction: column-reverse; gap: 2px; min-width: 0; }
+.specs dd { margin: 0; font: 700 clamp(18px, 2vw, 22px)/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.specs dt { color: var(--muted); font-size: var(--t-xs); }
+.frame { --r: 28px; margin: 0; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+.frame > img, .frame .compare { border-radius: 18px; }
+.frame figcaption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 0 10px 4px; color: var(--muted); font-size: var(--t-xs); }
+.frame figcaption .px { color: var(--ink-2); }
+.hero-shot { align-self: center; }
+.hero-shot img { aspect-ratio: 16 / 10; width: 100%; object-fit: cover; }
+
+/* Features bento */
+.bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.card { --r: 28px; padding: 22px 22px 10px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card > p:not(.tag) { color: var(--muted); }
+.tag { font: 400 11px/1.2 var(--f-pixel); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.more { align-self: flex-start; color: var(--ink); font-weight: 700; font-size: var(--t-sm); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); padding-bottom: 1px; }
+.more:hover { color: var(--accent); }
+.shot { margin: auto -12px 0; width: calc(100% + 24px); max-width: none; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 18px; }
+.card .more { margin-bottom: 8px; }
+.c-menus { grid-column: span 7; }
+.c-esp { grid-column: span 5; }
+.c-combat { grid-column: span 5; }
+.c-auto { grid-column: span 7; }
+.c-world { grid-column: span 5; }
+.c-privacy { grid-column: span 3; padding-bottom: 22px; }
+.c-cos { grid-column: span 4; }
+.c-privacy ul { list-style: none; margin: 4px 0 6px; padding: 0; display: grid; gap: 8px; font-size: var(--t-sm); color: var(--ink-2); }
+.c-privacy li, .side li { position: relative; padding-left: 16px; }
+.c-privacy li::before, .side li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 6px; height: 6px; background: var(--accent); }
+.c-privacy .more { margin-top: auto; margin-bottom: 0; }
+
+/* Glass section */
+.glass-sec { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: start; }
+.compare { position: relative; aspect-ratio: 16 / 10; overflow: hidden; --pos: 50%; }
+.compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.compare .compare-top { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+.compare-line { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; margin-left: -1px; background: rgba(255, 255, 255, 0.9); box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); pointer-events: none; }
+.compare-line::after { content: ""; position: absolute; top: 50%; left: 50%; width: 38px; height: 38px; margin: -19px 0 0 -19px; border-radius: 50%; background: rgba(20, 16, 28, 0.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 14px rgba(0, 0, 0, 0.4); }
+.ctag { position: absolute; top: 12px; padding: 6px 10px; border-radius: 8px; background: rgba(8, 6, 12, 0.72); color: var(--ink); font: 400 11px/1 var(--f-pixel); letter-spacing: 0.05em; text-transform: uppercase; pointer-events: none; }
+.ctag-l { left: 12px; }
+.ctag-r { right: 12px; }
+.compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.compare:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+.glass-copy { --r: 28px; padding: clamp(22px, 3vw, 32px); display: grid; gap: 16px; }
+.glass-copy > p:not(.eyebrow) { color: var(--muted); }
+.facts { margin: 0; display: grid; gap: 12px; padding-block: 4px; }
+.facts div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.facts dt { font: 700 var(--t-lg)/1.2 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.facts dd { margin: 0; color: var(--ink-2); font-size: var(--t-sm); }
+.picker { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+.picker-label { font-size: var(--t-sm); color: var(--ink-2); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatch { --r: 999px; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px 0 10px; border: 0; background: none; color: var(--ink); font: 700 var(--t-sm)/1 var(--f-body); cursor: pointer; transition: color 0.2s; }
+.swatch[aria-pressed="true"] { color: var(--accent-ink); }
+.swatch i { width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.25), 0 0 10px var(--c); }
+
+/* Anarchy section */
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.group { --r: 28px; padding: 24px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.group .tag { margin-bottom: 2px; }
+.mods { list-style: none; margin: 8px 0 0; padding: 0; display: grid; }
+.mods li { display: grid; gap: 2px; padding-block: 12px; border-top: 1px solid var(--line); }
+.mods strong { font-size: 15px; }
+.mods span { color: var(--muted); font-size: var(--t-sm); line-height: 1.5; }
+.private { --r: 28px; margin-top: 16px; padding: 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 28px; }
+.private > div { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.private > div:first-child p { color: var(--muted); font-size: var(--t-sm); }
+.private .mods { margin: 0; }
+.private .mods li { border-top: 0; padding-block: 0; }
+.note { grid-column: 1 / -1; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: var(--t-sm); }
+
+/* Gallery */
+.gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tile { --r: 22px; display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 10px; border: 0; background: none; color: var(--ink); text-align: left; cursor: zoom-in; transition: transform 0.25s ease; min-width: 0; }
+.tile:hover { transform: translateY(-3px); }
+.tile img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 15px; }
+.tile-cap { padding: 0 6px; color: var(--ink-2); }
+dialog { padding: 0; border: 0; background: transparent; color: var(--ink); max-width: min(1200px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: visible; }
+dialog::backdrop { background: rgba(6, 5, 10, 0.8); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.lb { margin: 0; display: grid; gap: 10px; }
+.lb img { border-radius: 16px; max-height: calc(100vh - 110px); width: auto; margin-inline: auto; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); }
+.lb figcaption { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--ink-2); font-size: var(--t-sm); }
+.lb-close { min-height: 38px; padding: 0 16px; border-radius: 999px; border: 0; background: rgba(255, 255, 255, 0.12); color: var(--ink); font: 700 var(--t-sm)/1 var(--f-body); cursor: pointer; }
+.lb-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Install */
+.reqs { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.reqs li { display: inline-flex; gap: 8px; align-items: baseline; padding: 7px 14px; border-radius: 999px; background: rgba(12, 10, 18, 0.55); box-shadow: inset 0 0 0 1px var(--line); font-size: var(--t-sm); color: var(--muted); }
+.reqs b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.install-grid { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: 16px; align-items: start; }
+.install-main { --r: 28px; padding: clamp(20px, 3vw, 30px); min-width: 0; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.tab { --r: 999px; min-height: 42px; padding: 0 18px; border: 0; background: none; color: var(--ink); font: 700 var(--t-sm)/1 var(--f-body); cursor: pointer; transition: color 0.2s; }
+.tab[aria-selected="true"] { color: var(--accent-ink); }
+.tabpanel { display: grid; gap: 16px; }
+.steps { margin: 0; padding-left: 1.6em; display: grid; gap: 12px; font-size: var(--t-lg); }
+.steps li { padding-left: 6px; }
+.steps li::marker { font: 400 13px var(--f-pixel); color: var(--accent); }
+.steps a, .tabpanel p a, .side a:not(.more) { color: var(--ink); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.tabpanel > p { color: var(--muted); font-size: var(--t-sm); }
+.code-wrap { position: relative; min-width: 0; }
+.code { margin: 0; padding: 18px 20px; padding-right: 96px; background: rgba(4, 3, 8, 0.5); border-radius: 16px; box-shadow: inset 0 0 0 1px var(--line); overflow-x: auto; font: 14px/1.75 var(--f-mono); color: var(--ink); }
+.code code { background: none; border: 0; padding: 0; font-size: inherit; overflow-wrap: normal; }
+.copy { --r: 999px; min-height: 34px; padding: 0 14px; border: 0; background: none; color: var(--ink); font: 700 13px/1 var(--f-body); cursor: pointer; }
+.code-wrap .copy { position: absolute; top: 10px; right: 10px; }
+.side { --r: 28px; padding: 24px; display: grid; gap: 14px; }
+.side ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; color: var(--ink-2); font-size: var(--t-sm); }
+
+/* Open source */
+.oss { --r: 32px; padding: clamp(24px, 4vw, 44px); display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(24px, 4vw, 48px); }
+.oss-copy { display: grid; gap: 16px; align-content: start; min-width: 0; }
+.oss-copy > p:not(.eyebrow) { color: var(--muted); font-size: var(--t-lg); }
+.clone { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.clone code { flex: 1; min-width: 0; display: block; padding: 10px 14px; border-radius: 12px; white-space: nowrap; overflow-x: auto; overflow-wrap: normal; font-size: 13px; }
+.links { list-style: none; margin: 0; padding: 0; display: grid; align-content: start; }
+.links li + li { border-top: 1px solid var(--line); }
+.links a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; padding-block: 14px; text-decoration: none; }
+.links b { font-size: var(--t-md); }
+.links span { grid-column: 1; color: var(--muted); font-size: var(--t-sm); }
+.links i { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-style: normal; color: var(--accent); transition: transform 0.2s; }
+.links a:hover b { color: var(--accent); }
+.links a:hover i { transform: translateX(4px); }
+
+/* Footer */
+.foot { padding-block: clamp(56px, 8vw, 96px) 40px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; color: var(--muted); font-size: var(--t-sm); }
+.foot-brand { display: flex; gap: 12px; align-items: flex-start; max-width: 520px; }
+.foot-brand img { width: 20px; height: 23px; flex: none; margin-top: 2px; }
+.foot nav { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.foot nav a { color: var(--ink-2); text-decoration: none; }
+.foot nav a:hover { color: var(--accent); }
+
+@media (max-width: 1000px) {
+  .bento > * { grid-column: span 6; }
+  .bento > .c-privacy { grid-column: 1 / -1; }
+  .trio { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 960px) {
+  .hero, .glass-sec, .install-grid, .oss { grid-template-columns: minmax(0, 1fr); }
+  .private { grid-template-columns: minmax(0, 1fr); }
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .nav-links { display: none; }
+}
+@media (max-width: 640px) {
+  .bento > * { grid-column: 1 / -1; }
+  .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 14px; }
+  .gallery { grid-template-columns: minmax(0, 1fr); }
+  .hide-sm { display: none; }
+  .nbtn { padding: 0 12px; }
+  .facts div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn, .tile, .links i, .swatch, .tab { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<header class="nav-shell">
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="#top"><img src="assets/monogram.webp" alt="" width="341" height="392"><span>Analyzer</span></a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#glass">Glass</a>
+      <a href="#anarchy">Anarchy</a>
+      <a href="#gallery">Screens</a>
+      <a href="#install">Install</a>
+    </div>
+    <div class="nav-actions">
+      <a class="nbtn" href="https://github.com/XonistReal/Analyzer-Public" target="_blank" rel="noopener" aria-label="Analyzer on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span class="hide-sm">GitHub</span></a>
+      <a class="nbtn nbtn-accent" href="https://github.com/XonistReal/Analyzer-Public/releases/latest" target="_blank" rel="noopener">Download</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero wrap" aria-label="Analyzer">
+    <div class="hero-copy" data-glass="sheet">
+      <p class="eyebrow">v0.15.0 · Minecraft Java 1.21.4 · Fabric</p>
+      <h1><img class="wordmark" src="assets/wordmark.webp" alt="Analyzer" width="1139" height="392"></h1>
+      <p class="tagline">The free, open-source client for anarchy and Donut&nbsp;SMP.</p>
+      <p class="lead">One liquid-glass menu holds every module: stash finders and ESP, crystal and anchor combat, native mining and building automation, server privacy and wearable wings. All of it is on GitHub under the MIT license.</p>
+      <div class="cta">
+        <a class="btn" data-glass="chip" data-accent href="https://github.com/XonistReal/Analyzer-Public/releases/latest" target="_blank" rel="noopener"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 3v10m0 0-4-4m4 4 4-4M4 16h12"/></svg>Download v0.15.0</a>
+        <a class="btn" data-glass="chip" href="https://github.com/XonistReal/Analyzer-Public" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View source</a>
+      </div>
+      <p class="hint">Press <kbd class="key" data-glass="chip">Right Shift</kbd> in game to open the menu.</p>
+      <dl class="specs">
+        <div><dt>modules</dt><dd>158</dd></div>
+        <div><dt>settings</dt><dd>1,839</dd></div>
+        <div><dt>categories</dt><dd>9</dd></div>
+        <div><dt>price</dt><dd>Free</dd></div>
+      </dl>
+    </div>
+    <figure class="hero-shot frame" data-glass="sheet" data-frost="0.55" data-tint="0.25">
+      <img src="assets/studio-glass.webp" alt="Analyzer's Studio menu in the Glass theme: combat modules on frosted cards over a blurred Minecraft world" width="1280" height="800">
+      <figcaption><span class="px">Studio · Glass theme</span><span>Captured in Minecraft 1.21.4</span></figcaption>
+    </figure>
+  </section>
+
+  <section id="features" class="section wrap">
+    <div class="sec-head">
+      <p class="eyebrow">What's inside</p>
+      <h2>Nine categories, one menu</h2>
+      <p>Studio lays modules out as cards with inline settings. Click GUI gives you draggable category columns. Search finds any module by name, and each area below links to its full docs.</p>
+    </div>
+    <div class="bento">
+      <article class="card c-menus" data-glass="sheet">
+        <p class="tag">HUD · 19 modules</p>
+        <h3>Menus and HUD</h3>
+        <p>Studio and Click GUI layouts, a custom Home screen and HUD widgets you drag into place. Glass, Classic, Minimal and Neon themes pair with Rose, Mint, Violet or Gold accents.</p>
+        <a class="more" href="https://github.com/XonistReal/Analyzer-Public/blob/main/docs/MODULE-GUIDE.md" target="_blank" rel="noopener">Menu guide →</a>
+        <img class="shot" src="assets/click-gui.webp" alt="Click GUI layout with Player, HUD and Client columns and a menu appearance panel" width="1280" height="800" loading="lazy">
+      </article>
+      <article class="card c-esp" data-glass="sheet">
+        <p class="tag">Render · 38 modules</p>
+        <h3>ESP and finders</h3>
+        <p>Entity and storage boxes, tracers locked to your crosshair, Advanced Stash Finder, Amethyst Finder and a local history of everything you've found.</p>
+        <a class="more" href="https://github.com/XonistReal/Analyzer-Public/blob/main/FINDERS.md" target="_blank" rel="noopener">Finders →</a>
+        <img class="shot" src="assets/esp-world.webp" alt="Entity ESP boxes with distance labels on mobs under an aurora sky" width="1400" height="788" loading="lazy">
+      </article>
+      <article class="card c-combat" data-glass="sheet">
+        <p class="tag">Combat 11 · HVH 7 · Movement 15</p>
+        <h3>Combat and movement</h3>
+        <p>Kill Aura with target filters and opt-in silent rotations, Crystal and Anchor Aura, Auto Totem and Hover Totem, plus Speed, Step, Glide and Elytra Boost.</p>
+        <a class="more" href="https://github.com/XonistReal/Analyzer-Public/blob/main/COMBAT-ESP.md" target="_blank" rel="noopener">Combat docs →</a>
+        <img class="shot" src="assets/combat.webp" alt="Target HUD reading Zombie, 3 m, with health bar, radar and active module list" width="1280" height="800" loading="lazy">
+      </article>
+      <article class="card c-auto" data-glass="sheet">
+        <p class="tag">Native · no Baritone</p>
+        <h3>Automation that asks first</h3>
+        <p>Type a goal like <q>get me 600 sand</q> or pick a schematic. Analyzer plans the mining, crafting and route with its own pathfinder, shows you the plan, and waits for you to press Start.</p>
+        <a class="more" href="https://github.com/XonistReal/Analyzer-Public/blob/main/AUTOMATION.md" target="_blank" rel="noopener">Automation docs →</a>
+        <img class="shot" src="assets/automation.webp" alt="Automation console with a new task form, route fields and a schematic build plan" width="1280" height="800" loading="lazy">
+      </article>
+      <article class="card c-world" data-glass="sheet">
+        <p class="tag">Chams · X-ray · Skybox</p>
+        <h3>World rendering</h3>
+        <p>Five chams materials on real posed models: Flat, Metallic, Glass, Glow and Wireframe. Three X-ray styles. Procedural skies or your own panorama and cubemap images.</p>
+        <a class="more" href="https://github.com/XonistReal/Analyzer-Public/blob/main/XRAY.md" target="_blank" rel="noopener">X-ray docs →</a>
+        <img class="shot" src="assets/xray.webp" alt="X-ray in Ores only mode showing diamond, redstone, lapis and gold ore blocks" width="1280" height="800" loading="lazy">
+      </article>
+      <article class="card c-privacy" data-glass="sheet">
+        <p class="tag">Client</p>
+        <h3>Privacy</h3>
+        <p>Server Privacy is on by default with eight protections, including:</p>
+        <ul>
+          <li>Reports a vanilla client brand</li>
+          <li>Blocks mod channel announcements</li>
+          <li>Guards translation and keybind probes</li>
+          <li>Checks resource-pack URLs and strips identifying headers</li>
+        </ul>
+        <a class="more" href="https://github.com/XonistReal/Analyzer-Public/blob/main/SERVER-PRIVACY.md" target="_blank" rel="noopener">Server Privacy →</a>
+      </article>
+      <article class="card c-cos" data-glass="sheet">
+        <p class="tag">Cosmetics · 35 modules</p>
+        <h3>Cosmetics</h3>
+        <p>Angel, Dragon, Bat and Parrot wings on an articulated rig, plus capes, pets, trails and hit effects. They render on your client only.</p>
+        <a class="more" href="https://github.com/XonistReal/Analyzer-Public/blob/main/WINGS.md" target="_blank" rel="noopener">Wings →</a>
+        <img class="shot" src="assets/wings-dragon.webp" alt="Player seen from behind wearing red and tan Dragon wings" width="1320" height="660" loading="lazy">
+      </article>
+    </div>
+  </section>
+
+  <section id="glass" class="section wrap glass-sec">
+    <figure class="frame" data-glass="sheet" data-frost="0.55" data-tint="0.25">
+      <div class="compare">
+        <img src="assets/optics-off.webp" alt="In-game glass panel with refraction off: the stripes behind it run straight through" width="1280" height="800">
+        <img class="compare-top" src="assets/optics-on.webp" alt="The same panel with refraction on: the stripes bend where the edge curves" width="1280" height="800">
+        <span class="compare-line" aria-hidden="true"></span>
+        <span class="ctag ctag-l">Refraction on</span>
+        <span class="ctag ctag-r">Off</span>
+        <input id="compare-range" type="range" min="0" max="100" value="50" aria-label="Slide between refraction on and off">
+      </div>
+      <figcaption><span class="px">Stripe test scene</span><span>Drag to compare</span></figcaption>
+    </figure>
+    <div class="glass-copy" data-glass="sheet">
+      <p class="eyebrow">Glass theme</p>
+      <h2>Real refraction, in game too</h2>
+      <p>The Glass theme is an original GLSL shader. It captures the frame behind each menu and bends it through a curved edge, then adds frost, a little color separation and moving glints. This page runs the same idea in WebGL.</p>
+      <dl class="facts">
+        <div><dt>23 px</dt><dd>edge displacement measured on the stripe test scene</dd></div>
+        <div><dt>4</dt><dd>themes, set separately for the menu and the HUD</dd></div>
+        <div><dt>0</dt><dd>ImGui. Native Minecraft screens and OpenGL</dd></div>
+      </dl>
+      <div class="picker">
+        <p class="picker-label" id="accent-label">Pick an accent. This page switches with it, like the client does.</p>
+        <div class="swatches" role="group" aria-labelledby="accent-label">
+          <button type="button" class="swatch" data-glass="chip" data-acc="Rose" aria-pressed="true"><i style="--c:#db85da"></i>Rose</button>
+          <button type="button" class="swatch" data-glass="chip" data-acc="Mint" aria-pressed="false"><i style="--c:#79f8cc"></i>Mint</button>
+          <button type="button" class="swatch" data-glass="chip" data-acc="Violet" aria-pressed="false"><i style="--c:#a993fa"></i>Violet</button>
+          <button type="button" class="swatch" data-glass="chip" data-acc="Gold" aria-pressed="false"><i style="--c:#ffcf84"></i>Gold</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="anarchy" class="section wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Anarchy &amp; Donut SMP</p>
+      <h2>Made for anarchy</h2>
+      <p>Bases stay hidden, fights end fast and servers read what your client sends. These are the modules you'll reach for first, described the way the module catalogue describes them.</p>
+    </div>
+    <div class="trio">
+      <article class="group" data-glass="sheet">
+        <p class="tag">Render · World</p>
+        <h3>Find bases</h3>
+        <ul class="mods">
+          <li><strong>Advanced Stash Finder</strong><span>Records storage clusters by chunk, with real counts and local history.</span></li>
+          <li><strong>Chunk Finder</strong><span>Flags building and farm evidence in received chunks. Some hits are natural.</span></li>
+          <li><strong>Region Map</strong><span>A coordinate grid of your position and the stashes you've logged.</span></li>
+          <li><strong>Storage ESP</strong><span>Boxes around loaded containers, colored by storage group.</span></li>
+          <li><strong>X-ray</strong><span>Real ore textures with faded terrain, outlines, or ores only.</span></li>
+        </ul>
+      </article>
+      <article class="group" data-glass="sheet">
+        <p class="tag">HVH · Combat · Player</p>
+        <h3>Win fights</h3>
+        <ul class="mods">
+          <li><strong>Crystal Aura</strong><span>Scores reachable crystals by explosion exposure, with self and friend damage guards.</span></li>
+          <li><strong>Anchor Aura</strong><span>Places, charges and detonates anchors outside anchor-safe dimensions.</span></li>
+          <li><strong>Surround</strong><span>Builds a shell around the blocks you stand in, using normal placement.</span></li>
+          <li><strong>Auto Totem</strong><span>Swaps an inventory totem into your offhand.</span></li>
+          <li><strong>Hover Totem</strong><span>Hold a key over a totem in your inventory to move it to the offhand.</span></li>
+        </ul>
+      </article>
+      <article class="group" data-glass="sheet">
+        <p class="tag">Movement · Player</p>
+        <h3>Travel and survive</h3>
+        <ul class="mods">
+          <li><strong>Elytra Boost</strong><span>Adds a bounded gliding push, or fires real hotbar rockets when flight slows.</span></li>
+          <li><strong>Auto Walk</strong><span>Holds a movement key while the game is focused.</span></li>
+          <li><strong>Glide</strong><span>Limits fall speed outside fluids. Legit mode opens your elytra.</span></li>
+          <li><strong>Safe Walk</strong><span>Stops you at ledges, or sneaks near an edge.</span></li>
+          <li><strong>Auto Eat</strong><span>Starts eating below your hunger threshold and keeps going until full.</span></li>
+        </ul>
+      </article>
+    </div>
+    <article class="private" data-glass="sheet">
+      <div>
+        <p class="tag">Client</p>
+        <h3>Stay private</h3>
+        <p>Both modules work on your side of the connection.</p>
+      </div>
+      <ul class="mods">
+        <li><strong>Server Privacy</strong><span>Eight protections, on by default: a vanilla brand, no channel announcements, guarded translation and keybind probes, checked resource-pack downloads and more.</span></li>
+      </ul>
+      <ul class="mods">
+        <li><strong>Name Changer</strong><span>Shows a local alias for your name in labels and chat. Your account and the messages you send stay unchanged.</span></li>
+      </ul>
+      <p class="note">Finders read the chunks your client has already received. Stash results are candidates to check, and Region Map is Analyzer's own grid, not Donut SMP's region numbers. Server Privacy cuts specific leaks; it does not hide your account, your IP or how you play.</p>
+    </article>
+  </section>
+
+  <section id="gallery" class="section wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Screens</p>
+      <h2>Straight from the game</h2>
+      <p>Unedited captures from Minecraft 1.21.4. Select one to see it full size.</p>
+    </div>
+    <div class="gallery">
+      <button type="button" class="tile" data-glass="sheet" data-frost="0.55" data-tint="0.25" data-full="assets/home-panorama.webp" data-cap="Home screen over the Minecraft panorama">
+        <img src="assets/home-panorama.webp" alt="Analyzer Home screen with its wordmark over a dark forest panorama" width="1280" height="800" loading="lazy">
+        <span class="tile-cap px">Home · Panorama</span>
+      </button>
+      <button type="button" class="tile" data-glass="sheet" data-frost="0.55" data-tint="0.25" data-full="assets/home-orbit.webp" data-cap="Home screen with the Orbit background">
+        <img src="assets/home-orbit.webp" alt="Home screen with a glowing black hole as the Orbit background" width="1280" height="800" loading="lazy">
+        <span class="tile-cap px">Home · Orbit</span>
+      </button>
+      <button type="button" class="tile" data-glass="sheet" data-frost="0.55" data-tint="0.25" data-full="assets/home-options.webp" data-cap="Minecraft Options inside a glass Home panel">
+        <img src="assets/home-options.webp" alt="Minecraft Options buttons on a liquid-glass panel" width="1280" height="800" loading="lazy">
+        <span class="tile-cap px">Home · Options</span>
+      </button>
+      <button type="button" class="tile" data-glass="sheet" data-frost="0.55" data-tint="0.25" data-full="assets/hud-glass.webp" data-cap="Glass HUD with radar, compass, target and module list">
+        <img src="assets/hud-glass.webp" alt="Glass HUD panels showing a local radar, compass, zombie target info and active modules" width="1280" height="800" loading="lazy">
+        <span class="tile-cap px">HUD · Glass</span>
+      </button>
+      <button type="button" class="tile" data-glass="sheet" data-frost="0.55" data-tint="0.25" data-full="assets/findings.webp" data-cap="Local Findings history with observed storage counts">
+        <img src="assets/findings.webp" alt="Local findings list of stash coordinates with an observed storage breakdown" width="1400" height="788" loading="lazy">
+        <span class="tile-cap px">Finders · History</span>
+      </button>
+      <button type="button" class="tile" data-glass="sheet" data-frost="0.55" data-tint="0.25" data-full="assets/schematics.webp" data-cap="Schematic browser reading the game's schematics folder">
+        <img src="assets/schematics.webp" alt="Schematic browser with folder path, search field and a selected schematic" width="1280" height="800" loading="lazy">
+        <span class="tile-cap px">Automation · Schematics</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="install" class="section wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Install</p>
+      <h2>Playing in three steps</h2>
+      <p>Pick how you launch the game. You'll use your own Minecraft account; releases never include accounts, worlds or settings.</p>
+    </div>
+    <ul class="reqs" aria-label="Requirements">
+      <li>Minecraft Java <b>1.21.4</b></li>
+      <li>Java <b>21</b></li>
+      <li>Fabric Loader <b>0.16.14</b></li>
+      <li>Fabric API <b>0.119.4+1.21.4</b></li>
+    </ul>
+    <div class="install-grid">
+      <div class="install-main" data-glass="sheet">
+        <div class="tabs" role="tablist" aria-label="Install method">
+          <button type="button" class="tab" role="tab" id="tab-prism" aria-controls="panel-prism" aria-selected="true" data-glass="chip">Prism Launcher</button>
+          <button type="button" class="tab" role="tab" id="tab-fabric" aria-controls="panel-fabric" aria-selected="false" tabindex="-1" data-glass="chip">Fabric mods folder</button>
+          <button type="button" class="tab" role="tab" id="tab-source" aria-controls="panel-source" aria-selected="false" tabindex="-1" data-glass="chip">Build from source</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="panel-prism" aria-labelledby="tab-prism">
+          <ol class="steps">
+            <li>Download <code>Analyzer-0.15.0-Prism-1.21.4.zip</code> from the <a href="https://github.com/XonistReal/Analyzer-Public/releases/latest" target="_blank" rel="noopener">latest release</a>.</li>
+            <li>Drag the ZIP onto Prism, or choose <b>Add Instance → Import</b> and select it.</li>
+            <li>Pick your Minecraft account and Java 21, launch, and press Right Shift.</li>
+          </ol>
+          <p>The ZIP already contains Fabric API, so there's nothing else to download.</p>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="panel-fabric" aria-labelledby="tab-fabric" hidden>
+          <ol class="steps">
+            <li>Create a Minecraft 1.21.4 instance with Fabric Loader 0.16.14 and Java 21.</li>
+            <li>Put <code>analyzer-0.15.0.jar</code> and the matching <a href="https://modrinth.com/mod/fabric-api" target="_blank" rel="noopener">Fabric API</a> jar in its <code>mods</code> folder.</li>
+            <li>Keep exactly one Analyzer jar, launch, and press Right Shift.</li>
+          </ol>
+          <p>The <code>-sources.jar</code> is for reading code. Install the plain runtime jar.</p>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="panel-source" aria-labelledby="tab-source" hidden>
+          <div class="code-wrap">
+            <pre class="code"><code id="build-cmd">git clone https://github.com/XonistReal/Analyzer-Public.git
+cd Analyzer-Public
+./gradlew build moduleCatalog</code></pre>
+            <button type="button" class="copy" data-copy="build-cmd" data-glass="chip">Copy</button>
+          </div>
+          <p>Needs a Java 21 JDK. In Windows PowerShell run <code>.\gradlew.bat build moduleCatalog</code> instead. The mod lands in <code>build/libs/analyzer-0.15.0.jar</code>.</p>
+        </div>
+      </div>
+      <aside class="side" data-glass="sheet">
+        <h3>Good to know</h3>
+        <ul>
+          <li>Gameplay automation starts disabled on a fresh install.</li>
+          <li>Settings, profiles and friends live in <code>config/analyzer/</code>.</li>
+          <li>Each release lists checksums in <code>SHA256SUMS.txt</code>.</li>
+          <li>Iris and Sodium compatibility hasn't been confirmed for every feature.</li>
+        </ul>
+        <a class="more" href="https://github.com/XonistReal/Analyzer-Public/blob/main/docs/INSTALLATION.md" target="_blank" rel="noopener">Full install guide →</a>
+      </aside>
+    </div>
+  </section>
+
+  <section id="source" class="section wrap">
+    <div class="oss" data-glass="sheet">
+      <div class="oss-copy">
+        <p class="eyebrow">Open source</p>
+        <h2>Free to use, free to fork</h2>
+        <p>Analyzer is MIT licensed. Read every line, build it yourself, or send a pull request. CI builds every change with Java 21 and checks that the module catalogue still matches the code.</p>
+        <div class="cta">
+          <a class="btn" data-glass="chip" data-accent href="https://github.com/XonistReal/Analyzer-Public" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Open the repository</a>
+          <a class="btn" data-glass="chip" href="https://github.com/XonistReal/Analyzer-Public/archive/refs/heads/main.zip" target="_blank" rel="noopener">Source ZIP</a>
+        </div>
+        <div class="clone">
+          <code id="clone-cmd">git clone https://github.com/XonistReal/Analyzer-Public.git</code>
+          <button type="button" class="copy" data-copy="clone-cmd" data-glass="chip">Copy</button>
+        </div>
+      </div>
+      <ul class="links">
+        <li><a href="https://github.com/XonistReal/Analyzer-Public/releases" target="_blank" rel="noopener"><b>Releases</b><span>Mod jars, Prism ZIPs and checksums</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="https://github.com/XonistReal/Analyzer-Public/blob/main/MODULES.md" target="_blank" rel="noopener"><b>Module catalogue</b><span>158 modules and 1,839 settings with defaults and ranges</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="https://github.com/XonistReal/Analyzer-Public/blob/main/docs/DEVELOPING.md" target="_blank" rel="noopener"><b>Build guide</b><span>Source map and Gradle tasks</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="https://github.com/XonistReal/Analyzer-Public/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener"><b>Contributing</b><span>How to propose a change</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="https://github.com/XonistReal/Analyzer-Public/issues/new?template=bug_report.yml" target="_blank" rel="noopener"><b>Report a bug</b><span>Issue form for your version, mods and steps</span><i aria-hidden="true">→</i></a></li>
+        <li><a href="https://github.com/XonistReal/Analyzer-Public/blob/main/VERSION-HISTORY.md" target="_blank" rel="noopener"><b>Version history</b><span>26 tagged versions since 0.1.0</span><i aria-hidden="true">→</i></a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  <div class="foot-brand">
+    <img src="assets/monogram.webp" alt="" width="341" height="392">
+    <p>Analyzer is free software under the MIT License, © 2026 Analyzer contributors. Wing assets and fonts keep their own notices. Not affiliated with Mojang Studios, Microsoft or any Minecraft server.</p>
+  </div>
+  <nav aria-label="Footer">
+    <a href="https://github.com/XonistReal/Analyzer-Public" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/XonistReal/Analyzer-Public/releases/latest" target="_blank" rel="noopener">Download</a>
+    <a href="https://github.com/XonistReal/Analyzer-Public/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+    <a href="https://github.com/XonistReal/Analyzer-Public/blob/main/THIRD-PARTY.md" target="_blank" rel="noopener">Third-party notices</a>
+  </nav>
+</footer>
+
+<dialog id="lightbox" aria-label="Screenshot">
+  <figure class="lb">
+    <img id="lb-img" src="assets/home-panorama.webp" alt="" width="1280" height="800">
+    <figcaption><span id="lb-cap"></span><button type="button" class="lb-close">Close</button></figcaption>
+  </figure>
+</dialog>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var ACCENTS = {
+    Rose:   { hex: '#db85da', b: '#a993fa', c: '#79f8cc' },
+    Mint:   { hex: '#79f8cc', b: '#6ddeff', c: '#a993fa' },
+    Violet: { hex: '#a993fa', b: '#db85da', c: '#6ddeff' },
+    Gold:   { hex: '#ffcf84', b: '#ff8f6b', c: '#db85da' }
+  };
+
+  /* ---------- Liquid glass renderer ---------- */
+  var glass = (function () {
+    var canvas = document.getElementById('gl');
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var fine = matchMedia('(pointer: fine)').matches;
+    var gl = null;
+    try { gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' }); } catch (e) { gl = null; }
+    if (!gl) return null;
+
+    var VS = '#version 300 es\nin vec2 aPos;\nvoid main(){ gl_Position = vec4(aPos, 0.0, 1.0); }';
+
+    // Pass 1: the world behind the glass (night sky, aurora, block floor, pixel motes)
+    var BG = '#version 300 es\nprecision highp float;\n' +
+      'uniform vec2 uRes; uniform float uTime; uniform float uScroll; uniform vec3 uA; uniform vec3 uB; uniform vec3 uC;\n' +
+      'out vec4 o;\n' +
+      'float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }\n' +
+      'float noise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);\n' +
+      '  return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y); }\n' +
+      'float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { v += a * noise(p); p = p * 2.03 + vec2(1.7, 9.2); a *= 0.5; } return v; }\n' +
+      'void main(){\n' +
+      '  vec2 uv = gl_FragCoord.xy / uRes;\n' +
+      '  float asp = uRes.x / uRes.y;\n' +
+      '  vec2 p = vec2((uv.x - 0.5) * asp, uv.y);\n' +
+      '  float s = uScroll, t = uTime;\n' +
+      '  vec3 col = mix(vec3(0.020, 0.017, 0.032), vec3(0.058, 0.042, 0.095), smoothstep(0.05, 1.0, uv.y));\n' +
+      '  vec2 sg = gl_FragCoord.xy / (uRes.y * 0.022) + vec2(0.0, s * 2.0);\n' +
+      '  vec2 sid = floor(sg); vec2 sf = fract(sg) - 0.5; float sh = hash(sid);\n' +
+      '  vec2 so = (vec2(hash(sid + 1.3), hash(sid + 7.1)) - 0.5) * 0.6;\n' +
+      '  float star = step(0.9, sh) * smoothstep(0.11, 0.0, length(sf - so)) * (0.45 + 0.55 * sin(t * 1.7 + sh * 40.0));\n' +
+      '  col += star * 0.8 * smoothstep(0.32, 0.7, uv.y);\n' +
+      '  float drift = sin(s * 0.55) * 0.05;\n' +
+      '  for (int i = 0; i < 3; i++) {\n' +
+      '    float fi = float(i);\n' +
+      '    vec3 c = i == 0 ? uA : (i == 1 ? uB : uC);\n' +
+      '    float x = p.x * (1.15 + fi * 0.25) + fi * 2.3 + s * 0.08;\n' +
+      '    float y0 = 0.70 - fi * 0.11 - drift * (1.0 + fi * 0.6) + 0.075 * sin(x * 1.6 + t * 0.13 + fi * 1.9) + 0.06 * (fbm(vec2(x * 0.8 + t * 0.04, fi * 4.0)) - 0.5);\n' +
+      '    float dy = uv.y - y0;\n' +
+      '    float up = max(dy, 0.0);\n' +
+      '    float curtain = smoothstep(-0.015, 0.003, dy) * (0.7 * exp(-up * (9.0 + fi * 3.0)) + 0.3 * exp(-up * 2.6));\n' +
+      '    float rays = fbm(vec2(x * 11.0, t * 0.08 + fi * 7.0));\n' +
+      '    rays = 0.2 + 1.2 * rays * rays;\n' +
+      '    col += c * (curtain * rays + exp(-abs(dy) * 90.0) * 0.22 * rays) * (0.62 - fi * 0.15);\n' +
+      '  }\n' +
+      '  float hz = 0.30; float y = hz - uv.y;\n' +
+      '  float z = 0.06 / max(y, 0.002);\n' +
+      '  vec2 g = vec2(p.x * z * 5.0, z * 5.0 + s * 4.0);\n' +
+      '  vec2 cell = floor(g); vec2 gf = fract(g);\n' +
+      '  float tex = hash(floor(gf * 8.0) + cell * 17.0);\n' +
+      '  vec3 stone = vec3(0.075, 0.068, 0.092) * (0.75 + 0.35 * hash(cell) + 0.25 * tex);\n' +
+      '  vec2 fw = max(fwidth(g), vec2(1e-4));\n' +
+      '  vec2 e = min(gf, 1.0 - gf) / fw;\n' +
+      '  float line = 1.0 - smoothstep(0.0, 1.5, min(e.x, e.y));\n' +
+      '  float fade = smoothstep(0.0, 0.14, y);\n' +
+      '  float glowH = exp(-abs(y) * 30.0);\n' +
+      '  col += uA * glowH * 0.10;\n' +
+      '  col = mix(col, stone + uA * line * 0.22 * fade, fade * 0.92);\n' +
+      '  vec2 mp = vec2(p.x, uv.y + s * 0.45 + t * 0.01) * 8.0;\n' +
+      '  vec2 mid = floor(mp); vec2 mf = fract(mp); float mh = hash(mid * 1.7 + 0.3);\n' +
+      '  if (mh > 0.76) {\n' +
+      '    vec2 mc = vec2(hash(mid + 3.1), hash(mid + 9.7)) * 0.5 + 0.25;\n' +
+      '    float sz = 0.035 + 0.05 * hash(mid + 5.3);\n' +
+      '    vec2 q = abs(mf - mc); float bx = max(q.x, q.y);\n' +
+      '    float sq = 1.0 - smoothstep(sz * 0.85, sz, bx);\n' +
+      '    float glow = exp(-bx * 16.0) * 0.4;\n' +
+      '    vec3 c = mix(uA, uB, hash(mid + 2.2));\n' +
+      '    col += c * (sq * 0.5 + glow * 0.5) * (0.55 + 0.45 * sin(t * 0.7 + mh * 31.0));\n' +
+      '  }\n' +
+      '  vec2 v = (uv - 0.5) * vec2(1.0, 0.9);\n' +
+      '  col *= 1.0 - 0.7 * dot(v, v);\n' +
+      '  o = vec4(col, 1.0);\n' +
+      '}';
+
+    // Pass 2: separable gaussian for the frost
+    var BLUR = '#version 300 es\nprecision highp float;\n' +
+      'uniform sampler2D uTex; uniform vec2 uRes; uniform vec2 uDir; out vec4 o;\n' +
+      'void main(){ vec2 uv = gl_FragCoord.xy / uRes;\n' +
+      '  vec3 c = texture(uTex, uv).rgb * 0.2270270;\n' +
+      '  c += (texture(uTex, uv + uDir * 1.3846154).rgb + texture(uTex, uv - uDir * 1.3846154).rgb) * 0.3162162;\n' +
+      '  c += (texture(uTex, uv + uDir * 3.2307692).rgb + texture(uTex, uv - uDir * 3.2307692).rgb) * 0.0702703;\n' +
+      '  o = vec4(c, 1.0); }';
+
+    // Pass 3: glass. Sheets (panels) melt into the cursor droplet; chips (buttons) sit on top as their own lenses
+    var COMP = '#version 300 es\nprecision highp float;\n' +
+      '#define MAXS 14\n#define MAXC 22\n' +
+      'uniform sampler2D uBg; uniform sampler2D uBlur;\n' +
+      'uniform vec2 uRes; uniform float uDpr; uniform float uTime; uniform vec3 uAccent;\n' +
+      'uniform int uSN; uniform vec4 uS[MAXS]; uniform vec4 uSP[MAXS];\n' +
+      'uniform int uCN; uniform vec4 uC[MAXC]; uniform vec4 uCP[MAXC];\n' +
+      'uniform vec4 uDrop; uniform vec2 uDropDir; uniform float uDropOn;\n' +
+      'uniform vec3 uPtr; uniform vec2 uLightDir;\n' +
+      'out vec4 o;\n' +
+      'float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }\n' +
+      // rounded box distance + outward gradient
+      'vec3 sdgRR(vec2 p, vec2 b, float r){\n' +
+      '  vec2 sg = vec2(p.x < 0.0 ? -1.0 : 1.0, p.y < 0.0 ? -1.0 : 1.0);\n' +
+      '  vec2 q = abs(p) - b + r; float g = max(q.x, q.y);\n' +
+      '  if (g > 0.0) { vec2 w = max(q, 0.0); float l = length(w); return vec3(l - r, sg * w / max(l, 1e-5)); }\n' +
+      '  return vec3(g - r, sg * (q.x > q.y ? vec2(1.0, 0.0) : vec2(0.0, 1.0)));\n' +
+      '}\n' +
+      // stretched droplet (ellipse along its velocity)
+      'vec3 sdgDrop(vec2 p, vec2 ab, vec2 dir){\n' +
+      '  vec2 nr = vec2(-dir.y, dir.x); vec2 l = vec2(dot(p, dir), dot(p, nr));\n' +
+      '  float d = (length(l / ab) - 1.0) * min(ab.x, ab.y);\n' +
+      '  vec2 gl = l / (ab * ab); float gm = length(gl); gl = gm > 1e-6 ? gl / gm : vec2(1.0, 0.0);\n' +
+      '  return vec3(d, gl.x * dir + gl.y * nr);\n' +
+      '}\n' +
+      'vec3 shade(vec2 p, float d, vec2 n, float bevel, float frost, float tint, float hover, float fill){\n' +
+      '  float edge = 1.0 - clamp(-d / bevel, 0.0, 1.0);\n' +
+      '  float bend = edge * edge * (1.0 + 0.5 * hover);\n' +
+      '  vec2 off = -n * bend * bevel * 0.85;\n' +
+      '  float disp = 0.03 + 0.14 * edge;\n' +
+      '  vec2 inv = 1.0 / uRes;\n' +
+      '  vec3 sharp = vec3(texture(uBg, (p + off * (1.0 + disp)) * inv).r, texture(uBg, (p + off) * inv).g, texture(uBg, (p + off * (1.0 - disp)) * inv).b);\n' +
+      '  vec3 soft = texture(uBlur, (p + off * 1.4) * inv).rgb;\n' +
+      '  vec3 c = mix(sharp, soft, frost);\n' +
+      '  float l = dot(c, vec3(0.299, 0.587, 0.114));\n' +
+      '  c = mix(vec3(l), c, 1.3);\n' +
+      '  c = mix(c, vec3(0.032, 0.028, 0.048), tint);\n' +
+      '  c += uAccent * 0.022 * frost;\n' +
+      '  c = mix(c, uAccent * (0.8 + 0.5 * l) + 0.03, fill);\n' +
+      '  vec2 tp = uPtr.xy - p; float pl = length(tp);\n' +
+      '  vec2 L = normalize(mix(uLightDir, pl > 1.0 ? tp / pl : uLightDir, uPtr.z * 0.6) + 1e-5);\n' +
+      '  float ndl = dot(n, L);\n' +
+      '  float rim = 1.0 - smoothstep(0.0, 1.6 * uDpr, -d);\n' +
+      '  float spec = pow(max(ndl, 0.0), 3.0);\n' +
+      '  float back = pow(max(-ndl, 0.0), 4.0) * 0.4;\n' +
+      '  c += rim * (0.06 + 0.6 * spec + 0.28 * back);\n' +
+      '  c += pow(edge, 3.0) * (0.035 + 0.12 * spec + 0.04 * hover);\n' +
+      '  return c;\n' +
+      '}\n' +
+      'void main(){\n' +
+      '  vec2 p = gl_FragCoord.xy;\n' +
+      '  vec3 col = texture(uBg, p / uRes).rgb;\n' +
+      '  vec3 dg = vec3(1e5, 0.0, 1.0); vec4 prm = vec4(0.0); float bmin = 100.0;\n' +
+      '  float reach = 70.0 * uDpr;\n' +
+      '  for (int i = 0; i < MAXS; i++) {\n' +
+      '    if (i >= uSN) break;\n' +
+      '    vec4 R = uS[i]; vec2 q = p - R.xy; vec2 aq = abs(q) - R.zw;\n' +
+      '    if (max(aq.x, aq.y) > reach) continue;\n' +
+      '    vec3 g = sdgRR(q, R.zw, uSP[i].x);\n' +
+      '    if (g.x < dg.x) { dg = g; prm = uSP[i]; bmin = min(R.z, R.w); }\n' +
+      '  }\n' +
+      '  if (uDropOn > 0.5) {\n' +
+      '    vec3 gd = sdgDrop(p - uDrop.xy, uDrop.zw, uDropDir);\n' +
+      '    float k = 30.0 * uDpr;\n' +
+      '    float hh = max(k - abs(dg.x - gd.x), 0.0);\n' +
+      '    float m = 0.25 * hh * hh / k; float w = 0.5 * hh / k;\n' +
+      '    float wb = dg.x < gd.x ? w : 1.0 - w;\n' +
+      '    float db = min(uDrop.z, uDrop.w);\n' +
+      '    dg = vec3(min(dg.x, gd.x) - m, mix(dg.yz, gd.yz, wb));\n' +
+      '    prm = mix(prm, vec4(db, 0.0, 0.06, 0.0), wb); bmin = mix(bmin, db, wb);\n' +
+      '  }\n' +
+      '  if (dg.x > 0.0) col *= 1.0 - exp(-dg.x / (18.0 * uDpr)) * (0.30 + 0.22 * max(-dg.z, 0.0));\n' +
+      '  if (dg.x < 0.5) {\n' +
+      '    vec2 n = normalize(dg.yz + vec2(1e-6));\n' +
+      '    float bevel = clamp(min(prm.x, bmin) * 0.95, 3.0 * uDpr, 36.0 * uDpr);\n' +
+      '    col = mix(col, shade(p, dg.x, n, bevel, prm.z, prm.w, prm.y, 0.0), clamp(0.5 - dg.x, 0.0, 1.0));\n' +
+      '  }\n' +
+      '  for (int i = 0; i < MAXC; i++) {\n' +
+      '    if (i >= uCN) break;\n' +
+      '    vec4 R = uC[i]; vec4 P = uCP[i]; vec2 q = p - R.xy;\n' +
+      '    float grow = P.y * 1.5 * uDpr;\n' +
+      '    vec2 aq = abs(q) - R.zw;\n' +
+      '    if (max(aq.x, aq.y) > 22.0 * uDpr) continue;\n' +
+      '    vec3 g = sdgRR(q, R.zw + grow, P.x + grow);\n' +
+      '    if (g.x > 0.5) { col *= 1.0 - 0.3 * exp(-g.x / (5.0 * uDpr)) * (0.5 + 0.5 * max(-g.z, 0.0)); continue; }\n' +
+      '    vec2 n = normalize(g.yz + vec2(1e-6));\n' +
+      '    float bevel = clamp(min(P.x + grow, min(R.z, R.w)) * 0.95, 3.0 * uDpr, 26.0 * uDpr);\n' +
+      '    col = mix(col, shade(p, g.x, n, bevel, P.z, 0.22 - 0.12 * P.y, P.y, P.w), clamp(0.5 - g.x, 0.0, 1.0));\n' +
+      '  }\n' +
+      '  col += (hash(p + fract(uTime)) - 0.5) / 255.0;\n' +
+      '  o = vec4(col, 1.0);\n' +
+      '}';
+
+    function compile(type, src) {
+      var s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(s)); return null; }
+      return s;
+    }
+    function program(fs) {
+      var v = compile(gl.VERTEX_SHADER, VS), f = compile(gl.FRAGMENT_SHADER, fs);
+      if (!v || !f) return null;
+      var p = gl.createProgram();
+      gl.attachShader(p, v); gl.attachShader(p, f);
+      gl.bindAttribLocation(p, 0, 'aPos');
+      gl.linkProgram(p);
+      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { console.warn(gl.getProgramInfoLog(p)); return null; }
+      var u = {}, n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+      for (var i = 0; i < n; i++) {
+        var info = gl.getActiveUniform(p, i);
+        u[info.name.replace(/\[0\]$/, '')] = gl.getUniformLocation(p, info.name);
+      }
+      return { p: p, u: u };
+    }
+    var pBg = program(BG), pBlur = program(BLUR), pComp = program(COMP);
+    if (!pBg || !pBlur || !pComp) return null;
+
+    var vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+    function target(old, w, h) {
+      if (old && old.w === w && old.h === h) return old;
+      if (old) { gl.deleteTexture(old.tex); gl.deleteFramebuffer(old.fb); }
+      var tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      var fb = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+      return { tex: tex, fb: fb, w: w, h: h };
+    }
+
+    var MAXS = 14, MAXC = 22;
+    var sData = new Float32Array(MAXS * 4), sPar = new Float32Array(MAXS * 4);
+    var cData = new Float32Array(MAXC * 4), cPar = new Float32Array(MAXC * 4);
+    var dprCap = 1.5, bgScale = 0.5, dpr = 1, W = 1, H = 1, cssW = 1, cssH = 1, rtBg = null, rtA = null, rtB = null;
+
+    function track(el) {
+      var sheet = el.getAttribute('data-glass') === 'sheet';
+      var it = {
+        el: el, sheet: sheet, hover: false, h: 0, a: 0, r: 0,
+        frost: el.hasAttribute('data-frost') ? +el.getAttribute('data-frost') : (sheet ? 0.8 : 0.5),
+        tint: el.hasAttribute('data-tint') ? +el.getAttribute('data-tint') : 0.45
+      };
+      var on = function () { it.hover = true; }, off = function () { it.hover = false; };
+      el.addEventListener('pointerenter', on);
+      el.addEventListener('pointerleave', off);
+      el.addEventListener('focusin', on);
+      el.addEventListener('focusout', off);
+      return it;
+    }
+    var items = Array.prototype.map.call(document.querySelectorAll('[data-glass]'), track);
+    var sheets = items.filter(function (i) { return i.sheet; });
+    var chips = items.filter(function (i) { return !i.sheet; });
+
+    function measure() {
+      for (var i = 0; i < items.length; i++) items[i].r = parseFloat(getComputedStyle(items[i].el).borderTopLeftRadius) || 0;
+    }
+    function isActive(el) {
+      return el.hasAttribute('data-accent') || el.getAttribute('aria-pressed') === 'true' || el.getAttribute('aria-selected') === 'true';
+    }
+    function pack(list, max, data, par, ease, sheet) {
+      var n = 0;
+      for (var i = 0; i < list.length && n < max; i++) {
+        var it = list[i], r = it.el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2 || r.bottom < -90 || r.top > cssH + 90 || r.right < -90 || r.left > cssW + 90) continue;
+        it.h += ((it.hover ? 1 : 0) - it.h) * ease;
+        it.a += ((!sheet && isActive(it.el) ? 1 : 0) - it.a) * ease;
+        var hw = r.width / 2, hh = r.height / 2, j = n * 4;
+        data[j] = (r.left + hw) * dpr;
+        data[j + 1] = (cssH - r.top - hh) * dpr;
+        data[j + 2] = hw * dpr;
+        data[j + 3] = hh * dpr;
+        par[j] = Math.min(it.r, hw, hh) * dpr;
+        par[j + 1] = it.h;
+        par[j + 2] = it.frost;
+        par[j + 3] = sheet ? it.tint - 0.08 * it.h : it.a;
+        n++;
+      }
+      return n;
+    }
+
+    function resize() {
+      cssW = canvas.clientWidth || innerWidth;
+      cssH = canvas.clientHeight || innerHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+      W = Math.max(1, Math.round(cssW * dpr));
+      H = Math.max(1, Math.round(cssH * dpr));
+      if (canvas.width !== W) canvas.width = W;
+      if (canvas.height !== H) canvas.height = H;
+      rtBg = target(rtBg, Math.ceil(W * bgScale), Math.ceil(H * bgScale));
+      var bw = Math.max(1, Math.ceil(W / 4)), bh = Math.max(1, Math.ceil(H / 4));
+      rtA = target(rtA, bw, bh);
+      rtB = target(rtB, bw, bh);
+      measure();
+    }
+
+    function rgb(hex) { var n = parseInt(hex.slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; }
+    var cur = { a: null, b: null, c: null }, tgt = { a: [0, 0, 0], b: [0, 0, 0], c: [0, 0, 0] };
+
+    var ptr = { x: -1e4, y: -1e4, on: 0, inside: false };
+    var drop = { x: -1e4, y: -1e4, vx: 0, vy: 0, on: 0, dx: 1, dy: 0, seen: false };
+    addEventListener('pointermove', function (e) {
+      ptr.x = e.clientX; ptr.y = e.clientY;
+      ptr.inside = e.pointerType === 'mouse';
+      if (!drop.seen && ptr.inside) { drop.x = ptr.x; drop.y = ptr.y; drop.seen = true; }
+      kick();
+    }, { passive: true });
+    addEventListener('pointerout', function (e) { if (!e.relatedTarget) ptr.inside = false; });
+    addEventListener('blur', function () { ptr.inside = false; });
+
+    var t0 = performance.now(), last = t0, slow = 0, first = true, raf = 0, lost = false;
+    var dialog = document.getElementById('lightbox');
+
+    function draw(now) {
+      var dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000));
+      last = now;
+      var time = reduce ? 18 : (now - t0) / 1000;
+      if (!reduce) {
+        slow = dt > 0.034 ? slow + 1 : Math.max(0, slow - 1);
+        if (slow > 90 && dprCap > 1) { dprCap = 1; bgScale = 0.4; slow = 0; resize(); }
+      }
+      var ease = reduce ? 1 : 1 - Math.exp(-dt * 12);
+      var cease = reduce ? 1 : 1 - Math.exp(-dt * 4);
+      ['a', 'b', 'c'].forEach(function (k) {
+        if (!cur[k]) cur[k] = tgt[k].slice();
+        for (var i = 0; i < 3; i++) cur[k][i] += (tgt[k][i] - cur[k][i]) * cease;
+      });
+
+      var want = ptr.inside && fine && !reduce && !dialog.open ? 1 : 0;
+      drop.on += (want - drop.on) * (1 - Math.exp(-dt * 6));
+      drop.vx += ((ptr.x - drop.x) * 150 - drop.vx * 16) * dt;
+      drop.vy += ((ptr.y - drop.y) * 150 - drop.vy * 16) * dt;
+      drop.x += drop.vx * dt;
+      drop.y += drop.vy * dt;
+      var sp = Math.hypot(drop.vx, drop.vy);
+      if (sp > 8) { drop.dx = drop.vx / sp; drop.dy = drop.vy / sp; }
+      var st = Math.min(sp / 1600, 0.5);
+      var R = 17 * drop.on * dpr;
+      ptr.on += ((ptr.inside ? 1 : 0) - ptr.on) * ease;
+      var intro = reduce ? 1 : Math.min(1, time / 2.2);
+      var ang = (25 + 95 * (1 - Math.pow(1 - intro, 3))) * Math.PI / 180;
+
+      var nS = pack(sheets, MAXS, sData, sPar, ease, true);
+      var nC = pack(chips, MAXC, cData, cPar, ease, false);
+      var scroll = (window.scrollY || 0) / Math.max(1, cssH);
+
+      gl.bindVertexArray(vao);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, rtBg.fb);
+      gl.viewport(0, 0, rtBg.w, rtBg.h);
+      gl.useProgram(pBg.p);
+      gl.uniform2f(pBg.u.uRes, rtBg.w, rtBg.h);
+      gl.uniform1f(pBg.u.uTime, time);
+      gl.uniform1f(pBg.u.uScroll, scroll);
+      gl.uniform3fv(pBg.u.uA, cur.a);
+      gl.uniform3fv(pBg.u.uB, cur.b);
+      gl.uniform3fv(pBg.u.uC, cur.c);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      gl.useProgram(pBlur.p);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.uniform1i(pBlur.u.uTex, 0);
+      gl.uniform2f(pBlur.u.uRes, rtA.w, rtA.h);
+      var passes = [[rtBg, rtA, 1.2, 0], [rtA, rtB, 0, 1.2], [rtB, rtA, 2.4, 0], [rtA, rtB, 0, 2.4]];
+      for (var i = 0; i < passes.length; i++) {
+        var ps = passes[i];
+        gl.bindFramebuffer(gl.FRAMEBUFFER, ps[1].fb);
+        gl.viewport(0, 0, ps[1].w, ps[1].h);
+        gl.bindTexture(gl.TEXTURE_2D, ps[0].tex);
+        gl.uniform2f(pBlur.u.uDir, ps[2] / ps[1].w, ps[3] / ps[1].h);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+
+      var u = pComp.u;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, W, H);
+      gl.useProgram(pComp.p);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, rtBg.tex);
+      gl.uniform1i(u.uBg, 0);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, rtB.tex);
+      gl.uniform1i(u.uBlur, 1);
+      gl.uniform2f(u.uRes, W, H);
+      gl.uniform1f(u.uDpr, dpr);
+      gl.uniform1f(u.uTime, time);
+      gl.uniform3fv(u.uAccent, cur.a);
+      gl.uniform1i(u.uSN, nS);
+      gl.uniform4fv(u.uS, sData);
+      gl.uniform4fv(u.uSP, sPar);
+      gl.uniform1i(u.uCN, nC);
+      gl.uniform4fv(u.uC, cData);
+      gl.uniform4fv(u.uCP, cPar);
+      gl.uniform4f(u.uDrop, drop.x * dpr, (cssH - drop.y) * dpr, Math.max(R * (1 + st), 0.01), Math.max(R * (1 - st * 0.45), 0.01));
+      gl.uniform2f(u.uDropDir, drop.dx, -drop.dy);
+      gl.uniform1f(u.uDropOn, R > 0.5 ? 1 : 0);
+      gl.uniform3f(u.uPtr, ptr.x * dpr, (cssH - ptr.y) * dpr, ptr.on);
+      gl.uniform2f(u.uLightDir, Math.cos(ang), Math.sin(ang));
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      if (first) { first = false; root.classList.add('gl'); }
+    }
+
+    function loop(now) {
+      raf = 0;
+      if (lost) return;
+      draw(now);
+      if (!reduce) raf = requestAnimationFrame(loop);
+    }
+    function kick() { if (reduce && !raf && !lost) raf = requestAnimationFrame(loop); }
+
+    canvas.addEventListener('webglcontextlost', function (e) {
+      e.preventDefault();
+      lost = true;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      root.classList.remove('gl');
+    });
+    addEventListener('resize', function () { resize(); kick(); });
+    addEventListener('scroll', kick, { passive: true });
+    if (window.ResizeObserver) new ResizeObserver(kick).observe(document.body);
+
+    resize();
+    raf = requestAnimationFrame(loop);
+
+    return {
+      setAccent: function (acc) { tgt.a = rgb(acc.hex); tgt.b = rgb(acc.b); tgt.c = rgb(acc.c); kick(); },
+      kick: kick
+    };
+  })();
+
+  /* ---------- Accent picker ---------- */
+  var swatches = Array.prototype.slice.call(document.querySelectorAll('.swatch'));
+  function applyAccent(name, save) {
+    var acc = ACCENTS[name] || ACCENTS.Rose;
+    root.style.setProperty('--accent', acc.hex);
+    swatches.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-acc') === name)); });
+    if (glass) glass.setAccent(acc);
+    if (save) { try { localStorage.setItem('analyzer-accent', name); } catch (e) {} }
+  }
+  var saved = 'Rose';
+  try { var s = localStorage.getItem('analyzer-accent'); if (s && ACCENTS[s]) saved = s; } catch (e) {}
+  applyAccent(saved, false);
+  swatches.forEach(function (b) { b.addEventListener('click', function () { applyAccent(b.getAttribute('data-acc'), true); }); });
+
+  /* ---------- Install tabs ---------- */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function selectTab(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tab.focus();
+    if (glass) glass.kick();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { selectTab(t, false); });
+    t.addEventListener('keydown', function (e) {
+      var j = null;
+      if (e.key === 'ArrowRight') j = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = tabs.length - 1;
+      if (j !== null) { e.preventDefault(); selectTab(tabs[j], true); }
+    });
+  });
+
+  /* ---------- Copy buttons ---------- */
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var src = document.getElementById(btn.getAttribute('data-copy'));
+      var done = function (msg) {
+        btn.textContent = msg;
+        clearTimeout(btn._t);
+        btn._t = setTimeout(function () { btn.textContent = 'Copy'; }, 1800);
+      };
+      var fallback = function () {
+        var range = document.createRange();
+        range.selectNodeContents(src);
+        var sel = getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        done('Press Ctrl+C');
+      };
+      try { navigator.clipboard.writeText(src.textContent).then(function () { done('Copied'); }, fallback); } catch (e) { fallback(); }
+    });
+  });
+
+  /* ---------- Refraction compare ---------- */
+  var range = document.getElementById('compare-range');
+  range.addEventListener('input', function () { range.parentNode.style.setProperty('--pos', range.value + '%'); });
+
+  /* ---------- Lightbox ---------- */
+  var lb = document.getElementById('lightbox'), lbImg = document.getElementById('lb-img'), lbCap = document.getElementById('lb-cap');
+  document.querySelectorAll('.tile').forEach(function (t) {
+    t.addEventListener('click', function () {
+      lbImg.src = t.getAttribute('data-full');
+      lbImg.alt = t.querySelector('img').alt;
+      lbCap.textContent = t.getAttribute('data-cap');
+      if (lb.showModal) lb.showModal(); else lb.setAttribute('open', '');
+    });
+  });
+  lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
+  lb.querySelector('.lb-close').addEventListener('click', function () { lb.close(); });
+})();
+</script>
+</body>
+</html>
