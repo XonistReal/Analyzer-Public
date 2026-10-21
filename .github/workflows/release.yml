@@ -1,11 +1,26 @@
 name: Release
 
-# Pushing a version tag (v<mod_version>) builds, runs every check and creates a draft
-# release with the runtime JAR, sources JAR, a Git source ZIP and SHA-256 checksums.
-# The draft is reviewed and published by hand.
+# Builds the version in gradle.properties, runs every check and attaches the runtime JAR, sources
+# JAR, a Git source ZIP and SHA-256 checksums to a GitHub release tagged v<mod_version>.
+# - Pushing that tag creates a draft release to review and publish by hand.
+# - Running the workflow by hand on a branch creates the tag at the built commit together with the
+#   release, using the given notes; nothing is published if any build or check step fails.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      title:
+        description: Release title (blank = "Analyzer <version>")
+        required: false
+        default: ''
+      notes:
+        description: Release notes (Markdown)
+        required: true
+      publish:
+        description: Publish now as the latest release (otherwise create a draft)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -25,11 +40,19 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
-      - name: Check tag matches mod_version
+      - name: Resolve version and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           version=$(grep -E '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '\r')
-          test "v$version" = "$GITHUB_REF_NAME" || { echo "::error::Tag $GITHUB_REF_NAME does not match mod_version $version"; exit 1; }
+          tag="v$version"
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            test "$GITHUB_REF_NAME" = "$tag" || { echo "::error::Tag $GITHUB_REF_NAME does not match mod_version $version"; exit 1; }
+          elif gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "::error::Release $tag already exists"; exit 1
+          fi
           echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
       - name: Build, check and generate module reference
         run: bash ./gradlew --no-daemon build moduleCatalog
       - name: Check committed catalogue
@@ -41,9 +64,19 @@ jobs:
           git archive --format=zip --prefix="Analyzer-$VERSION/" -o "dist/Analyzer-$VERSION-source.zip" HEAD
           (cd dist && sha256sum -- * > SHA256SUMS.txt)
           cat dist/SHA256SUMS.txt
-      - name: Create draft release
+      - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ github.event.inputs.title }}
+          NOTES: ${{ github.event.inputs.notes }}
+          PUBLISH: ${{ github.event.inputs.publish }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --draft \
-            --title "Analyzer $VERSION" --notes "Draft created by the release workflow; notes are added before publishing."
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --draft --title "Analyzer $VERSION" \
+              --notes "Draft created by the release workflow; notes are added before publishing."
+            exit 0
+          fi
+          printf '%s\n' "$NOTES" > notes.md
+          mode=--draft; [ "$PUBLISH" = true ] && mode=--latest
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" $mode \
+            --title "${TITLE:-Analyzer $VERSION}" --notes-file notes.md
