@@ -65,7 +65,7 @@ jobs:
         run: |
           task="run$(echo '${{ matrix.run }}' | sed 's/^./\U&/')"
           set +e
-          timeout 1800 xvfb-run -a -s "-screen 0 1920x1080x24" bash ./gradlew --no-daemon "$task" > gradle-run.log 2>&1
+          timeout 1200 xvfb-run -a -s "-screen 0 1920x1080x24" bash ./gradlew --no-daemon "$task" > gradle-run.log 2>&1
           status=$?
           set -e
           log=$(ls -t run*/logs/latest.log 2>/dev/null | head -1)
@@ -75,6 +75,9 @@ jobs:
             echo "::notice title=${{ matrix.run }} passed::$(grep -h "${{ matrix.marker }}" "$log" | tail -1 | cut -c1-1500 | esc)"
             exit 0
           fi
-          echo "::error title=${{ matrix.run }} failed (exit $status)::$(grep -hE 'ANALYZER_|Exception|Error|FATAL|ERROR|Caused by|at dev\.analyzer|failed|FAIL' "$log" gradle-run.log | grep -v '^\s*$' | tail -40 | esc)"
-          echo "::error title=${{ matrix.run }} log tail::$(tail -25 "$log" | esc)"
+          # First real exceptions with their stack heads (audio/narrator noise from the headless runner is skipped).
+          awk '/Exception|Error:|ERROR\]/ && !/flite|OpenAL|[Nn]arrator|SoundSystem/ {n=14} n>0 {print; n--}' "$log" | head -90 > first-errors.txt
+          echo "::error title=${{ matrix.run }} failed (exit $status)::$(cat first-errors.txt | esc)"
+          echo "::error title=${{ matrix.run }} Analyzer log lines::$(grep -h 'Analyzer' "$log" | tail -30 | esc)"
+          echo "::error title=${{ matrix.run }} log tail::$(tail -15 "$log" | esc)"
           exit 1
