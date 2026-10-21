@@ -21,7 +21,7 @@ The [native smoke workflow](.github/workflows/native-smoke.yml) runs real develo
   - **Chams:** Hologram and Galaxy draw on the husk with a Rim light occluded material and edges.
   - **Menus:** In the Click GUI, left-click toggles a Movement module on and off, right-click opens the settings flyout, Escape closes only the flyout, and a header drag saves the panel position. Compact and Studio open with live controls.
 - **`runChamsSmoke` passes.** It includes `ChamsGlChecks`, which compiles and draws all ten materials, plus five occluded-material variants with edges, without GL errors and with every state restored.
-- **`runSilentAimSmoke` passes 425 checks**, including real server attacks and damage through the changed silent-rotation ownership.
+- **`runSilentAimSmoke` passes 425–426 checks** (the count varies slightly between runs), including real server attacks and damage through the changed silent-rotation ownership.
 - **`runWingsSmoke` passes 39 checks** through the updated cosmetic renderer.
 - **Mixins:** every client launch applied all mixins, including the two Glow ESP hooks and the two movement-correction hooks.
 
