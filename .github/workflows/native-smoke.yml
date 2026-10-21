@@ -25,6 +25,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - run: betaSmoke
+            marker: ANALYZER_BETA_COMPLETE
           - run: chamsSmoke
             marker: ANALYZER_CHAMS_COMPLETE
           - run: liquidLayoutSmoke
@@ -87,3 +89,12 @@ jobs:
           echo "::error title=${{ matrix.run }} Analyzer log lines::$(grep -h 'Analyzer' "$log" | tail -30 | esc)"
           echo "::error title=${{ matrix.run }} log tail::$(tail -15 "$log" | esc)"
           exit 1
+      - name: Upload screenshots and logs
+        if: always() && steps.select.outputs.go == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.run }}
+          path: |
+            run*/screenshots/*.png
+            run*/logs/latest.log
+          if-no-files-found: ignore

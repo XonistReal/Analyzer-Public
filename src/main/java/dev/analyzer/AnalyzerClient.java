@@ -105,6 +105,7 @@ public final class AnalyzerClient implements ClientModInitializer {
             else if (Boolean.getBoolean("analyzer.tracerPrivacySmoke")) TracerPrivacySmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.findersSmoke")) FindersSmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.chamsSmoke")) ChamsSmoke.tick(client);
+            else if (Boolean.getBoolean("analyzer.betaSmoke")) BetaSmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.privacySmoke")) PrivacySmoke.tick(client);
             else if (Boolean.getBoolean("analyzer.homeSmoke")) HomeSmoke.tick(client);
             else DevSmoke.tick(client);

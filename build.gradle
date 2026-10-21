@@ -278,6 +278,19 @@ loom {
             programArg '--height'
             programArg '1080'
         }
+        betaSmoke {
+            client()
+            name 'Analyzer 0.16 beta additions acceptance'
+            runDir 'run-beta-smoke'
+            vmArg '-Danalyzer.smoke=true'
+            vmArg '-Danalyzer.betaSmoke=true'
+            programArg '--username'
+            programArg 'AnalyzerDev'
+            programArg '--width'
+            programArg '1920'
+            programArg '--height'
+            programArg '1080'
+        }
         chamsSmoke {
             client()
             name 'Analyzer native entity material acceptance'
