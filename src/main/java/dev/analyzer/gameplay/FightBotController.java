@@ -24,11 +24,12 @@ final class FightBotController {
     private static int side = 1;
     private static long sideChanged = Long.MIN_VALUE, critJumpTick = Long.MIN_VALUE, movementTick = Long.MIN_VALUE;
     private static boolean critPending, sprintingLastTick;
+    private static double airPeakY = Double.NaN;
     private static float steeringYaw;
     private FightBotController() { }
 
     static void reset() {
-        locked = null; side = 1; critPending = false; sprintingLastTick = false;
+        locked = null; side = 1; critPending = false; sprintingLastTick = false; airPeakY = Double.NaN;
         sideChanged = critJumpTick = movementTick = Long.MIN_VALUE;
     }
 
@@ -61,6 +62,10 @@ final class FightBotController {
         if (!combatControls.camera(ID)) { stop("Waiting for the current aim owner"); return false; }
         GameplayEngine.target = victim;
         if (critPending && (p.isOnGround() && ticks > critJumpTick + 1 || p.isTouchingWater() || p.isClimbing())) critPending = false;
+        // The client player's fallDistance stays 0 in the air (the server tracks it from position updates),
+        // so the descent is measured from this jump's peak; the server has already received that descent.
+        if (p.isOnGround()) airPeakY = Double.NaN;
+        else airPeakY = Double.isNaN(airPeakY) ? p.getY() : Math.max(airPeakY, p.getY());
 
         Vec3d point = CombatController.aimPoint(ID, victim);
         String mode = choice(ID, "rotation");
@@ -161,7 +166,7 @@ final class FightBotController {
         if (!settled) { note(ID, "Waiting for the selected weapon"); return; }
         if (bool(ID, "weapon-only") && !CombatController.melee(p.getMainHandStack())) { note(ID, "Hold a melee weapon"); return; }
         if (p.getAttackCooldownProgress(0) < num(ID, "cooldown")) { note(ID, "Waiting for attack charge"); return; }
-        if (criticals && !FightBotPolicy.criticalWindow(p.isOnGround(), p.getVelocity().y, p.fallDistance, p.isSprinting(), wasSprinting)) {
+        if (criticals && !FightBotPolicy.criticalWindow(p.isOnGround(), p.getVelocity().y, fallen(p), p.isSprinting(), wasSprinting)) {
             if (!p.isOnGround() || critPending) {
                 if (FightBotPolicy.releaseSprintForCritical(p.isOnGround(), p.getVelocity().y)) releaseSprint(p);
                 note(ID, "Lining up a falling critical hit on " + name); return;
@@ -194,6 +199,10 @@ final class FightBotController {
             critPending = false;
             note(ID, (criticals && !p.isOnGround() ? "Critical hit on " : "Hit ") + name);
         }
+    }
+
+    private static double fallen(ClientPlayerEntity p) {
+        return Math.max(p.fallDistance, Double.isNaN(airPeakY) ? 0 : airPeakY - p.getY());
     }
 
     private static void releaseSprint(ClientPlayerEntity p) {
